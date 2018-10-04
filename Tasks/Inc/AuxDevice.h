@@ -22,14 +22,6 @@
 #define LED_GREEN_ON()     HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin,GPIO_PIN_RESET)
 #define LED_RED_ON()       HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin,GPIO_PIN_RESET)
   
-#define AMFB_ANGLE_STEP 1.4
-#define AMUD_ANGLE_STEP 8.4
-#define GMANGLE_STEP 	1.5
-#define AM_BACK			41
-#define AM_FRONT		203
-#define UD_TOP			270
-#define UD_BOTTOM		-900
-  
 //IO÷ÿ√¸√˚
 #define STEER_TIM 			&htim2
 #define BYPASS_TIM 			&htim12
