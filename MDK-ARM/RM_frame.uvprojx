@@ -365,7 +365,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F427xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;                       ../Drivers/STM32F4xx_HAL_Driver/Inc;                       ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;                       ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;                       ../Drivers/CMSIS/Include;                       ..\Tasks\Inc</IncludePath>
+              <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../Tasks/Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -524,11 +524,6 @@
               <FilePath>..\Tasks\Src\CANTask.c</FilePath>
             </File>
             <File>
-              <FileName>CANMotor.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Tasks\Src\CANMotor.c</FilePath>
-            </File>
-            <File>
               <FileName>ControlTask.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Tasks\Src\ControlTask.c</FilePath>
@@ -542,6 +537,11 @@
               <FileName>pid_regulator.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Tasks\Src\pid_regulator.c</FilePath>
+            </File>
+            <File>
+              <FileName>CANMotor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Tasks\Src\CANMotor.c</FilePath>
             </File>
             <File>
               <FileName>RemoteTask.c</FileName>
