@@ -20,29 +20,37 @@ void ControlGM(MotorINFO *id);
 //**********************************************************************
 //				Chassis_MOTORINFO_Init(can,txid,rxid,func,spid)
 //**********************************************************************
-MotorINFO CMFL = Chassis_MOTORINFO_Init(&hcan1,0x200,0x201,&ControlCM,CHASSIS_MOTOR_ROTATE_PID_DEFAULT);
-MotorINFO CMFR = Chassis_MOTORINFO_Init(&hcan1,0x200,0x202,&ControlCM,CHASSIS_MOTOR_ROTATE_PID_DEFAULT);
-MotorINFO CMBL = Chassis_MOTORINFO_Init(&hcan1,0x200,0x203,&ControlCM,CHASSIS_MOTOR_ROTATE_PID_DEFAULT);
-MotorINFO CMBR = Chassis_MOTORINFO_Init(&hcan1,0x200,0x204,&ControlCM,CHASSIS_MOTOR_ROTATE_PID_DEFAULT);
+MotorINFO CMFL = Chassis_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
+MotorINFO CMFR = Chassis_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
+MotorINFO CMBL = Chassis_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
+MotorINFO CMBR = Chassis_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
 //************************************************************************
 //		Pantilt_MOTORINFO_Init(can,txid,rxid,zero_point,func,ppid,spid)
 //************************************************************************
-MotorINFO GMP  = Pantilt_MOTORINFO_Init(&hcan1,0x1ff,0x205,GM_PITCH_ZERO,&ControlGM,
+/*	该类电机不用于此次校内赛
+MotorINFO GMP  = Pantilt_MOTORINFO_Init(GM_PITCH_ZERO,&ControlGM,
 										fw_PID_INIT(8.0, 0.0, 0.0, 		10000.0, 10000.0, 10000.0, 10000.0),
 										fw_PID_INIT(40.0, 0.0, 15, 		10000.0, 10000.0, 10000.0, 3500.0));
-MotorINFO GMY  = Pantilt_MOTORINFO_Init(&hcan1,0x1ff,0x206,GM_YAW_ZERO,&ControlGM,
+MotorINFO GMY  = Pantilt_MOTORINFO_Init(GM_YAW_ZERO,&ControlGM,
 										fw_PID_INIT(5.0, 0.0, 0.5, 		10000.0, 10000.0, 10000.0, 10000.0),
 										fw_PID_INIT(30.0, 0.0, 5, 		10000.0, 10000.0, 10000.0, 4000.0));
+*/
 //*************************************************************************
 //			Normal_MOTORINFO_Init(can,txid,rxid,rdc,func,ppid,spid)
 //*************************************************************************
+//demo
+MotorINFO UD1 = Normal_MOTORINFO_Init(19.0,&ControlNM,
+								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
+								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
+MotorINFO UD2 = Normal_MOTORINFO_Init(19.0,&ControlNM,
+								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
+								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
 
+//demo end
 
-
-
-
-MotorINFO* can1[8]={&CMFL,&CMFR,&CMBL,&CMBR,&GMP,&GMY,0,0};
+MotorINFO* can1[8]={&CMFL,&CMFR,&CMBL,&CMBR,&UD1,&UD2,0,0};
 MotorINFO* can2[8]={0,0,0,0,0,0,0,0};
+
 
 void ControlNM(MotorINFO* id)
 {
@@ -84,10 +92,10 @@ void ControlCM(MotorINFO* id)
 {
 	//TargetAngle 代作为目标速度
 	if(id==0) return;
-	id->offical_speedPID.ref = id->TargetAngle;
+	id->offical_speedPID.ref = (float)(id->TargetAngle);
 	id->offical_speedPID.fdb = id->RxMsgC6x0.RotateSpeed;
 	id->offical_speedPID.Calc(&(id->offical_speedPID));
-	id->Intensity=id->offical_speedPID.output;
+	id->Intensity=(1.30f)*id->offical_speedPID.output;
 }
 
 void ControlGM(MotorINFO* id)
@@ -100,7 +108,7 @@ void ControlGM(MotorINFO* id)
 		NORMALIZE_ANGLE180(id->RealAngle);
 		MINMAX(id->TargetAngle, -9.0f, 32);
 		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->TargetAngle,id->RealAngle,-gYroXs);
-				
+
 		id->s_count = 0;
 	}
 	else
@@ -324,4 +332,38 @@ void InitMotor(MotorINFO *id)
 	id->TargetAngle=0;
 	id->offical_speedPID.Reset(&(id->offical_speedPID));
 	(id->Handle)(id);
+}
+
+void Motor_ID_Setting()
+{
+	for(int i=0;i<4;i++)
+	{
+		if(can1[i]!=0) 
+		{
+			can1[i]->CAN_TYPE=&hcan1;
+			can1[i]->RXID = 0x201+i;
+			can1[i]->TXID = 0x200;
+		}
+		if(can2[i]!=0) 
+		{
+			can2[i]->CAN_TYPE=&hcan2;
+			can2[i]->RXID = 0x201+i;
+			can2[i]->TXID = 0x200;
+		}
+	}
+	for(int i=4;i<8;i++)
+	{
+		if(can1[i]!=0) 
+		{
+			can1[i]->CAN_TYPE=&hcan1;
+			can1[i]->RXID = 0x201+i;
+			can1[i]->TXID = 0x1ff;
+		}
+		if(can2[i]!=0) 
+		{
+			can2[i]->CAN_TYPE=&hcan2;
+			can2[i]->RXID = 0x201+i;
+			can2[i]->TXID = 0x1ff;
+		}
+	}
 }

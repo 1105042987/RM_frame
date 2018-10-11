@@ -25,9 +25,10 @@ void WorkStateFSM(void)
 		case PREPARE_STATE:				//准备模式
 		{
 			if (inputmode == STOP) WorkState = STOP_STATE;
-			if(prepare_time < 1000) prepare_time++;
+			if(prepare_time < 1000) prepare_time++;	
 			if(prepare_time == 1000)//开机一秒进入正常模式
 			{
+				CMRotatePID.Reset(&CMRotatePID);
 				WorkState = NORMAL_STATE;
 				prepare_time = 0;
 			}
@@ -92,7 +93,6 @@ void Chassis_Data_Decoding()
 	CMBR.TargetAngle = (- ChassisSpeedRef.forward_back_ref	*0.075 
 						- ChassisSpeedRef.left_right_ref	*0.075 
 						+ ChassisSpeedRef.rotate_ref		*0.075)*160;
-	
 }
 
 //主控制循环
@@ -100,7 +100,7 @@ void controlLoop()
 {
 	WorkStateFSM();
 	
-	if(WorkState != STOP_STATE && WorkState != PREPARE_STATE)
+	if(WorkState > 0)
 	{
 		Chassis_Data_Decoding();
 		
@@ -118,6 +118,7 @@ void controlLoop()
 		#endif
 		#ifdef CAN22
 		for(int i=4;i<8;i++) if(can2[i]!=0) (can2[i]->Handle)(can2[i]);
+		setCAN22();
 		#endif
 	}
 }
@@ -150,7 +151,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			}
 			else
 			{
-				if(rc_first_frame) WorkState = PREPARE_STATE;
+				if(rc_first_frame) 
+					WorkState = PREPARE_STATE;
 				HAL_UART_AbortReceive(&RC_UART);
 				HAL_UART_Receive_DMA(&RC_UART, rc_data, 18);
 				rc_cnt = 0;

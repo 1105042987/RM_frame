@@ -83,6 +83,7 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 	{
 		for(int i=0;i<8;i++)
 		{
+			if(can1[i]==0)continue;
 			if(Can1RxMsg.StdId==can1[i]->RXID)
 			{
 				flag=1;
@@ -115,22 +116,23 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 	{
 		for(int i=0;i<8;i++)
 		{
-			if(Can1RxMsg.StdId==can1[i]->RXID)
+			if(can2[i]==0)continue;
+			if(Can2RxMsg.StdId==can2[i]->RXID)
 			{
 				flag=1;
-				switch(can1[i]->ESCtype)
+				switch(can2[i]->ESCtype)
 				{
 					case ESC_C6x0:
 					{
-						can1[i]->RxMsgC6x0.angle		 = CanRxGetU16(Can1RxMsg, 0);
-						can1[i]->RxMsgC6x0.RotateSpeed   = CanRxGetU16(Can1RxMsg, 1);
-						can1[i]->RxMsgC6x0.moment		 = CanRxGetU16(Can1RxMsg, 2);
+						can2[i]->RxMsgC6x0.angle		 = CanRxGetU16(Can2RxMsg, 0);
+						can2[i]->RxMsgC6x0.RotateSpeed   = CanRxGetU16(Can2RxMsg, 1);
+						can2[i]->RxMsgC6x0.moment		 = CanRxGetU16(Can2RxMsg, 2);
 					}
 					case ESC_6623:
 					{
-						can1[i]->RxMsg6623.angle		 = CanRxGetU16(Can1RxMsg, 0);
-						can1[i]->RxMsg6623.realIntensity = CanRxGetU16(Can1RxMsg, 1);
-						can1[i]->RxMsg6623.giveIntensity = CanRxGetU16(Can1RxMsg, 2);
+						can2[i]->RxMsg6623.angle		 = CanRxGetU16(Can2RxMsg, 0);
+						can2[i]->RxMsg6623.realIntensity = CanRxGetU16(Can2RxMsg, 1);
+						can2[i]->RxMsg6623.giveIntensity = CanRxGetU16(Can2RxMsg, 2);
 					}
 				}
 				

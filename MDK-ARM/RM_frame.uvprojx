@@ -365,7 +365,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F427xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../Tasks/Inc</IncludePath>
+              <IncludePath>../Inc;   ../Drivers/STM32F4xx_HAL_Driver/Inc;   ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;   ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;   ../Drivers/CMSIS/Include;   ../Tasks/Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -494,16 +494,6 @@
               <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c</FilePath>
             </File>
             <File>
-              <FileName>stm32f4xx_hal_adc_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc_ex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_adc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c</FilePath>
-            </File>
-            <File>
               <FileName>stm32f4xx_hal_iwdg.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_iwdg.c</FilePath>
@@ -587,11 +577,6 @@
           <GroupName>Application/User</GroupName>
           <Files>
             <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/main.c</FilePath>
-            </File>
-            <File>
               <FileName>gpio.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/gpio.c</FilePath>
@@ -632,14 +617,14 @@
               <FilePath>../Src/spi.c</FilePath>
             </File>
             <File>
-              <FileName>adc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/adc.c</FilePath>
-            </File>
-            <File>
               <FileName>iwdg.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/iwdg.c</FilePath>
+            </File>
+            <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/main.c</FilePath>
             </File>
           </Files>
         </Group>

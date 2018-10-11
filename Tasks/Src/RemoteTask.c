@@ -63,7 +63,7 @@ void GetRemoteSwitchAction(RemoteSwitch_t *sw, uint8_t val)
 //遥控器数据解算
 void RemoteDataProcess(uint8_t *pData)
 {
-	 HAL_IWDG_Refresh(&hiwdg);
+	HAL_IWDG_Refresh(&hiwdg);
 	if(pData == NULL)
 	{
 			return;
@@ -109,14 +109,14 @@ void RemoteDataProcess(uint8_t *pData)
 	{
 		case REMOTE_INPUT:               
 		{
-			if(WorkState != STOP_STATE && WorkState != PREPARE_STATE)
+			if(WorkState > 0)
 			{ 
 				RemoteControlProcess(&(RC_CtrlData.rc));
 			}
 		}break;
 		case KEY_MOUSE_INPUT:              
 		{
-			if(WorkState != STOP_STATE && WorkState != PREPARE_STATE)
+			if(WorkState > 0)
 			{ 
 				MouseKeyControlProcess(&RC_CtrlData.mouse,&RC_CtrlData.key);
 			}

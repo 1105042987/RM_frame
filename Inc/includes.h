@@ -12,7 +12,6 @@
 #ifndef __INCLUDES_H
 #define __INCLUDES_H
 
-#define SLOW_UPDOWN
 //#define DEBUG_MODE
 #define CAN11
 #define CAN12
@@ -27,7 +26,6 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "adc.h"
 #include "iwdg.h"
 
 #include "AuxDevice.h"

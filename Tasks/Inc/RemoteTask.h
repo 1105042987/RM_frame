@@ -81,9 +81,9 @@ typedef enum
 
 typedef __packed struct
 {
-	 uint8_t switch_value_raw;      // the current switch value
-	 uint8_t switch_value1;				  //  last value << 2 | value
-	 uint8_t switch_value2;				  //
+	 uint8_t switch_value_raw;      	// the current switch value
+	 uint8_t switch_value1;				//  last value << 2 | value
+	 uint8_t switch_value2;				//
 	 uint8_t switch_long_value; 		//keep still if no switching
 	 uint8_t switch_value_buf[REMOTE_SWITCH_VALUE_BUF_DEEP]; 
 	 uint8_t buf_index;

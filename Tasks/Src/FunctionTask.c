@@ -19,10 +19,10 @@ ChassisSpeed_Ref_t ChassisSpeedRef;
 
 int32_t auto_counter=0;		//用于准确延时的完成某事件
 
-int16_t channel0 = 0;
-int16_t channel1 = 0;
-int16_t channel2 = 0;
-int16_t channel3 = 0;
+int16_t channelrrow = 0;
+int16_t channelrcol = 0;
+int16_t channellrow = 0;
+int16_t channellcol = 0;
 
 //初始化
 void FunctionTaskInit()
@@ -35,6 +35,16 @@ void FunctionTaskInit()
 	ChassisSpeedRef.forward_back_ref = 0.0f;
 	ChassisSpeedRef.left_right_ref = 0.0f;
 	ChassisSpeedRef.rotate_ref = 0.0f;
+	
+	KeyboardMode=NO_CHANGE;
+}
+
+void Limit_and_Synchronization()
+{
+	//demo
+	MINMAX(UD1.TargetAngle,-900,270);//limit
+	UD2.TargetAngle=-UD1.TargetAngle;//sychronization
+	//demo end
 }
 
 //******************
@@ -44,15 +54,19 @@ void RemoteControlProcess(Remote *rc)
 {
 	if(WorkState <= 0) return;
 	//max=297
-	channel0 = (rc->ch0 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); //右横
-	channel1 = (rc->ch1 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); //右纵
-	channel2 = (rc->ch2 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); //左横
-	channel3 = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); //左纵
+	channelrrow = (rc->ch0 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
+	channelrcol = (rc->ch1 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
+	channellrow = (rc->ch2 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
+	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	if(WorkState == NORMAL_STATE)
 	{	
-		ChassisSpeedRef.forward_back_ref = channel1 * RC_CHASSIS_SPEED_REF;
-		ChassisSpeedRef.left_right_ref   = channel0 * RC_CHASSIS_SPEED_REF/2;
-		rotate_speed = -channel2 * RC_ROTATE_SPEED_REF;
+		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
+		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
+		rotate_speed = -channellrow * RC_ROTATE_SPEED_REF;
+		
+		//demo
+		UD1.TargetAngle += channellcol * 0.02;
+		//demo end
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
@@ -62,6 +76,7 @@ void RemoteControlProcess(Remote *rc)
 	{
 		
 	}
+	Limit_and_Synchronization();
 }
 
 
@@ -118,6 +133,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 		}
 	}
+	Limit_and_Synchronization();
 }
 
 void KeyboardModeFSM(Key *key)

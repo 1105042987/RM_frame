@@ -31,8 +31,8 @@
 	0,0,{0,0},\
 	6.0f,0.0f,1.0f,\
 	0,0,0,\
-	16000,16000,16000,\
-	0,16000,0,0,0,\
+	12000,12000,12000,\
+	0,12000,0,0,0,\
 	&PID_Calc,&PID_Reset,\
 }
 
@@ -68,34 +68,35 @@ typedef struct MotorINFO
 	fw_PID_Regulator_t 	positionPID;
 	fw_PID_Regulator_t 	speedPID;
 	PID_Regulator_t		offical_speedPID;
-	uint16_t			Intensity;	
+	int16_t				Intensity;	
 }MotorINFO;
 
-#define Normal_MOTORINFO_Init(can,txid,rxid,rdc,func,ppid,spid)\
+#define Normal_MOTORINFO_Init(rdc,func,ppid,spid)\
 {\
-	ESC_C6x0,can,txid,rxid,rdc,\
+	ESC_C6x0,0,0,0,rdc,\
 	{0,0,0},{0,0,0},0,0,1,0,0,func,\
 	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0 \
 }
 
-#define Chassis_MOTORINFO_Init(can,txid,rxid,func,spid)\
+#define Chassis_MOTORINFO_Init(func,spid)\
 {\
-	ESC_C6x0,can,txid,rxid,1,\
+	ESC_C6x0,0,0,0,1,\
 	{0,0,0},{0,0,0},0,0,1,0,0,func,\
 	FW_PID_DEFAULT,FW_PID_DEFAULT,spid,0 \
 }
 
-#define Pantilt_MOTORINFO_Init(can,txid,rxid,zero_point,func,ppid,spid)\
+#define Pantilt_MOTORINFO_Init(zero_point,func,ppid,spid)\
 {\
-	ESC_6623,can,txid,rxid,1,\
+	ESC_6623,0,0,0,1,\
 	{0,0,0},{0,0,0},0,0,1,zero_point,0,func,\
 	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0 \
 }
 
-extern MotorINFO GMP,GMY,CMFL,CMFR,CMBL,CMBR;
+extern MotorINFO CMFL,CMFR,CMBL,CMBR,UD1,UD2;
 extern MotorINFO *can1[8],*can2[8];
 
 void InitMotor(MotorINFO *id);
+void Motor_ID_Setting(void);
 
 void setCAN11(void);
 void setCAN12(void);

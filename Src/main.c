@@ -39,7 +39,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_hal.h"
-#include "adc.h"
 #include "can.h"
 #include "dma.h"
 #include "iwdg.h"
@@ -123,7 +122,6 @@ int main(void)
   MX_USART6_UART_Init();
   MX_TIM7_Init();
   MX_TIM10_Init();
-  MX_ADC1_Init();
   MX_TIM2_Init();
   MX_IWDG_Init();
 
@@ -131,6 +129,7 @@ int main(void)
 	//各模块初始化
 	InitRemoteControl();
 	InitMPU6500();
+	Motor_ID_Setting();
 	for(int i=0;i<8;i++) {InitMotor(can1[i]);InitMotor(can2[i]);}
 	InitPWM();
 	InitCanReception();
@@ -147,18 +146,19 @@ int main(void)
 	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
 	
 	//ADC
-	HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&ADC_Value,160);
+	//HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&ADC_Value,160);
 	
 	//其他中断
 	HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 	HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
 	HAL_NVIC_EnableIRQ(USART1_IRQn);
 	HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
+	HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
 	HAL_NVIC_EnableIRQ(TIM7_IRQn);
 	#ifdef DEBUG_MODE
 		HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
 	#endif
-	HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
+	
 	
   /* USER CODE END 2 */
 
