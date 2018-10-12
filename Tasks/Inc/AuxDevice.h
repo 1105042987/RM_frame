@@ -15,12 +15,12 @@
   
 #include "includes.h"
 
-//已经定义好的pwm中断：	tim12-channel1
+//已经定义好的pwm中断：	tim2-channel4
 //						tim2-channel3
-//						tim2-channel4
-#define STEER_TIM 			&htim2
-#define BYPASS_TIM 			&htim12
+#define STEER_TIM 				&htim2
+#define BUZZER_TIM 				&htim12
 
+#define BUZZER_CHANNEL			TIM_CHANNEL_1
 #define GIVE_BULLET_CHANNEL		TIM_CHANNEL_4
 
 

@@ -13,9 +13,30 @@
 
 WorkState_e WorkState = PREPARE_STATE;
 uint16_t prepare_time = 0;
+MusicNote SuperMario[] = {
+	{H3, 100}, {0, 50}, 
+	{H3, 250}, {0, 50}, 
+	{H3, 100}, {0, 50}, 
+	{0, 150},
+	{H1, 100}, {0, 50},  
+	{H3, 250}, {0, 50},
+	{H5, 250}, {0, 50},
+	{0, 300},
+	{M5, 250}, {0, 50},
+	{0, 300},
+	{H1, 250}, {0, 50}
+};
 
 PID_Regulator_t CMRotatePID = CHASSIS_MOTOR_ROTATE_PID_DEFAULT; 
+extern int32_t auto_counter;
 
+void playMusicSuperMario(void){
+	HAL_TIM_PWM_Start(BUZZER_TIM, TIM_CHANNEL_1);
+	for(int i = 0; i < sizeof(SuperMario) / sizeof(MusicNote); i++){
+			PLAY(SuperMario[i].note, SuperMario[i].time);
+	}
+	HAL_TIM_PWM_Stop(BUZZER_TIM, TIM_CHANNEL_1);
+}
 
 //状态机切换
 void WorkStateFSM(void)
@@ -28,6 +49,7 @@ void WorkStateFSM(void)
 			if(prepare_time < 1000) prepare_time++;	
 			if(prepare_time == 1000)//开机一秒进入正常模式
 			{
+				playMusicSuperMario();
 				CMRotatePID.Reset(&CMRotatePID);
 				WorkState = NORMAL_STATE;
 				prepare_time = 0;
@@ -123,7 +145,6 @@ void controlLoop()
 	}
 }
 
-extern int32_t auto_counter;
 //时间中断入口函数
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
