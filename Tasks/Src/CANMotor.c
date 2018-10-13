@@ -18,14 +18,19 @@ void ControlNM(MotorINFO *id);
 void ControlCM(MotorINFO *id);
 void ControlGM(MotorINFO *id);
 //**********************************************************************
-//				Chassis_MOTORINFO_Init(can,txid,rxid,func,spid)
+//					pid(kp,ki,kd,kprM,kirM,kdrM,rM)
+//						kprM:kp result Max
+//**********************************************************************
+
+//**********************************************************************
+//				Chassis_MOTORINFO_Init(func,spid)
 //**********************************************************************
 MotorINFO CMFL = Chassis_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
 MotorINFO CMFR = Chassis_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
 MotorINFO CMBL = Chassis_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
 MotorINFO CMBR = Chassis_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
 //************************************************************************
-//		Pantilt_MOTORINFO_Init(can,txid,rxid,zero_point,func,ppid,spid)
+//		Pantilt_MOTORINFO_Init(zero_point,func,ppid,spid)
 //************************************************************************
 /*	该类电机不用于此次校内赛
 MotorINFO GMP  = Pantilt_MOTORINFO_Init(GM_PITCH_ZERO,&ControlGM,
@@ -36,7 +41,7 @@ MotorINFO GMY  = Pantilt_MOTORINFO_Init(GM_YAW_ZERO,&ControlGM,
 										fw_PID_INIT(30.0, 0.0, 5, 		10000.0, 10000.0, 10000.0, 4000.0));
 */
 //*************************************************************************
-//			Normal_MOTORINFO_Init(can,txid,rxid,rdc,func,ppid,spid)
+//			Normal_MOTORINFO_Init(rdc,func,ppid,spid)
 //*************************************************************************
 //demo
 MotorINFO UD1 = Normal_MOTORINFO_Init(19.0,&ControlNM,
