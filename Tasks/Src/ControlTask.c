@@ -72,7 +72,7 @@ void WorkStateFSM(void)
 				if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
 				if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
 			}
-		}
+		}break;
 		case ADDITIONAL_STATE_TWO:		//附加模式二
 		{
 			if (inputmode == STOP) WorkState = STOP_STATE;
@@ -81,9 +81,10 @@ void WorkStateFSM(void)
 				if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
 				if(functionmode == MIDDLE_POS) WorkState = ADDITIONAL_STATE_ONE;
 			}
-		}
+		}break;
 		case STOP_STATE:				//紧急停止
 		{
+			for(int i=0;i<8;i++) {InitMotor(can1[i]);InitMotor(can2[i]);}
 			if (inputmode == REMOTE_INPUT || inputmode == KEY_MOUSE_INPUT)
 			{
 				WorkState = PREPARE_STATE;
