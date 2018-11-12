@@ -19,15 +19,15 @@
 void ctrlUartRxCpltCallback(void);
 void ctrlUartInit(void);
 
-#define REC_LEN            1024
-#define RX_DONE           (RX_STA&0x8000)
-#define RX_LEN	  			   (RX_STA&0x3f)
+#define REC_LEN				1024
+#define RX_DONE				(RX_STA&0x8000)
+#define RX_LEN				(RX_STA&0x3f)
 
-extern uint8_t buf[REC_LEN];
+extern char buf[REC_LEN];
 extern uint16_t RX_STA;
 
 //--------------------数据解析协议部分-------------------//
-uint8_t ComProtocal(char*rxbuf,char*head,char*end,char* separater,char dataout[][15]);
+uint8_t ComProtocal(char*rxbuf,char*head,char*end,char* separater,char dataout[15]);
 
 //--------------------任务循环部分-------------------//
 //void zykProcessData();

@@ -14,6 +14,10 @@
 
 #include "includes.h"
 
+#define GM_PITCH_GRAVITY_COMPENSATION 800
+#define GM_PITCH_ZERO 	7788
+#define GM_YAW_ZERO 	4640
+
 #define CHASSIS_SPEED_ATTENUATION   (1.30f)
 #define NORMALIZE_ANGLE180(angle) angle = ((angle) > 180) ? ((angle) - 360) : (((angle) < -180) ? (angle) + 360 : angle)
 #define CHASSIS_MOTOR_ROTATE_PID_DEFAULT \
@@ -41,6 +45,7 @@
 	0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ,\
 	0, 0, 0, 0.0, 0.0, 0.0, \
 	0, 0, 0, 0.0, 0, \
+	{0.0}, \
 	&fw_PID_Calc, &fw_PID_Reset \
 }
 
@@ -68,7 +73,7 @@ typedef struct MotorINFO
 	fw_PID_Regulator_t 	positionPID;
 	fw_PID_Regulator_t 	speedPID;
 	PID_Regulator_t		offical_speedPID;
-	int16_t				Intensity;	
+	int16_t				Intensity;
 }MotorINFO;
 
 #define Normal_MOTORINFO_Init(rdc,func,ppid,spid)\
@@ -85,14 +90,15 @@ typedef struct MotorINFO
 	FW_PID_DEFAULT,FW_PID_DEFAULT,spid,0 \
 }
 
-#define Pantilt_MOTORINFO_Init(zero_point,func,ppid,spid)\
+#define Gimbal_MOTORINFO_Init(rdc,func,ppid,spid)\
 {\
-	ESC_6623,0,0,0,1,\
-	{0,0,0},{0,0,0},0,0,1,zero_point,0,func,\
+	ESC_6623,0,0,0,rdc,\
+	{0,0,0},{0,0,0},0,0,1,0,0,func,\
 	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0 \
 }
 
-extern MotorINFO CMFL,CMFR,CMBL,CMBR,UD1,UD2;
+
+extern MotorINFO CMFL,CMFR,CMBL,CMBR,UD1,UD2,GMY,GMP;
 extern MotorINFO *can1[8],*can2[8];
 
 void InitMotor(MotorINFO *id);

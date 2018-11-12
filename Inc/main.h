@@ -51,8 +51,6 @@
 #define NSS_GPIO_Port GPIOF
 #define LED_GREEN_Pin GPIO_PIN_14
 #define LED_GREEN_GPIO_Port GPIOF
-#define LED_RED_Pin GPIO_PIN_7
-#define LED_RED_GPIO_Port GPIOE
 
 /* ########################## Assert Selection ############################## */
 /**

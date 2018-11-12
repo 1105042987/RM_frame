@@ -196,11 +196,11 @@
             <ldmm>1</ldmm>
             <ldXref>1</ldXref>
             <BigEnd>0</BigEnd>
-            <AdsALst>1</AdsALst>
+            <AdsALst>0</AdsALst>
             <AdsACrf>1</AdsACrf>
             <AdsANop>0</AdsANop>
             <AdsANot>0</AdsANot>
-            <AdsLLst>1</AdsLLst>
+            <AdsLLst>0</AdsLLst>
             <AdsLmap>1</AdsLmap>
             <AdsLcgr>1</AdsLcgr>
             <AdsLsym>1</AdsLsym>
@@ -365,7 +365,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F427xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;    ../Drivers/STM32F4xx_HAL_Driver/Inc;    ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;    ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;    ../Drivers/CMSIS/Include;    ../Tasks/Inc</IncludePath>
+              <IncludePath>../Inc;        ../Drivers/STM32F4xx_HAL_Driver/Inc;        ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;        ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;        ../Drivers/CMSIS/Include;        ../Tasks/Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -504,9 +504,24 @@
           <GroupName>Tasks</GroupName>
           <Files>
             <File>
+              <FileName>includes.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Inc\includes.h</FilePath>
+            </File>
+            <File>
+              <FileName>AuxDevice.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Tasks\Inc\AuxDevice.h</FilePath>
+            </File>
+            <File>
               <FileName>FunctionTask.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Tasks\Src\FunctionTask.c</FilePath>
+            </File>
+            <File>
+              <FileName>MotorTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Tasks\Src\MotorTask.c</FilePath>
             </File>
             <File>
               <FileName>CANTask.c</FileName>
@@ -519,29 +534,9 @@
               <FilePath>..\Tasks\Src\ControlTask.c</FilePath>
             </File>
             <File>
-              <FileName>IMUTask.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Tasks\Src\IMUTask.c</FilePath>
-            </File>
-            <File>
-              <FileName>pid_regulator.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Tasks\Src\pid_regulator.c</FilePath>
-            </File>
-            <File>
-              <FileName>CANMotor.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Tasks\Src\CANMotor.c</FilePath>
-            </File>
-            <File>
               <FileName>RemoteTask.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Tasks\Src\RemoteTask.c</FilePath>
-            </File>
-            <File>
-              <FileName>RMLib.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>..\Tasks\Src\RMLib.lib</FilePath>
             </File>
             <File>
               <FileName>JudgeTask.c</FileName>
@@ -557,6 +552,31 @@
               <FileName>UpperTask.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Tasks\Src\UpperTask.c</FilePath>
+            </File>
+            <File>
+              <FileName>CapControlTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Tasks\Src\CapControlTask.c</FilePath>
+            </File>
+            <File>
+              <FileName>PowerLimitationTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Tasks\Src\PowerLimitationTask.c</FilePath>
+            </File>
+            <File>
+              <FileName>GyroReadTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Tasks\Src\GyroReadTask.c</FilePath>
+            </File>
+            <File>
+              <FileName>pid_regulator.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Tasks\Src\pid_regulator.c</FilePath>
+            </File>
+            <File>
+              <FileName>RMLib.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\Tasks\Src\RMLib.lib</FilePath>
             </File>
           </Files>
         </Group>

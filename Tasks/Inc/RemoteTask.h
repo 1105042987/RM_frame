@@ -14,12 +14,6 @@
 
 #include "includes.h"
 
-#define RC_UART huart1
-#define MANIFOLD_UART huart3
-#define UPPER_UART huart3
-#define JUDGE_UART huart6
-
-
 //解算数据区
 #define REMOTE_CONTROLLER_STICK_OFFSET  1024u
 

@@ -11,7 +11,6 @@
   */
 #include "includes.h"
 
-float rotate_speed = 0;
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
@@ -23,6 +22,7 @@ int16_t channelrrow = 0;
 int16_t channelrcol = 0;
 int16_t channellrow = 0;
 int16_t channellcol = 0;
+int16_t testIntensity = 0;
 
 //初始化
 void FunctionTaskInit()
@@ -42,11 +42,10 @@ void FunctionTaskInit()
 void Limit_and_Synchronization()
 {
 	//demo
-	MINMAX(UD1.TargetAngle,-900,270);//limit
-	UD2.TargetAngle=-UD1.TargetAngle;//sychronization
+	//MINMAX(UD1.TargetAngle,-900,270);//limit
+	//UD2.TargetAngle=-UD1.TargetAngle;//sychronization
 	//demo end
 }
-
 //******************
 //遥控器模式功能编写
 //******************
@@ -62,15 +61,16 @@ void RemoteControlProcess(Remote *rc)
 	{	
 		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
-		rotate_speed = -channellrow * RC_ROTATE_SPEED_REF;
+		#ifdef CHASSIS_FOLLOW
+		GMY.TargetAngle -= channellrow * RC_GIMBAL_SPEED_REF;
+		GMP.TargetAngle += channellcol * RC_GIMBAL_SPEED_REF;
+		#else
+		ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF;
+		#endif
 		
-		//demo
-		UD1.TargetAngle += channellcol * 0.02;
-		//demo end
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
-		
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{

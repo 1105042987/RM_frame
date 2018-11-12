@@ -118,21 +118,23 @@ int main(void)
   MX_TIM6_Init();
   MX_TIM12_Init();
   MX_USART2_UART_Init();
-  MX_USART3_UART_Init();
   MX_USART6_UART_Init();
   MX_TIM7_Init();
   MX_TIM10_Init();
   MX_TIM2_Init();
   MX_IWDG_Init();
+  MX_UART7_Init();
+  MX_TIM5_Init();
+  MX_UART8_Init();
 
   /* USER CODE BEGIN 2 */
 	//各模块初始化
 	InitRemoteControl();
-	InitMPU6500();
 	Motor_ID_Setting();
 	for(int i=0;i<8;i++) {InitMotor(can1[i]);InitMotor(can2[i]);}
 	InitPWM();
 	InitCanReception();
+	InitGyroUart();
 	
 	#ifdef DEBUG_MODE
 	ctrlUartInit();
@@ -157,6 +159,8 @@ int main(void)
 	#ifdef DEBUG_MODE
 		HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
 	#endif
+	__HAL_UART_ENABLE_IT(&UPPER_UART, UART_IT_IDLE);
+	__HAL_UART_ENABLE_IT(&JUDGE_UART, UART_IT_IDLE);
 	
 	
   /* USER CODE END 2 */
@@ -168,7 +172,6 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-		IMURefresh();
   }
   /* USER CODE END 3 */
 
