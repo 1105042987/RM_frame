@@ -13,7 +13,7 @@
 #define __INCLUDES_H
 
 //#define DEBUG_MODE
-#define CHASSIS_FOLLOW
+//#define CHASSIS_FOLLOW
 #define CAN11
 #define CAN12
 #define CAN21

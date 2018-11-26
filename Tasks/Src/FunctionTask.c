@@ -62,19 +62,24 @@ void RemoteControlProcess(Remote *rc)
 		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 		#ifdef CHASSIS_FOLLOW
-		GMY.TargetAngle -= channellrow * RC_GIMBAL_SPEED_REF;
+		GMY.TargetAngle += channellrow * RC_GIMBAL_SPEED_REF;
 		GMP.TargetAngle += channellcol * RC_GIMBAL_SPEED_REF;
 		#else
 		ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF;
 		#endif
-		
+		FRICL.TargetAngle = 0;
+		FRICR.TargetAngle = 0;
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
+		FRICL.TargetAngle = 5000;
+		FRICR.TargetAngle = -5000;
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
-		
+		FRICL.TargetAngle = 5000;
+		FRICR.TargetAngle = -5000;
+		Delay(20,{STIR.TargetAngle-=60;});
 	}
 	Limit_and_Synchronization();
 }

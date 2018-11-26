@@ -422,13 +422,13 @@ void getJudgeState(void)
 	}
 }
 
-/*
-extern uint16_t tmpx;
+
+//extern uint16_t tmpx;
 extShowData_t user_data;
 void Send_User_Data()
 {
 	uint8_t Buffer[22]={0};
-	user_data.data1 = tmpx;
+	//user_data.data1 = tmpx;
 	user_data.data2 += 0.2f;
 	user_data.data3 += 0.3f;
 	user_data.mask = 0xFF;
@@ -449,11 +449,11 @@ void Send_User_Data()
 	CRC16 = myGet_CRC16_Check_Sum(Buffer, 20, myCRC16_INIT);
 	Buffer[20] = CRC16 & 0xff;
 	Buffer[21] = (CRC16 >> 8) & 0xff;
-	HAL_UART_Transmit(&JUDGE_UART,Buffer,22,0xff);
+	HAL_UART_Transmit(&JUDGE_UART,Buffer,22,0xffff);
 //	HAL_UART_Transmit_IT(&JUDGE_UART,(uint8_t *)&Buffer,22);
 //	if(HAL_UART_Transmit_DMA(&JUDGE_UART,(uint8_t *)&Buffer,22)!=HAL_OK)
 //	{
 //		Error_Handler();
 //	};
 }
-*/
+

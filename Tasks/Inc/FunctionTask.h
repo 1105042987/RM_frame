@@ -56,8 +56,8 @@
 {\
 	static uint8_t cache;\
 	static uint8_t cnt=0;\
-	if(cache != button){\
-		cache = button;\
+	if(cache != (button)){\
+		cache = (button);\
 		cnt = 0;\
 	}\
 	else if(cnt == 5){\

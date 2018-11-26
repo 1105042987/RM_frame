@@ -39,17 +39,25 @@ MotorINFO GMP  = Gimbal_MOTORINFO_Init(2.0,&ControlGMP,
 									   fw_PID_INIT(60,0.01,10, 	10000.0, 10000.0, 10000.0, 6000.0),
 									   fw_PID_INIT(0.6,0,13, 	10000.0, 10000.0, 10000.0, 5000.0));
 MotorINFO GMY  = Gimbal_MOTORINFO_Init(-1.0,&ControlGMY,
-									   fw_PID_INIT(110,0.01,10, 	10000.0, 10000.0, 10000.0, 6000.0),
+									   fw_PID_INIT(110,0.01,10, 10000.0, 10000.0, 10000.0, 6000.0),
 									   fw_PID_INIT(0.6,0,13, 	10000.0, 10000.0, 10000.0, 5000.0));
 
 //*************************************************************************
 //			Normal_MOTORINFO_Init(rdc,func,ppid,spid)
 //*************************************************************************
-MotorINFO STIR = Normal_MOTORINFO_Init(19.0,&ControlNM,
+MotorINFO STIR = Normal_MOTORINFO_Init(36.0,&ControlNM,
+								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
+								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
+								
+MotorINFO DEMO = Normal_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
 								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
 
-MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
+MotorINFO DEMO1 = Normal_MOTORINFO_Init(19.0,&ControlNM,
+								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
+								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
+
+MotorINFO* can1[8]={&FRICL,&FRICR,&DEMO,&DEMO1,&GMY,&GMP,&STIR,0};
 MotorINFO* can2[8]={&CMFL,&CMFR,&CMBL,&CMBR,0,0,0,0};
 
 
@@ -64,14 +72,14 @@ void ControlNM(MotorINFO* id)
 		if(id->FirstEnter==1) {id->lastRead = ThisAngle;id->FirstEnter = 0;return;}
 		if(ThisAngle<=id->lastRead)
 		{
-			if((id->lastRead-ThisAngle)>3000)//编码器上溢
+			if((id->lastRead-ThisAngle)>4000)//编码器上溢
 				id->RealAngle = id->RealAngle + (ThisAngle+8192-id->lastRead) * 360 / 8192.0 / id->ReductionRate;
 			else//正常
 				id->RealAngle = id->RealAngle - (id->lastRead - ThisAngle) * 360 / 8192.0 / id->ReductionRate;
 		}
 		else
 		{
-			if((ThisAngle-id->lastRead)>3000)//编码器下溢
+			if((ThisAngle-id->lastRead)>4000)//编码器下溢
 				id->RealAngle = id->RealAngle - (id->lastRead+8192-ThisAngle) *360 / 8192.0 / id->ReductionRate;
 			else//正常
 				id->RealAngle = id->RealAngle + (ThisAngle - id->lastRead) * 360 / 8192.0 / id->ReductionRate;
@@ -88,7 +96,6 @@ void ControlNM(MotorINFO* id)
 		id->s_count++;
 	}		
 }
-
 void ControlCM(MotorINFO* id)
 {
 	//TargetAngle 代作为目标速度
@@ -109,9 +116,8 @@ void ControlGMY(MotorINFO* id)
 		
 		if(id->FirstEnter==1) {
 			id->lastRead = ThisAngle;
-			id->RealAngle =(double)(GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0;
+			id->RealAngle =(double)(GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate;
 			NORMALIZE_ANGLE180(id->RealAngle);
-			id->RealAngle/=id->ReductionRate;
 			id->FirstEnter = 0;
 			return;
 		}
@@ -119,16 +125,16 @@ void ControlGMY(MotorINFO* id)
 		if(ThisAngle <= id->lastRead)
 		{
 			if((id->lastRead-ThisAngle) > 180)
-				 id->RealAngle = id->RealAngle + (ThisAngle + 360 - id->lastRead);
+				 id->RealAngle += (ThisAngle + 360 - id->lastRead) / id->ReductionRate;
 			else
-				 id->RealAngle = id->RealAngle + (ThisAngle - id->lastRead);
+				 id->RealAngle -= (id->lastRead - ThisAngle) / id->ReductionRate;
 		}
 		else
 		{
 			if((ThisAngle-id->lastRead) > 180)
-				 id->RealAngle = id->RealAngle - (id->lastRead + 360 - ThisAngle);
+				 id->RealAngle -= (id->lastRead + 360 - ThisAngle)  / id->ReductionRate;
 			else
-				 id->RealAngle = id->RealAngle + (ThisAngle - id->lastRead);
+				 id->RealAngle += (ThisAngle - id->lastRead)  / id->ReductionRate;
 		}
 		id->lastRead = ThisAngle ;
 			
@@ -146,14 +152,13 @@ void ControlGMP(MotorINFO* id)
 	if(id==0) return;
 	if(id->s_count == 1)
 	{		
-		uint16_t 	ThisAngle = 360 - gyroYAngle;
-		double 		ThisSpeed = -gyroYspeed;		
+		int16_t 	ThisAngle = gyroYAngle;
+		double 		ThisSpeed = gyroYspeed;		
 		
 		if(id->FirstEnter==1) {
 			id->lastRead = ThisAngle;
-			id->RealAngle =(double)(GM_PITCH_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0;
+			id->RealAngle =(double)(GM_PITCH_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate;
 			NORMALIZE_ANGLE180(id->RealAngle);
-			id->RealAngle/=id->ReductionRate;
 			id->FirstEnter = 0;
 			return;
 		}
@@ -161,16 +166,16 @@ void ControlGMP(MotorINFO* id)
 		if(ThisAngle <= id->lastRead)
 		{
 			if((id->lastRead-ThisAngle) > 180)
-				 id->RealAngle = id->RealAngle + (ThisAngle + 360 - id->lastRead);
+				 id->RealAngle += (ThisAngle + 360 - id->lastRead) / id->ReductionRate;
 			else
-				 id->RealAngle = id->RealAngle + (ThisAngle - id->lastRead);
+				 id->RealAngle -= (id->lastRead - ThisAngle) / id->ReductionRate;
 		}
 		else
 		{
 			if((ThisAngle-id->lastRead) > 180)
-				 id->RealAngle = id->RealAngle - (id->lastRead + 360 - ThisAngle);
+				 id->RealAngle -= (id->lastRead + 360 - ThisAngle)  / id->ReductionRate;
 			else
-				 id->RealAngle = id->RealAngle + (ThisAngle - id->lastRead);
+				 id->RealAngle += (ThisAngle - id->lastRead)  / id->ReductionRate;
 		}
 		id->lastRead = ThisAngle ;
 			
@@ -400,6 +405,7 @@ void InitMotor(MotorINFO *id)
 	id->TargetAngle=0;
 	id->offical_speedPID.Reset(&(id->offical_speedPID));
 	(id->Handle)(id);
+	id->Intensity=0;
 }
 
 void Motor_ID_Setting()

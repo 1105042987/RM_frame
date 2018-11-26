@@ -86,6 +86,7 @@ void WorkStateFSM(void)
 		case STOP_STATE:				//紧急停止
 		{
 			for(int i=0;i<8;i++) {InitMotor(can1[i]);InitMotor(can2[i]);}
+			setCAN11();setCAN12();setCAN21();setCAN22();
 			if (inputmode == REMOTE_INPUT || inputmode == KEY_MOUSE_INPUT)
 			{
 				WorkState = PREPARE_STATE;
@@ -148,6 +149,7 @@ void controlLoop()
 		for(int i=4;i<8;i++) if(can2[i]!=0) (can2[i]->Handle)(can2[i]);
 		setCAN22();
 		#endif
+		Delay(200,{Send_User_Data();})
 	}
 }
 

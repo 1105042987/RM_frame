@@ -2,7 +2,7 @@
   * File Name   : GyroReadTask.c
   * Description : 
   * Author      : «ÿ…‹∑…
-  * Telephone   :
+  * Telephone   : 18916930119
 ********************************************************************
   *
   * Copyright (c) 2019 Team Jiao Long - ShanghaiJiaoTong University
