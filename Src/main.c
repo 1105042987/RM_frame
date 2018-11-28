@@ -117,15 +117,14 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM6_Init();
   MX_TIM12_Init();
-  MX_USART2_UART_Init();
   MX_USART6_UART_Init();
   MX_TIM7_Init();
   MX_TIM10_Init();
   MX_TIM2_Init();
   MX_IWDG_Init();
-  MX_UART7_Init();
   MX_TIM5_Init();
-  MX_UART8_Init();
+  MX_USART3_UART_Init();
+  MX_UART7_Init();
 
   /* USER CODE BEGIN 2 */
 	//各模块初始化

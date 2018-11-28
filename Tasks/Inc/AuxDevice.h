@@ -21,9 +21,9 @@
 #define BUZZER_TIM 				htim12
 
 #define RC_UART 				huart1
-#define MANIFOLD_UART 			huart8
-#define UPPER_UART 				huart8
-#define JUDGE_UART 				huart6
+#define MANIFOLD_UART 			huart6
+#define UPPER_UART 				huart6
+#define JUDGE_UART 				huart3
 #define GYRO_UART 				huart7
 
 #define BUZZER_CHANNEL			TIM_CHANNEL_1

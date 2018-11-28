@@ -14,9 +14,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#define fw_printf(...) printf(__VA_ARGS__)
 
 #ifdef DEBUG_MODE
-#define fw_printf(...) printf(__VA_ARGS__)
 //--------------------底层接收驱动部分-------------------//
 char buf[REC_LEN];
 uint16_t RX_STA=0;
@@ -214,5 +214,6 @@ void dataCallBack()
 #else
 void ctrlUartRxCpltCallback()
 {
+	
 }
 #endif
