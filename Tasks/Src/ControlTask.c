@@ -4,7 +4,7 @@
   * Description        : 主控制任务
   ******************************************************************************
   *
-  * Copyright (c) 2018 Team TPP-Shanghai Jiao Tong University
+  * Copyright (c) 2019 Team JiaoLong-ShanghaiJiaoTong University
   * All rights reserved.
   *
   ******************************************************************************
@@ -97,7 +97,7 @@ void WorkStateFSM(void)
 }
 void ControlRotate(void)
 {	
-	#ifdef CHASSIS_FOLLOW
+	#ifdef USE_CHASSIS_FOLLOW
 		ChassisSpeedRef.rotate_ref=(GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f;
 		NORMALIZE_ANGLE180(ChassisSpeedRef.rotate_ref);
 	#endif
@@ -127,29 +127,29 @@ void Chassis_Data_Decoding()
 //主控制循环
 void controlLoop()
 {
+	getJudgeState();
 	WorkStateFSM();
 	
 	if(WorkState > 0)
 	{
 		Chassis_Data_Decoding();
+		for(int i=0;i<8;i++) if(can1[i]!=0) (can1[i]->Handle)(can1[i]);
+		for(int i=0;i<8;i++) if(can2[i]!=0) (can2[i]->Handle)(can2[i]);
+		
+		OptionalFunction();
 		
 		#ifdef CAN11
-		for(int i=0;i<4;i++) if(can1[i]!=0) (can1[i]->Handle)(can1[i]);
 		setCAN11();
 		#endif
 		#ifdef CAN12
-		for(int i=4;i<8;i++) if(can1[i]!=0) (can1[i]->Handle)(can1[i]);
 		setCAN12();
 		#endif
 		#ifdef CAN21
-		for(int i=0;i<4;i++) if(can2[i]!=0) (can2[i]->Handle)(can2[i]);
 		setCAN21();
 		#endif
 		#ifdef CAN22
-		for(int i=4;i<8;i++) if(can2[i]!=0) (can2[i]->Handle)(can2[i]);
 		setCAN22();
 		#endif
-		Delay(200,{Send_User_Data();})
 	}
 }
 

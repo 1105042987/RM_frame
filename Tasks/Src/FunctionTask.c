@@ -39,6 +39,12 @@ void FunctionTaskInit()
 	KeyboardMode=NO_CHANGE;
 }
 
+void OptionalFunction()
+{
+	Cap_Control();
+	PowerLimitation();
+}
+
 void Limit_and_Synchronization()
 {
 	//demo
@@ -52,7 +58,7 @@ void Limit_and_Synchronization()
 void RemoteControlProcess(Remote *rc)
 {
 	if(WorkState <= 0) return;
-	//max=297
+	//max=660
 	channelrrow = (rc->ch0 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	channelrcol = (rc->ch1 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	channellrow = (rc->ch2 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
@@ -61,7 +67,7 @@ void RemoteControlProcess(Remote *rc)
 	{	
 		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
-		#ifdef CHASSIS_FOLLOW
+		#ifdef USE_CHASSIS_FOLLOW
 		GMY.TargetAngle += channellrow * RC_GIMBAL_SPEED_REF;
 		GMP.TargetAngle += channellcol * RC_GIMBAL_SPEED_REF;
 		#else

@@ -140,24 +140,39 @@ void InitRemoteControl(){
 uint8_t rc_first_frame = 0;
 uint8_t rc_update = 0;
 uint8_t rc_cnt = 0;
+uint8_t tx_cnt = 200;
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
 	if(UartHandle == &RC_UART){
 		rc_update = 1;
 	}
-	else if(UartHandle == &MANIFOLD_UART)
+	else if(UartHandle == &GYRO_UART)
 	{
-		#ifdef DEBUG_MODE
-		ctrlUartRxCpltCallback();
+		#ifdef USE_GYRO
+		gyroUartRxCpltCallback();
 		#endif
 	}
 	else if(UartHandle == &JUDGE_UART)
 	{
 		judgeUartRxCpltCallback();  //裁判系统数据解算
 	}
-	else if(UartHandle == &GYRO_UART)
+	
+}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
+{
+	if(UartHandle == &JUDGE_UART)
 	{
-		gyroUartRxCpltCallback();
+		
 	}
-}   
+}
+void UART_IDLE_Handler(UART_HandleTypeDef *UartHandle)
+{
+	if(UartHandle == &UPPER_UART)
+	{
+		#ifdef DEBUG_MODE
+		ctrlUartRxCpltCallback();
+		#endif
+	}
+}

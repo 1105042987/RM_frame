@@ -13,8 +13,10 @@
 
 void ControlNM(MotorINFO *id);
 void ControlCM(MotorINFO *id);
+#ifdef USE_GYRO
 void ControlGMY(MotorINFO *id);
 void ControlGMP(MotorINFO *id);
+#endif
 extern int16_t testIntensity;
 
 //**********************************************************************
@@ -99,7 +101,7 @@ void ControlCM(MotorINFO* id)
 	id->offical_speedPID.Calc(&(id->offical_speedPID));
 	id->Intensity=(1.30f)*id->offical_speedPID.output;
 }
-
+#ifdef USE_GYRO
 void ControlGMY(MotorINFO* id)
 {
 	if(id==0) return;
@@ -189,7 +191,7 @@ void ControlGMP(MotorINFO* id)
 		id->s_count++;
 	}		
 }
-
+#endif
 //CAN
 void setCAN11()
 {
