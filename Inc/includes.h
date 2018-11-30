@@ -12,8 +12,9 @@
 #ifndef __INCLUDES_H
 #define __INCLUDES_H
 
+#define INFANTRY2
 //#define DEBUG_MODE
-//#define CHASSIS_FOLLOW
+#define CHASSIS_FOLLOW
 #define CAN11
 #define CAN12
 #define CAN21
