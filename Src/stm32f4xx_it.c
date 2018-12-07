@@ -36,7 +36,8 @@
 #include "stm32f4xx_it.h"
 
 /* USER CODE BEGIN 0 */
-void UART_IDLE_Handler(UART_HandleTypeDef *UartHandle);
+void ctrlUartRxCpltCallback();
+
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -285,7 +286,7 @@ void USART1_IRQHandler(void)
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
-  UART_IDLE_Handler(&huart1);
+
   /* USER CODE END USART1_IRQn 1 */
 }
 
@@ -299,7 +300,7 @@ void USART3_IRQHandler(void)
   /* USER CODE END USART3_IRQn 0 */
   HAL_UART_IRQHandler(&huart3);
   /* USER CODE BEGIN USART3_IRQn 1 */
-  UART_IDLE_Handler(&huart3);
+
   /* USER CODE END USART3_IRQn 1 */
 }
 
@@ -313,7 +314,7 @@ void TIM6_DAC_IRQHandler(void)
   /* USER CODE END TIM6_DAC_IRQn 0 */
   HAL_TIM_IRQHandler(&htim6);
   /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
-  
+
   /* USER CODE END TIM6_DAC_IRQn 1 */
 }
 
@@ -407,11 +408,11 @@ void DMA2_Stream6_IRQHandler(void)
 void USART6_IRQHandler(void)
 {
   /* USER CODE BEGIN USART6_IRQn 0 */
-  
+  ctrlUartRxCpltCallback();
   /* USER CODE END USART6_IRQn 0 */
   HAL_UART_IRQHandler(&huart6);
   /* USER CODE BEGIN USART6_IRQn 1 */
-  UART_IDLE_Handler(&huart6);
+
   /* USER CODE END USART6_IRQn 1 */
 }
 
@@ -425,7 +426,7 @@ void UART7_IRQHandler(void)
   /* USER CODE END UART7_IRQn 0 */
   HAL_UART_IRQHandler(&huart7);
   /* USER CODE BEGIN UART7_IRQn 1 */
-  UART_IDLE_Handler(&huart7);
+
   /* USER CODE END UART7_IRQn 1 */
 }
 

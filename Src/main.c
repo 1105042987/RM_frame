@@ -134,7 +134,6 @@ int main(void)
 	InitPWM();
 	InitCanReception();
 	InitGyroUart();
-	InitJudgeUart();
 	
 	#ifdef DEBUG_MODE
 	ctrlUartInit();
@@ -160,7 +159,8 @@ int main(void)
 		HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
 	#endif
 	__HAL_UART_ENABLE_IT(&UPPER_UART, UART_IT_IDLE);
-
+	__HAL_UART_ENABLE_IT(&JUDGE_UART, UART_IT_IDLE);
+	
 	
   /* USER CODE END 2 */
 

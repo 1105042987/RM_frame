@@ -95,6 +95,5 @@ extern extPowerHeatData_t PowerHeatData;
 extern extShootData_t ShootData0;
 extern extShootData_t ShootData1;
 extern JudgeState_e JUDGE_State;
-extern extShowData_t user_data;
 
 #endif /*__ JUDGETASK_H */

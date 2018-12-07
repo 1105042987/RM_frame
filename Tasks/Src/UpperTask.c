@@ -5,7 +5,7 @@
   * Author			: 秦绍飞
   ******************************************************************************
   *
-  * Copyright (c) 2019 Team JiaoLong-ShanghaiJiaoTong University
+  * Copyright (c) 2018 Team TPP-Shanghai Jiao Tong University
   * All rights reserved.
   *
   ******************************************************************************
@@ -19,6 +19,7 @@
 #ifdef DEBUG_MODE
 //--------------------底层接收驱动部分-------------------//
 char buf[REC_LEN];
+uint16_t RX_STA=0;
 void zykProcessData(void);
 void ctrlUartRxCpltCallback()
 {
@@ -28,6 +29,7 @@ void ctrlUartRxCpltCallback()
 		HAL_UART_DMAStop(&UPPER_UART);
 		uint32_t rx_len =  REC_LEN - UPPER_UART.hdmarx->Instance->NDTR;
 		buf[rx_len]='\0';
+		RX_STA=0x8000;
 		zykProcessData();
 	}
 	if(HAL_UART_Receive_DMA(&UPPER_UART, (uint8_t *)buf, REC_LEN) != HAL_OK)

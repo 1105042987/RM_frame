@@ -544,14 +544,14 @@
               <FilePath>..\Tasks\Src\JudgeTask.c</FilePath>
             </File>
             <File>
-              <FileName>UpperTask.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Tasks\Src\UpperTask.c</FilePath>
-            </File>
-            <File>
               <FileName>ManifoldTask.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Tasks\Src\ManifoldTask.c</FilePath>
+            </File>
+            <File>
+              <FileName>UpperTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Tasks\Src\UpperTask.c</FilePath>
             </File>
             <File>
               <FileName>CapControlTask.c</FileName>

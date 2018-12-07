@@ -187,24 +187,7 @@
           <Name>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0STM32F4xx_2048 -FS08000000 -FL0200000 -FP0($$Device:STM32F427IIHx$CMSIS/Flash/STM32F4xx_2048.FLM))</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint>
-        <Bp>
-          <Number>0</Number>
-          <Type>0</Type>
-          <LineNumber>43</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134243842</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Tasks\Src\GyroReadTask.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\RM_frame\../Tasks/Src/GyroReadTask.c\43</Expression>
-        </Bp>
-      </Breakpoint>
+      <Breakpoint/>
       <WatchWindow1>
         <Ww>
           <count>0</count>
@@ -305,21 +288,6 @@
           <count>19</count>
           <WinNumber>1</WinNumber>
           <ItemText>gyroYAngle</ItemText>
-        </Ww>
-        <Ww>
-          <count>20</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>gyroBuffercnt,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>21</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>buffercnt</ItemText>
-        </Ww>
-        <Ww>
-          <count>22</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>JUDGE_State</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -722,8 +690,8 @@
       <Focus>0</Focus>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Tasks\Src\UpperTask.c</PathWithFileName>
-      <FilenameWithoutPath>UpperTask.c</FilenameWithoutPath>
+      <PathWithFileName>..\Tasks\Src\ManifoldTask.c</PathWithFileName>
+      <FilenameWithoutPath>ManifoldTask.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -735,8 +703,8 @@
       <Focus>0</Focus>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Tasks\Src\ManifoldTask.c</PathWithFileName>
-      <FilenameWithoutPath>ManifoldTask.c</FilenameWithoutPath>
+      <PathWithFileName>..\Tasks\Src\UpperTask.c</PathWithFileName>
+      <FilenameWithoutPath>UpperTask.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

@@ -5,16 +5,17 @@
   * Telephone   : 18916930119
 ********************************************************************
   *
-  * Copyright (c) 2019 Team JiaoLong-ShanghaiJiaoTong University
+  * Copyright (c) 2019 Team Jiao Long - ShanghaiJiaoTong University
   * All rights reserved.
   *
 *******************************************************************/
 #include "includes.h"
-#ifdef USE_GYRO
+
 uint8_t tmp_gyro;
 uint8_t gyro_receiving = 0;
 uint8_t gyroBuffer[80] = {0};
 uint8_t gyroBuffercnt = 0;
+uint8_t gyroID = 0;
 float gyroXAngle,gyroYAngle,gyroZAngle;
 float gyroXspeed,gyroYspeed,gyroZspeed;
 float gyroXacc,gyroYacc,gyroZacc;
@@ -27,13 +28,13 @@ void InitGyroUart(void){
 	}
 }
 /*
-?????
+角速度输出
 0x55 0x52 wxL wxH wyL wyH wzL wzH TL TH SUM
 SUM = 0x55 + 0x52 + RollL + RollH + PitchL + PitchH + YawL + yawH + TL + TH
-????
+角度输出
 0x55 0x53 RollL RollH PitchL PitchH YawL yawH TL TH SUM
 SUM = 0x55 + 0x53 + RollL + RollH + PitchL + PitchH + YawL + yawH + TL + TH
-?????
+加速度输出
 0x55 0x51 axL axH ayL ayH azL azH TL TH SUM
 SUM = 0x55 + 0x51 + axL + axH + ayL + ayH + azL + azH + TL + TH
 */
@@ -97,4 +98,3 @@ uint8_t sumCheck()
 	}
 	return minus;
 }
-#endif

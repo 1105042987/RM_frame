@@ -4,7 +4,7 @@
   * Description        : 统一包含文件
   ******************************************************************************
   *
-  * Copyright (c) 2019 Team JiaoLong-ShanghaiJiaoTong University
+  * Copyright (c) 2018 Team TPP-Shanghai Jiao Tong University
   * All rights reserved.
   *
   ******************************************************************************
@@ -12,15 +12,9 @@
 #ifndef __INCLUDES_H
 #define __INCLUDES_H
 
-//#define DEBUG_MODE
-
 #define INFANTRY2
-
-
-#define USE_GYRO
-#define USE_CHASSIS_FOLLOW
-
-
+//#define DEBUG_MODE
+#define CHASSIS_FOLLOW
 #define CAN11
 #define CAN12
 #define CAN21

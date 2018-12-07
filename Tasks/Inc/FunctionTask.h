@@ -17,7 +17,7 @@
 //Ò£¿Ø³£Á¿Çø
 #define RC_CHASSIS_SPEED_REF    		0.60f
 #define RC_ROTATE_SPEED_REF 			0.05f
-#define RC_GIMBAL_SPEED_REF				0.006f
+#define RC_GIMBAL_SPEED_REF				0.002f
 
 #define IGNORE_RANGE 					200
 
@@ -96,6 +96,5 @@ extern ChassisSpeed_Ref_t ChassisSpeedRef;
 
 void FunctionTaskInit(void);
 void Limit_Position(void);
-void OptionalFunction(void);
 
 #endif /*__FUNCTIONTASK_H*/
