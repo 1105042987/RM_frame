@@ -19,7 +19,7 @@ ChassisSpeed_Ref_t ChassisSpeedRef;
 int32_t auto_counter=0;		//用于准确延时的完成某事件
 
 int16_t channelrrow = 0;
-int16_t channelrcol = 0;
+int16_t channelrcol = 0; 
 int16_t channellrow = 0;
 int16_t channellcol = 0;
 int16_t testIntensity = 0;
