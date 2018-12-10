@@ -17,7 +17,9 @@ RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
 ChassisSpeed_Ref_t ChassisSpeedRef; 
 
 int32_t auto_counter=0;		//用于准确延时的完成某事件
-
+//存储红外传感器的数值
+extern uint32_t ADC_value[100];
+extern uint32_t ADC2_value[100];
 /**
 	***********************************************
 	*一键登岛
