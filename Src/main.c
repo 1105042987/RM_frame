@@ -165,10 +165,10 @@ int main(void)
 	#endif
 	__HAL_UART_ENABLE_IT(&UPPER_UART, UART_IT_IDLE);
 	//打开四个24V电源
-	HAL_GPIO_WritePin(GPIOH,1<<2,GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(GPIOH,1<<3,GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(GPIOH,1<<4,GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(GPIOH,1<<5,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOH,1<<2,1);
+	HAL_GPIO_WritePin(GPIOH,1<<3,1);
+	HAL_GPIO_WritePin(GPIOH,1<<4,1);
+	HAL_GPIO_WritePin(GPIOH,1<<5,1);
 	//开启红外传感器，并把数据存在ADC_value里
   HAL_ADC_Start_DMA(&hadc1,ADC_value,100);
   HAL_ADC_Start_DMA(&hadc2,ADC2_value,100);

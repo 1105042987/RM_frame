@@ -172,7 +172,7 @@ if(reset_flag){
 			i2++;
 			 auto_counter=1;
 			 if(i2==30)
-			 {flag_get=1;auto_counter=1000;}
+			 {flag_get=1;HAL_GPIO_WritePin(GPIOI,1<<5,GPIO_PIN_RESET);auto_counter=1000;}
 		 }
 		 if(auto_counter==0&&flag_get==1){
      UM1.TargetAngle=-i2*4;
@@ -188,7 +188,7 @@ if(reset_flag){
 			i2++;
 			 auto_counter=1;
 			 if(i2==20)
-			 {auto_counter=500;}
+			 {auto_counter=500;HAL_GPIO_WritePin(GPIOI,1<<5,GPIO_PIN_SET);}
 			 if(i2==30)
 			 {flag_get=3;auto_counter=1000;}
 		 }
