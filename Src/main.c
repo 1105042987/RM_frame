@@ -39,6 +39,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_hal.h"
+#include "adc.h"
 #include "can.h"
 #include "dma.h"
 #include "iwdg.h"
@@ -125,6 +126,8 @@ int main(void)
   MX_TIM5_Init();
   MX_USART3_UART_Init();
   MX_UART7_Init();
+  MX_ADC1_Init();
+  MX_ADC2_Init();
 
   /* USER CODE BEGIN 2 */
 	//各模块初始化
