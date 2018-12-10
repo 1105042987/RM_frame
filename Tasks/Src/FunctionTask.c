@@ -37,7 +37,7 @@ extern uint32_t ADC2_value[100];
 	
 	
 /******************自动化取弹*************/
-int flag_get=0;
+int flag_get=-1;
 int  i2;
 /*****************************************/
 int16_t channelrrow = 0;
@@ -164,41 +164,43 @@ if(reset_flag){
 	}
 }
 		//****************自动取弹程序//UM1--是拔出来UM2相反  最大120***************
-//     if(auto_counter==0&&flag_get==0){
-//     UM1.TargetAngle=-i2*4;
-//     UM2.TargetAngle=i2*4;
-//			i2++;
-//			 auto_counter=1;
-//			 if(i2==30)
-//			 {flag_get=1;auto_counter=1000;}
-//		 }
-//		 if(auto_counter==0&&flag_get==1){
-//     UM1.TargetAngle=-i2*4;
-//     UM2.TargetAngle=i2*4;
-//			i2--;
-//			 auto_counter=1;
-//			 if(i2==0)
-//			 {flag_get=2;auto_counter=1000;}
-//		 }
-//		 if(auto_counter==0&&flag_get==2){
-//     UM1.TargetAngle=-i2*4;
-//     UM2.TargetAngle=i2*4;
-//			i2++;
-//			 auto_counter=1;
-//			 if(i2==20)
-//			 {auto_counter=500;}
-//			 if(i2==30)
-//			 {flag_get=3;auto_counter=1000;}
-//		 }
-//		 if(auto_counter==0&&flag_get==3){
-//     UM1.TargetAngle=-i2*4;
-//     UM2.TargetAngle=i2*4;
-//			i2--;
-//			 auto_counter=1;
-//			 if(i2==0)
-//			 {flag_get=0;auto_counter=1000;}
-//		 }
-//			
+     if(ADC_value[1]>500&&ADC2_value[1]>500&&flag_get==-1)
+		 flag_get=0;
+     if(auto_counter==0&&flag_get==0){
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2++;
+			 auto_counter=1;
+			 if(i2==30)
+			 {flag_get=1;auto_counter=1000;}
+		 }
+		 if(auto_counter==0&&flag_get==1){
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2--;
+			 auto_counter=1;
+			 if(i2==0)
+			 {flag_get=2;auto_counter=1000;}
+		 }
+		 if(auto_counter==0&&flag_get==2){
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2++;
+			 auto_counter=1;
+			 if(i2==20)
+			 {auto_counter=500;}
+			 if(i2==30)
+			 {flag_get=3;auto_counter=1000;}
+		 }
+		 if(auto_counter==0&&flag_get==3){
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2--;
+			 auto_counter=1;
+			 if(i2==0)
+			 {flag_get=-1;auto_counter=1000;}
+		 }
+			
 /**********************/	
 	}
 	Limit_and_Synchronization();
