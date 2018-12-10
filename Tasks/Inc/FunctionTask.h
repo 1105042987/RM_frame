@@ -97,5 +97,6 @@ extern ChassisSpeed_Ref_t ChassisSpeedRef;
 void FunctionTaskInit(void);
 void Limit_Position(void);
 void OptionalFunction(void);
+void FreshSuperCState(void);
 
 #endif /*__FUNCTIONTASK_H*/

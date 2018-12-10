@@ -23,6 +23,7 @@ int16_t channelrcol = 0;
 int16_t channellrow = 0;
 int16_t channellcol = 0;
 int16_t testIntensity = 0;
+uint8_t SuperCTestMode = 0;
 
 //初始化
 void FunctionTaskInit()
@@ -85,9 +86,17 @@ void RemoteControlProcess(Remote *rc)
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
 		//for debug SuperC
-		Control_SuperCap.release_power = 1;
-		Control_SuperCap.stop_power = 0;
-		if(Control_SuperCap.C_voltage>1200){
+		if(SuperCTestMode==1)
+		{
+			Control_SuperCap.release_power = 1;
+			Control_SuperCap.stop_power = 0;
+		}
+		else
+		{
+			Control_SuperCap.release_power = 0;
+			Control_SuperCap.stop_power = 0;
+		}
+		if(Control_SuperCap.C_voltage>1200 && SuperCTestMode==1){
 			ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF * 2;
 			ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF / 2 * 2;
 		}
@@ -102,19 +111,45 @@ void RemoteControlProcess(Remote *rc)
 		#else
 		ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF;
 		#endif
+		if(SuperCTestMode==0)
+		{
+			FRICL.TargetAngle = 5000;
+			FRICR.TargetAngle = -5000;
+		}
+		else
+		{
+			FRICL.TargetAngle = 0;
+			FRICR.TargetAngle = 0;
+		}
 		
-		FRICL.TargetAngle = 5000;
-		FRICR.TargetAngle = -5000;
 		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
-		FRICL.TargetAngle = 5000;
-		FRICR.TargetAngle = -5000;
+		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
+		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
+		#ifdef USE_CHASSIS_FOLLOW
+		GMY.TargetAngle += channellrow * RC_GIMBAL_SPEED_REF;
+		GMP.TargetAngle += channellcol * RC_GIMBAL_SPEED_REF;
+		#else
+		ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF;
+		#endif
+		if(SuperCTestMode==0)
+		{
+			FRICL.TargetAngle = 5000;
+			FRICR.TargetAngle = -5000;
+			Delay(20,{STIR.TargetAngle-=60;});
+		}
+		else
+		{
+			FRICL.TargetAngle = 0;
+			FRICR.TargetAngle = 0;
+		}
 		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
-		Delay(20,{STIR.TargetAngle-=60;});
+		
 	}
-	Limit_and_Synchronization();
+	FreshSuperCState();
+	//Limit_and_Synchronization();
 }
 
 
@@ -200,4 +235,32 @@ void KeyboardModeFSM(Key *key)
 		KM_LEFT_RIGHT_SPEED = NORMAL_LEFT_RIGHT_SPEED;
 		KeyboardMode=NO_CHANGE;
 	}	
+}
+
+//用于遥控器模式下超级电容测试模式的控制
+void FreshSuperCState(void)
+{
+	static uint8_t counter = 0;
+	if(HAL_GPIO_ReadPin(BUTTON_GPIO_Port,BUTTON_Pin))
+	{
+		counter++;
+		if(counter==40)
+		{
+			SuperCTestMode = (SuperCTestMode==1)?0:1;
+		}
+	}
+	else
+	{
+		counter = 0;
+	}
+	if(SuperCTestMode==1)
+	{
+		HAL_GPIO_WritePin(GPIOF, LED_GREEN_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOE, LED_RED_Pin, GPIO_PIN_RESET);
+	}
+	else
+	{
+		HAL_GPIO_WritePin(GPIOF, LED_GREEN_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOE, LED_RED_Pin, GPIO_PIN_SET);
+	}
 }

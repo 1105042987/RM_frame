@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=D:/RM_frame-master/Inc
+HeaderPath=F:/RM_frame/Inc
 HeaderFiles=gpio.h;can.h;dma.h;spi.h;usart.h;stm32f4xx_it.h;stm32f4xx_hal_conf.h;main.h;tim.h;adc.h;iwdg.h;
-SourcePath=D:/RM_frame-master/Src
+SourcePath=F:/RM_frame/Src
 SourceFiles=gpio.c;can.c;dma.c;spi.c;usart.c;stm32f4xx_it.c;stm32f4xx_hal_msp.c;main.c;tim.c;adc.c;iwdg.c;
 
 [PreviousLibFiles]
