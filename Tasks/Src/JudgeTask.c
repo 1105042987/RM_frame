@@ -16,9 +16,10 @@
 
 uint8_t tmp_judge;
 void InitJudgeUart(void){
-	//Send_User_Data();
+	tx_free = 1;
+	Send_User_Data();
 	if(HAL_UART_Receive_DMA(&JUDGE_UART, &tmp_judge, 1) != HAL_OK){
-		Error_Handler();
+			Error_Handler();
 	}
 }
 uint8_t receiving = 0;
@@ -309,5 +310,6 @@ void Send_User_Data()
 	buffer[20] = CRC16 & 0xff;
 	buffer[21] = (CRC16 >> 8) & 0xff;
 
+	tx_free = 0;
 	while(HAL_UART_Transmit_DMA(&JUDGE_UART,(uint8_t *)&buffer,22)!=HAL_OK);
 }

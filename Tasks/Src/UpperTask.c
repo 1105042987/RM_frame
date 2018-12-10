@@ -22,6 +22,7 @@ char buf[REC_LEN];
 void zykProcessData(void);
 void ctrlUartRxCpltCallback()
 {
+	rx_free = 0;
 	if((__HAL_UART_GET_FLAG(&UPPER_UART,UART_FLAG_IDLE) != RESET))  
 	{
 		__HAL_UART_CLEAR_IDLEFLAG(&UPPER_UART);  

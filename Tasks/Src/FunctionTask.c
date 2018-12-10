@@ -65,6 +65,10 @@ void RemoteControlProcess(Remote *rc)
 	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	if(WorkState == NORMAL_STATE)
 	{	
+		//for debug SuperC
+		Control_SuperCap.release_power = 0;
+		Control_SuperCap.stop_power = 0;
+		
 		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 		#ifdef USE_CHASSIS_FOLLOW
@@ -75,16 +79,39 @@ void RemoteControlProcess(Remote *rc)
 		#endif
 		FRICL.TargetAngle = 0;
 		FRICR.TargetAngle = 0;
+		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
+		
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
+		//for debug SuperC
+		Control_SuperCap.release_power = 1;
+		Control_SuperCap.stop_power = 0;
+		if(Control_SuperCap.C_voltage>1200){
+			ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF * 2;
+			ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF / 2 * 2;
+		}
+		else
+		{
+			ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
+			ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF / 2;
+		}
+		#ifdef USE_CHASSIS_FOLLOW
+		GMY.TargetAngle += channellrow * RC_GIMBAL_SPEED_REF;
+		GMP.TargetAngle += channellcol * RC_GIMBAL_SPEED_REF;
+		#else
+		ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF;
+		#endif
+		
 		FRICL.TargetAngle = 5000;
 		FRICR.TargetAngle = -5000;
+		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
 		FRICL.TargetAngle = 5000;
 		FRICR.TargetAngle = -5000;
+		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
 		Delay(20,{STIR.TargetAngle-=60;});
 	}
 	Limit_and_Synchronization();

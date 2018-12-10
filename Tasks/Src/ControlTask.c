@@ -13,6 +13,7 @@
 
 WorkState_e WorkState = PREPARE_STATE;
 uint16_t prepare_time = 0;
+uint16_t counter = 0;
 double rotate_speed = 0;
 MusicNote SuperMario[] = {
 	{H3, 100}, {0, 50}, 
@@ -48,7 +49,7 @@ void WorkStateFSM(void)
 		{
 			if (inputmode == STOP) WorkState = STOP_STATE;
 			if(prepare_time < 2000) prepare_time++;	
-			if(prepare_time == 2000)//开机二秒进入正常模式
+			if(prepare_time >= 2000 && imu.InitFinish == 1 && isCan1FirstRx == 1 && isCan2FirstRx ==1)//开机二秒后且imu初始化完成且所有can电机上电完成后进入正常模式
 			{
 				playMusicSuperMario();
 				CMRotatePID.Reset(&CMRotatePID);
@@ -133,6 +134,7 @@ void controlLoop()
 	if(WorkState > 0)
 	{
 		Chassis_Data_Decoding();
+		
 		for(int i=0;i<8;i++) if(can1[i]!=0) (can1[i]->Handle)(can1[i]);
 		for(int i=0;i<8;i++) if(can2[i]!=0) (can2[i]->Handle)(can2[i]);
 		
@@ -159,7 +161,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if (htim->Instance == htim6.Instance)//2ms时钟`
 	{
 		HAL_NVIC_DisableIRQ(TIM6_DAC_IRQn);
-		
+		//imu解算
+		mpu_get_data();
+		imu_ahrs_update();
+		imu_attitude_update();
+		if(imu.FirstEnter == 1) imu.InitCount++;
+		if(imu.InitCount == 1000) {imu.InitFinish = 1;imu.FirstEnter = 0;imu.InitCount = 0;}
 		//主循环在时间中断中启动
 		controlLoop();
 		
@@ -167,28 +174,41 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 	else if (htim->Instance == htim7.Instance)//ims时钟
 	{
+		
 		rc_cnt++;
 		if(auto_counter > 0) auto_counter--;
-		if (rc_update)
+		
+		if (rx_free == 1 && tx_free == 1)
 		{
 			if( (rc_cnt <= 17) && (rc_first_frame == 1))
 			{
 				RemoteDataProcess(rc_data);				//遥控器数据解算
 				HAL_UART_AbortReceive(&RC_UART);
-				HAL_UART_Receive_DMA(&RC_UART, rc_data, 18);
-				rc_cnt = 0;
+				rx_free = 0;
+				while(HAL_UART_Receive_DMA(&RC_UART, rc_data, 18)!= HAL_OK);
+				if (counter == 10) 
+				{
+					tx_free = 0;
+					Send_User_Data(); 
+					counter = 0;
+				}
+				else counter++;				
+					rc_cnt = 0;
 			}
 			else
 			{
-				if(rc_first_frame) 
-					WorkState = PREPARE_STATE;
-				HAL_UART_AbortReceive(&RC_UART);
-				HAL_UART_Receive_DMA(&RC_UART, rc_data, 18);
-				rc_cnt = 0;
-				rc_first_frame = 1;
+				if(rc_first_frame == 0) 
+				{
+				   WorkState = PREPARE_STATE;
+				   HAL_UART_AbortReceive(&RC_UART);
+				   while(HAL_UART_Receive_DMA(&RC_UART, rc_data, 18)!= HAL_OK);
+  				 rc_cnt = 0;
+				   rc_first_frame = 1;
+				}
 			}
 			rc_update = 0;
 		}
+		
 	}
 	else if (htim->Instance == htim10.Instance)  //10ms，处理上位机数据，优先级不高
 	{

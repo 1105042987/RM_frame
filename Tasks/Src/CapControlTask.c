@@ -23,12 +23,12 @@ void Cap_Control(void)
 {
 	for(i=0;i<5;i++)
 	{
-		/*
+		
 		HAL_ADC_Start(&hadc1);
 		while(HAL_ADC_PollForConversion(&hadc1,100) != HAL_OK);
 		v_tem[i]=HAL_ADC_GetValue(&hadc1)*29.19f/40.96f;
 		HAL_ADC_Stop(&hadc1);
-		*/
+		
 	}
 	
 	for(i=0;i<5;i++){
@@ -36,6 +36,7 @@ void Cap_Control(void)
 	}
 	Control_SuperCap.C_voltage = Control_SuperCap.C_voltage/5;
 	
+	user_data.mask = 0xC0;
 	uint16_t temcov = Control_SuperCap.C_voltage;
 	for (int j = 1;temcov > 1100; temcov = temcov - 155 )
 	{

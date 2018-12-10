@@ -35,6 +35,7 @@
 #include "usart.h"
 #include "gpio.h"
 #include "iwdg.h"
+#include "adc.h"
 
 #include "AuxDevice.h"
 #include "RemoteTask.h"
@@ -50,6 +51,7 @@
 #include "CapControlTask.h"
 #include "PowerLimitationTask.h"
 #include "GyroReadTask.h"
+#include "bsp_imu.h"
 
 
 extern int16_t global_catch;		//用于检测一个其他文档里，不值得设置全局变量，但是临时需要读取的数据

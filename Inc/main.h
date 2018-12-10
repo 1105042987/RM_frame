@@ -47,8 +47,16 @@
 
 /* Private define ------------------------------------------------------------*/
 
+#define LASER_Pin GPIO_PIN_13
+#define LASER_GPIO_Port GPIOG
+#define Cap_In_Pin GPIO_PIN_4
+#define Cap_In_GPIO_Port GPIOE
+#define Cap_Out_Pin GPIO_PIN_5
+#define Cap_Out_GPIO_Port GPIOE
 #define NSS_Pin GPIO_PIN_6
 #define NSS_GPIO_Port GPIOF
+#define Cap_V_Pin GPIO_PIN_0
+#define Cap_V_GPIO_Port GPIOC
 #define LED_GREEN_Pin GPIO_PIN_14
 #define LED_GREEN_GPIO_Port GPIOF
 
