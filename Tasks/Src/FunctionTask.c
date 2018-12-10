@@ -31,6 +31,9 @@ int32_t auto_counter=0;		//用于准确延时的完成某事件
 	
 	
 	
+/******************自动化取弹*************/
+int flag_get=0;
+int  i2;
 /*****************************************/
 int16_t channelrrow = 0;
 int16_t channelrcol = 0;
@@ -68,6 +71,8 @@ void Limit_and_Synchronization()
 //	MINMAX(NMUDL.TargetAngle,-650,600);//limit
 //	MINMAX(NMUDR.TargetAngle,600,650);
 	NMUDL.TargetAngle = -NMUDR.TargetAngle;//sychronization
+	UM1.TargetAngle=-UM2.TargetAngle;
+	
 	//demo end
 }
 //******************
@@ -141,7 +146,44 @@ void RemoteControlProcess(Remote *rc)
 				if(NMUDL.TargetAngle<-640 && NMUDL.RxMsgC6x0.moment>14800){
 					NMUDFL.TargetAngle -= 5;
 	}
+				
 }
+		//****************自动取弹程序//UM1--是拔出来UM2相反  最大120***************
+     if(auto_counter==0&&flag_get==0){
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2++;
+			 auto_counter=1;
+			 if(i2==30)
+			 {flag_get=1;auto_counter=1000;}
+		 }
+		 if(auto_counter==0&&flag_get==1){
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2--;
+			 auto_counter=1;
+			 if(i2==0)
+			 {flag_get=2;auto_counter=1000;}
+		 }
+		 if(auto_counter==0&&flag_get==2){
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2++;
+			 auto_counter=1;
+			 if(i2==20)
+			 {auto_counter=500;}
+			 if(i2==30)
+			 {flag_get=3;auto_counter=1000;}
+		 }
+		 if(auto_counter==0&&flag_get==3){
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2--;
+			 auto_counter=1;
+			 if(i2==0)
+			 {flag_get=0;auto_counter=1000;}
+		 }
+			
 /**********************/	
 	}
 	Limit_and_Synchronization();

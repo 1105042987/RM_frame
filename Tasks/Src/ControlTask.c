@@ -15,16 +15,6 @@ WorkState_e WorkState = PREPARE_STATE;
 uint16_t prepare_time = 0;
 double rotate_speed = 0;
 MusicNote SuperMario[] = {
-	{H3, 100}, {0, 50}, 
-	{H3, 250}, {0, 50}, 
-	{H3, 100}, {0, 50}, 
-	{0, 150},
-	{H1, 100}, {0, 50},  
-	{H3, 250}, {0, 50},
-	{H5, 250}, {0, 50},
-	{0, 300},
-	{M5, 250}, {0, 50},
-	{0, 300},
 	{H1, 250}, {0, 50}
 };
 //150十六分音符 300八分音符  
