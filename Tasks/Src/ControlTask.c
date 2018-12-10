@@ -27,6 +27,7 @@ MusicNote SuperMario[] = {
 	{0, 300},
 	{H1, 250}, {0, 50}
 };
+//150十六分音符 300八分音符  
 
 PID_Regulator_t CMRotatePID = CHASSIS_MOTOR_ROTATE_PID_DEFAULT; 
 extern int32_t auto_counter;
@@ -97,10 +98,10 @@ void WorkStateFSM(void)
 }
 void ControlRotate(void)
 {	
-	#ifdef USE_CHASSIS_FOLLOW
-		ChassisSpeedRef.rotate_ref=(GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f;
-		NORMALIZE_ANGLE180(ChassisSpeedRef.rotate_ref);
-	#endif
+//	#ifdef USE_CHASSIS_FOLLOW
+//		ChassisSpeedRef.rotate_ref=(GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f;
+//		NORMALIZE_ANGLE180(ChassisSpeedRef.rotate_ref);
+//	#endif
 	CMRotatePID.ref = 0;
 	CMRotatePID.fdb = ChassisSpeedRef.rotate_ref;
 	CMRotatePID.Calc(&CMRotatePID);

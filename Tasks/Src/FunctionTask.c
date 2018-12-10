@@ -18,6 +18,20 @@ ChassisSpeed_Ref_t ChassisSpeedRef;
 
 int32_t auto_counter=0;		//用于准确延时的完成某事件
 
+/**
+	***********************************************
+	*一键登岛
+	*********************************************
+	* reset_flag 重置变量，一次开机只执行一次
+	*	
+	*/
+	uint8_t reset_flag = 1;
+	
+	
+	
+	
+	
+/*****************************************/
 int16_t channelrrow = 0;
 int16_t channelrcol = 0;
 int16_t channellrow = 0;
@@ -48,8 +62,12 @@ void OptionalFunction()
 void Limit_and_Synchronization()
 {
 	//demo
-	//MINMAX(UD1.TargetAngle,-900,270);//limit
-	//UD2.TargetAngle=-UD1.TargetAngle;//sychronization
+//	MINMAX(NMUDL.TargetAngle,-650,0);//limit
+//	MINMAX(NMUDR.TargetAngle,0,650);
+	
+//	MINMAX(NMUDL.TargetAngle,-650,600);//limit
+//	MINMAX(NMUDR.TargetAngle,600,650);
+	NMUDL.TargetAngle = -NMUDR.TargetAngle;//sychronization
 	//demo end
 }
 //******************
@@ -67,25 +85,64 @@ void RemoteControlProcess(Remote *rc)
 	{	
 		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
-		#ifdef USE_CHASSIS_FOLLOW
-		GMY.TargetAngle += channellrow * RC_GIMBAL_SPEED_REF;
-		GMP.TargetAngle += channellcol * RC_GIMBAL_SPEED_REF;
-		#else
-		ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF;
-		#endif
-		FRICL.TargetAngle = 0;
-		FRICR.TargetAngle = 0;
+		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
+
+//TODO/******暂未用到的参数  发射机构电机********/		
+//		#ifdef USE_CHASSIS_FOLLOW
+//		GMY.TargetAngle += channellrow * RC_GIMBAL_SPEED_REF ;
+//		GMP.TargetAngle += channellcol * RC_GIMBAL_SPEED_REF ;
+//		#else
+//		ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF;
+//		#endif
+//		FRICL.TargetAngle = 0;
+//		FRICR.TargetAngle = 0;
+/******未用到参数********/		
+		
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
-		FRICL.TargetAngle = 5000;
-		FRICR.TargetAngle = -5000;
+//TODO/******暂未用到的参数  发射机构电机********/
+//		FRICL.TargetAngle = -4200;
+//		FRICR.TargetAngle = 4200;
+/******未用到参数********/	
+		
+		if(channellcol>200){       //UP
+		NMUDL.TargetAngle += channellcol * RC_ROTATE_SPEED_REF ;
+		NMUDR.TargetAngle -= channellcol * RC_ROTATE_SPEED_REF ;
+		}	else if(channellcol<-200){		//DOWN
+		NMUDL.TargetAngle += channellcol * RC_ROTATE_SPEED_REF ;
+		NMUDR.TargetAngle -= channellcol * RC_ROTATE_SPEED_REF ;
+		}
+		
+		if(channelrcol>200){			//Forward
+		NMUDFL.TargetAngle -= channelrcol * RC_ROTATE_SPEED_REF ;
+		NMUDFR.TargetAngle += channelrcol * RC_ROTATE_SPEED_REF ;
+		}else if(channelrcol<-200){//Back
+		NMUDFL.TargetAngle -= channelrcol * RC_ROTATE_SPEED_REF ;
+		NMUDFR.TargetAngle += channelrcol * RC_ROTATE_SPEED_REF ;
+		}
+		
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
-		FRICL.TargetAngle = 5000;
-		FRICR.TargetAngle = -5000;
-		Delay(20,{STIR.TargetAngle-=60;});
+//TODO/******暂未用到的参数  发射机构电机********/
+//		FRICL.TargetAngle = 5000;
+//		FRICR.TargetAngle = -5000;
+//		Delay(20,{STIR.TargetAngle-=60;});
+//TODO/**********登岛机构抬升复位************/
+		if(reset_flag){
+			
+				NMUDL.TargetAngle = 300;
+				NMUDR.TargetAngle = -300;
+				reset_flag = 0;
+}
+		if(channellcol>200){
+				NMUDL.TargetAngle -= 5;
+				if(NMUDL.TargetAngle<-640 && NMUDL.RxMsgC6x0.moment>14800){
+					NMUDFL.TargetAngle -= 5;
+	}
+}
+/**********************/	
 	}
 	Limit_and_Synchronization();
 }

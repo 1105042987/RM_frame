@@ -14,7 +14,6 @@
 #define CanRxGetU16(canRxMsg, num) (((uint16_t)canRxMsg.Data[num * 2] << 8) | (uint16_t)canRxMsg.Data[num * 2 + 1])
 uint8_t isRcan1Started = 0, isRcan2Started = 0;
 CanRxMsgTypeDef Can1RxMsg,Can2RxMsg;
-ESCC6x0RxMsg_t CMFLRx,CMBLRx,CMFRRx,CMBRRx;
 uint8_t can1_update = 1;
 uint8_t can1_type = 1;
 uint8_t can2_update = 1;

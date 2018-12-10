@@ -94,6 +94,7 @@ typedef __packed struct
 
 extern ChassisSpeed_Ref_t ChassisSpeedRef; 
 
+void funcReset(uint8_t);
 void FunctionTaskInit(void);
 void Limit_Position(void);
 void OptionalFunction(void);
