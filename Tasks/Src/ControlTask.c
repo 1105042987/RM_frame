@@ -20,7 +20,8 @@ MusicNote SuperMario[] = {
 //150十六分音符 300八分音符  
 
 PID_Regulator_t CMRotatePID = CHASSIS_MOTOR_ROTATE_PID_DEFAULT; 
-extern int32_t auto_counter;
+extern int32_t auto_counter;//自动取弹时间中断常量
+extern int32_t cnt_clk;    //登岛时间中断常量
 
 void playMusicSuperMario(void){
 	HAL_TIM_PWM_Start(&BUZZER_TIM, TIM_CHANNEL_1);
@@ -160,6 +161,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		rc_cnt++;
 		if(auto_counter > 0) auto_counter--;
+		if(cnt_clk > 0) cnt_clk--;
+		
 		if (rc_update)
 		{
 			if( (rc_cnt <= 17) && (rc_first_frame == 1))

@@ -17,6 +17,9 @@ RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
 ChassisSpeed_Ref_t ChassisSpeedRef; 
 
 int32_t auto_counter=0;		//用于准确延时的完成某事件
+int32_t cnt_clk;
+int16_t cnt = 0;
+
 //存储红外传感器的数值
 extern uint32_t ADC_value[100];
 extern uint32_t ADC2_value[100];
@@ -137,55 +140,65 @@ void RemoteControlProcess(Remote *rc)
 //		FRICR.TargetAngle = -5000;
 //		Delay(20,{STIR.TargetAngle-=60;});
 //TODO/**********登岛机构抬升复位************/
-		if(reset_flag){
-			
-				NMUDL.TargetAngle = 300;
-				NMUDR.TargetAngle = -300;
-				reset_flag = 0;
+if(reset_flag){
+	if(cnt_clk == 0){
+			cnt++;
+			NMUDL.TargetAngle += 5;
+			NMUDR.TargetAngle -= 5;
+			cnt_clk = 5;
+	}
+	if(cnt > 40){
+			reset_flag = 0;
+			cnt = 0;
+			NMUDL.RealAngle = 0;
+			NMUDR.RealAngle = 0;
+			NMUDL.TargetAngle = 0;
+			NMUDR.TargetAngle = 0;
+	}
 }
+/****************/
 		if(channellcol>200){
 				NMUDL.TargetAngle -= 5;
 				if(NMUDL.TargetAngle<-640 && NMUDL.RxMsgC6x0.moment>14800){
 					NMUDFL.TargetAngle -= 5;
 	}
-				
 }
 		//****************自动取弹程序//UM1--是拔出来UM2相反  最大120***************
-     if(auto_counter==0&&flag_get==0){
-     UM1.TargetAngle=-i2*4;
-     UM2.TargetAngle=i2*4;
-			i2++;
-			 auto_counter=1;
-			 if(i2==30)
-			 {flag_get=1;auto_counter=1000;}
-		 }
-		 if(auto_counter==0&&flag_get==1){
-     UM1.TargetAngle=-i2*4;
-     UM2.TargetAngle=i2*4;
-			i2--;
-			 auto_counter=1;
-			 if(i2==0)
-			 {flag_get=2;auto_counter=1000;}
-		 }
-		 if(auto_counter==0&&flag_get==2){
-     UM1.TargetAngle=-i2*4;
-     UM2.TargetAngle=i2*4;
-			i2++;
-			 auto_counter=1;
-			 if(i2==20)
-			 {auto_counter=500;}
-			 if(i2==30)
-			 {flag_get=3;auto_counter=1000;}
-		 }
-		 if(auto_counter==0&&flag_get==3){
-     UM1.TargetAngle=-i2*4;
-     UM2.TargetAngle=i2*4;
-			i2--;
-			 auto_counter=1;
-			 if(i2==0)
-			 {flag_get=0;auto_counter=1000;}
-		 }
-			
+//     if(auto_counter==0&&flag_get==0){
+//     UM1.TargetAngle=-i2*4;
+//     UM2.TargetAngle=i2*4;
+//			i2++;
+//			 auto_counter=1;
+//			 if(i2==30)
+//			 {flag_get=1;auto_counter=1000;}
+//		 }
+//		 if(auto_counter==0&&flag_get==1){
+//     UM1.TargetAngle=-i2*4;
+//     UM2.TargetAngle=i2*4;
+//			i2--;
+//			 auto_counter=1;
+//			 if(i2==0)
+//			 {flag_get=2;auto_counter=1000;}
+//		 }
+//		 if(auto_counter==0&&flag_get==2){
+//     UM1.TargetAngle=-i2*4;
+//     UM2.TargetAngle=i2*4;
+//			i2++;
+//			 auto_counter=1;
+//			 if(i2==20)
+//			 {auto_counter=500;}
+//			 if(i2==30)
+//			 {flag_get=3;auto_counter=1000;}
+//		 }
+//		 if(auto_counter==0&&flag_get==3){
+//     UM1.TargetAngle=-i2*4;
+//     UM2.TargetAngle=i2*4;
+//			i2--;
+//			 auto_counter=1;
+//			 if(i2==0)
+//			 {flag_get=0;auto_counter=1000;}
+//		 }
+//			
 /**********************/	
 	}
 	Limit_and_Synchronization();
