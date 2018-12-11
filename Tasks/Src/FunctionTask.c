@@ -138,8 +138,7 @@ void Limit_and_Synchronization()
 //	MINMAX(NMUDL.TargetAngle,-650,0);//limit
 //	MINMAX(NMUDR.TargetAngle,0,650);
 	
-//	MINMAX(NMUDL.TargetAngle,-650,600);//limit
-//	MINMAX(NMUDR.TargetAngle,600,650);
+	MINMAX(NMUDL.TargetAngle,-700,700);//limit
 	NMUDL.TargetAngle = -NMUDR.TargetAngle;//sychronization
 	UM1.TargetAngle=-UM2.TargetAngle;
 	
@@ -189,7 +188,7 @@ if(reset_flag){
 			NMUDR.TargetAngle -= 5;
 			cnt_clk = 5;
 	}
-	if(cnt > 40){
+	if(cnt > 100){
 			reset_flag = 0;
 			cnt = 0;
 			NMUDL.RealAngle = 0;
@@ -200,67 +199,78 @@ if(reset_flag){
 }
 /****************/
 
-		if(channellcol>200){       //UP
-		NMUDL.TargetAngle += channellcol * RC_ROTATE_SPEED_REF * 0.5f;
-		NMUDR.TargetAngle -= channellcol * RC_ROTATE_SPEED_REF * 0.5f;
-		}	else if(channellcol<-200){		//DOWN
-		NMUDL.TargetAngle += channellcol * RC_ROTATE_SPEED_REF * 0.5f;
-		NMUDR.TargetAngle -= channellcol * RC_ROTATE_SPEED_REF * 0.5f;
+		if(cnt_clk == 0 && channellcol>200){       //UP  velocity = 2
+			NMUDL.TargetAngle += 20;
+			NMUDR.TargetAngle -= 20;
+			cnt_clk = 10;
+		}	else if(cnt_clk == 0 && channellcol<-200){		//DOWN
+			NMUDL.TargetAngle -= 20;
+			NMUDR.TargetAngle += 20;
+			cnt_clk = 10;
 		}
 		
-		if(channellrow>200){			//Forward
-		NMUDFL.TargetAngle -= channellrow * RC_ROTATE_SPEED_REF ;
-		NMUDFR.TargetAngle += channellrow * RC_ROTATE_SPEED_REF ;
-		}else if(channellrow<-200){//Back
-		NMUDFL.TargetAngle -= channellrow * RC_ROTATE_SPEED_REF ;
-		NMUDFR.TargetAngle += channellrow * RC_ROTATE_SPEED_REF ;
+		if(cnt_clk == 0 && channellrow > 200){			//Forward
+			NMUDFL.TargetAngle -= 10 ;
+			NMUDFR.TargetAngle += 10 ;
+			cnt_clk = 10;
+		}else if(cnt_clk == 0 && channellrow < -200){//Back
+			NMUDFL.TargetAngle += 10 ;
+			NMUDFR.TargetAngle -= 10 ;
+			cnt_clk = 10;
 		}
 		
 /**********自动化登岛************/
 	if(channelrcol > 200)climb_flag = 1;
+	if(channelrrow > 200)reset_flag = 1;
 	
 	//支撑架下降
-	if(cnt_clk == 0 && climb_state == 1 && climb_flag){
+	if(cnt_clk == 0 && climb_state == 1 && climb_flag){ //velocity = 0.35 
 			NMUDL.TargetAngle -= 14;
 			NMUDR.TargetAngle += 14;
 			cnt_clk = 40;
 			cnt++;
-	if(cnt >= 50){climb_state = 2;cnt = 0;}
+	if(cnt >= 50 || NMUDR.TargetAngle > 520){climb_state = 2;cnt = 0;} //time = 2000ms
 	}
 	//小轮前进
 	if(cnt_clk ==0 && climb_state == 2 && climb_flag){
-			if(cnt < 100){
-			NMUDFL.TargetAngle -= 10;
-			NMUDFR.TargetAngle += 10;
-			cnt_clk = 10;
-			cnt++;}
-			if(cnt >= 100 && cnt < 200){	//支撑架升起一点点，让轮胎触底
-				ChassisSpeedRef.forward_back_ref = 600 * RC_CHASSIS_SPEED_REF;
-				NMUDFL.TargetAngle -= 10;	//小轮前进
-				NMUDFR.TargetAngle += 10;
-				NMUDL.TargetAngle += 2;		//支撑架慢速升起
-				NMUDR.TargetAngle -= 2;
-				cnt_clk = 10;
-				cnt++;}
-			if(cnt >= 200 && cnt < 300){//支撑架快速升起
-				NMUDL.TargetAngle += 50;
-				NMUDR.TargetAngle -= 50;
+			if(cnt < 100){ 					//cnt 0-100 小轮前进0.2s 从520到620 velocity = 0.5 
+			NMUDL.TargetAngle -= 5;
+			NMUDR.TargetAngle += 5;
+			NMUDFL.TargetAngle -= 5;
+			NMUDFR.TargetAngle += 5;
+			cnt_clk = 2;
+			cnt++;
+			if(NMUDR.TargetAngle > 640){ChassisSpeedRef.forward_back_ref = 350 * RC_CHASSIS_SPEED_REF;cnt = 100;}
+		}//time = 0.2s  R.angle = 500 
+			if(cnt >= 100 && cnt < 200){						//大轮子使能，支撑架升起一点点，让轮胎触底
+				ChassisSpeedRef.forward_back_ref = 350 * RC_CHASSIS_SPEED_REF;		
+  //到再降到605
+				if(NMUDR.TargetAngle > 590){//降到接触位
+					NMUDL.TargetAngle += 1;
+					NMUDR.TargetAngle -= 1;
+					NMUDFL.TargetAngle -= 10;	//小轮前进
+					NMUDFR.TargetAngle += 10;
+					cnt_clk = 10;cnt++;
+				}else{
+					NMUDFL.TargetAngle -= 10;	//保持接触位，小轮前进
+					NMUDFR.TargetAngle += 10;
+					cnt_clk = 10;cnt++;}
+				}
+			if(cnt >= 200 && cnt < 350){//轮子继续前进，支撑架快速升起
+				NMUDL.TargetAngle += 100;
+				NMUDR.TargetAngle -= 100;
 				cnt_clk = 5;
-				cnt++;
+				cnt++;}
 			if(cnt >= 300){//重置
 				ChassisSpeedRef.forward_back_ref = 0;
 				climb_state = 1;
 				cnt = 0;
-				NMUDL.TargetAngle = 0;
-				NMUDR.TargetAngle = 0;
-				NMUDL.RealAngle = 0;
-				NMUDL.RealAngle = 0;
+				reset_flag = 1;
 				climb_flag = 0;
 			}
 			}
-	}
-	
-/************/
+
+/**********************/
 }
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
