@@ -32,8 +32,8 @@ extern uint32_t ADC2_value[100];
 	*	
 	*/
 	uint8_t reset_flag = 1;
-	
-	
+	uint8_t climb_state = 1;
+	uint8_t climb_flag = 0;
 	
 	
 	
@@ -179,32 +179,9 @@ void RemoteControlProcess(Remote *rc)
 //TODO/******暂未用到的参数  发射机构电机********/
 //		FRICL.TargetAngle = -4200;
 //		FRICR.TargetAngle = 4200;
-/******未用到参数********/	
+/**************/	
 		
-		if(channellcol>200){       //UP
-		NMUDL.TargetAngle += channellcol * RC_ROTATE_SPEED_REF ;
-		NMUDR.TargetAngle -= channellcol * RC_ROTATE_SPEED_REF ;
-		}	else if(channellcol<-200){		//DOWN
-		NMUDL.TargetAngle += channellcol * RC_ROTATE_SPEED_REF ;
-		NMUDR.TargetAngle -= channellcol * RC_ROTATE_SPEED_REF ;
-		}
-		
-		if(channelrcol>200){			//Forward
-		NMUDFL.TargetAngle -= channelrcol * RC_ROTATE_SPEED_REF ;
-		NMUDFR.TargetAngle += channelrcol * RC_ROTATE_SPEED_REF ;
-		}else if(channelrcol<-200){//Back
-		NMUDFL.TargetAngle -= channelrcol * RC_ROTATE_SPEED_REF ;
-		NMUDFR.TargetAngle += channelrcol * RC_ROTATE_SPEED_REF ;
-		}
-		
-	}
-	if(WorkState == ADDITIONAL_STATE_TWO)
-	{
-//TODO/******暂未用到的参数  发射机构电机********/
-//		FRICL.TargetAngle = 5000;
-//		FRICR.TargetAngle = -5000;
-//		Delay(20,{STIR.TargetAngle-=60;});
-//TODO/**********登岛机构抬升复位************/
+/**********登岛机构抬升复位************/
 if(reset_flag){
 	if(cnt_clk == 0){
 			cnt++;
@@ -222,12 +199,68 @@ if(reset_flag){
 	}
 }
 /****************/
-		if(channellcol>200){
-				NMUDL.TargetAngle -= 5;
-				if(NMUDL.TargetAngle<-640 && NMUDL.RxMsgC6x0.moment>14800){
-					NMUDFL.TargetAngle -= 5;
+
+		if(channellcol>200){       //UP
+		NMUDL.TargetAngle += channellcol * RC_ROTATE_SPEED_REF * 0.5f;
+		NMUDR.TargetAngle -= channellcol * RC_ROTATE_SPEED_REF * 0.5f;
+		}	else if(channellcol<-200){		//DOWN
+		NMUDL.TargetAngle += channellcol * RC_ROTATE_SPEED_REF * 0.5f;
+		NMUDR.TargetAngle -= channellcol * RC_ROTATE_SPEED_REF * 0.5f;
+		}
+		
+//		if(channelrcol>200){			//Forward
+//		NMUDFL.TargetAngle -= channelrcol * RC_ROTATE_SPEED_REF ;
+//		NMUDFR.TargetAngle += channelrcol * RC_ROTATE_SPEED_REF ;
+//		}else if(channelrcol<-200){//Back
+//		NMUDFL.TargetAngle -= channelrcol * RC_ROTATE_SPEED_REF ;
+//		NMUDFR.TargetAngle += channelrcol * RC_ROTATE_SPEED_REF ;
+//		}
+		
+/**********自动化登岛************/
+		if(channelrcol > 200)climb_flag = 1;
+	//机架下降
+	if(cnt_clk == 0 && climb_state == 1 && climb_flag){
+			NMUDL.TargetAngle -= 14;
+			NMUDR.TargetAngle += 14;
+			cnt_clk = 40;
+			cnt++;
+	if(cnt >= 50){climb_state = 2;cnt = 0;}
 	}
+	//前进
+	if(cnt_clk ==0 && climb_state == 2 && climb_flag){
+			NMUDFL.TargetAngle -= 10;
+			NMUDFR.TargetAngle += 10;
+			cnt_clk = 10;
+			cnt++;
+	if(cnt >= 450){climb_state = 3;cnt = 0;}
+	}
+	//机架再升起
+	if(cnt_clk ==0 && climb_state == 3 && climb_flag){
+			NMUDL.TargetAngle += 20;
+			NMUDR.TargetAngle -= 20;
+			cnt_clk = 40;
+			cnt++;
+	if(cnt >= 50){
+		climb_state = 1;
+		cnt = 0;
+		NMUDL.TargetAngle = 0;
+		NMUDR.TargetAngle = 0;
+		NMUDL.RealAngle = 0;
+		NMUDL.RealAngle = 0;
+		climb_flag = 0;
+							}
+		}
+	
+/************/
 }
+	if(WorkState == ADDITIONAL_STATE_TWO)
+	{
+//TODO/******暂未用到的参数  发射机构电机********/
+//		FRICL.TargetAngle = 5000;
+//		FRICR.TargetAngle = -5000;
+//		Delay(20,{STIR.TargetAngle-=60;});
+
+
 		//****************自动取弹程序//UM1--是拔出来UM2相反  最大120***************
      if(ifset==1)autoget();
 		 
