@@ -21,7 +21,7 @@
 #endif
 #ifdef INFANTRY2
 #define GM_PITCH_GRAVITY_COMPENSATION 0
-#define GM_PITCH_ZERO 	5573
+#define GM_PITCH_ZERO 	6300
 #define GM_YAW_ZERO 	1310
 #endif
 #define CHASSIS_SPEED_ATTENUATION   (1.30f)
@@ -29,7 +29,7 @@
 #define CHASSIS_MOTOR_ROTATE_PID_DEFAULT \
 {\
 	0,0,{0,0},\
-	0.7f,0.0f,0.0f,/*p i d*/\
+	1.3f,0.0f,17.0f,/*p i d*/\
 	0,0,0,\
 	800,1000,1500,\
 	0,5000,0,0,0,\
@@ -39,7 +39,7 @@
 #define CHASSIS_MOTOR_SPEED_PID_DEFAULT \
 {\
 	0,0,{0,0},\
-	6.0f,0.3f,1.0f,\
+	5.0f,0.1f,0.0f,\
 	0,0,0,\
 	10000,10000,10000,\
 	0,7000,0,0,0,\

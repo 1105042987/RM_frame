@@ -49,6 +49,9 @@
 #define MOUSE_LR_RAMP_TICK_COUNT		50
 #define MOUSR_FB_RAMP_TICK_COUNT		60
 
+#define MOUSE_TO_YAW_ANGLE_INC_FACT		0.05f
+#define MOUSE_TO_PITCH_ANGLE_INC_FACT	0.05f
+
 #define MK_ROTATE_SPEED_REF 			1.20f
 
 
@@ -84,6 +87,13 @@ typedef enum
 	SHIFT_CTRL,
 	NO_CHANGE,
 }KeyboardMode_e;
+
+typedef enum
+{
+	SHORT_CLICK,
+	LONG_CLICK,
+	NO_CLICK,
+}MouseMode_e;
 
 typedef __packed struct
 {
