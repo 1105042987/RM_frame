@@ -19,6 +19,7 @@ ChassisSpeed_Ref_t ChassisSpeedRef;
 int32_t auto_counter=0;		//用于准确延时的完成某事件
 int32_t cnt_clk;
 int16_t cnt = 0;
+int ifset=0;//用于自检
 
 //存储红外传感器的数值
 extern uint32_t ADC_value[100];
@@ -38,7 +39,7 @@ extern uint32_t ADC2_value[100];
 	
 /******************自动化取弹*************/
 int flag_get=-1;
-int  i2;
+int  i2=0;
 /*****************************************/
 int16_t channelrrow = 0;
 int16_t channelrcol = 0;
@@ -66,7 +67,71 @@ void OptionalFunction()
 	Cap_Control();
 	PowerLimitation();
 }
-
+uint32_t average(uint32_t a[])
+{
+	uint32_t ave;
+	uint32_t sum=0;
+	for(int j=0;j<100;j++)
+	{
+		sum+=a[j];
+	}
+	ave=sum/100;
+	
+	return ave;
+}
+void autoget()
+{
+	if(channelrcol>500){
+		if(flag_get==-1)
+			ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
+	if(average(ADC_value)>500&&average(ADC2_value)>500&&flag_get==-1)
+		 flag_get=0;
+     if(auto_counter==0&&flag_get==0){
+			ChassisSpeedRef.forward_back_ref = 0.0f;
+	    ChassisSpeedRef.left_right_ref = 0.0f;
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2++;
+			 auto_counter=1;
+			 
+			 if(i2==30)
+			 {flag_get=1;HAL_GPIO_WritePin(GPIOI,1<<5,GPIO_PIN_SET);auto_counter=1000;}
+		 }
+		 if(auto_counter==0&&flag_get==1){
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2--;
+			 auto_counter=1;
+			 if(i2==0)
+			 {flag_get=2;auto_counter=300;}
+		 }
+		 if(auto_counter==0&&flag_get==2){
+     UM1.TargetAngle=-i2*10;
+     UM2.TargetAngle=i2*10;
+			i2++;
+			 auto_counter=1;
+			 if(i2==8)
+			 {HAL_GPIO_WritePin(GPIOI,1<<5,GPIO_PIN_RESET);}
+			 if(i2==12)
+			 {flag_get=3;auto_counter=1000;}
+		 }
+		 if(auto_counter==0&&flag_get==3){
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2--;
+			 auto_counter=1;
+			 if(i2==0)
+			 {flag_get=-1;auto_counter=1000;}
+		 }
+}
+	if(channelrcol<-500)
+	{
+		flag_get=-1;
+		ifset=0;
+		i2=0;
+		
+	}
+	}
 void Limit_and_Synchronization()
 {
 	//demo
@@ -164,44 +229,23 @@ if(reset_flag){
 	}
 }
 		//****************自动取弹程序//UM1--是拔出来UM2相反  最大120***************
-     if(ADC_value[1]>500&&ADC2_value[1]>500&&flag_get==-1)
-		 flag_get=0;
-     if(auto_counter==0&&flag_get==0){
-     UM1.TargetAngle=-i2*4;
-     UM2.TargetAngle=i2*4;
-			i2++;
-			 auto_counter=1;
-			 if(i2==30)
-			 {flag_get=1;HAL_GPIO_WritePin(GPIOI,1<<5,GPIO_PIN_RESET);auto_counter=1000;}
-		 }
-		 if(auto_counter==0&&flag_get==1){
-     UM1.TargetAngle=-i2*4;
-     UM2.TargetAngle=i2*4;
-			i2--;
-			 auto_counter=1;
-			 if(i2==0)
-			 {flag_get=2;auto_counter=1000;}
-		 }
-		 if(auto_counter==0&&flag_get==2){
-     UM1.TargetAngle=-i2*4;
-     UM2.TargetAngle=i2*4;
-			i2++;
-			 auto_counter=1;
-			 if(i2==20)
-			 {auto_counter=500;HAL_GPIO_WritePin(GPIOI,1<<5,GPIO_PIN_SET);}
-			 if(i2==30)
-			 {flag_get=3;auto_counter=1000;}
-		 }
-		 if(auto_counter==0&&flag_get==3){
-     UM1.TargetAngle=-i2*4;
-     UM2.TargetAngle=i2*4;
-			i2--;
-			 auto_counter=1;
-			 if(i2==0)
-			 {flag_get=-1;auto_counter=1000;}
-		 }
-			
-/**********************/	
+     if(ifset==1)autoget();
+		 
+/****************************开机自检**********************************/
+      if(ifset==0)
+			{
+			  if(UM1.RxMsgC6x0.moment<=14000)
+				{UM1.TargetAngle+=3;UM2.TargetAngle-=3;}
+				if(UM1.RxMsgC6x0.moment>=14000)
+				{
+					UM1.RealAngle=0;
+					UM2.RealAngle=0;
+					UM1.TargetAngle=0;
+					UM2.TargetAngle=0;
+					ifset=1;
+				}
+				
+			}
 	}
 	Limit_and_Synchronization();
 }
