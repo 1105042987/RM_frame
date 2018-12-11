@@ -208,17 +208,18 @@ if(reset_flag){
 		NMUDR.TargetAngle -= channellcol * RC_ROTATE_SPEED_REF * 0.5f;
 		}
 		
-//		if(channelrcol>200){			//Forward
-//		NMUDFL.TargetAngle -= channelrcol * RC_ROTATE_SPEED_REF ;
-//		NMUDFR.TargetAngle += channelrcol * RC_ROTATE_SPEED_REF ;
-//		}else if(channelrcol<-200){//Back
-//		NMUDFL.TargetAngle -= channelrcol * RC_ROTATE_SPEED_REF ;
-//		NMUDFR.TargetAngle += channelrcol * RC_ROTATE_SPEED_REF ;
-//		}
+		if(channellrow>200){			//Forward
+		NMUDFL.TargetAngle -= channellrow * RC_ROTATE_SPEED_REF ;
+		NMUDFR.TargetAngle += channellrow * RC_ROTATE_SPEED_REF ;
+		}else if(channellrow<-200){//Back
+		NMUDFL.TargetAngle -= channellrow * RC_ROTATE_SPEED_REF ;
+		NMUDFR.TargetAngle += channellrow * RC_ROTATE_SPEED_REF ;
+		}
 		
 /**********自动化登岛************/
-		if(channelrcol > 200)climb_flag = 1;
-	//机架下降
+	if(channelrcol > 200)climb_flag = 1;
+	
+	//支撑架下降
 	if(cnt_clk == 0 && climb_state == 1 && climb_flag){
 			NMUDL.TargetAngle -= 14;
 			NMUDR.TargetAngle += 14;
@@ -226,30 +227,38 @@ if(reset_flag){
 			cnt++;
 	if(cnt >= 50){climb_state = 2;cnt = 0;}
 	}
-	//前进
+	//小轮前进
 	if(cnt_clk ==0 && climb_state == 2 && climb_flag){
+			if(cnt < 100){
 			NMUDFL.TargetAngle -= 10;
 			NMUDFR.TargetAngle += 10;
 			cnt_clk = 10;
-			cnt++;
-	if(cnt >= 450){climb_state = 3;cnt = 0;}
+			cnt++;}
+			if(cnt >= 100 && cnt < 200){	//支撑架升起一点点，让轮胎触底
+				ChassisSpeedRef.forward_back_ref = 600 * RC_CHASSIS_SPEED_REF;
+				NMUDFL.TargetAngle -= 10;	//小轮前进
+				NMUDFR.TargetAngle += 10;
+				NMUDL.TargetAngle += 2;		//支撑架慢速升起
+				NMUDR.TargetAngle -= 2;
+				cnt_clk = 10;
+				cnt++;}
+			if(cnt >= 200 && cnt < 300){//支撑架快速升起
+				NMUDL.TargetAngle += 50;
+				NMUDR.TargetAngle -= 50;
+				cnt_clk = 5;
+				cnt++;
+			if(cnt >= 300){//重置
+				ChassisSpeedRef.forward_back_ref = 0;
+				climb_state = 1;
+				cnt = 0;
+				NMUDL.TargetAngle = 0;
+				NMUDR.TargetAngle = 0;
+				NMUDL.RealAngle = 0;
+				NMUDL.RealAngle = 0;
+				climb_flag = 0;
+			}
+			}
 	}
-	//机架再升起
-	if(cnt_clk ==0 && climb_state == 3 && climb_flag){
-			NMUDL.TargetAngle += 20;
-			NMUDR.TargetAngle -= 20;
-			cnt_clk = 40;
-			cnt++;
-	if(cnt >= 50){
-		climb_state = 1;
-		cnt = 0;
-		NMUDL.TargetAngle = 0;
-		NMUDR.TargetAngle = 0;
-		NMUDL.RealAngle = 0;
-		NMUDL.RealAngle = 0;
-		climb_flag = 0;
-							}
-		}
 	
 /************/
 }
