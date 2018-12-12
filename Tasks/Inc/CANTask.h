@@ -31,6 +31,9 @@ extern uint8_t can2_update;
 extern uint8_t can1_type;
 extern uint8_t can2_type;
 
+extern uint8_t isCan1FirstRx;
+extern uint8_t isCan2FirstRx;
+
 void InitCanReception(void);
 
 #endif /*__ CANTASK_H */

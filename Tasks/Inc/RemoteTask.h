@@ -96,6 +96,9 @@ extern uint8_t rc_first_frame;
 extern uint8_t rc_update;
 extern uint8_t rc_cnt;
 
+extern uint8_t tx_free;
+extern uint8_t rx_free;
+
 void RemoteDataProcess(uint8_t *pData);
 void InitRemoteControl(void);
 void RemoteControlProcess(Remote *rc);

@@ -20,16 +20,16 @@
 #define GM_YAW_ZERO 	4640
 #endif
 #ifdef INFANTRY2
-#define GM_PITCH_GRAVITY_COMPENSATION 100
-#define GM_PITCH_ZERO 	6000
-#define GM_YAW_ZERO 	1200
+#define GM_PITCH_GRAVITY_COMPENSATION 0
+#define GM_PITCH_ZERO 	6300
+#define GM_YAW_ZERO 	1310
 #endif
 #define CHASSIS_SPEED_ATTENUATION   (1.30f)
 #define NORMALIZE_ANGLE180(angle) angle = ((angle) > 180) ? ((angle) - 360) : (((angle) < -180) ? (angle) + 360 : angle)
 #define CHASSIS_MOTOR_ROTATE_PID_DEFAULT \
 {\
 	0,0,{0,0},\
-	0.7f,0.0f,0.0f,/*p i d*/\
+	1.3f,0.0f,17.0f,/*p i d*/\
 	0,0,0,\
 	800,1000,1500,\
 	0,5000,0,0,0,\
@@ -39,10 +39,10 @@
 #define CHASSIS_MOTOR_SPEED_PID_DEFAULT \
 {\
 	0,0,{0,0},\
-	6.0f,0.0f,1.0f,\
+	5.0f,0.1f,0.0f,\
 	0,0,0,\
-	12000,12000,12000,\
-	0,12000,0,0,0,\
+	10000,10000,10000,\
+	0,7000,0,0,0,\
 	&PID_Calc,&PID_Reset,\
 }
 
@@ -73,7 +73,7 @@ typedef struct MotorINFO
 	double 				TargetAngle;
 	uint8_t				s_count;
 	uint8_t 			FirstEnter;
-	uint16_t 			lastRead;
+	double 				lastRead;
 	double 				RealAngle;
 	void (*Handle)(struct MotorINFO* id);
 	fw_PID_Regulator_t 	positionPID;

@@ -39,6 +39,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_hal.h"
+#include "adc.h"
 #include "can.h"
 #include "dma.h"
 #include "iwdg.h"
@@ -121,20 +122,30 @@ int main(void)
   MX_TIM7_Init();
   MX_TIM10_Init();
   MX_TIM2_Init();
-  MX_IWDG_Init();
+  //MX_IWDG_Init();
   MX_TIM5_Init();
   MX_USART3_UART_Init();
   MX_UART7_Init();
+  MX_ADC1_Init();
 
   /* USER CODE BEGIN 2 */
 	//各模块初始化
+		
+	
 	InitRemoteControl();
+	
 	Motor_ID_Setting();
 	for(int i=0;i<8;i++) {InitMotor(can1[i]);InitMotor(can2[i]);}
 	InitPWM();
 	InitCanReception();
-	InitGyroUart();
-	
+	//InitGyroUart();
+	InitJudgeUart();
+	/*****�?螺仪初始�?*****/
+	mpu_device_init();
+	init_quaternion();
+
+	/*****�?螺仪初始化结�?*****/
+	MX_IWDG_Init();							//Cube配置完记得注释掉上面自动生成的看门狗初始化函�?
 	#ifdef DEBUG_MODE
 	ctrlUartInit();
 	//时间中断
@@ -159,7 +170,6 @@ int main(void)
 		HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
 	#endif
 	__HAL_UART_ENABLE_IT(&UPPER_UART, UART_IT_IDLE);
-	__HAL_UART_ENABLE_IT(&JUDGE_UART, UART_IT_IDLE);
 	
 	
   /* USER CODE END 2 */

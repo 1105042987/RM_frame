@@ -16,7 +16,7 @@
 #define _PID_REGULATOR_H_
 #include "stm32f4xx.h"
 
-#define PID_I_CNT 20
+#define PID_I_CNT 4
 #define MINMAX(value, min, max) value = (value < min) ? min : (value > max ? max : value)
 #define fw_PID_INIT(Kp, Ki, Kd, KpMax, KiMax, KdMax, OutputMax) { \
 	0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ,\

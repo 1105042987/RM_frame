@@ -4,7 +4,7 @@
   * Description        : 上位机处理任务，进行串口调试
   ******************************************************************************
   *
-  * Copyright (c) 2018 Team TPP-Shanghai Jiao Tong University
+  * Copyright (c) 2019 Team JiaoLong-ShanghaiJiaoTong University
   * All rights reserved.
   *
   ******************************************************************************
@@ -18,13 +18,8 @@
 //--------------------底层接收驱动部分-------------------//
 void ctrlUartRxCpltCallback(void);
 void ctrlUartInit(void);
-
-#define REC_LEN				1024
-#define RX_DONE				(RX_STA&0x8000)
-#define RX_LEN				(RX_STA&0x3f)
-
+#define REC_LEN				100
 extern char buf[REC_LEN];
-extern uint16_t RX_STA;
 
 //--------------------数据解析协议部分-------------------//
 uint8_t ComProtocal(char*rxbuf,char*head,char*end,char* separater,char dataout[15]);

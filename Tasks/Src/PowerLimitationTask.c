@@ -5,7 +5,7 @@
   * Author			: ¡÷±˛ª‘£¨’‘’Ò”Ó
   ******************************************************************************
   *
-  * Copyright (c) 2018 Team TPP-Shanghai Jiao Tong University
+  * Copyright (c) 2019 Team JiaoLong-ShanghaiJiaoTong University
   * All rights reserved.
   *
   ******************************************************************************

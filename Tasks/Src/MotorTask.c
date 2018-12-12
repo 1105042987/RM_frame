@@ -13,8 +13,10 @@
 
 void ControlNM(MotorINFO *id);
 void ControlCM(MotorINFO *id);
+#ifdef USE_GYRO
 void ControlGMY(MotorINFO *id);
 void ControlGMP(MotorINFO *id);
+#endif
 extern int16_t testIntensity;
 
 //**********************************************************************
@@ -36,11 +38,11 @@ MotorINFO FRICR = Chassis_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFA
 //************************************************************************
 //使用云台电机时，请务必确定校准过零点
 MotorINFO GMP  = Gimbal_MOTORINFO_Init(2.0,&ControlGMP,
-									   fw_PID_INIT(200,0,100, 	10000.0, 10000.0, 10000.0, 6000.0),
-									   fw_PID_INIT(0.6,0,13, 	10000.0, 10000.0, 10000.0, 5000.0));
-MotorINFO GMY  = Gimbal_MOTORINFO_Init(-1.0,&ControlGMY,
-									   fw_PID_INIT(300,0,100, 10000.0, 10000.0, 10000.0, 6000.0),
-									   fw_PID_INIT(0.6,0,13, 	10000.0, 10000.0, 10000.0, 5000.0));
+									   fw_PID_INIT(0.5,0,0.9, 	100.0, 100.0, 100.0, 10.0),
+									   fw_PID_INIT(920,30,0, 	5000.0, 5000.0, 5000.0, 5000.0));
+MotorINFO GMY  = Gimbal_MOTORINFO_Init(1.0,&ControlGMY,
+									   fw_PID_INIT(0.6,0,0.5, 100.0, 100.0, 100.0, 10.0),
+									   fw_PID_INIT(2500,100,0, 	5000.0, 5000.0, 5000.0, 5000.0));
 
 //*************************************************************************
 //			Normal_MOTORINFO_Init(rdc,func,ppid,spid)
@@ -99,14 +101,14 @@ void ControlCM(MotorINFO* id)
 	id->offical_speedPID.Calc(&(id->offical_speedPID));
 	id->Intensity=(1.30f)*id->offical_speedPID.output;
 }
-
+#ifdef USE_GYRO
 void ControlGMY(MotorINFO* id)
 {
 	if(id==0) return;
 	if(id->s_count == 1)
 	{		
-		uint16_t 	ThisAngle = gyroZAngle;		
-		double 		ThisSpeed = gyroZspeed;		
+		float 	ThisAngle = imu.yaw+180.0f;		
+		float 	ThisSpeed = imu.wz;		
 		int8_t 	dir;
 		if(id->ReductionRate>=0) dir=1;
 		else dir=-1;
@@ -134,10 +136,15 @@ void ControlGMY(MotorINFO* id)
 				 id->RealAngle += (ThisAngle - id->lastRead)*dir;
 		}
 		id->lastRead = ThisAngle ;
-			
-		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->TargetAngle,id->RealAngle,ThisSpeed);
-		
-		id->s_count = 0;
+		#ifdef INFANTRY2
+		MINMAX(id->TargetAngle, id->RealAngle - (GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate - 40.0f, id->RealAngle - (GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate + 40.0f);
+		#endif
+		#ifdef INFANTRY4
+		MINMAX(id->TargetAngle, id->RealAngle - (GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate - 30.0f, id->RealAngle - (GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate + 30.0f);
+		#endif
+		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->TargetAngle,id->RealAngle,-ThisSpeed);
+
+		//id->s_count = 0;
 	}
 	else
 	{
@@ -149,9 +156,9 @@ void ControlGMP(MotorINFO* id)
 	if(id==0) return;
 	if(id->s_count == 1)
 	{		
-		int16_t 	ThisAngle = gyroYAngle;
-		double 		ThisSpeed = gyroYspeed;
-		int8_t 		dir;
+		float 	ThisAngle = imu.pit+180.0f;
+		float 	ThisSpeed = imu.wy;
+		int8_t 	dir;
 		if(id->ReductionRate>=0) dir=1;
 		else dir=-1;
 		
@@ -178,18 +185,24 @@ void ControlGMP(MotorINFO* id)
 				 id->RealAngle += (ThisAngle - id->lastRead)*dir;
 		}
 		id->lastRead = ThisAngle ;
-			
-		id->Intensity = GM_PITCH_GRAVITY_COMPENSATION + PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->TargetAngle,id->RealAngle,ThisSpeed);
+		#ifdef INFANTRY2
+		MINMAX(id->TargetAngle, id->RealAngle - (GM_PITCH_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate - 20.0f, id->RealAngle - (GM_PITCH_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate + 20.0f);
+		#endif
+		#ifdef INFANTRY4
+		MINMAX(id->TargetAngle, id->RealAngle - (GM_PITCH_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate - 15.0f, id->RealAngle - (GM_PITCH_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate + 30.0f);
+		#endif
+		id->Intensity = GM_PITCH_GRAVITY_COMPENSATION + PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->TargetAngle,id->RealAngle,-ThisSpeed);
+
 		MINMAX(id->Intensity,-id->speedPID.outputMax,id->speedPID.outputMax);
 		
-		id->s_count = 0;
+		//id->s_count = 0;
 	}
 	else
 	{
 		id->s_count++;
 	}		
 }
-
+#endif
 //CAN
 void setCAN11()
 {
