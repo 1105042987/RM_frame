@@ -40,7 +40,12 @@ extern uint32_t ADC2_value[100];
 /******************自动化取弹*************/
 int flag_get=-1;
 int  i2=0;
-/*****************************************/
+/*****************红外传感器消抖******************/
+int tmp[2];
+int count[2];
+int isok=0;
+/************************************************/
+
 int16_t channelrrow = 0;
 int16_t channelrcol = 0;
 int16_t channellrow = 0;
@@ -71,20 +76,38 @@ uint32_t average(uint32_t a[])
 {
 	uint32_t ave;
 	uint32_t sum=0;
-	for(int j=0;j<100;j++)
+	for(int j=0;j<sizeof(a);j++)
 	{
 		sum+=a[j];
 	}
-	ave=sum/100;
+	ave=sum/sizeof(a);
 	
 	return ave;
+}
+void isokey()
+{
+	if(tmp[0]>100&&average(ADC_value)>100)
+		count[0]++;
+	else
+	{tmp[0]=average(ADC_value);count[0]=0;}
+	if(count[0]>100000&&isok==0)
+		isok=1;
+	
+	if(tmp[1]>100&&average(ADC2_value)>100)
+		count[1]++;
+	else
+	{tmp[1]=average(ADC2_value);count[1]=0;}
+	if(count[1]>100000&&isok==1)
+		isok=2;
+		
+	
 }
 void autoget()
 {
 	if(channelrcol>500){
 		if(flag_get==-1)
 			ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
-	if(average(ADC_value)>500&&average(ADC2_value)>500&&flag_get==-1)
+	if(isok==2&&flag_get==-1)
 		 flag_get=0;
      if(auto_counter==0&&flag_get==0){
 			ChassisSpeedRef.forward_back_ref = 0.0f;
@@ -113,7 +136,7 @@ void autoget()
 			 if(i2==8)
 			 {HAL_GPIO_WritePin(GPIOI,1<<5,GPIO_PIN_RESET);}
 			 if(i2==12)
-			 {flag_get=3;auto_counter=1000;}
+			 {flag_get=3;auto_counter=1000;isok=0;}
 		 }
 		 if(auto_counter==0&&flag_get==3){
      UM1.TargetAngle=-i2*4;
@@ -281,7 +304,10 @@ if(reset_flag){
 
 
 		//****************自动取弹程序//UM1--是拔出来UM2相反  最大120***************
-     if(ifset==1)autoget();
+     if(ifset==1)
+		 {autoget();
+			 isokey();
+		 }
 		 
 /****************************开机自检**********************************/
       if(ifset==0)
