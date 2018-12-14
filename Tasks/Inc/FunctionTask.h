@@ -103,10 +103,13 @@ typedef __packed struct
 }ChassisSpeed_Ref_t;
 
 extern ChassisSpeed_Ref_t ChassisSpeedRef; 
+extern int ChassisTwistGapAngle;
 
 void FunctionTaskInit(void);
 void Limit_Position(void);
 void OptionalFunction(void);
 void FreshSuperCState(void);
+void ChassisTwist(void);
+void ChassisDeTwist(void);
 
 #endif /*__FUNCTIONTASK_H*/

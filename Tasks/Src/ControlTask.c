@@ -99,7 +99,7 @@ void WorkStateFSM(void)
 void ControlRotate(void)
 {	
 	#ifdef USE_CHASSIS_FOLLOW
-		ChassisSpeedRef.rotate_ref=(GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f;
+		ChassisSpeedRef.rotate_ref=(GMY.RxMsg6623.angle - GM_YAW_ZERO - ChassisTwistGapAngle) * 360 / 8192.0f;
 		NORMALIZE_ANGLE180(ChassisSpeedRef.rotate_ref);
 	#endif
 	CMRotatePID.ref = 0;
