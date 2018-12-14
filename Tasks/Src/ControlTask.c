@@ -21,7 +21,7 @@ MusicNote SuperMario[] = {
 
 PID_Regulator_t CMRotatePID = CHASSIS_MOTOR_ROTATE_PID_DEFAULT; 
 extern int32_t auto_counter;//自动取弹时间中断常量
-//extern int32_t auto_pluser; //消抖计时器
+extern int32_t auto_lock; //锁定底盘
 extern int32_t cnt_clk;    //登岛时间中断常量
 
 void playMusicSuperMario(void){
@@ -163,6 +163,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		rc_cnt++;
 		if(auto_counter > 0) auto_counter--;
 		if(cnt_clk > 0) cnt_clk--;
+		if(auto_lock>0) auto_lock--;
 		
 		if (rc_update)
 		{

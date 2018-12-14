@@ -17,6 +17,7 @@ RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
 ChassisSpeed_Ref_t ChassisSpeedRef; 
 
 int32_t auto_counter=0;		//用于准确延时的完成某事件
+int32_t auto_lock=0;
 int32_t cnt_clk;
 int16_t cnt = 0;
 int ifset=0;//用于自检
@@ -40,10 +41,14 @@ extern uint32_t ADC2_value[100];
 /******************自动化取弹*************/
 int flag_get=-1;
 int  i2=0;
+int checkmode=0;
+int resetmode=0;
 /*****************红外传感器消抖******************/
 int tmp[2];
-int count[2];
+double count[2];
 int isok=0;
+int a;
+int b;
 /************************************************/
 
 int16_t channelrrow = 0;
@@ -84,31 +89,36 @@ uint32_t average(uint32_t a[])
 	
 	return ave;
 }
+
 void isokey()
 {
 	if(tmp[0]>100&&average(ADC_value)>100)
-		count[0]++;
+		count[0]+=0.5;
 	else
 	{tmp[0]=average(ADC_value);count[0]=0;}
-	if(count[0]>100000&&isok==0)
+	if(count[0]>1&&isok==0)
 		isok=1;
-	
 	if(tmp[1]>100&&average(ADC2_value)>100)
-		count[1]++;
+		count[1]+=0.5;
 	else
 	{tmp[1]=average(ADC2_value);count[1]=0;}
-	if(count[1]>100000&&isok==1)
+	if(count[1]>1&&isok==1)
 		isok=2;
 		
 	
 }
 void autoget()
 {
-	if(channelrcol>500){
-		if(flag_get==-1)
-			ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
+	 a=average(ADC_value);
+   b=average(ADC2_value);
+	if(channelrcol>500&&checkmode==0)
+		checkmode=1;
+	if(checkmode==1){
+		isokey();
 	if(isok==2&&flag_get==-1)
-		 flag_get=0;
+	{  flag_get=0;
+	   auto_lock=2000;
+	}
      if(auto_counter==0&&flag_get==0){
 			ChassisSpeedRef.forward_back_ref = 0.0f;
 	    ChassisSpeedRef.left_right_ref = 0.0f;
@@ -144,14 +154,26 @@ void autoget()
 			i2--;
 			 auto_counter=1;
 			 if(i2==0)
-			 {flag_get=-1;auto_counter=1000;}
+			 {flag_get=-1;
+			 auto_counter=1000;
+			 isok=0;
+			checkmode=0;
+			ChassisSpeedRef.forward_back_ref = 0.0f;
+	    ChassisSpeedRef.left_right_ref = 0.0f;}
 		 }
 }
-	if(channelrcol<-500)
+	if(channelrcol<-500&&resetmode==0)
+		resetmode=1;
+	if(resetmode==1)
 	{
 		flag_get=-1;
-		ifset=0;
+		UM1.TargetAngle=0;
+		UM2.TargetAngle=0;
 		i2=0;
+		isok=0;
+		checkmode=0;
+		if(UM1.RealAngle>-5)
+			resetmode=0;
 		
 	}
 	}
@@ -306,7 +328,11 @@ if(reset_flag){
 		//****************自动取弹程序//UM1--是拔出来UM2相反  最大120***************
      if(ifset==1)
 		 {autoget();
-			 isokey();
+			 if(auto_lock==0)
+			 {
+			ChassisSpeedRef.left_right_ref   = (channellrow/3) * RC_CHASSIS_SPEED_REF;
+			ChassisSpeedRef.forward_back_ref = (channellcol/2) * RC_CHASSIS_SPEED_REF;
+			 }
 		 }
 		 
 /****************************开机自检**********************************/
