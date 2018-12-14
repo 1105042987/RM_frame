@@ -330,7 +330,7 @@ if(reset_flag){
 		 {autoget();
 			 if(auto_lock==0)
 			 {
-			ChassisSpeedRef.left_right_ref   = (channellrow/3) * RC_CHASSIS_SPEED_REF;
+			ChassisSpeedRef.left_right_ref   = (channellrow/(2.7)) * RC_CHASSIS_SPEED_REF;
 			ChassisSpeedRef.forward_back_ref = (channellcol/2) * RC_CHASSIS_SPEED_REF;
 			 }
 		 }
