@@ -172,7 +172,7 @@ void RemoteControlProcess(Remote *rc)
 	FreshSuperCState();
 	if(ChassisTwistState)
 	{
-		ChassisTwist();
+		LJHTwist();
 	}
 	else ChassisDeTwist();
 	//Limit_and_Synchronization();
@@ -466,16 +466,16 @@ void ChassisTwist(void)
 	switch (ChassisTwistGapAngle)
 	{
 		case 0:
-		{ChassisTwistGapAngle = 500;}break;
-		case 500:
+		{ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;}break;
+		case CHASSIS_TWIST_ANGLE_LIMIT:
 		{
-			if(abs(GMY.RxMsg6623.angle - GM_YAW_ZERO - ChassisTwistGapAngle)<100)
-			{ChassisTwistGapAngle = -500;}break;
+			if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+			{ChassisTwistGapAngle = -CHASSIS_TWIST_ANGLE_LIMIT;}break;
 		}
-		case -500:
+		case -CHASSIS_TWIST_ANGLE_LIMIT:
 		{
-			if(abs(GMY.RxMsg6623.angle - GM_YAW_ZERO - ChassisTwistGapAngle)<100)
-			{ChassisTwistGapAngle = 500;}break;
+			if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+			{ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;}break;
 		}
 	}
 }
@@ -483,4 +483,9 @@ void ChassisTwist(void)
 void ChassisDeTwist(void)
 {
 	ChassisTwistGapAngle = 0;
+}
+
+void LJHTwist(void)
+{
+	ChassisTwist();
 }
