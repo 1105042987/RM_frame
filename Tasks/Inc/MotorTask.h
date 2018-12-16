@@ -104,7 +104,7 @@ typedef struct MotorINFO
 }
 
 
-extern MotorINFO CMFL,CMFR,CMBL,CMBR,GMY,GMP,FRICL,FRICR,STIR;
+extern MotorINFO CMFL,CMFR,CMBL,CMBR,GMY,GMP,FRICL,FRICR,STIR,test;
 extern MotorINFO *can1[8],*can2[8];
 
 void InitMotor(MotorINFO *id);

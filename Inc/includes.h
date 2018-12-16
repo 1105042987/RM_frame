@@ -24,7 +24,7 @@
 #define CAN11
 #define CAN12
 #define CAN21
-#define CAN22
+//#define CAN22
 
 #include "main.h"
 #include "stm32f4xx_hal.h"
