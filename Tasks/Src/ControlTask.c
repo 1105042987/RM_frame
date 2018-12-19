@@ -47,9 +47,9 @@ void WorkStateFSM(void)
 	{
 		case PREPARE_STATE:				//准备模式
 		{
-			if (inputmode == STOP) WorkState = STOP_STATE;
+			//if (inputmode == STOP) WorkState = STOP_STATE;
 			if(prepare_time < 2000) prepare_time++;	
-			if(prepare_time >= 2000 && imu.InitFinish == 1 && isCan1FirstRx == 1 && isCan2FirstRx ==1)//开机二秒后且imu初始化完成且所有can电机上电完成后进入正常模式
+			if(prepare_time >= 2000 && imu.InitFinish == 1 && isCan11FirstRx == 1 && isCan12FirstRx == 1 && isCan21FirstRx == 1 && isCan22FirstRx == 1)//开机二秒后且imu初始化完成且所有can电机上电完成后进入正常模式
 			{
 				playMusicSuperMario();
 				CMRotatePID.Reset(&CMRotatePID);
@@ -99,12 +99,13 @@ void WorkStateFSM(void)
 void ControlRotate(void)
 {	
 	#ifdef USE_CHASSIS_FOLLOW
-		ChassisSpeedRef.rotate_ref=(GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f;
+		ChassisSpeedRef.rotate_ref=(GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle;
 		NORMALIZE_ANGLE180(ChassisSpeedRef.rotate_ref);
 	#endif
 	CMRotatePID.ref = 0;
 	CMRotatePID.fdb = ChassisSpeedRef.rotate_ref;
 	CMRotatePID.Calc(&CMRotatePID);
+	if(ChassisTwistState) MINMAX(CMRotatePID.output,-10,10);
 	rotate_speed = CMRotatePID.output * 13 + ChassisSpeedRef.forward_back_ref * 0.01 + ChassisSpeedRef.left_right_ref * 0.01;
 }
 

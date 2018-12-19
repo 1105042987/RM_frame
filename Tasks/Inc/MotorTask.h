@@ -21,25 +21,30 @@
 #endif
 #ifdef INFANTRY2
 #define GM_PITCH_GRAVITY_COMPENSATION 0
-#define GM_PITCH_ZERO 	6300
+#define GM_PITCH_ZERO 	3740
 #define GM_YAW_ZERO 	1310
+#endif
+#ifdef GM_TEST
+#define GM_PITCH_GRAVITY_COMPENSATION -150
+#define GM_PITCH_ZERO 	6700
+#define GM_YAW_ZERO 	1900
 #endif
 #define CHASSIS_SPEED_ATTENUATION   (1.30f)
 #define NORMALIZE_ANGLE180(angle) angle = ((angle) > 180) ? ((angle) - 360) : (((angle) < -180) ? (angle) + 360 : angle)
 #define CHASSIS_MOTOR_ROTATE_PID_DEFAULT \
 {\
 	0,0,{0,0},\
-	1.3f,0.0f,17.0f,/*p i d*/\
+	1.1f,0.0f,0.5f,/*p i d*/\
 	0,0,0,\
-	800,1000,1500,\
-	0,5000,0,0,0,\
+	20,20,20,\
+	0,20,0,0,0,\
 	&PID_Calc,&PID_Reset,\
 }
 
 #define CHASSIS_MOTOR_SPEED_PID_DEFAULT \
 {\
 	0,0,{0,0},\
-	5.0f,0.1f,0.0f,\
+	12.0f,0.17f,8.0f,\
 	0,0,0,\
 	10000,10000,10000,\
 	0,7000,0,0,0,\
@@ -104,7 +109,7 @@ typedef struct MotorINFO
 }
 
 
-extern MotorINFO CMFL,CMFR,CMBL,CMBR,GMY,GMP,FRICL,FRICR,STIR;
+extern MotorINFO CMFL,CMFR,CMBL,CMBR,GMY,GMP,FRICL,FRICR,STIR,test;
 extern MotorINFO *can1[8],*can2[8];
 
 void InitMotor(MotorINFO *id);

@@ -31,8 +31,10 @@ extern uint8_t can2_update;
 extern uint8_t can1_type;
 extern uint8_t can2_type;
 
-extern uint8_t isCan1FirstRx;
-extern uint8_t isCan2FirstRx;
+extern uint8_t isCan11FirstRx;
+extern uint8_t isCan12FirstRx;
+extern uint8_t isCan21FirstRx;
+extern uint8_t isCan22FirstRx;
 
 void InitCanReception(void);
 

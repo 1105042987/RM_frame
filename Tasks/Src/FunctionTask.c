@@ -18,6 +18,8 @@ RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
 ChassisSpeed_Ref_t ChassisSpeedRef; 
 
+int ChassisTwistGapAngle = 0;
+
 int32_t auto_counter=0;		//用于准确延时的完成某事件
 
 int16_t channelrrow = 0;
@@ -27,6 +29,7 @@ int16_t channellcol = 0;
 int16_t testIntensity = 0;
 uint8_t SuperCTestMode = 0;
 uint8_t ShootState = 0;
+uint8_t ChassisTwistState = 0;
 
 //初始化
 void FunctionTaskInit()
@@ -79,8 +82,14 @@ void RemoteControlProcess(Remote *rc)
 		GMY.TargetAngle += channellrow * RC_GIMBAL_SPEED_REF;
 		GMP.TargetAngle += channellcol * RC_GIMBAL_SPEED_REF;
 		#else
-		ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF;
+		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
 		#endif
+		#ifdef USE_AUTOAIM
+		autoAimGMCTRL();
+		#endif /*USE_AUTOAIM*/
+		
+		ChassisTwistState = 0;
+		
 		ShootState = 0;
 		FRICL.TargetAngle = 0;
 		FRICR.TargetAngle = 0;
@@ -115,6 +124,9 @@ void RemoteControlProcess(Remote *rc)
 		#else
 		ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF;
 		#endif
+		
+		ChassisTwistState = 0;
+		
 		if(SuperCTestMode==0)
 		{
 			ShootState = 1;
@@ -140,6 +152,9 @@ void RemoteControlProcess(Remote *rc)
 		#else
 		ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF;
 		#endif
+		
+		ChassisTwistState = 0;
+		
 		if(SuperCTestMode==0)
 		{
 			ShootState = 1;
@@ -152,11 +167,17 @@ void RemoteControlProcess(Remote *rc)
 			ShootState = 0;
 			FRICL.TargetAngle = 0;
 			FRICR.TargetAngle = 0;
+			ChassisTwistState = 1;
 		}
 		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
 		
 	}
 	FreshSuperCState();
+	if(ChassisTwistState)
+	{
+		LJHTwist();
+	}
+	else ChassisDeTwist();
 	//Limit_and_Synchronization();
 }
 
@@ -180,7 +201,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	GMY.TargetAngle += mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT;
 	GMP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT;
 	#else
-	ChassisSpeedRef.rotate_ref = mouse->x * RC_ROTATE_SPEED_REF;
+	ChassisSpeedRef.rotate_ref = -mouse->x * RC_ROTATE_SPEED_REF;
 	#endif
 	
 	MouseModeFSM(mouse);
@@ -441,4 +462,33 @@ void FreshSuperCState(void)
 		HAL_GPIO_WritePin(GPIOG, LED8_Pin|LED7_Pin, GPIO_PIN_SET);
 	else if(Control_SuperCap.C_voltage<2100)
 		HAL_GPIO_WritePin(GPIOG, LED8_Pin, GPIO_PIN_SET);
+}
+
+void ChassisTwist(void)
+{
+	switch (ChassisTwistGapAngle)
+	{
+		case 0:
+		{ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;}break;
+		case CHASSIS_TWIST_ANGLE_LIMIT:
+		{
+			if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+			{ChassisTwistGapAngle = -CHASSIS_TWIST_ANGLE_LIMIT;}break;
+		}
+		case -CHASSIS_TWIST_ANGLE_LIMIT:
+		{
+			if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+			{ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;}break;
+		}
+	}
+}
+
+void ChassisDeTwist(void)
+{
+	ChassisTwistGapAngle = 0;
+}
+
+void LJHTwist(void)
+{
+	ChassisTwist();
 }

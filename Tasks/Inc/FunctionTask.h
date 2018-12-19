@@ -46,6 +46,8 @@
 #define LOW_FORWARD_BACK_SPEED 			200
 #define LOW_LEFT_RIGHT_SPEED   			200/2
 
+#define CHASSIS_TWIST_ANGLE_LIMIT		35
+
 #define MOUSE_LR_RAMP_TICK_COUNT		50
 #define MOUSR_FB_RAMP_TICK_COUNT		60
 
@@ -103,10 +105,16 @@ typedef __packed struct
 }ChassisSpeed_Ref_t;
 
 extern ChassisSpeed_Ref_t ChassisSpeedRef; 
+extern int ChassisTwistGapAngle;
+extern uint8_t ChassisTwistState;
+extern int32_t auto_counter;
 
 void FunctionTaskInit(void);
 void Limit_Position(void);
 void OptionalFunction(void);
 void FreshSuperCState(void);
+void ChassisTwist(void);
+void ChassisDeTwist(void);
+void LJHTwist(void);
 
 #endif /*__FUNCTIONTASK_H*/
