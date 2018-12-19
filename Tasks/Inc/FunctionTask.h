@@ -107,6 +107,7 @@ typedef __packed struct
 extern ChassisSpeed_Ref_t ChassisSpeedRef; 
 extern int ChassisTwistGapAngle;
 extern uint8_t ChassisTwistState;
+extern int32_t auto_counter;
 
 void FunctionTaskInit(void);
 void Limit_Position(void);

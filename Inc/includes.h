@@ -12,14 +12,15 @@
 #ifndef __INCLUDES_H
 #define __INCLUDES_H
 
-//#define DEBUG_MODE
-
+//#define GM_TEST
 #define INFANTRY2
 
-
-#define USE_GYRO
+//#define DEBUG_MODE
+#define USE_AUTOAIM
+//#define USE_GYRO
+#define USE_IMU
 #define USE_CHASSIS_FOLLOW
-
+//#define FRIC_PWM_MODE//临时使用，后续不需要
 
 #define CAN11
 #define CAN12
@@ -36,6 +37,7 @@
 #include "gpio.h"
 #include "iwdg.h"
 #include "adc.h"
+#include "math.h"
 
 #include "AuxDevice.h"
 #include "RemoteTask.h"
@@ -45,7 +47,7 @@
 #include "MotorTask.h"
 #include "ControlTask.h"
 #include "drivers_ramp.h"
-#include "ManifoldTask.h"
+#include "AutoAimTask.h"
 #include "JudgeTask.h"
 #include "UpperTask.h"
 #include "CapControlTask.h"

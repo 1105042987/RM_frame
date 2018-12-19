@@ -84,6 +84,9 @@ void RemoteControlProcess(Remote *rc)
 		#else
 		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
 		#endif
+		#ifdef USE_AUTOAIM
+		autoAimGMCTRL();
+		#endif /*USE_AUTOAIM*/
 		
 		ChassisTwistState = 0;
 		

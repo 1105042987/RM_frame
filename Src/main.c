@@ -127,28 +127,33 @@ int main(void)
   MX_USART3_UART_Init();
   MX_UART7_Init();
   MX_ADC1_Init();
+  MX_UART8_Init();
+  MX_USART2_UART_Init();
 
   /* USER CODE BEGIN 2 */
-	//鍚勬ā鍧楀垵濮嬪寲
-		
-	
+	//各模块初始化
+	#ifdef FRIC_PWM_MODE//临时使用，后续不需要
+	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_2);
+	__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_2,800);
+	__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_3,800);
+	#endif /*FRIC_PWM_MODE*/
 	InitRemoteControl();
-	
 	Motor_ID_Setting();
 	for(int i=0;i<8;i++) {InitMotor(can1[i]);InitMotor(can2[i]);}
 	InitPWM();
 	InitCanReception();
 	//InitGyroUart();
 	InitJudgeUart();
-	/*****闄?铻轰华鍒濆鍖?*****/
+	/*****陀螺仪初始化*****/
 	mpu_device_init();
 	init_quaternion();
 
-	/*****闄?铻轰华鍒濆鍖栫粨鏉?*****/
-	MX_IWDG_Init();							//Cube閰嶇疆瀹岃寰楁敞閲婃帀涓婇潰鑷姩鐢熸垚鐨勭湅闂ㄧ嫍鍒濆鍖栧嚱鏁?
+	/*****陀螺仪初始化结束*****/
+	MX_IWDG_Init();							//Cube配置完记得注释掉上面自动生成的看门狗初始化函数
+	InitAutoAim();
 	#ifdef DEBUG_MODE
 	ctrlUartInit();
-	//鏃堕棿涓柇
+	//时间中断
 	HAL_TIM_Base_Start_IT(&htim10);
 	#endif
 	HAL_TIM_Base_Start_IT(&htim6);
@@ -159,7 +164,7 @@ int main(void)
 	//ADC
 	//HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&ADC_Value,160);
 	
-	//鍏朵粬涓柇
+	//时间中断
 	HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 	HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
 	HAL_NVIC_EnableIRQ(USART1_IRQn);

@@ -24,6 +24,11 @@
 #define GM_PITCH_ZERO 	3740
 #define GM_YAW_ZERO 	1310
 #endif
+#ifdef GM_TEST
+#define GM_PITCH_GRAVITY_COMPENSATION -150
+#define GM_PITCH_ZERO 	6700
+#define GM_YAW_ZERO 	1900
+#endif
 #define CHASSIS_SPEED_ATTENUATION   (1.30f)
 #define NORMALIZE_ANGLE180(angle) angle = ((angle) > 180) ? ((angle) - 360) : (((angle) < -180) ? (angle) + 360 : angle)
 #define CHASSIS_MOTOR_ROTATE_PID_DEFAULT \
