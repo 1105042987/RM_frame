@@ -233,24 +233,30 @@ if(reset_flag){
 			NMUDR.TargetAngle -= 5;
 			cnt_clk = 5;
 	}
-	if(cnt > 100){
+	if(cnt > 100 || NMUDR.RxMsgC6x0.moment<-14750){
 			reset_flag = 0;
 			cnt = 0;
+
 			NMUDL.RealAngle = 0;
 			NMUDR.RealAngle = 0;
 			NMUDL.TargetAngle = 0;
 			NMUDR.TargetAngle = 0;
+			NMUDL.TargetAngle -= 20;
+			NMUDR.TargetAngle += 20;
+		//
+			NMUDL.RealAngle = 0;
+			NMUDR.RealAngle = 0;
 	}
 }
 /****************/
 
-		if(cnt_clk == 0 && channellcol>200){       //UP  velocity = 2
-			NMUDL.TargetAngle += 20;
-			NMUDR.TargetAngle -= 20;
+		if(cnt_clk == 0 && channellcol>200){       //UP  velocity = 1
+			NMUDL.TargetAngle += 10;
+			NMUDR.TargetAngle -= 10;
 			cnt_clk = 10;
-		}	else if(cnt_clk == 0 && channellcol<-200){		//DOWN
-			NMUDL.TargetAngle -= 20;
-			NMUDR.TargetAngle += 20;
+		}	else if(cnt_clk == 0 && channellcol<-200){		//DOWN velocity = 1
+			NMUDL.TargetAngle -= 10;
+			NMUDR.TargetAngle += 10;
 			cnt_clk = 10;
 		}
 		
