@@ -331,18 +331,18 @@ if(reset_flag){
 //		Delay(20,{STIR.TargetAngle-=60;});
 
 
-		//****************自动取弹程序//UM1--是拔出来UM2相反  最大120***************
-     if(ifset==1)
+		//****************自动取弹程序//UM1--是拔出来UM2相反  最大120//大的PH2 小的PH4***************
+     /*if(ifset==1)
 		 {autoget();
 			 if(auto_lock==0)
 			 {
 			ChassisSpeedRef.left_right_ref   = (channellrow/(2.7)) * RC_CHASSIS_SPEED_REF;
 			ChassisSpeedRef.forward_back_ref = (channellcol/2) * RC_CHASSIS_SPEED_REF;
 			 }
-		 }
+		 }*/
 		 
 /****************************开机自检**********************************/
-      if(ifset==0)
+      /*if(ifset==0)
 			{
 			  if(UM1.RxMsgC6x0.moment<=14000)
 				{UM1.TargetAngle+=3;UM2.TargetAngle-=3;}
@@ -355,7 +355,18 @@ if(reset_flag){
 					ifset=1;
 				}
 				
-			}
+			}*/
+			
+			//********************调试模式
+			NMUDL.TargetAngle-=channelrrow*0.005;
+			NMUDR.TargetAngle=+channelrrow*0.005;
+			if(channelrcol>500)
+				HAL_GPIO_WritePin(GPIOH,1<<2,1);
+			if(channelrcol<-500)
+				HAL_GPIO_WritePin(GPIOH,1<<2,0);
+			
+			UFM.TargetAngle+=channellcol*0.005;
+			
 	}
 	Limit_and_Synchronization();
 }
