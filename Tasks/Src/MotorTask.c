@@ -86,8 +86,8 @@ MotorINFO UFM = Normal_MOTORINFO_Init(36.0,&ControlNM,
 //MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
 //MotorINFO* can2[8]={&CMFL,&CMFR,&CMBL,&CMBR,&NMUDL,&NMUDR,0,0};
 
-MotorINFO* can1[8]={&CMFL,&CMFR,&CMBL,&CMBR,&NMUDL,&NMUDR,&UFM,0};
-MotorINFO* can2[8]={&MDL1,&MDL2,&UM1,&UM2,&NMUDFL,&NMUDFR,0,0};
+MotorINFO* can1[8]={&CMFL,&CMFR,&CMBL,&CMBR,&NMUDL,&NMUDR,0,0};
+MotorINFO* can2[8]={&MDL1,&MDL2,&UM1,&UM2,&NMUDFL,&NMUDFR,&UFM,0};
 
 
 void ControlNM(MotorINFO* id)

@@ -16,6 +16,12 @@ RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
 ChassisSpeed_Ref_t ChassisSpeedRef; 
 
+int16_t channelrrow = 0;
+int16_t channelrcol = 0;
+int16_t channellrow = 0;
+int16_t channellcol = 0;
+int16_t testIntensity = 0;
+
 int32_t auto_counter=0;		//用于准确延时的完成某事件
 int32_t auto_lock=0;
 int32_t cnt_clk;
@@ -35,8 +41,39 @@ extern uint32_t ADC2_value[100];
 	uint8_t reset_flag = 1;
 	uint8_t climb_state = 1;
 	uint8_t climb_flag = 0;
-	
-	
+	/**********登岛机构抬升复位************/
+	void reset_Pos(){
+	if(reset_flag){
+	if(cnt_clk == 0){
+			cnt++;
+			NMUDL.TargetAngle += 5;
+			NMUDR.TargetAngle -= 5;
+			cnt_clk = 5;
+	}
+	if(cnt > 100 || NMUDR.RxMsgC6x0.moment<-14750){
+			reset_flag = 0;
+			cnt = 0;
+
+			NMUDL.RealAngle = 0;
+			NMUDR.RealAngle = 0;
+			NMUDL.TargetAngle = 0;
+			NMUDR.TargetAngle = 0;
+			NMUDL.TargetAngle -= 20;
+			NMUDR.TargetAngle += 20;
+		//
+			NMUDL.RealAngle = 0;
+			NMUDR.RealAngle = 0;
+		}
+	}
+}
+/**************一键复位**************/
+	void resetClimbState(){
+		
+	}
+/**************复位判断**************/
+	void judgeClimbState(){
+		if(channelrcol<-200)climb_flag = 0;
+	}
 	
 /******************自动化取弹*************/
 int flag_get=-1;
@@ -50,12 +87,6 @@ int isok=0;
 int a;
 int b;
 /************************************************/
-
-int16_t channelrrow = 0;
-int16_t channelrcol = 0;
-int16_t channellrow = 0;
-int16_t channellcol = 0;
-int16_t testIntensity = 0;
 
 //初始化
 void FunctionTaskInit()
@@ -184,6 +215,7 @@ void Limit_and_Synchronization()
 //	MINMAX(NMUDR.TargetAngle,0,650);
 	
 	MINMAX(NMUDL.TargetAngle,-700,700);//limit
+	MINMAX(UFM.TargetAngle,-700,700);
 	NMUDL.TargetAngle = -NMUDR.TargetAngle;//sychronization
 	UM1.TargetAngle=-UM2.TargetAngle;
 	
@@ -223,54 +255,40 @@ void RemoteControlProcess(Remote *rc)
 //TODO/******暂未用到的参数  发射机构电机********/
 //		FRICL.TargetAngle = -4200;
 //		FRICR.TargetAngle = 4200;
-/**************/	
+/************************/	
+		reset_Pos();
 		
-/**********登岛机构抬升复位************/
-if(reset_flag){
-	if(cnt_clk == 0){
-			cnt++;
-			NMUDL.TargetAngle += 5;
-			NMUDR.TargetAngle -= 5;
-			cnt_clk = 5;
-	}
-	if(cnt > 100 || NMUDR.RxMsgC6x0.moment<-14750){
-			reset_flag = 0;
-			cnt = 0;
-
-			NMUDL.RealAngle = 0;
-			NMUDR.RealAngle = 0;
-			NMUDL.TargetAngle = 0;
-			NMUDR.TargetAngle = 0;
-			NMUDL.TargetAngle -= 20;
-			NMUDR.TargetAngle += 20;
-		//
-			NMUDL.RealAngle = 0;
-			NMUDR.RealAngle = 0;
-	}
-}
-/****************/
-
-		if(cnt_clk == 0 && channellcol>200){       //UP  velocity = 1
-			NMUDL.TargetAngle += 10;
-			NMUDR.TargetAngle -= 10;
-			cnt_clk = 10;
-		}	else if(cnt_clk == 0 && channellcol<-200){		//DOWN velocity = 1
-			NMUDL.TargetAngle -= 10;
-			NMUDR.TargetAngle += 10;
-			cnt_clk = 10;
+	/***********量化电机转速*************/	
+//		if(cnt_clk == 0 && channellcol>200){       //UP  velocity = 1
+//			NMUDL.TargetAngle += 10;
+//			NMUDR.TargetAngle -= 10;
+//			cnt_clk = 10;
+//		}	else if(cnt_clk == 0 && channellcol<-200){		//DOWN velocity = 1
+//			NMUDL.TargetAngle -= 10;
+//			NMUDR.TargetAngle += 10;
+//			cnt_clk = 10;
+//		}
+//		
+//		if(cnt_clk == 0 && channellrow > 200){			//Forward
+//			NMUDFL.TargetAngle -= 10 ;
+//			NMUDFR.TargetAngle += 10 ;
+//			cnt_clk = 10;
+//		}else if(cnt_clk == 0 && channellrow < -200){//Back
+//			NMUDFL.TargetAngle += 10 ;
+//			NMUDFR.TargetAngle -= 10 ;
+//			cnt_clk = 10;
+//		}
+		
+		if(channellcol>200){       //UP  
+			NMUDL.TargetAngle += channellcol * 0.01;
+			NMUDR.TargetAngle -= channellcol * 0.01;
+		}	else if(channellcol<-200){		//DOWN 
+			NMUDL.TargetAngle += channellcol * 0.01;
+			NMUDR.TargetAngle -= channellcol * 0.01;
 		}
 		
-		if(cnt_clk == 0 && channellrow > 200){			//Forward
-			NMUDFL.TargetAngle -= 10 ;
-			NMUDFR.TargetAngle += 10 ;
-			cnt_clk = 10;
-		}else if(cnt_clk == 0 && channellrow < -200){//Back
-			NMUDFL.TargetAngle += 10 ;
-			NMUDFR.TargetAngle -= 10 ;
-			cnt_clk = 10;
-		}
 		
-/**********自动化登岛************/
+/**********自动化登岛************
 	if(channelrcol > 200)climb_flag = 1;
 	if(channelrrow > 200)reset_flag = 1;
 	
@@ -280,6 +298,7 @@ if(reset_flag){
 			NMUDR.TargetAngle += 14;
 			cnt_clk = 40;
 			cnt++;
+			judgeClimbState();
 	if(cnt >= 50 || NMUDR.TargetAngle > 520){climb_state = 2;cnt = 0;} //time = 2000ms
 	}
 	//小轮前进
@@ -321,7 +340,7 @@ if(reset_flag){
 			}
 			}
 
-/**********************/
+**********************/
 }
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
@@ -357,15 +376,25 @@ if(reset_flag){
 				
 			}*/
 			
-			//********************调试模式
-			NMUDL.TargetAngle-=channelrrow*0.005;
-			NMUDR.TargetAngle=+channelrrow*0.005;
-			if(channelrcol>500)
+			//*****调试模式UFM.RxMsgC6x0.moment   >5000 在远端卡住 <-5000 在近端卡住  + 往远端移动  - 近端移动 
+			//**targetAngle 总行程830左右
+			NMUDL.TargetAngle-=channelrrow * 0.005;
+			NMUDR.TargetAngle=+channelrrow * 0.005;
+			if(channelrcol>200)
 				HAL_GPIO_WritePin(GPIOH,1<<2,1);
-			if(channelrcol<-500)
+			if(channelrcol<-200)
 				HAL_GPIO_WritePin(GPIOH,1<<2,0);
-			
-			UFM.TargetAngle+=channellcol*0.005;
+
+			if(channellcol>500 || channellcol<-500)UFM.TargetAngle+=channellcol*0.002;
+			if(channellrow > 300){
+					UFM.TargetAngle+=10;
+					if(UFM.RxMsgC6x0.moment > 5000)UFM.TargetAngle-=10;
+					if(UFM.RxMsgC6x0.moment < -5000)UFM.TargetAngle+=10;
+			}
+				if(channellrow < -300){
+					UFM.TargetAngle = 0;
+					UFM.RealAngle = 0;
+			}
 			
 	}
 	Limit_and_Synchronization();
