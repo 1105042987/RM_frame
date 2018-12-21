@@ -26,7 +26,8 @@ int32_t auto_counter=0;		//用于准确延时的完成某事件
 int32_t auto_lock=0;
 int32_t cnt_clk;
 int16_t cnt = 0;
-int ifset=0;//用于自检
+int ifset=-5;//用于自检
+int cheeeeck=0;
 
 //存储红外传感器的数值
 extern uint32_t ADC_value[100];
@@ -63,8 +64,42 @@ extern uint32_t ADC2_value[100];
 		//
 			NMUDL.RealAngle = 0;
 			NMUDR.RealAngle = 0;
+		ifset=1;
 		}
 	}
+	/*if(ifset==0)
+			{
+			  if(UM1.RxMsgC6x0.moment<7000)
+				{UM1.TargetAngle+=3;
+				UM2.TargetAngle-=3;
+				}
+				if(UM1.RxMsgC6x0.moment>=7000)
+				{
+					UM1.RealAngle=0;
+					UM2.RealAngle=0;
+					UM1.TargetAngle=0;
+					UM2.TargetAngle=0;
+					HAL_GPIO_WritePin(GPIOH,1<<2,0);//爪子的向前弹出 0是收起 1是弹出
+	        HAL_GPIO_WritePin(GPIOH,1<<4,0);//弹射装置0是放下 1是弹起 
+					HAL_GPIO_WritePin(GPIOI,1<<5,1);//爪子抓紧与松开 1是松开
+					ifset=1;
+				}
+				
+			}*/
+	if(ifset==1)
+	{
+		HAL_GPIO_WritePin(GPIOI,1<<5,1);
+		HAL_GPIO_WritePin(GPIOH,1<<4,1);//弹射装置0是放下 1是弹起
+		if(UFM.RxMsgC6x0.moment>-5000)
+		UFM.TargetAngle-=3;
+		if(UFM.RxMsgC6x0.moment<=-5000)
+		{
+			UFM.RealAngle=0;
+			UFM.TargetAngle=0;
+			ifset=233;
+		}
+	}
+			
 }
 /**************一键复位**************/
 	void resetClimbState(){
@@ -78,8 +113,10 @@ extern uint32_t ADC2_value[100];
 /******************自动化取弹*************/
 int flag_get=-1;
 int  i2=0;
+int  im=0;
 int checkmode=0;
 int resetmode=0;
+int ifloose=0;
 /*****************红外传感器消抖******************/
 int tmp[2];
 double count[2];
@@ -208,6 +245,85 @@ void autoget()
 		
 	}
 	}
+
+void autoget_final()
+{
+	if(channelrcol>500&&checkmode==0)
+		checkmode=1;
+	if(checkmode==1){
+		//isokey();
+		isok=2;
+	if(isok==2&&flag_get==-1)
+	{  flag_get=0;
+	   auto_lock=2000;
+	}
+	if(auto_counter==0&&flag_get==0){//向外转 然后气动夹住块
+			ChassisSpeedRef.forward_back_ref = 0.0f;
+	    ChassisSpeedRef.left_right_ref = 0.0f;
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+		i2++;
+			 auto_counter=1;
+			 
+			 if(i2==30)
+			 {flag_get=1;HAL_GPIO_WritePin(GPIOI,1<<5,0);auto_counter=1000;}
+		 }
+	 if(auto_counter==0&&flag_get==1){//向内转，但不转到底
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2--;
+			 auto_counter=1;
+			 if(i2==4)//这里i2是4，不转到底
+			 {flag_get=2;auto_counter=300;}
+		 }
+	 if(auto_counter==0&&flag_get==2){//移到中间，并进行扔箱
+     UFM.TargetAngle=im*5;
+		 if(im<70)
+		 im++;
+		 auto_counter=1;
+			 if(im==70)
+			 {HAL_GPIO_WritePin(GPIOI,1<<5,1);//松开之后等200ms再弹飞
+				if(ifloose==0){
+					cnt_clk=200;
+					ifloose=1;
+				}
+				if(cnt_clk==0){
+				HAL_GPIO_WritePin(GPIOH,1<<4,0);
+        flag_get=3;
+        auto_counter=300;
+        ifloose=0;					
+			 }
+		 }
+	 }
+	 if(auto_counter==0&&flag_get==3){//移到最边上，并进行取箱
+		 UFM.TargetAngle=im*5;
+		 if(im<143)
+			 im++;
+		 auto_counter=1;
+		 if(im==143&&auto_counter==0)//转出去
+		 {
+		 UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2++;
+			 auto_counter=1;
+			 if(i2==30)
+			 {
+				 HAL_GPIO_WritePin(GPIOI,1<<5,GPIO_PIN_SET);
+				 flag_get=4;//收紧
+			 }
+		 }
+	 }
+	 if(auto_counter==0&&flag_get==4){
+		 UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2--;
+			 auto_counter=1;
+			 if(i2==4)//这里i2是4，不转到底
+			 {flag_get=5;auto_counter=300;}
+	 }
+	
+}	
+}
 void Limit_and_Synchronization()
 {
 	//demo
@@ -257,6 +373,9 @@ void RemoteControlProcess(Remote *rc)
 //		FRICR.TargetAngle = 4200;
 /************************/	
 		reset_Pos();
+		if((channelrrow>500||channelrrow<-500||channelrcol<-500||channelrrow>500)||reset_flag==0)
+		    reset_flag=1;
+			
 		
 	/***********量化电机转速*************/	
 //		if(cnt_clk == 0 && channellcol>200){       //UP  velocity = 1
@@ -360,41 +479,26 @@ void RemoteControlProcess(Remote *rc)
 			 }
 		 }*/
 		 
-/****************************开机自检**********************************/
-      /*if(ifset==0)
-			{
-			  if(UM1.RxMsgC6x0.moment<=14000)
-				{UM1.TargetAngle+=3;UM2.TargetAngle-=3;}
-				if(UM1.RxMsgC6x0.moment>=14000)
-				{
-					UM1.RealAngle=0;
-					UM2.RealAngle=0;
-					UM1.TargetAngle=0;
-					UM2.TargetAngle=0;
-					ifset=1;
-				}
-				
-			}*/
-			
+/****************************自检**********************************/
+      reset_Pos();
+		 if(UM1.RxMsgC6x0.moment>7500)
+			 UM1.TargetAngle=0;
+		 if(UFM.RxMsgC6x0.moment>5000)
+			 UFM.TargetAngle=710;
+		 if(UFM.RxMsgC6x0.moment<-5500)
+			 UFM.TargetAngle=0;
 			//*****调试模式UFM.RxMsgC6x0.moment   >5000 在远端卡住 <-5000 在近端卡住  + 往远端移动  - 近端移动 
 			//**targetAngle 总行程830左右
-			NMUDL.TargetAngle-=channelrrow * 0.005;
-			NMUDR.TargetAngle=+channelrrow * 0.005;
-			if(channelrcol>200)
-				HAL_GPIO_WritePin(GPIOH,1<<2,1);
-			if(channelrcol<-200)
-				HAL_GPIO_WritePin(GPIOH,1<<2,0);
-
-			if(channellcol>500 || channellcol<-500)UFM.TargetAngle+=channellcol*0.002;
-			if(channellrow > 300){
-					UFM.TargetAngle+=10;
-					if(UFM.RxMsgC6x0.moment > 5000)UFM.TargetAngle-=10;
-					if(UFM.RxMsgC6x0.moment < -5000)UFM.TargetAngle+=10;
-			}
-				if(channellrow < -300){
-					UFM.TargetAngle = 0;
-					UFM.RealAngle = 0;
-			}
+			//360°共11个齿 每个齿12.7mm 
+			//最靠近电机moment是负的 realangle=0,中间是410左右 最远端700左右
+     UM1.TargetAngle+=channellcol*0.01;
+		  UM2.TargetAngle-=channellcol*0.01;
+		  if(channelrrow>500)
+				HAL_GPIO_WritePin(GPIOI,1<<5,1);
+			if(channelrrow<-500)
+				HAL_GPIO_WritePin(GPIOI,1<<5,0);
+	    autoget_final();
+				
 			
 	}
 	Limit_and_Synchronization();
