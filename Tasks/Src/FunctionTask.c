@@ -64,10 +64,10 @@ extern uint32_t ADC2_value[100];
 		//
 			NMUDL.RealAngle = 0;
 			NMUDR.RealAngle = 0;
-		ifset=1;
+		ifset=0;
 		}
 	}
-	/*if(ifset==0)
+	if(ifset==0)
 			{
 			  if(UM1.RxMsgC6x0.moment<7000)
 				{UM1.TargetAngle+=3;
@@ -85,7 +85,7 @@ extern uint32_t ADC2_value[100];
 					ifset=1;
 				}
 				
-			}*/
+			}
 	if(ifset==1)
 	{
 		HAL_GPIO_WritePin(GPIOI,1<<5,1);
@@ -352,7 +352,16 @@ void RemoteControlProcess(Remote *rc)
 	{	
 		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
-		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
+		//ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
+		
+		//手动挡控制爪子
+		if(channellcol>500)
+		HAL_GPIO_WritePin(GPIOH,1<<2,1);//爪子的向前弹出 0是收起 1是弹出
+		if(channellcol<-500)
+		HAL_GPIO_WritePin(GPIOH,1<<2,0);//左纵向
+		
+		UM1.TargetAngle+=channellrow*0.01;
+		UM2.TargetAngle-=channellrow*0.01;//左横向是爪子的上下移动
 
 //TODO/******暂未用到的参数  发射机构电机********/		
 //		#ifdef USE_CHASSIS_FOLLOW
@@ -372,9 +381,26 @@ void RemoteControlProcess(Remote *rc)
 //		FRICL.TargetAngle = -4200;
 //		FRICR.TargetAngle = 4200;
 /************************/	
-		reset_Pos();
-		if((channelrrow>500||channelrrow<-500||channelrcol<-500||channelrrow>500)||reset_flag==0)
-		    reset_flag=1;
+		//reset_Pos();
+		//手动挡
+		if(channellcol>200){       //UP  左纵向是整个机构的上下
+			NMUDL.TargetAngle += channellcol * 0.01;
+			NMUDR.TargetAngle -= channellcol * 0.01;
+		}	else if(channellcol<-200){		//DOWN 
+			NMUDL.TargetAngle += channellcol * 0.01;
+			NMUDR.TargetAngle -= channellcol * 0.01;
+		}
+	  if(channelrrow>500)
+				HAL_GPIO_WritePin(GPIOI,1<<5,1);//右横向是抓紧的开关
+			if(channelrrow<-500)
+				HAL_GPIO_WritePin(GPIOI,1<<5,0);
+			
+			if(channelrcol>500)
+				HAL_GPIO_WritePin(GPIOH,1<<4,1);//右纵向是弹出的开关
+			if(channelrcol<-500)
+				HAL_GPIO_WritePin(GPIOH,1<<4,0);
+			
+			UFM.TargetAngle-=channellrow*0.01;//左横向是水平电机
 			
 		
 	/***********量化电机转速*************/	
@@ -398,13 +424,7 @@ void RemoteControlProcess(Remote *rc)
 //			cnt_clk = 10;
 //		}
 		
-		if(channellcol>200){       //UP  
-			NMUDL.TargetAngle += channellcol * 0.01;
-			NMUDR.TargetAngle -= channellcol * 0.01;
-		}	else if(channellcol<-200){		//DOWN 
-			NMUDL.TargetAngle += channellcol * 0.01;
-			NMUDR.TargetAngle -= channellcol * 0.01;
-		}
+		
 		
 		
 /**********自动化登岛************
