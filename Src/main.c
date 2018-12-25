@@ -1,7 +1,8 @@
+
 /**
   ******************************************************************************
-  * File Name          : main.c
-  * Description        : Main program body
+  * @file           : main.c
+  * @brief          : Main program body
   ******************************************************************************
   ** This notice applies to any and all portions of this file
   * that are not between comment pairs USER CODE BEGIN and
@@ -35,7 +36,6 @@
   *
   ******************************************************************************
   */
-
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_hal.h"
@@ -73,9 +73,13 @@ void SystemClock_Config(void);
 
 /* USER CODE END 0 */
 
+/**
+  * @brief  The application entry point.
+  *
+  * @retval None
+  */
 int main(void)
 {
-
   /* USER CODE BEGIN 1 */
   /* USER CODE END 1 */
 
@@ -129,7 +133,6 @@ int main(void)
   MX_UART7_Init();
   MX_ADC1_Init();
   MX_ADC2_Init();
-
   /* USER CODE BEGIN 2 */
 	//各模块初始化
 	InitRemoteControl();
@@ -166,11 +169,12 @@ int main(void)
 	__HAL_UART_ENABLE_IT(&UPPER_UART, UART_IT_IDLE);
 	//打开四个24V电源
 	HAL_GPIO_WritePin(GPIOH,1<<5,1);
+	HAL_GPIO_WritePin(GPIOH,1<<3,1);
 	HAL_GPIO_WritePin(GPIOI,1<<5,0);
-	//HAL_GPIO_WritePin(GPIOH,1<<2,0);//爪子的向前弹出
-	//HAL_GPIO_WritePin(GPIOH,1<<4,1);//弹射装置1是放下 0是弹起
-	//HAL_GPIO_WritePin(GPIOI,1<<5,1);//爪子抓紧与松开
-	//开启红外传感器，并把数据存在ADC_value里
+	
+	
+	
+	//�洢ADC�Ļش�ֵ
   HAL_ADC_Start_DMA(&hadc1,ADC_value,10);
   HAL_ADC_Start_DMA(&hadc2,ADC2_value,10);
 	
@@ -188,8 +192,10 @@ int main(void)
 
 }
 
-/** System Clock Configuration
-*/
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
 void SystemClock_Config(void)
 {
 
@@ -250,45 +256,43 @@ void SystemClock_Config(void)
 
 /**
   * @brief  This function is executed in case of error occurrence.
-  * @param  None
+  * @param  file: The file name as string.
+  * @param  line: The line in file as a number.
   * @retval None
   */
-void _Error_Handler(char * file, int line)
+void _Error_Handler(char *file, int line)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   while(1) 
   {
   }
-  /* USER CODE END Error_Handler_Debug */ 
+  /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef USE_FULL_ASSERT
-
+#ifdef  USE_FULL_ASSERT
 /**
-   * @brief Reports the name of the source file and the source line number
-   * where the assert_param error has occurred.
-   * @param file: pointer to the source file name
-   * @param line: assert_param error line source number
-   * @retval None
-   */
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
 void assert_failed(uint8_t* file, uint32_t line)
-{
+{ 
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
-
 }
-
-#endif
-
-/**
-  * @}
-  */ 
+#endif /* USE_FULL_ASSERT */
 
 /**
   * @}
-*/ 
+  */
+
+/**
+  * @}
+  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -14,8 +14,8 @@
 #define clawin    HAL_GPIO_WritePin(GPIOH,1<<2,0)
 #define testclawtight HAL_GPIO_WritePin(GPIOI,1<<5,1)
 #define testclawloose HAL_GPIO_WritePin(GPIOI,1<<5,0)
-#define testlaunch    HAL_GPIO_WritePin(GPIOH,1<<4,1)
-#define testland      HAL_GPIO_WritePin(GPIOH,1<<4,0)
+#define testlaunch    HAL_GPIO_WritePin(GPIOI,1<<6,1)
+#define testland      HAL_GPIO_WritePin(GPIOI,1<<6,0)
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//Ð±ÆÂº¯Êý
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
@@ -213,7 +213,7 @@ void launch()//µ¯Ò©Ïäµ¯Éä×°ÖÃ
 {
 	if(auto_wait==0&&alreadywaited==1)
 	{
-	  HAL_GPIO_WritePin(GPIOH,1<<4,1);
+	  HAL_GPIO_WritePin(GPIOI,1<<6,1);
 	  auto_wait=300;
 		alreadywaited=2;
 	}
@@ -223,7 +223,7 @@ void land()
 {
 	if(auto_wait==0&&alreadywaited==2)
 	{
-	  HAL_GPIO_WritePin(GPIOH,1<<4,0);
+	  HAL_GPIO_WritePin(GPIOI,1<<6,0);
 		totalstep++;
 		alreadywaited=0;
 	}
