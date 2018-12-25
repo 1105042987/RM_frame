@@ -10,7 +10,12 @@
   ******************************************************************************
   */
 #include "includes.h"
-
+#define clawout   HAL_GPIO_WritePin(GPIOH,1<<2,1)//爪子弹出
+#define clawin    HAL_GPIO_WritePin(GPIOH,1<<2,0)
+#define testclawtight HAL_GPIO_WritePin(GPIOI,1<<5,0)
+#define testclawloose HAL_GPIO_WritePin(GPIOI,1<<5,1)
+#define testlaunch    HAL_GPIO_WritePin(GPIOH,1<<4,0)
+#define testland      HAL_GPIO_WritePin(GPIOH,1<<4,1)
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
@@ -25,6 +30,7 @@ int16_t testIntensity = 0;
 int32_t auto_counter=0;		//用于准确延时的完成某事件
 int32_t auto_lock=0;
 int32_t cnt_clk;
+int32_t auto_wait=0;
 int16_t cnt = 0;
 int ifset=-5;//用于自检
 int cheeeeck=0;
@@ -43,64 +49,7 @@ extern uint32_t ADC2_value[100];
 	uint8_t climb_state = 1;
 	uint8_t climb_flag = 0;
 	/**********登岛机构抬升复位************/
-	void reset_Pos(){
-	if(reset_flag){
-	if(cnt_clk == 0){
-			cnt++;
-			NMUDL.TargetAngle += 5;
-			NMUDR.TargetAngle -= 5;
-			cnt_clk = 5;
-	}
-	if(cnt > 100 || NMUDR.RxMsgC6x0.moment<-14750){
-			reset_flag = 0;
-			cnt = 0;
-
-			NMUDL.RealAngle = 0;
-			NMUDR.RealAngle = 0;
-			NMUDL.TargetAngle = 0;
-			NMUDR.TargetAngle = 0;
-			NMUDL.TargetAngle -= 20;
-			NMUDR.TargetAngle += 20;
-		//
-			NMUDL.RealAngle = 0;
-			NMUDR.RealAngle = 0;
-		ifset=0;
-		}
-	}
-	if(ifset==0)
-			{
-			  if(UM1.RxMsgC6x0.moment<7000)
-				{UM1.TargetAngle+=3;
-				UM2.TargetAngle-=3;
-				}
-				if(UM1.RxMsgC6x0.moment>=7000)
-				{
-					UM1.RealAngle=0;
-					UM2.RealAngle=0;
-					UM1.TargetAngle=0;
-					UM2.TargetAngle=0;
-					HAL_GPIO_WritePin(GPIOH,1<<2,0);//爪子的向前弹出 0是收起 1是弹出
-	        HAL_GPIO_WritePin(GPIOH,1<<4,0);//弹射装置0是放下 1是弹起 
-					HAL_GPIO_WritePin(GPIOI,1<<5,1);//爪子抓紧与松开 1是松开
-					ifset=1;
-				}
-				
-			}
-	if(ifset==1)
-	{
-		HAL_GPIO_WritePin(GPIOI,1<<5,1);
-		HAL_GPIO_WritePin(GPIOH,1<<4,1);//弹射装置0是放下 1是弹起
-		if(UFM.RxMsgC6x0.moment>-5000)
-		UFM.TargetAngle-=3;
-		if(UFM.RxMsgC6x0.moment<=-5000)
-		{
-			UFM.RealAngle=0;
-			UFM.TargetAngle=0;
-			ifset=233;
-		}
-	}
-			
-}
+	
 /**************一键复位**************/
 	void resetClimbState(){
 		
@@ -117,6 +66,16 @@ int  im=0;
 int checkmode=0;
 int resetmode=0;
 int ifloose=0;
+//下面是调试用变量 复位时记得全部复位
+int theposition=0;
+int inposition=1;
+int laststate=0;
+int letsrock=0;
+int alreadychanged=0;
+int back_a_little=0;
+int totalstep=1;
+int rollout=0;
+int alreadywaited=0;
 /*****************红外传感器消抖******************/
 int tmp[2];
 double count[2];
@@ -175,154 +134,196 @@ void isokey()
 		
 	
 }
-void autoget()
+void gofar()
 {
-	 a=average(ADC_value);
-   b=average(ADC2_value);
-	if(channelrcol>500&&checkmode==0)
-		checkmode=1;
-	if(checkmode==1){
-		isokey();
-	if(isok==2&&flag_get==-1)
-	{  flag_get=0;
-	   auto_lock=2000;
+	alreadychanged=0;
+	if(UFM.RxMsgC6x0.moment<4000)
+	UFM.TargetAngle+=3;
+	if(UFM.RxMsgC6x0.moment>=4000&&alreadychanged==0)
+	{ 
+		inposition+=1;
+		alreadychanged=1;
+		back_a_little=0;
+		totalstep++;
 	}
-     if(auto_counter==0&&flag_get==0){
-			ChassisSpeedRef.forward_back_ref = 0.0f;
-	    ChassisSpeedRef.left_right_ref = 0.0f;
-     UM1.TargetAngle=-i2*4;
-     UM2.TargetAngle=i2*4;
-			i2++;
-			 auto_counter=1;
-			 
-			 if(i2==30)
-			 {flag_get=1;HAL_GPIO_WritePin(GPIOI,1<<5,GPIO_PIN_SET);auto_counter=1000;}
-		 }
-		 if(auto_counter==0&&flag_get==1){
-     UM1.TargetAngle=-i2*4;
-     UM2.TargetAngle=i2*4;
-			i2--;
-			 auto_counter=1;
-			 if(i2==0)
-			 {flag_get=2;auto_counter=300;}
-		 }
-		 if(auto_counter==0&&flag_get==2){
-     UM1.TargetAngle=-i2*10;
-     UM2.TargetAngle=i2*10;
-			i2++;
-			 auto_counter=1;
-			 if(i2==8)
-			 {HAL_GPIO_WritePin(GPIOI,1<<5,GPIO_PIN_RESET);}
-			 if(i2==12)
-			 {flag_get=3;auto_counter=1000;isok=0;}
-		 }
-		 if(auto_counter==0&&flag_get==3){
-     UM1.TargetAngle=-i2*4;
-     UM2.TargetAngle=i2*4;
-			i2--;
-			 auto_counter=1;
-			 if(i2==0)
-			 {flag_get=-1;
-			 auto_counter=1000;
-			 isok=0;
-			checkmode=0;
-			ChassisSpeedRef.forward_back_ref = 0.0f;
-	    ChassisSpeedRef.left_right_ref = 0.0f;}
-		 }
 }
-	if(channelrcol<-500&&resetmode==0)
-		resetmode=1;
-	if(resetmode==1)
-	{
-		flag_get=-1;
-		UM1.TargetAngle=0;
-		UM2.TargetAngle=0;
-		i2=0;
-		isok=0;
-		checkmode=0;
-		if(UM1.RealAngle>-5)
-			resetmode=0;
-		
-	}
-	}
 
-void autoget_final()
+void gonear()
 {
-	if(channelrcol>500&&checkmode==0)
-		checkmode=1;
-	if(checkmode==1){
-		//isokey();
-		isok=2;
-	if(isok==2&&flag_get==-1)
-	{  flag_get=0;
-	   auto_lock=2000;
+	alreadychanged=0;
+	if(UFM.RxMsgC6x0.moment>-4000)
+	UFM.TargetAngle-=3;
+	if(UFM.RxMsgC6x0.moment<=-4000&&alreadychanged==0)
+	{
+		inposition+=1;
+		alreadychanged=1;
+		back_a_little=0;
+		totalstep++;
 	}
-	if(auto_counter==0&&flag_get==0){//向外转 然后气动夹住块
-			ChassisSpeedRef.forward_back_ref = 0.0f;
-	    ChassisSpeedRef.left_right_ref = 0.0f;
-     UM1.TargetAngle=-i2*4;
-     UM2.TargetAngle=i2*4;
-		i2++;
-			 auto_counter=1;
-			 
-			 if(i2==30)
-			 {flag_get=1;HAL_GPIO_WritePin(GPIOI,1<<5,0);auto_counter=1000;}
-		 }
-	 if(auto_counter==0&&flag_get==1){//向内转，但不转到底
-     UM1.TargetAngle=-i2*4;
-     UM2.TargetAngle=i2*4;
-			i2--;
-			 auto_counter=1;
-			 if(i2==4)//这里i2是4，不转到底
-			 {flag_get=2;auto_counter=300;}
-		 }
-	 if(auto_counter==0&&flag_get==2){//移到中间，并进行扔箱
-     UFM.TargetAngle=im*5;
-		 if(im<70)
-		 im++;
+}
+void clawrollout()
+{
+	if(auto_counter==0&&i2<50&&rollout==0)
+	{
+     UM1.TargetAngle=i2*4;
+     UM2.TargetAngle=-i2*4;
+		 i2++;
 		 auto_counter=1;
-			 if(im==70)
-			 {HAL_GPIO_WritePin(GPIOI,1<<5,1);//松开之后等200ms再弹飞
-				if(ifloose==0){
-					cnt_clk=200;
-					ifloose=1;
-				}
-				if(cnt_clk==0){
-				HAL_GPIO_WritePin(GPIOH,1<<4,0);
-        flag_get=3;
-        auto_counter=300;
-        ifloose=0;					
-			 }
-		 }
-	 }
-	 if(auto_counter==0&&flag_get==3){//移到最边上，并进行取箱
-		 UFM.TargetAngle=im*5;
-		 if(im<143)
-			 im++;
-		 auto_counter=1;
-		 if(im==143&&auto_counter==0)//转出去
-		 {
-		 UM1.TargetAngle=-i2*4;
-     UM2.TargetAngle=i2*4;
-			i2++;
-			 auto_counter=1;
-			 if(i2==30)
+	}
+	if(i2==50&&rollout==0)
+		rollout=1;
+}
+void clawrollin()
+{
+	if(auto_counter==0&&i2>4&&rollout==1)
+	{
+		UM1.TargetAngle=i2*4;
+    UM2.TargetAngle=-i2*4;
+		i2--;
+	  auto_counter=1;
+	}
+	if(i2==4&&rollout==1)
+	{
+		totalstep++;
+		rollout=0;
+	}
+}
+
+
+void clawtight()//爪子抓紧与松开
+{
+	if(i2==50)
+	{
+		HAL_GPIO_WritePin(GPIOI,1<<5,0);
+		auto_counter=500;
+		i2--;
+	}
+}
+
+void clawloose()
+{
+	HAL_GPIO_WritePin(GPIOI,1<<5,1);
+	if(alreadywaited==0)
+	{
+		auto_wait=300;
+		alreadywaited=1;
+	}
+}
+void launch()//弹药箱弹射装置
+{
+	if(auto_wait==0&&alreadywaited==1)
+	{
+	  HAL_GPIO_WritePin(GPIOH,1<<4,0);
+	  auto_wait=300;
+		alreadywaited=2;
+	}
+}
+
+void land()
+{
+	if(auto_wait==0&&alreadywaited==2)
+	{
+	  HAL_GPIO_WritePin(GPIOH,1<<4,1);
+		totalstep++;
+		alreadywaited=0;
+	}
+}
+void setlimit(int a)
+{
+	switch(a)
+	{
+		case 1:{ULM.TargetAngle=45;gonear();break;}
+		case 2:{ULM.TargetAngle=0;gofar();break;}
+		case 3:
+		{
+		   if(back_a_little==0)
 			 {
-				 HAL_GPIO_WritePin(GPIOI,1<<5,GPIO_PIN_SET);
-				 flag_get=4;//收紧
+		   UFM.TargetAngle-=30;
+			 back_a_little=1;
+				auto_wait=300;
+			 }				 
+		   ULM.TargetAngle=45;
+			 if(auto_wait==0)
+		   gofar();
+		break;
+		}
+		case 4:{ULM.TargetAngle=135;gonear();break;}
+		case 5:
+		{
+			if(back_a_little==0)
+			{
+		   UFM.TargetAngle+=30;
+			 back_a_little=1;
+				auto_wait=300;
+			}
+		   ULM.TargetAngle=-90;
+			if(auto_wait==0)
+		   gonear();
+		   break;
+		}
+		case 6:
+		{
+			if(back_a_little==0)
+			{
+		   UFM.TargetAngle+=30;
+				back_a_little=1;
+				auto_wait=300;
+			}
+		   ULM.TargetAngle=45;
+			if(auto_wait==0)
+		   gonear();
+		   break;
+		}
+		default: return;
+	}
+}
+
+void gotoanywhere()
+{
+		if(theposition<6)
+		{if(laststate!=inposition)
+			 {
+				 theposition++;
+				laststate=inposition;
 			 }
-		 }
-	 }
-	 if(auto_counter==0&&flag_get==4){
-		 UM1.TargetAngle=-i2*4;
-     UM2.TargetAngle=i2*4;
-			i2--;
-			 auto_counter=1;
-			 if(i2==4)//这里i2是4，不转到底
-			 {flag_get=5;auto_counter=300;}
-	 }
-	
-}	
+			setlimit(theposition);
+		}
+}
+void getabox()
+{
+	clawrollout();
+	clawtight();
+	clawrollin();
+}
+
+void fire()
+{
+	clawloose();
+	launch();
+	land();
+}
+void autoget_test()
+{
+	switch(totalstep)
+	{
+		case 1:{setlimit(1);   break;}
+		case 2:{getabox();     break;}
+		case 3:{setlimit(2);   break;}
+		case 4:{fire();        break;}
+		case 5:{getabox();     break;}
+		case 6:{setlimit(3);   break;}
+		case 7:{fire();        break;}
+		case 8:{getabox();     break;}
+		case 9:{setlimit(4);   break;}
+		case 10:{fire();       break;}
+		case 11:{getabox();    break;}
+		case 12:{setlimit(5);  break;}
+		case 13:{fire();       break;}
+		case 14:{getabox();    break;}
+		case 15:{setlimit(6);  break;}
+		case 16:{fire();       break;}
+		default: break;
+	}
 }
 void Limit_and_Synchronization()
 {
@@ -331,7 +332,7 @@ void Limit_and_Synchronization()
 //	MINMAX(NMUDR.TargetAngle,0,650);
 	
 	MINMAX(NMUDL.TargetAngle,-700,700);//limit
-	MINMAX(UFM.TargetAngle,-700,700);
+	//MINMAX(UFM.TargetAngle,-700,700);
 	NMUDL.TargetAngle = -NMUDR.TargetAngle;//sychronization
 	UM1.TargetAngle=-UM2.TargetAngle;
 	
@@ -356,12 +357,12 @@ void RemoteControlProcess(Remote *rc)
 		
 		//手动挡控制爪子
 		if(channellcol>500)
-		HAL_GPIO_WritePin(GPIOH,1<<2,1);//爪子的向前弹出 0是收起 1是弹出
+		clawout;//左纵向是爪子的向前弹出
 		if(channellcol<-500)
-		HAL_GPIO_WritePin(GPIOH,1<<2,0);//左纵向
+		clawin;
 		
-		UM1.TargetAngle+=channellrow*0.01;
-		UM2.TargetAngle-=channellrow*0.01;//左横向是爪子的上下移动
+		UM1.TargetAngle+=channellrow*0.001;
+		UM2.TargetAngle-=channellrow*0.001;//左横向是爪子的上下移动
 
 //TODO/******暂未用到的参数  发射机构电机********/		
 //		#ifdef USE_CHASSIS_FOLLOW
@@ -391,16 +392,16 @@ void RemoteControlProcess(Remote *rc)
 			NMUDR.TargetAngle -= channellcol * 0.01;
 		}
 	  if(channelrrow>500)
-				HAL_GPIO_WritePin(GPIOI,1<<5,1);//右横向是抓紧的开关
+				testclawtight;//右横向是抓紧的开关
 			if(channelrrow<-500)
-				HAL_GPIO_WritePin(GPIOI,1<<5,0);
+				testclawloose;
 			
 			if(channelrcol>500)
-				HAL_GPIO_WritePin(GPIOH,1<<4,1);//右纵向是弹出的开关
+				testlaunch;//右纵向是弹药箱弹出的开关
 			if(channelrcol<-500)
-				HAL_GPIO_WritePin(GPIOH,1<<4,0);
+				testland;
 			
-			UFM.TargetAngle-=channellrow*0.01;//左横向是水平电机
+			UFM.TargetAngle-=channellrow*0.01;//左横向是水平电机   向左远离（角度++）向右靠近（角度--）
 			
 		
 	/***********量化电机转速*************/	
@@ -427,59 +428,7 @@ void RemoteControlProcess(Remote *rc)
 		
 		
 		
-/**********自动化登岛************
-	if(channelrcol > 200)climb_flag = 1;
-	if(channelrrow > 200)reset_flag = 1;
-	
-	//支撑架下降
-	if(cnt_clk == 0 && climb_state == 1 && climb_flag){ //velocity = 0.35 
-			NMUDL.TargetAngle -= 14;
-			NMUDR.TargetAngle += 14;
-			cnt_clk = 40;
-			cnt++;
-			judgeClimbState();
-	if(cnt >= 50 || NMUDR.TargetAngle > 520){climb_state = 2;cnt = 0;} //time = 2000ms
-	}
-	//小轮前进
-	if(cnt_clk ==0 && climb_state == 2 && climb_flag){
-			if(cnt < 100){ 					//cnt 0-100 小轮前进0.2s 从520到620 velocity = 0.5 
-			NMUDL.TargetAngle -= 5;
-			NMUDR.TargetAngle += 5;
-			NMUDFL.TargetAngle -= 5;
-			NMUDFR.TargetAngle += 5;
-			cnt_clk = 2;
-			cnt++;
-			if(NMUDR.TargetAngle > 640){ChassisSpeedRef.forward_back_ref = 350 * RC_CHASSIS_SPEED_REF;cnt = 100;}
-		}//time = 0.2s  R.angle = 500 
-			if(cnt >= 100 && cnt < 200){						//大轮子使能，支撑架升起一点点，让轮胎触底
-				ChassisSpeedRef.forward_back_ref = 350 * RC_CHASSIS_SPEED_REF;		
-  //到再降到605
-				if(NMUDR.TargetAngle > 590){//降到接触位
-					NMUDL.TargetAngle += 1;
-					NMUDR.TargetAngle -= 1;
-					NMUDFL.TargetAngle -= 10;	//小轮前进
-					NMUDFR.TargetAngle += 10;
-					cnt_clk = 10;cnt++;
-				}else{
-					NMUDFL.TargetAngle -= 10;	//保持接触位，小轮前进
-					NMUDFR.TargetAngle += 10;
-					cnt_clk = 10;cnt++;}
-				}
-			if(cnt >= 200 && cnt < 350){//轮子继续前进，支撑架快速升起
-				NMUDL.TargetAngle += 100;
-				NMUDR.TargetAngle -= 100;
-				cnt_clk = 5;
-				cnt++;}
-			if(cnt >= 300){//重置
-				ChassisSpeedRef.forward_back_ref = 0;
-				climb_state = 1;
-				cnt = 0;
-				reset_flag = 1;
-				climb_flag = 0;
-			}
-			}
 
-**********************/
 }
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
@@ -500,25 +449,32 @@ void RemoteControlProcess(Remote *rc)
 		 }*/
 		 
 /****************************自检**********************************/
-      reset_Pos();
-		 if(UM1.RxMsgC6x0.moment>7500)
-			 UM1.TargetAngle=0;
-		 if(UFM.RxMsgC6x0.moment>5000)
-			 UFM.TargetAngle=710;
-		 if(UFM.RxMsgC6x0.moment<-5500)
-			 UFM.TargetAngle=0;
+      //reset_Pos();
 			//*****调试模式UFM.RxMsgC6x0.moment   >5000 在远端卡住 <-5000 在近端卡住  + 往远端移动  - 近端移动 
 			//**targetAngle 总行程830左右
 			//360°共11个齿 每个齿12.7mm 
 			//最靠近电机moment是负的 realangle=0,中间是410左右 最远端700左右
-     UM1.TargetAngle+=channellcol*0.01;
-		  UM2.TargetAngle-=channellcol*0.01;
-		  if(channelrrow>500)
-				HAL_GPIO_WritePin(GPIOI,1<<5,1);
-			if(channelrrow<-500)
-				HAL_GPIO_WritePin(GPIOI,1<<5,0);
-	    autoget_final();
-				
+	    //autoget_final();
+			ULM.TargetAngle+=channelrrow*0.01;
+			//比较健康的moment是3000    靠近电机-3000 远离电机3000 
+			
+			if(channellrow>500&&letsrock==0)
+				letsrock=1;
+			if(channellrow<-500)
+			{ letsrock=0;
+				theposition=0;
+				inposition=1;
+				back_a_little=0;
+				laststate=0;
+				totalstep=1;
+				i2=0;
+				UM1.TargetAngle=0;
+				UM2.TargetAngle=0;
+				rollout=0;
+			}
+			
+			if(letsrock==1)
+				autoget_test();
 			
 	}
 	Limit_and_Synchronization();

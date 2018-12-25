@@ -21,6 +21,7 @@ MusicNote SuperMario[] = {
 
 PID_Regulator_t CMRotatePID = CHASSIS_MOTOR_ROTATE_PID_DEFAULT; 
 extern int32_t auto_counter;//自动取弹时间中断常量
+extern int32_t auto_wait;   //限位器等待
 extern int32_t auto_lock; //锁定底盘
 extern int32_t cnt_clk;    //登岛时间中断常量
 
@@ -164,6 +165,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(auto_counter > 0) auto_counter--;
 		if(cnt_clk > 0) cnt_clk--;
 		if(auto_lock>0) auto_lock--;
+		if(auto_wait>0) auto_wait--;
 		
 		if (rc_update)
 		{

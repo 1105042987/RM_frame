@@ -53,10 +53,10 @@ MotorINFO GMY  = Gimbal_MOTORINFO_Init(-1.0,&ControlGMY,
 MotorINFO STIR = Normal_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
 								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
-MotorINFO NMUDL = Normal_MOTORINFO_Init(36.0,&ControlNM,
+MotorINFO NMUDL = Normal_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
 								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
-MotorINFO NMUDR = Normal_MOTORINFO_Init(36.0,&ControlNM,
+MotorINFO NMUDR = Normal_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
 								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
 								
@@ -66,10 +66,10 @@ MotorINFO NMUDFL = Normal_MOTORINFO_Init(19.0,&ControlNM,
 MotorINFO NMUDFR = Normal_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
 								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));		
-MotorINFO UM1 = Normal_MOTORINFO_Init(36.0,&ControlNM,
+MotorINFO UM1 = Normal_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
 								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));								
-MotorINFO UM2 = Normal_MOTORINFO_Init(36.0,&ControlNM,
+MotorINFO UM2 = Normal_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
 								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));	
 MotorINFO MDL1 = Normal_MOTORINFO_Init(19.0,&ControlNM,
@@ -78,16 +78,19 @@ MotorINFO MDL1 = Normal_MOTORINFO_Init(19.0,&ControlNM,
 MotorINFO MDL2 = Normal_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
 								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));		
-MotorINFO UFM = Normal_MOTORINFO_Init(36.0,&ControlNM,
+MotorINFO UFM = Normal_MOTORINFO_Init(19.0,&ControlNM,
+								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
+								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));	
+MotorINFO ULM = Normal_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
 								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));								
 							
-
+//2006ÊÇ36 3508ÊÇ19
 //MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
 //MotorINFO* can2[8]={&CMFL,&CMFR,&CMBL,&CMBR,&NMUDL,&NMUDR,0,0};
 
 MotorINFO* can1[8]={&CMFL,&CMFR,&CMBL,&CMBR,&NMUDL,&NMUDR,&UFM,0};
-MotorINFO* can2[8]={&MDL1,&MDL2,&UM1,&UM2,&NMUDFL,&NMUDFR,0,0};
+MotorINFO* can2[8]={&MDL1,&MDL2,&UM1,&UM2,&NMUDFL,&NMUDFR,&ULM,0};
 
 
 void ControlNM(MotorINFO* id)
