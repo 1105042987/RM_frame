@@ -12,10 +12,10 @@
 #include "includes.h"
 #define clawout   HAL_GPIO_WritePin(GPIOH,1<<2,1)//爪子弹出
 #define clawin    HAL_GPIO_WritePin(GPIOH,1<<2,0)
-#define testclawtight HAL_GPIO_WritePin(GPIOI,1<<5,0)
-#define testclawloose HAL_GPIO_WritePin(GPIOI,1<<5,1)
-#define testlaunch    HAL_GPIO_WritePin(GPIOH,1<<4,0)
-#define testland      HAL_GPIO_WritePin(GPIOH,1<<4,1)
+#define testclawtight HAL_GPIO_WritePin(GPIOI,1<<5,1)
+#define testclawloose HAL_GPIO_WritePin(GPIOI,1<<5,0)
+#define testlaunch    HAL_GPIO_WritePin(GPIOH,1<<4,1)
+#define testland      HAL_GPIO_WritePin(GPIOH,1<<4,0)
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
@@ -163,14 +163,14 @@ void gonear()
 }
 void clawrollout()
 {
-	if(auto_counter==0&&i2<50&&rollout==0)
+	if(auto_counter==0&&i2<42&&rollout==0)
 	{
      UM1.TargetAngle=i2*4;
      UM2.TargetAngle=-i2*4;
 		 i2++;
 		 auto_counter=1;
 	}
-	if(i2==50&&rollout==0)
+	if(i2==42&&rollout==0)
 		rollout=1;
 }
 void clawrollin()
@@ -192,9 +192,9 @@ void clawrollin()
 
 void clawtight()//爪子抓紧与松开
 {
-	if(i2==50)
+	if(i2==42)
 	{
-		HAL_GPIO_WritePin(GPIOI,1<<5,0);
+		HAL_GPIO_WritePin(GPIOI,1<<5,1);
 		auto_counter=500;
 		i2--;
 	}
@@ -202,7 +202,7 @@ void clawtight()//爪子抓紧与松开
 
 void clawloose()
 {
-	HAL_GPIO_WritePin(GPIOI,1<<5,1);
+	HAL_GPIO_WritePin(GPIOI,1<<5,0);
 	if(alreadywaited==0)
 	{
 		auto_wait=300;
@@ -213,7 +213,7 @@ void launch()//弹药箱弹射装置
 {
 	if(auto_wait==0&&alreadywaited==1)
 	{
-	  HAL_GPIO_WritePin(GPIOH,1<<4,0);
+	  HAL_GPIO_WritePin(GPIOH,1<<4,1);
 	  auto_wait=300;
 		alreadywaited=2;
 	}
@@ -223,7 +223,7 @@ void land()
 {
 	if(auto_wait==0&&alreadywaited==2)
 	{
-	  HAL_GPIO_WritePin(GPIOH,1<<4,1);
+	  HAL_GPIO_WritePin(GPIOH,1<<4,0);
 		totalstep++;
 		alreadywaited=0;
 	}
@@ -314,14 +314,14 @@ void autoget_test()
 		case 6:{setlimit(3);   break;}
 		case 7:{fire();        break;}
 		case 8:{getabox();     break;}
-		case 9:{setlimit(4);   break;}
+		/*case 9:{setlimit(4);   break;}
 		case 10:{fire();       break;}
 		case 11:{getabox();    break;}
 		case 12:{setlimit(5);  break;}
 		case 13:{fire();       break;}
 		case 14:{getabox();    break;}
 		case 15:{setlimit(6);  break;}
-		case 16:{fire();       break;}
+		case 16:{fire();       break;}*/
 		default: break;
 	}
 }
@@ -471,6 +471,7 @@ void RemoteControlProcess(Remote *rc)
 				UM1.TargetAngle=0;
 				UM2.TargetAngle=0;
 				rollout=0;
+				testclawloose;
 			}
 			
 			if(letsrock==1)
