@@ -10,12 +10,16 @@
   ******************************************************************************
   */
 #include "includes.h"
+<<<<<<< HEAD
 #define clawout   HAL_GPIO_WritePin(GPIOH,1<<2,1)//×¦×Óµ¯³ö
 #define clawin    HAL_GPIO_WritePin(GPIOH,1<<2,0)
 #define testclawtight HAL_GPIO_WritePin(GPIOI,1<<5,1)
 #define testclawloose HAL_GPIO_WritePin(GPIOI,1<<5,0)
 #define testlaunch    HAL_GPIO_WritePin(GPIOI,1<<6,1)
 #define testland      HAL_GPIO_WritePin(GPIOI,1<<6,0)
+=======
+
+>>>>>>> parent of 9d2ca7c... å…¨ä»£ç é‡æ„+å®Œå…¨æµç¨‹
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//Ğ±ÆÂº¯Êı
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
@@ -30,7 +34,6 @@ int16_t testIntensity = 0;
 int32_t auto_counter=0;		//ÓÃÓÚ×¼È·ÑÓÊ±µÄÍê³ÉÄ³ÊÂ¼ş
 int32_t auto_lock=0;
 int32_t cnt_clk;
-int32_t auto_wait=0;
 int16_t cnt = 0;
 int ifset=-5;//ÓÃÓÚ×Ô¼ì
 int cheeeeck=0;
@@ -49,7 +52,64 @@ extern uint32_t ADC2_value[100];
 	uint8_t climb_state = 1;
 	uint8_t climb_flag = 0;
 	/**********µÇµº»ú¹¹Ì§Éı¸´Î»************/
-	
+	void reset_Pos(){
+	if(reset_flag){
+	if(cnt_clk == 0){
+			cnt++;
+			NMUDL.TargetAngle += 5;
+			NMUDR.TargetAngle -= 5;
+			cnt_clk = 5;
+	}
+	if(cnt > 100 || NMUDR.RxMsgC6x0.moment<-14750){
+			reset_flag = 0;
+			cnt = 0;
+
+			NMUDL.RealAngle = 0;
+			NMUDR.RealAngle = 0;
+			NMUDL.TargetAngle = 0;
+			NMUDR.TargetAngle = 0;
+			NMUDL.TargetAngle -= 20;
+			NMUDR.TargetAngle += 20;
+		//
+			NMUDL.RealAngle = 0;
+			NMUDR.RealAngle = 0;
+		ifset=0;
+		}
+	}
+	if(ifset==0)
+			{
+			  if(UM1.RxMsgC6x0.moment<7000)
+				{UM1.TargetAngle+=3;
+				UM2.TargetAngle-=3;
+				}
+				if(UM1.RxMsgC6x0.moment>=7000)
+				{
+					UM1.RealAngle=0;
+					UM2.RealAngle=0;
+					UM1.TargetAngle=0;
+					UM2.TargetAngle=0;
+					HAL_GPIO_WritePin(GPIOH,1<<2,0);//×¦×ÓµÄÏòÇ°µ¯³ö 0ÊÇÊÕÆğ 1ÊÇµ¯³ö
+	        HAL_GPIO_WritePin(GPIOH,1<<4,0);//µ¯Éä×°ÖÃ0ÊÇ·ÅÏÂ 1ÊÇµ¯Æğ 
+					HAL_GPIO_WritePin(GPIOI,1<<5,1);//×¦×Ó×¥½ôÓëËÉ¿ª 1ÊÇËÉ¿ª
+					ifset=1;
+				}
+				
+			}
+	if(ifset==1)
+	{
+		HAL_GPIO_WritePin(GPIOI,1<<5,1);
+		HAL_GPIO_WritePin(GPIOH,1<<4,1);//µ¯Éä×°ÖÃ0ÊÇ·ÅÏÂ 1ÊÇµ¯Æğ
+		if(UFM.RxMsgC6x0.moment>-5000)
+		UFM.TargetAngle-=3;
+		if(UFM.RxMsgC6x0.moment<=-5000)
+		{
+			UFM.RealAngle=0;
+			UFM.TargetAngle=0;
+			ifset=233;
+		}
+	}
+			
+}
 /**************Ò»¼ü¸´Î»**************/
 	void resetClimbState(){
 		
@@ -66,16 +126,6 @@ int  im=0;
 int checkmode=0;
 int resetmode=0;
 int ifloose=0;
-//ÏÂÃæÊÇµ÷ÊÔÓÃ±äÁ¿ ¸´Î»Ê±¼ÇµÃÈ«²¿¸´Î»
-int theposition=0;
-int inposition=1;
-int laststate=0;
-int letsrock=0;
-int alreadychanged=0;
-int back_a_little=0;
-int totalstep=1;
-int rollout=0;
-int alreadywaited=0;
 /*****************ºìÍâ´«¸ĞÆ÷Ïû¶¶******************/
 int tmp[2];
 double count[2];
@@ -134,27 +184,66 @@ void isokey()
 		
 	
 }
-void gofar()
+void autoget()
 {
-	alreadychanged=0;
-	if(UFM.RxMsgC6x0.moment<4000)
-	UFM.TargetAngle+=3;
-	if(UFM.RxMsgC6x0.moment>=4000&&alreadychanged==0)
-	{ 
-		inposition+=1;
-		alreadychanged=1;
-		back_a_little=0;
-		totalstep++;
+	 a=average(ADC_value);
+   b=average(ADC2_value);
+	if(channelrcol>500&&checkmode==0)
+		checkmode=1;
+	if(checkmode==1){
+		isokey();
+	if(isok==2&&flag_get==-1)
+	{  flag_get=0;
+	   auto_lock=2000;
 	}
+     if(auto_counter==0&&flag_get==0){
+			ChassisSpeedRef.forward_back_ref = 0.0f;
+	    ChassisSpeedRef.left_right_ref = 0.0f;
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2++;
+			 auto_counter=1;
+			 
+			 if(i2==30)
+			 {flag_get=1;HAL_GPIO_WritePin(GPIOI,1<<5,GPIO_PIN_SET);auto_counter=1000;}
+		 }
+		 if(auto_counter==0&&flag_get==1){
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2--;
+			 auto_counter=1;
+			 if(i2==0)
+			 {flag_get=2;auto_counter=300;}
+		 }
+		 if(auto_counter==0&&flag_get==2){
+     UM1.TargetAngle=-i2*10;
+     UM2.TargetAngle=i2*10;
+			i2++;
+			 auto_counter=1;
+			 if(i2==8)
+			 {HAL_GPIO_WritePin(GPIOI,1<<5,GPIO_PIN_RESET);}
+			 if(i2==12)
+			 {flag_get=3;auto_counter=1000;isok=0;}
+		 }
+		 if(auto_counter==0&&flag_get==3){
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2--;
+			 auto_counter=1;
+			 if(i2==0)
+			 {flag_get=-1;
+			 auto_counter=1000;
+			 isok=0;
+			checkmode=0;
+			ChassisSpeedRef.forward_back_ref = 0.0f;
+	    ChassisSpeedRef.left_right_ref = 0.0f;}
+		 }
 }
-
-void gonear()
-{
-	alreadychanged=0;
-	if(UFM.RxMsgC6x0.moment>-4000)
-	UFM.TargetAngle-=3;
-	if(UFM.RxMsgC6x0.moment<=-4000&&alreadychanged==0)
+	if(channelrcol<-500&&resetmode==0)
+		resetmode=1;
+	if(resetmode==1)
 	{
+<<<<<<< HEAD
 		inposition+=1;
 		alreadychanged=1;
 		back_a_little=0;
@@ -216,11 +305,23 @@ void launch()//µ¯Ò©Ïäµ¯Éä×°ÖÃ
 	  HAL_GPIO_WritePin(GPIOI,1<<6,1);
 	  auto_wait=300;
 		alreadywaited=2;
+=======
+		flag_get=-1;
+		UM1.TargetAngle=0;
+		UM2.TargetAngle=0;
+		i2=0;
+		isok=0;
+		checkmode=0;
+		if(UM1.RealAngle>-5)
+			resetmode=0;
+		
 	}
-}
+>>>>>>> parent of 9d2ca7c... å…¨ä»£ç é‡æ„+å®Œå…¨æµç¨‹
+	}
 
-void land()
+void autoget_final()
 {
+<<<<<<< HEAD
 	if(auto_wait==0&&alreadywaited==2)
 	{
 	  HAL_GPIO_WritePin(GPIOI,1<<6,0);
@@ -275,17 +376,72 @@ void setlimit(int a)
 		   break;
 		}
 		default: return;
+=======
+	if(channelrcol>500&&checkmode==0)
+		checkmode=1;
+	if(checkmode==1){
+		//isokey();
+		isok=2;
+	if(isok==2&&flag_get==-1)
+	{  flag_get=0;
+	   auto_lock=2000;
+>>>>>>> parent of 9d2ca7c... å…¨ä»£ç é‡æ„+å®Œå…¨æµç¨‹
 	}
-}
-
-void gotoanywhere()
-{
-		if(theposition<6)
-		{if(laststate!=inposition)
-			 {
-				 theposition++;
-				laststate=inposition;
+	if(auto_counter==0&&flag_get==0){//ÏòÍâ×ª È»ºóÆø¶¯¼Ğ×¡¿é
+			ChassisSpeedRef.forward_back_ref = 0.0f;
+	    ChassisSpeedRef.left_right_ref = 0.0f;
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+		i2++;
+			 auto_counter=1;
+			 
+			 if(i2==30)
+			 {flag_get=1;HAL_GPIO_WritePin(GPIOI,1<<5,0);auto_counter=1000;}
+		 }
+	 if(auto_counter==0&&flag_get==1){//ÏòÄÚ×ª£¬µ«²»×ªµ½µ×
+     UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2--;
+			 auto_counter=1;
+			 if(i2==4)//ÕâÀïi2ÊÇ4£¬²»×ªµ½µ×
+			 {flag_get=2;auto_counter=300;}
+		 }
+	 if(auto_counter==0&&flag_get==2){//ÒÆµ½ÖĞ¼ä£¬²¢½øĞĞÈÓÏä
+     UFM.TargetAngle=im*5;
+		 if(im<70)
+		 im++;
+		 auto_counter=1;
+			 if(im==70)
+			 {HAL_GPIO_WritePin(GPIOI,1<<5,1);//ËÉ¿ªÖ®ºóµÈ200msÔÙµ¯·É
+				if(ifloose==0){
+					cnt_clk=200;
+					ifloose=1;
+				}
+				if(cnt_clk==0){
+				HAL_GPIO_WritePin(GPIOH,1<<4,0);
+        flag_get=3;
+        auto_counter=300;
+        ifloose=0;					
 			 }
+		 }
+	 }
+	 if(auto_counter==0&&flag_get==3){//ÒÆµ½×î±ßÉÏ£¬²¢½øĞĞÈ¡Ïä
+		 UFM.TargetAngle=im*5;
+		 if(im<143)
+			 im++;
+		 auto_counter=1;
+		 if(im==143&&auto_counter==0)//×ª³öÈ¥
+		 {
+		 UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2++;
+			 auto_counter=1;
+			 if(i2==30)
+			 {
+				 HAL_GPIO_WritePin(GPIOI,1<<5,GPIO_PIN_SET);
+				 flag_get=4;//ÊÕ½ô
+			 }
+<<<<<<< HEAD
 			setlimit(theposition);
 		}
 }
@@ -324,6 +480,20 @@ void autoget_test()
 		case 16:{fire();       break;}*/
 		default: break;
 	}
+=======
+		 }
+	 }
+	 if(auto_counter==0&&flag_get==4){
+		 UM1.TargetAngle=-i2*4;
+     UM2.TargetAngle=i2*4;
+			i2--;
+			 auto_counter=1;
+			 if(i2==4)//ÕâÀïi2ÊÇ4£¬²»×ªµ½µ×
+			 {flag_get=5;auto_counter=300;}
+	 }
+	
+}	
+>>>>>>> parent of 9d2ca7c... å…¨ä»£ç é‡æ„+å®Œå…¨æµç¨‹
 }
 void Limit_and_Synchronization()
 {
@@ -332,7 +502,7 @@ void Limit_and_Synchronization()
 //	MINMAX(NMUDR.TargetAngle,0,650);
 	
 	MINMAX(NMUDL.TargetAngle,-700,700);//limit
-	//MINMAX(UFM.TargetAngle,-700,700);
+	MINMAX(UFM.TargetAngle,-700,700);
 	NMUDL.TargetAngle = -NMUDR.TargetAngle;//sychronization
 	UM1.TargetAngle=-UM2.TargetAngle;
 	
@@ -357,12 +527,12 @@ void RemoteControlProcess(Remote *rc)
 		
 		//ÊÖ¶¯µ²¿ØÖÆ×¦×Ó
 		if(channellcol>500)
-		clawout;//×ó×İÏòÊÇ×¦×ÓµÄÏòÇ°µ¯³ö
+		HAL_GPIO_WritePin(GPIOH,1<<2,1);//×¦×ÓµÄÏòÇ°µ¯³ö 0ÊÇÊÕÆğ 1ÊÇµ¯³ö
 		if(channellcol<-500)
-		clawin;
+		HAL_GPIO_WritePin(GPIOH,1<<2,0);//×ó×İÏò
 		
-		UM1.TargetAngle+=channellrow*0.001;
-		UM2.TargetAngle-=channellrow*0.001;//×óºáÏòÊÇ×¦×ÓµÄÉÏÏÂÒÆ¶¯
+		UM1.TargetAngle+=channellrow*0.01;
+		UM2.TargetAngle-=channellrow*0.01;//×óºáÏòÊÇ×¦×ÓµÄÉÏÏÂÒÆ¶¯
 
 //TODO/******ÔİÎ´ÓÃµ½µÄ²ÎÊı  ·¢Éä»ú¹¹µç»ú********/		
 //		#ifdef USE_CHASSIS_FOLLOW
@@ -392,16 +562,16 @@ void RemoteControlProcess(Remote *rc)
 			NMUDR.TargetAngle -= channellcol * 0.01;
 		}
 	  if(channelrrow>500)
-				testclawtight;//ÓÒºáÏòÊÇ×¥½ôµÄ¿ª¹Ø
+				HAL_GPIO_WritePin(GPIOI,1<<5,1);//ÓÒºáÏòÊÇ×¥½ôµÄ¿ª¹Ø
 			if(channelrrow<-500)
-				testclawloose;
+				HAL_GPIO_WritePin(GPIOI,1<<5,0);
 			
 			if(channelrcol>500)
-				testlaunch;//ÓÒ×İÏòÊÇµ¯Ò©Ïäµ¯³öµÄ¿ª¹Ø
+				HAL_GPIO_WritePin(GPIOH,1<<4,1);//ÓÒ×İÏòÊÇµ¯³öµÄ¿ª¹Ø
 			if(channelrcol<-500)
-				testland;
+				HAL_GPIO_WritePin(GPIOH,1<<4,0);
 			
-			UFM.TargetAngle-=channellrow*0.01;//×óºáÏòÊÇË®Æ½µç»ú   Ïò×óÔ¶Àë£¨½Ç¶È++£©ÏòÓÒ¿¿½ü£¨½Ç¶È--£©
+			UFM.TargetAngle-=channellrow*0.01;//×óºáÏòÊÇË®Æ½µç»ú
 			
 		
 	/***********Á¿»¯µç»ú×ªËÙ*************/	
@@ -428,7 +598,59 @@ void RemoteControlProcess(Remote *rc)
 		
 		
 		
+/**********×Ô¶¯»¯µÇµº************
+	if(channelrcol > 200)climb_flag = 1;
+	if(channelrrow > 200)reset_flag = 1;
+	
+	//Ö§³Å¼ÜÏÂ½µ
+	if(cnt_clk == 0 && climb_state == 1 && climb_flag){ //velocity = 0.35 
+			NMUDL.TargetAngle -= 14;
+			NMUDR.TargetAngle += 14;
+			cnt_clk = 40;
+			cnt++;
+			judgeClimbState();
+	if(cnt >= 50 || NMUDR.TargetAngle > 520){climb_state = 2;cnt = 0;} //time = 2000ms
+	}
+	//Ğ¡ÂÖÇ°½ø
+	if(cnt_clk ==0 && climb_state == 2 && climb_flag){
+			if(cnt < 100){ 					//cnt 0-100 Ğ¡ÂÖÇ°½ø0.2s ´Ó520µ½620 velocity = 0.5 
+			NMUDL.TargetAngle -= 5;
+			NMUDR.TargetAngle += 5;
+			NMUDFL.TargetAngle -= 5;
+			NMUDFR.TargetAngle += 5;
+			cnt_clk = 2;
+			cnt++;
+			if(NMUDR.TargetAngle > 640){ChassisSpeedRef.forward_back_ref = 350 * RC_CHASSIS_SPEED_REF;cnt = 100;}
+		}//time = 0.2s  R.angle = 500 
+			if(cnt >= 100 && cnt < 200){						//´óÂÖ×ÓÊ¹ÄÜ£¬Ö§³Å¼ÜÉıÆğÒ»µãµã£¬ÈÃÂÖÌ¥´¥µ×
+				ChassisSpeedRef.forward_back_ref = 350 * RC_CHASSIS_SPEED_REF;		
+  //µ½ÔÙ½µµ½605
+				if(NMUDR.TargetAngle > 590){//½µµ½½Ó´¥Î»
+					NMUDL.TargetAngle += 1;
+					NMUDR.TargetAngle -= 1;
+					NMUDFL.TargetAngle -= 10;	//Ğ¡ÂÖÇ°½ø
+					NMUDFR.TargetAngle += 10;
+					cnt_clk = 10;cnt++;
+				}else{
+					NMUDFL.TargetAngle -= 10;	//±£³Ö½Ó´¥Î»£¬Ğ¡ÂÖÇ°½ø
+					NMUDFR.TargetAngle += 10;
+					cnt_clk = 10;cnt++;}
+				}
+			if(cnt >= 200 && cnt < 350){//ÂÖ×Ó¼ÌĞøÇ°½ø£¬Ö§³Å¼Ü¿ìËÙÉıÆğ
+				NMUDL.TargetAngle += 100;
+				NMUDR.TargetAngle -= 100;
+				cnt_clk = 5;
+				cnt++;}
+			if(cnt >= 300){//ÖØÖÃ
+				ChassisSpeedRef.forward_back_ref = 0;
+				climb_state = 1;
+				cnt = 0;
+				reset_flag = 1;
+				climb_flag = 0;
+			}
+			}
 
+**********************/
 }
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
@@ -449,11 +671,18 @@ void RemoteControlProcess(Remote *rc)
 		 }*/
 		 
 /****************************×Ô¼ì**********************************/
-      //reset_Pos();
+      reset_Pos();
+		 if(UM1.RxMsgC6x0.moment>7500)
+			 UM1.TargetAngle=0;
+		 if(UFM.RxMsgC6x0.moment>5000)
+			 UFM.TargetAngle=710;
+		 if(UFM.RxMsgC6x0.moment<-5500)
+			 UFM.TargetAngle=0;
 			//*****µ÷ÊÔÄ£Ê½UFM.RxMsgC6x0.moment   >5000 ÔÚÔ¶¶Ë¿¨×¡ <-5000 ÔÚ½ü¶Ë¿¨×¡  + ÍùÔ¶¶ËÒÆ¶¯  - ½ü¶ËÒÆ¶¯ 
 			//**targetAngle ×ÜĞĞ³Ì830×óÓÒ
 			//360¡ã¹²11¸ö³İ Ã¿¸ö³İ12.7mm 
 			//×î¿¿½üµç»úmomentÊÇ¸ºµÄ realangle=0,ÖĞ¼äÊÇ410×óÓÒ ×îÔ¶¶Ë700×óÓÒ
+<<<<<<< HEAD
 	    //autoget_final();
 			ULM.TargetAngle+=channelrrow*0.01;
 			//±È½Ï½¡¿µµÄmomentÊÇ3000    ¿¿½üµç»ú-3000 Ô¶Àëµç»ú3000 
@@ -476,6 +705,16 @@ void RemoteControlProcess(Remote *rc)
 			
 			if(letsrock==1)
 				autoget_test();
+=======
+     UM1.TargetAngle+=channellcol*0.01;
+		  UM2.TargetAngle-=channellcol*0.01;
+		  if(channelrrow>500)
+				HAL_GPIO_WritePin(GPIOI,1<<5,1);
+			if(channelrrow<-500)
+				HAL_GPIO_WritePin(GPIOI,1<<5,0);
+	    autoget_final();
+				
+>>>>>>> parent of 9d2ca7c... å…¨ä»£ç é‡æ„+å®Œå…¨æµç¨‹
 			
 	}
 	Limit_and_Synchronization();

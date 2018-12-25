@@ -171,10 +171,17 @@ int main(void)
 	HAL_GPIO_WritePin(GPIOH,1<<5,1);
 	HAL_GPIO_WritePin(GPIOH,1<<3,1);
 	HAL_GPIO_WritePin(GPIOI,1<<5,0);
+<<<<<<< HEAD
 	
 	
 	
 	//�洢ADC�Ļش�ֵ
+=======
+	HAL_GPIO_WritePin(GPIOH,1<<2,0);//爪子的向前弹出
+	HAL_GPIO_WritePin(GPIOH,1<<4,1);//弹射装置1是放下 0是弹起
+	HAL_GPIO_WritePin(GPIOI,1<<5,1);//爪子抓紧与松开
+	//开启红外传感器，并把数据存在ADC_value里
+>>>>>>> parent of 9d2ca7c... 全代码重构+完全流程
   HAL_ADC_Start_DMA(&hadc1,ADC_value,10);
   HAL_ADC_Start_DMA(&hadc2,ADC2_value,10);
 	
