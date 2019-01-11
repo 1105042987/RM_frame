@@ -14,7 +14,9 @@
 
 ### 业务代码书写
 FunctionTask.c中书写所有的控制代码，如：从遥控器/键鼠接收到xxx消息，执行xxx动作。
+
 动作控制通过更改MotorINFO结构体中的Target来实现（底盘电机除外）。
+
 底盘电机控制有一套相互影响的逻辑，通过更改结构体ChassisSpeed_Ref_t的对象ChassisSpeedRef中的三个子参量进行平移旋转控制。
 
 ### 已完成模块启用
