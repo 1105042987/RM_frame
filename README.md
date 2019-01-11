@@ -5,7 +5,7 @@
 
 使用者在MotorTask.c中配置电机相应信息，具有三种已规范初始化方法：
 > 1. NomalMotorInfo(用于控制位置速度双环电机，控制函数选择ControlNM)
-> 1. GimbalMotorInfo(用于控制云台电机，控制函数选择ControlGMYAW或者ControlGMPITCH)
+> 1. GimbalMotorInfo(用于控制云台电机，控制函数选择ControlGMY或者ControlGMP)
 > 1. ChassisMotorInfo(用于控制单速度环电机，控制函数选择ControlCM)
 
 初始化完成后将其挂在在对应的MotorINFO canx[8] 数组上，其中x可取1、2，分别代表两条can线，在数组中的位置表示电机id号码，0-7号位一一对应0x201-0x208。
