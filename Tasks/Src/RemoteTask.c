@@ -125,7 +125,7 @@ void RemoteDataProcess(uint8_t *pData)
 		{
 			 
 		}break;
-	}
+	}	
 }
 
 //初始化遥控器串口DMA接收
@@ -134,27 +134,55 @@ void InitRemoteControl(){
 			Error_Handler();
 	} 
 	FunctionTaskInit();
+	rx_free = 1;
 }
 
 //遥控器串口中断入口函数，从此处开始执行
 uint8_t rc_first_frame = 0;
 uint8_t rc_update = 0;
 uint8_t rc_cnt = 0;
+uint8_t tx_cnt = 200;
+
+uint8_t  tx_free = 1;
+uint8_t  rx_free = 1;
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
 	if(UartHandle == &RC_UART){
 		rc_update = 1;
+		rx_free = 1;
 	}
-	else if(UartHandle == &MANIFOLD_UART)
+	else if(UartHandle == &GYRO_UART)
 	{
-		//manifoldUartRxCpltCallback();  //妙算信号数据解算
-		#ifdef DEBUG_MODE
-		ctrlUartRxCpltCallback();
+		#ifdef USE_GYRO
+		gyroUartRxCpltCallback();
 		#endif
 	}
 	else if(UartHandle == &JUDGE_UART)
 	{
 		judgeUartRxCpltCallback();  //裁判系统数据解算
 	}
-}   
+	else if(UartHandle == &AUTOAIM_UART)
+	{
+		#ifdef USE_AUTOAIM
+		AutoAimRxEnemyINFO();
+		#endif /*USE_AUTOAIM*/
+	}
+}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
+{
+	if(UartHandle == &JUDGE_UART)
+	{
+		tx_free = 1;
+	}
+}
+void UART_IDLE_Handler(UART_HandleTypeDef *UartHandle)
+{
+	if(UartHandle == &DEBUG_UART)
+	{
+		#ifdef DEBUG_MODE
+		ctrlUartRxCpltCallback();
+		#endif
+	}
+}

@@ -13,6 +13,7 @@
 
 #define CanRxGetU16(canRxMsg, num) (((uint16_t)canRxMsg.Data[num * 2] << 8) | (uint16_t)canRxMsg.Data[num * 2 + 1])
 uint8_t isRcan1Started = 0, isRcan2Started = 0;
+uint8_t isCan11FirstRx = 0, isCan12FirstRx = 0, isCan21FirstRx = 0, isCan22FirstRx = 0;
 CanRxMsgTypeDef Can1RxMsg,Can2RxMsg;
 ESCC6x0RxMsg_t CMFLRx,CMBLRx,CMFRRx,CMBRRx;
 uint8_t can1_update = 1;
@@ -36,6 +37,19 @@ void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef* hcan)
 /********************CAN******************************/
 void InitCanReception()
 {
+	#ifndef CAN11
+	isCan11FirstRx = 1;
+	#endif
+	#ifndef CAN12
+	isCan12FirstRx = 1;
+	#endif
+	#ifndef CAN21
+	isCan21FirstRx = 1;
+	#endif
+	#ifndef CAN22
+	isCan22FirstRx = 1;
+	#endif
+	
 	//http://www.eeworld.com.cn/mcu/article_2016122732674_3.html
 	hcan1.pRxMsg = &Can1RxMsg;
 	/*##-- Configure the CAN1 Filter ###########################################*/
@@ -86,6 +100,8 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 			if(can1[i]==0)continue;
 			if(Can1RxMsg.StdId==can1[i]->RXID)
 			{
+				if(i<4) isCan11FirstRx = 1;
+				else if(i<8) isCan12FirstRx = 1;
 				flag=1;
 				switch(can1[i]->ESCtype)
 				{
@@ -119,6 +135,8 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 			if(can2[i]==0)continue;
 			if(Can2RxMsg.StdId==can2[i]->RXID)
 			{
+				if(i<4) isCan21FirstRx = 1;
+				else if(i<8) isCan22FirstRx = 1;
 				flag=1;
 				switch(can2[i]->ESCtype)
 				{

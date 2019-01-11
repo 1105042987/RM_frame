@@ -67,10 +67,10 @@ typedef struct {
 #define PLAY(note, time) {\
 	while(auto_counter != 0);\
 	if(note == 0){ \
-		__HAL_TIM_SET_AUTORELOAD(BUZZER_TIM, 0);\
+		__HAL_TIM_SET_AUTORELOAD(&BUZZER_TIM, 0);\
 	}else{ \
-		__HAL_TIM_SET_AUTORELOAD(BUZZER_TIM, 1000000 / note); \
-		__HAL_TIM_SET_COMPARE(BUZZER_TIM, TIM_CHANNEL_1, 500000 / note); \
+		__HAL_TIM_SET_AUTORELOAD(&BUZZER_TIM, 1000000 / note); \
+		__HAL_TIM_SET_COMPARE(&BUZZER_TIM, TIM_CHANNEL_1, 500000 / note); \
 	}\
 	auto_counter=time;\
 }

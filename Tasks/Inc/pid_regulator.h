@@ -16,12 +16,14 @@
 #define _PID_REGULATOR_H_
 #include "stm32f4xx.h"
 
+#define PID_I_CNT 4
 #define MINMAX(value, min, max) value = (value < min) ? min : (value > max ? max : value)
 #define fw_PID_INIT(Kp, Ki, Kd, KpMax, KiMax, KdMax, OutputMax) { \
 	0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ,\
 	Kp, Ki, Kd, 0.0, 0.0, 0.0, \
 	KpMax, KiMax, KdMax, 0.0, \
 	OutputMax, \
+	{0.0}, \
 	&fw_PID_Calc, &fw_PID_Reset \
 }
 typedef __packed struct fw_PID_Regulator_t
@@ -43,6 +45,7 @@ typedef __packed struct fw_PID_Regulator_t
 	float componentKdMax;
 	float output;
 	float outputMax;
+	float err[PID_I_CNT];
 	
 	void (*Calc)(struct fw_PID_Regulator_t *pid);
 	void (*Reset)(struct fw_PID_Regulator_t *pid);

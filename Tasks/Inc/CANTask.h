@@ -15,13 +15,13 @@
 #include "includes.h"
 
 typedef __packed struct{
-	uint16_t angle;
+	int16_t angle;
 	int16_t RotateSpeed;//RPM
-	uint16_t moment;
+	int16_t moment;
 }ESCC6x0RxMsg_t;
 
 typedef struct{
-	uint16_t angle;
+	int16_t angle;
 	int16_t realIntensity;
 	int16_t giveIntensity;
 }ESC6623RxMsg_t;
@@ -30,6 +30,11 @@ extern uint8_t can1_update;
 extern uint8_t can2_update;
 extern uint8_t can1_type;
 extern uint8_t can2_type;
+
+extern uint8_t isCan11FirstRx;
+extern uint8_t isCan12FirstRx;
+extern uint8_t isCan21FirstRx;
+extern uint8_t isCan22FirstRx;
 
 void InitCanReception(void);
 

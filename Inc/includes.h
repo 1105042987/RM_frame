@@ -4,7 +4,7 @@
   * Description        : 统一包含文件
   ******************************************************************************
   *
-  * Copyright (c) 2018 Team TPP-Shanghai Jiao Tong University
+  * Copyright (c) 2019 Team JiaoLong-ShanghaiJiaoTong University
   * All rights reserved.
   *
   ******************************************************************************
@@ -13,10 +13,20 @@
 #define __INCLUDES_H
 
 //#define DEBUG_MODE
+//#define GM_TEST
+
+#define INFANTRY2
+
+#define USE_AUTOAIM
+//#define USE_GYRO
+#define USE_IMU
+#define USE_CHASSIS_FOLLOW
+//#define FRIC_PWM_MODE//临时使用，后续不需要
+
 #define CAN11
 #define CAN12
 #define CAN21
-#define CAN22
+//#define CAN22
 
 #include "main.h"
 #include "stm32f4xx_hal.h"
@@ -27,19 +37,24 @@
 #include "usart.h"
 #include "gpio.h"
 #include "iwdg.h"
+#include "adc.h"
+#include "math.h"
 
 #include "AuxDevice.h"
 #include "RemoteTask.h"
 #include "FunctionTask.h"
 #include "pid_regulator.h"
-#include "IMUTask.h"
 #include "CANTask.h"
-#include "CANMotor.h"
+#include "MotorTask.h"
 #include "ControlTask.h"
 #include "drivers_ramp.h"
-#include "ManifoldTask.h"
+#include "AutoAimTask.h"
 #include "JudgeTask.h"
 #include "UpperTask.h"
+#include "CapControlTask.h"
+#include "PowerLimitationTask.h"
+#include "GyroReadTask.h"
+#include "bsp_imu.h"
 
 
 extern int16_t global_catch;		//用于检测一个其他文档里，不值得设置全局变量，但是临时需要读取的数据

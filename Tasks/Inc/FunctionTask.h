@@ -17,6 +17,7 @@
 //Ò£¿Ø³£Á¿Çø
 #define RC_CHASSIS_SPEED_REF    		0.60f
 #define RC_ROTATE_SPEED_REF 			0.05f
+#define RC_GIMBAL_SPEED_REF				0.006f
 
 #define IGNORE_RANGE 					200
 
@@ -45,8 +46,13 @@
 #define LOW_FORWARD_BACK_SPEED 			200
 #define LOW_LEFT_RIGHT_SPEED   			200/2
 
+#define CHASSIS_TWIST_ANGLE_LIMIT		35
+
 #define MOUSE_LR_RAMP_TICK_COUNT		50
 #define MOUSR_FB_RAMP_TICK_COUNT		60
+
+#define MOUSE_TO_YAW_ANGLE_INC_FACT		0.05f
+#define MOUSE_TO_PITCH_ANGLE_INC_FACT	0.05f
 
 #define MK_ROTATE_SPEED_REF 			1.20f
 
@@ -55,8 +61,8 @@
 {\
 	static uint8_t cache;\
 	static uint8_t cnt=0;\
-	if(cache != button){\
-		cache = button;\
+	if(cache != (button)){\
+		cache = (button);\
 		cnt = 0;\
 	}\
 	else if(cnt == 5){\
@@ -84,6 +90,13 @@ typedef enum
 	NO_CHANGE,
 }KeyboardMode_e;
 
+typedef enum
+{
+	SHORT_CLICK,
+	LONG_CLICK,
+	NO_CLICK,
+}MouseMode_e;
+
 typedef __packed struct
 {
     int16_t forward_back_ref;
@@ -91,10 +104,17 @@ typedef __packed struct
     int16_t rotate_ref;
 }ChassisSpeed_Ref_t;
 
-extern float rotate_speed;
 extern ChassisSpeed_Ref_t ChassisSpeedRef; 
+extern int ChassisTwistGapAngle;
+extern uint8_t ChassisTwistState;
+extern int32_t auto_counter;
 
 void FunctionTaskInit(void);
 void Limit_Position(void);
+void OptionalFunction(void);
+void FreshSuperCState(void);
+void ChassisTwist(void);
+void ChassisDeTwist(void);
+void LJHTwist(void);
 
 #endif /*__FUNCTIONTASK_H*/

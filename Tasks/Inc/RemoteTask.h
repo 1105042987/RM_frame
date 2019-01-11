@@ -14,12 +14,6 @@
 
 #include "includes.h"
 
-#define RC_UART huart1
-#define MANIFOLD_UART huart3
-#define UPPER_UART huart3
-#define JUDGE_UART huart6
-
-
 //解算数据区
 #define REMOTE_CONTROLLER_STICK_OFFSET  1024u
 
@@ -101,6 +95,9 @@ extern uint8_t rc_data[18];
 extern uint8_t rc_first_frame;
 extern uint8_t rc_update;
 extern uint8_t rc_cnt;
+
+extern uint8_t tx_free;
+extern uint8_t rx_free;
 
 void RemoteDataProcess(uint8_t *pData);
 void InitRemoteControl(void);
