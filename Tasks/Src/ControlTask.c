@@ -112,18 +112,33 @@ void ControlRotate(void)
 void Chassis_Data_Decoding()
 {
 	ControlRotate();
+	#ifdef USE_CHASSIS_FOLLOW
 	CMFL.TargetAngle = (  ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						+ ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						+ rotate_speed					*0.075)*160;
+						+ rotate_speed*0.075)*160;
 	CMFR.TargetAngle = (- ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						+ ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						+ rotate_speed					*0.075)*160;
+						+ rotate_speed*0.075)*160;
 	CMBL.TargetAngle = (  ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						- ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						+ rotate_speed					*0.075)*160;
+						+ rotate_speed*0.075)*160;
 	CMBR.TargetAngle = (- ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						- ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
+						+ rotate_speed*0.075)*160;
+	#else
+	CMFL.TargetAngle = (  ChassisSpeedRef.forward_back_ref	*0.075 
+						+ ChassisSpeedRef.left_right_ref	*0.075 
 						+ rotate_speed					*0.075)*160;
+	CMFR.TargetAngle = (- ChassisSpeedRef.forward_back_ref	*0.075 
+						+ ChassisSpeedRef.left_right_ref	*0.075 
+						+ rotate_speed					*0.075)*160;
+	CMBL.TargetAngle = (  ChassisSpeedRef.forward_back_ref	*0.075 
+						- ChassisSpeedRef.left_right_ref	*0.075 
+						+ rotate_speed					*0.075)*160;
+	CMBR.TargetAngle = (- ChassisSpeedRef.forward_back_ref	*0.075 
+						- ChassisSpeedRef.left_right_ref	*0.075 
+						+ rotate_speed					*0.075)*160;
+	#endif
 }
 
 //主控制循环
