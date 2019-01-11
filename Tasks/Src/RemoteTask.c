@@ -179,7 +179,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
 }
 void UART_IDLE_Handler(UART_HandleTypeDef *UartHandle)
 {
-	if(UartHandle == &UPPER_UART)
+	if(UartHandle == &DEBUG_UART)
 	{
 		#ifdef DEBUG_MODE
 		ctrlUartRxCpltCallback();

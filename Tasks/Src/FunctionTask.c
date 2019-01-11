@@ -441,27 +441,16 @@ void FreshSuperCState(void)
 		HAL_GPIO_WritePin(GPIOF, LED_GREEN_Pin, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(GPIOE, LED_RED_Pin, GPIO_PIN_SET);
 	}
-	HAL_GPIO_WritePin(GPIOG, LED8_Pin|LED7_Pin|LED6_Pin 
-                          |LED5_Pin|LED4_Pin|LED3_Pin|LED2_Pin 
-                          |LED1_Pin, GPIO_PIN_RESET);
 	if(Control_SuperCap.C_voltage<1100)
 	{
-		HAL_GPIO_WritePin(GPIOG, LED8_Pin|LED7_Pin|LED6_Pin|LED5_Pin|LED4_Pin|LED3_Pin|LED2_Pin|LED1_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOG, 0xff<<1, GPIO_PIN_SET);
 	}
-	else if(Control_SuperCap.C_voltage<1300)
-		HAL_GPIO_WritePin(GPIOG, LED8_Pin|LED7_Pin|LED6_Pin|LED5_Pin|LED4_Pin|LED3_Pin|LED2_Pin, GPIO_PIN_SET);
-	else if(Control_SuperCap.C_voltage<1500)
-		HAL_GPIO_WritePin(GPIOG, LED8_Pin|LED7_Pin|LED6_Pin|LED5_Pin|LED4_Pin|LED3_Pin, GPIO_PIN_SET);
-	else if(Control_SuperCap.C_voltage<1700)
-		HAL_GPIO_WritePin(GPIOG, LED8_Pin|LED7_Pin|LED6_Pin|LED5_Pin|LED4_Pin, GPIO_PIN_SET);
-	else if(Control_SuperCap.C_voltage<1800)
-		HAL_GPIO_WritePin(GPIOG, LED8_Pin|LED7_Pin|LED6_Pin|LED5_Pin, GPIO_PIN_SET);
-	else if(Control_SuperCap.C_voltage<1900)
-		HAL_GPIO_WritePin(GPIOG, LED8_Pin|LED7_Pin|LED6_Pin, GPIO_PIN_SET);
-	else if(Control_SuperCap.C_voltage<2000)
-		HAL_GPIO_WritePin(GPIOG, LED8_Pin|LED7_Pin, GPIO_PIN_SET);
-	else if(Control_SuperCap.C_voltage<2100)
-		HAL_GPIO_WritePin(GPIOG, LED8_Pin, GPIO_PIN_SET);
+	else{
+		HAL_GPIO_WritePin(GPIOG, 0xff<<1, GPIO_PIN_SET);
+		int unlight = 7-(Control_SuperCap.C_voltage-1100)/143;
+		if(unlight<0) unlight=0;
+		HAL_GPIO_WritePin(GPIOG, 0x1fe>>unlight, GPIO_PIN_RESET);
+	}
 }
 
 void ChassisTwist(void)

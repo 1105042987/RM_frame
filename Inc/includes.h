@@ -12,10 +12,11 @@
 #ifndef __INCLUDES_H
 #define __INCLUDES_H
 
+//#define DEBUG_MODE
 //#define GM_TEST
+
 #define INFANTRY2
 
-//#define DEBUG_MODE
 #define USE_AUTOAIM
 //#define USE_GYRO
 #define USE_IMU

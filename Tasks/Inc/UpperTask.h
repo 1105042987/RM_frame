@@ -18,7 +18,7 @@
 //--------------------底层接收驱动部分-------------------//
 void ctrlUartRxCpltCallback(void);
 void ctrlUartInit(void);
-#define REC_LEN				100
+#define REC_LEN				80
 extern char buf[REC_LEN];
 
 //--------------------数据解析协议部分-------------------//

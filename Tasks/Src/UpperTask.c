@@ -5,7 +5,7 @@
   * Author			: 秦绍飞
   ******************************************************************************
   *
-  * Copyright (c) 2019 Team JiaoLong-ShanghaiJiaoTong University
+  * Copyright (c) 2018 Team TPP-Shanghai Jiao Tong University
   * All rights reserved.
   *
   ******************************************************************************
@@ -22,16 +22,15 @@ char buf[REC_LEN];
 void zykProcessData(void);
 void ctrlUartRxCpltCallback()
 {
-	rx_free = 0;
-	if((__HAL_UART_GET_FLAG(&UPPER_UART,UART_FLAG_IDLE) != RESET))  
+	if((__HAL_UART_GET_FLAG(&DEBUG_UART,UART_FLAG_IDLE) != RESET))  
 	{
-		__HAL_UART_CLEAR_IDLEFLAG(&UPPER_UART);  
-		HAL_UART_DMAStop(&UPPER_UART);
-		uint32_t rx_len =  REC_LEN - UPPER_UART.hdmarx->Instance->NDTR;
+		__HAL_UART_CLEAR_IDLEFLAG(&DEBUG_UART);  
+		HAL_UART_DMAStop(&DEBUG_UART);
+		uint32_t rx_len =  REC_LEN - DEBUG_UART.hdmarx->Instance->NDTR;
 		buf[rx_len]='\0';
 		zykProcessData();
 	}
-	if(HAL_UART_Receive_DMA(&UPPER_UART, (uint8_t *)buf, REC_LEN) != HAL_OK)
+	if(HAL_UART_Receive_DMA(&DEBUG_UART, (uint8_t *)buf, REC_LEN) != HAL_OK)
 	{
 		Error_Handler();
 		printf( "CtrlUart error" );
@@ -39,7 +38,7 @@ void ctrlUartRxCpltCallback()
 }
 
 void ctrlUartInit(){
-	if(HAL_UART_Receive_DMA(&UPPER_UART,(uint8_t *)buf, REC_LEN) != HAL_OK){
+	if(HAL_UART_Receive_DMA(&DEBUG_UART,(uint8_t *)buf, REC_LEN) != HAL_OK){
 		Error_Handler();
 		printf( "InitCtrlUart error" );
 	} 
@@ -47,125 +46,102 @@ void ctrlUartInit(){
 
 void zykProcessData()
 {
-	if(RX_DONE)
-	{
-		char data[15];
-		/////////// GM CONTROL ////////////////
-		if(strcmp(buf,"U")==0)
-		{
-			fw_printf("UP\r\n");
-			GMP.TargetAngle+=20;
-		}
-		else if(strcmp(buf,"D")==0)
-		{
-			fw_printf("DOWN\r\n");
-			GMP.TargetAngle-=20;
-		}
-		if(strcmp(buf,"L")==0)
-		{
-			fw_printf("LEFT\r\n");
-			GMY.TargetAngle+=20;
-		}
-		else if(strcmp(buf,"R")==0)
-		{
-			fw_printf("RIGHT\r\n");
-			GMY.TargetAngle-=20;
-		}
-//		GM PID yaw
-		else if(ComProtocal(buf,"#GMYPP","$","@",data))
-		{
-			float p=atof(data);
-			GMY.positionPID.kp = p;
-			fw_printf("Yaw position P change to %f\r\n",p);
-		}
-		else if(ComProtocal(buf,"#GMYPI","$","@",data))
-		{
-			float i=atof(data);
-			GMY.positionPID.ki = i;
-			fw_printf("Yaw position I change to %f\r\n",i);
-		}
-		else if(ComProtocal(buf,"#GMYPD","$","@",data))
-		{
-			float d=atof(data);
-			GMY.positionPID.kd = d;
-			fw_printf("Yaw position D change to %f\r\n",d);
-		}
-		else if(ComProtocal(buf,"#GMYSP","$","@",data))
-		{
-			float p=atof(data);
-			GMY.speedPID.kp = p;
-			fw_printf("Yaw speed P change to %f\r\n",p);
-		}
-		else if(ComProtocal(buf,"#GMYSI","$","@",data))
-		{
-			float i=atof(data);
-			GMY.speedPID.ki = i;
-			fw_printf("Yaw speed I change to %f\r\n",i);
-		}
-		else if(ComProtocal(buf,"#GMYSD","$","@",data))
-		{
-			float d=atof(data);
-			GMY.speedPID.kd = d;
-			fw_printf("Yaw speed D change to %f\r\n",d);
-		}
-//		GM PID pitch
-		else if(ComProtocal(buf,"#GMPPP","$","@",data))
-		{
-			float p=atof(data);
-			GMP.positionPID.kp = p;
-			fw_printf("Pitch position P change to %f\r\n",p);
-		}
-		else if(ComProtocal(buf,"#GMPPI","$","@",data))
-		{
-			float i=atof(data);
-			GMP.positionPID.ki = i;
-			fw_printf("Pitch position I change to %f\r\n",i);
-		}
-		else if(ComProtocal(buf,"#GMPPD","$","@",data))
-		{
-			float d=atof(data);
-			GMP.positionPID.kd = d;
-			fw_printf("Pitch position D change to %f\r\n",d);
-		}
-		else if(ComProtocal(buf,"#GMPSP","$","@",data))
-		{
-			float p=atof(data);
-			GMP.speedPID.kp = p;
-			fw_printf("Pitch speed P change to %f\r\n",p);
-		}
-		else if(ComProtocal(buf,"#GMPSI","$","@",data))
-		{
-			float i=atof(data);
-			GMP.speedPID.ki = i;
-			fw_printf("Pitch speed I change to %f\r\n",i);
-		}
-		else if(ComProtocal(buf,"#GMPSD","$","@",data))
-		{
-			float d=atof(data);
-			GMP.speedPID.kd = d;
-			fw_printf("Pitch speed D change to %f\r\n",d);
-		}
-
-		else if(strcmp(buf,"RD1")==0)
-		{
-			float realSpeed2=-gyroZspeed/(float)(32.8);
-			fw_printf("#DATA%.2f@%.2f@%.2f$",GMY.positionPID.output,realSpeed2,GMY.RxMsg6623.angle*360/8192.0);
-		}
-		else if(strcmp(buf,"RD2")==0)
-		{
-			//speed
-			float realSpeed2=-gyroXspeed/(float)(32.8);
-			fw_printf("#DATA%.2f@%.2f@%.2f$",GMP.positionPID.output,realSpeed2,GMP.RxMsg6623.angle*360/8192.0);
-
-		}
-		strcpy(buf,"\0");
-		RX_STA=0;
-	}
+    char data[15];
+    //00 00 		00 		00
+    //空 P=10Y=11  P=10S=11 P=01I=10D=11
+    uint8_t Index=0;
+    
+    /////////// GM CONTROL ////////////////
+    if(strncmp(buf,"U",1)==0)
+    {
+    	fw_printf("UP\r\n");
+    	GMP.TargetAngle+=20;
+    }
+    else if(strncmp(buf,"D",1)==0)
+    {
+    	fw_printf("DOWN\r\n");
+    	GMP.TargetAngle-=20;
+    }
+    else if(strncmp(buf,"SHOWYS",6)==0)
+    {	//clolor order: R:target G:real B:adjust
+    	float realSpeed2=-gyroZspeed/(float)(32.8);
+    	fw_printf("#DATA%.2f@%.2f@%.2f$",GMY.positionPID.output,realSpeed2,GMY.speedPID.output);
+    }
+    else if(strncmp(buf,"SHOWYP",6)==0)
+    {	//clolor order: R:target G:real B:adjust
+    	fw_printf("#DATA%.2f@%.2f@%.2f$",GMY.TargetAngle,GMY.RealAngle,GMY.positionPID.output);
+    }
+    else if(strncmp(buf,"SHOWPS",6)==0)
+    {	//clolor order: R:target G:real B:adjust
+    	float realSpeed2=-gyroXspeed/(float)(32.8);
+    	fw_printf("#DATA%.2f@%.2f@%.2f$",GMP.positionPID.output,realSpeed2,GMP.speedPID.output);
+    }
+    else if(strncmp(buf,"SHOWPP",6)==0)
+    {	//clolor order: R:target G:real B:adjust
+    	fw_printf("#DATA%.2f@%.2f@%.2f$",GMP.TargetAngle,GMP.RealAngle,GMP.positionPID.output);
+    }
+    else if(strncmp(buf,"L",1)==0)
+    {
+    	fw_printf("LEFT\r\n");
+    	GMY.TargetAngle+=20;
+    }
+    else if(strncmp(buf,"R",1)==0)
+    {
+    	fw_printf("RIGHT\r\n");
+    	GMY.TargetAngle-=20;
+    }
+    //GM PID yaw
+    else if(strncmp(buf,"#",1)==0)
+    {
+    	switch(buf[3])
+    	{
+    		case'P':Index|=0x20;break;
+    		case'Y':Index|=0x30;break;
+    	}
+    	switch(buf[4])
+    	{
+    		case'P':Index|=0x08;break;
+    		case'S':Index|=0x0c;break;
+    	}
+    	switch(buf[5])
+    	{
+    		case'P':Index|=0x01;break;
+    		case'I':Index|=0x02;break;
+    		case'D':Index|=0x03;break;
+    	}
+    	int iii=0;
+    	while(buf[6+iii]!='@'){
+    		data[iii]=buf[6+iii];
+    		iii++;
+    	}
+    	if(iii!=15)
+    	{
+    		float data_num=atof(data);
+    		fw_printf("%c%c%c change to %f\r\n",buf[3],buf[4],buf[5],data_num);
+    		switch(Index)
+    		{
+    			case 0x29:GMP.positionPID.kp = data_num;break;
+    			case 0x2a:GMP.positionPID.ki = data_num;break;
+    			case 0x2b:GMP.positionPID.kd = data_num;break;
+    			case 0x2d:GMP.speedPID.kp = data_num;break;
+    			case 0x2e:GMP.speedPID.ki = data_num;break;
+    			case 0x2f:GMP.speedPID.kd = data_num;break;
+    
+    			case 0x39:GMY.positionPID.kp = data_num;break;
+    			case 0x3a:GMY.positionPID.ki = data_num;break;
+    			case 0x3b:GMY.positionPID.kd = data_num;break;
+    			case 0x3d:GMY.speedPID.kp = data_num;break;
+    			case 0x3e:GMY.speedPID.ki = data_num;break;
+    			case 0x3f:GMY.speedPID.kd = data_num;break;
+    		}
+    	}
+    }		
+    strcpy(buf,"\0");
 }
 
 
 //--------------------数据解析协议部分-------------------//
-uint8_t ComProtocal(char*rxbuf,char*head,char*end,char* separater,char dataout[15])
+/*uint8_t ComProtocal(char*rxbuf,char*head,char*end,char* separater,char dataout[15])
 {
     uint8_t headlength,endlength,datalength,totallength;
     uint8_t i=0;
@@ -197,7 +173,10 @@ uint8_t ComProtocal(char*rxbuf,char*head,char*end,char* separater,char dataout[1
         splitchar=strtok(NULL,separater);
     }
     return i;
-}
+}*/
+
+
+
 
 //--------------------任务循环部分-------------------//
 //debug监测变量

@@ -18,11 +18,11 @@
 #define STEER_TIM 				htim2
 #define BUZZER_TIM 				htim12
 
-#define RC_UART 					huart1
+#define RC_UART 				huart1
 #define JUDGE_UART 				huart6
 #define GYRO_UART 				huart7
 #define AUTOAIM_UART 			huart8
-#define UPPER_UART 				huart8
+#define DEBUG_UART 				huart8
 
 #define BUZZER_CHANNEL			TIM_CHANNEL_1
 

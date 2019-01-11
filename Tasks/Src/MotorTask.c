@@ -49,8 +49,8 @@ MotorINFO GMY  = Gimbal_MOTORINFO_Init(1.0,&ControlGMY,
 //			Normal_MOTORINFO_Init(rdc,func,ppid,spid)
 //*************************************************************************
 MotorINFO STIR = Normal_MOTORINFO_Init(36.0,&ControlNM,
-								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
-								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
+								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
+								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
 								
 
 MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
@@ -80,7 +80,7 @@ void ControlNM(MotorINFO* id)
 			else//正常
 				id->RealAngle = id->RealAngle + (ThisAngle - id->lastRead) * 360 / 8192.0 / id->ReductionRate;
 		}
-		ThisSpeed = id->RxMsgC6x0.RotateSpeed * 6;		//单位：度每秒
+		ThisSpeed = id->RxMsgC6x0.RotateSpeed * 6 / id->ReductionRate;		//单位：度每秒
 		
 		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->TargetAngle,id->RealAngle,ThisSpeed);
 		
