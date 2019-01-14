@@ -18,7 +18,7 @@ RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
 ChassisSpeed_Ref_t ChassisSpeedRef; 
 void KeyboardModeFSM(Key *key);
 void MouseModeFSM(Mouse *mouse);
-void Standardization_Chassis_Move(float Rate);
+void Standardized_Chassis_Move(float Rate);
 
 int32_t auto_counter=0;		//用于准确延时的完成某事件
 
@@ -66,7 +66,7 @@ void RemoteControlProcess(Remote *rc)
 	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	if(WorkState == NORMAL_STATE)
 	{	
-		Standardization_Chassis_Move(1);
+		Standardized_Chassis_Move(1);
 		#ifdef USE_AUTOAIM
 			autoAimGMCTRL();
 		#endif
@@ -76,14 +76,14 @@ void RemoteControlProcess(Remote *rc)
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
-		Standardization_Chassis_Move(1);
+		Standardized_Chassis_Move(1);
 		ShootState = 1;
 		FRICL.Target = FRICTION_SPEED;
 		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
-		Standardization_Chassis_Move(1);
+		Standardized_Chassis_Move(1);
 		ShootState = 1;
 		FRICL.Target = FRICTION_SPEED;
 		Delay(20,{STIR.Target-=STIR_STEP_ANGLE;});
@@ -112,7 +112,7 @@ void RemoteTestProcess(Remote *rc)
 		Control_SuperCap.release_power = 0;
 		Control_SuperCap.stop_power = 0;
 		ChassisTwistState = 0;
-		Standardization_Chassis_Move(1);
+		Standardized_Chassis_Move(1);
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
@@ -120,16 +120,16 @@ void RemoteTestProcess(Remote *rc)
 		Control_SuperCap.stop_power = 0;
 		ChassisTwistState = 0;
 		if(Control_SuperCap.C_voltage>1200)
-			Standardization_Chassis_Move(2);
+			Standardized_Chassis_Move(2);
 		else 
-			Standardization_Chassis_Move(1);
+			Standardized_Chassis_Move(1);
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{	
 		Control_SuperCap.release_power = 0;
 		Control_SuperCap.stop_power = 0;
 		ChassisTwistState = 1;
-		Standardization_Chassis_Move(1);
+		Standardized_Chassis_Move(1);
 	}
 	//底盘摆动
 	if(ChassisTwistState) LJHTwist();
@@ -304,7 +304,7 @@ void LJHTwist(void)
 {
 	ChassisTwist();
 }
-void Standardization_Chassis_Move(float Rate)
+void Standardized_Chassis_Move(float Rate)
 {
 	ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF*Rate;
 	ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2*Rate;
