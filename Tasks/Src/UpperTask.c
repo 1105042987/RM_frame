@@ -16,6 +16,17 @@
 #include <stdio.h>
 #define fw_printf(...) printf(__VA_ARGS__)
 
+#ifdef __GNUC__
+  #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+	#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif 
+PUTCHAR_PROTOTYPE
+{
+ 	HAL_UART_Transmit(&DEBUG_UART , (uint8_t *)&ch, 1, 0xFFFF);
+	return ch;
+}
+
 #ifdef DEBUG_MODE
 //--------------------底层接收驱动部分-------------------//
 char buf[REC_LEN];
@@ -55,12 +66,12 @@ void zykProcessData()
     if(strncmp(buf,"U",1)==0)
     {
     	fw_printf("UP\r\n");
-    	GMP.TargetAngle+=20;
+    	GMP.Target+=20;
     }
     else if(strncmp(buf,"D",1)==0)
     {
     	fw_printf("DOWN\r\n");
-    	GMP.TargetAngle-=20;
+    	GMP.Target-=20;
     }
     else if(strncmp(buf,"SHOWYS",6)==0)
     {	//clolor order: R:target G:real B:adjust
@@ -69,7 +80,7 @@ void zykProcessData()
     }
     else if(strncmp(buf,"SHOWYP",6)==0)
     {	//clolor order: R:target G:real B:adjust
-    	fw_printf("#DATA%.2f@%.2f@%.2f$",GMY.TargetAngle,GMY.RealAngle,GMY.positionPID.output);
+    	fw_printf("#DATA%.2f@%.2f@%.2f$",GMY.Target,GMY.Real,GMY.positionPID.output);
     }
     else if(strncmp(buf,"SHOWPS",6)==0)
     {	//clolor order: R:target G:real B:adjust
@@ -78,17 +89,17 @@ void zykProcessData()
     }
     else if(strncmp(buf,"SHOWPP",6)==0)
     {	//clolor order: R:target G:real B:adjust
-    	fw_printf("#DATA%.2f@%.2f@%.2f$",GMP.TargetAngle,GMP.RealAngle,GMP.positionPID.output);
+    	fw_printf("#DATA%.2f@%.2f@%.2f$",GMP.Target,GMP.Real,GMP.positionPID.output);
     }
     else if(strncmp(buf,"L",1)==0)
     {
     	fw_printf("LEFT\r\n");
-    	GMY.TargetAngle+=20;
+    	GMY.Target+=20;
     }
     else if(strncmp(buf,"R",1)==0)
     {
     	fw_printf("RIGHT\r\n");
-    	GMY.TargetAngle-=20;
+    	GMY.Target-=20;
     }
     //GM PID yaw
     else if(strncmp(buf,"#",1)==0)
@@ -188,10 +199,5 @@ void dataCallBack()
 			pcnt = 0;
 		}
 		else pcnt++;
-}
-#else
-void ctrlUartRxCpltCallback()
-{
-	
 }
 #endif

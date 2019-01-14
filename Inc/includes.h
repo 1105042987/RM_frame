@@ -13,15 +13,16 @@
 #define __INCLUDES_H
 
 //#define DEBUG_MODE
-//#define GM_TEST
+//#define TEST_MODE
 
-#define INFANTRY2
-
-#define USE_AUTOAIM
 //#define USE_GYRO
 #define USE_IMU
 #define USE_CHASSIS_FOLLOW
-//#define FRIC_PWM_MODE//临时使用，后续不需要
+#define USE_SUPER_CAP
+#define USE_POWER_LIMIT
+#define USE_AUTOAIM
+
+//#define FRIC_PWM_MODE
 
 #define CAN11
 #define CAN12

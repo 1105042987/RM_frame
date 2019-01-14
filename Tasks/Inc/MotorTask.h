@@ -14,6 +14,10 @@
 
 #include "includes.h"
 
+//³µÐÍÑ¡Ôñ
+#define INFANTRY2
+
+
 #ifdef INFANTRY4
 #define GM_PITCH_GRAVITY_COMPENSATION 800
 #define GM_PITCH_ZERO 	7788
@@ -24,7 +28,7 @@
 #define GM_PITCH_ZERO 	3740
 #define GM_YAW_ZERO 	1310
 #endif
-#ifdef GM_TEST
+#ifdef TEST_MODE
 #define GM_PITCH_GRAVITY_COMPENSATION -150
 #define GM_PITCH_ZERO 	6700
 #define GM_YAW_ZERO 	1900
@@ -75,11 +79,11 @@ typedef struct MotorINFO
 	float 				ReductionRate;
 	ESCC6x0RxMsg_t		RxMsgC6x0;
 	ESC6623RxMsg_t		RxMsg6623;
-	double 				TargetAngle;
+	double 				Target;
 	uint8_t				s_count;
 	uint8_t 			FirstEnter;
 	double 				lastRead;
-	double 				RealAngle;
+	double 				Real;
 	void (*Handle)(struct MotorINFO* id);
 	fw_PID_Regulator_t 	positionPID;
 	fw_PID_Regulator_t 	speedPID;
@@ -87,14 +91,14 @@ typedef struct MotorINFO
 	int16_t				Intensity;
 }MotorINFO;
 
-#define Normal_MOTORINFO_Init(rdc,func,ppid,spid)\
+#define AngleBased_MOTORINFO_Init(rdc,func,ppid,spid)\
 {\
 	ESC_C6x0,0,0,0,rdc,\
 	{0,0,0},{0,0,0},0,0,1,0,0,func,\
 	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0 \
 }
 
-#define Chassis_MOTORINFO_Init(func,spid)\
+#define SpeedBased_MOTORINFO_Init(func,spid)\
 {\
 	ESC_C6x0,0,0,0,1,\
 	{0,0,0},{0,0,0},0,0,1,0,0,func,\

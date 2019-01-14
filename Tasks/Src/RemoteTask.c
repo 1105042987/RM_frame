@@ -102,22 +102,44 @@ void RemoteDataProcess(uint8_t *pData)
 	else functionmode = LOWER_POS; 
 	
 	//左上角拨杆状态（RC_CtrlData.rc.s1）获取
-	//用于遥控器发射控制
 	GetRemoteSwitchAction(&g_switch1, RC_CtrlData.rc.s1);
 	
+	//遥控模式按键切换
+	static uint8_t remote_change_counter = 0;
+	static uint8_t remote_test_mode = 0;
+	if(HAL_GPIO_ReadPin(BUTTON_GPIO_Port,BUTTON_Pin))
+	{
+		remote_change_counter++;
+		if(remote_change_counter==40) remote_test_mode = !remote_test_mode;
+	}
+	else remote_change_counter = 0;
+	if(remote_test_mode==0)
+	{
+		HAL_GPIO_WritePin(GPIOF, LED_GREEN_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOE, LED_RED_Pin, GPIO_PIN_SET);
+	}
+	else
+	{
+		HAL_GPIO_WritePin(GPIOF, LED_GREEN_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOE, LED_RED_Pin, GPIO_PIN_RESET);
+	}
+	//数据处理方式选择
 	switch(inputmode)
 	{
 		case REMOTE_INPUT:               
 		{
 			if(WorkState > 0)
-			{ 
-				RemoteControlProcess(&(RC_CtrlData.rc));
+			{
+				if(remote_test_mode==0) 
+					RemoteTestProcess(&(RC_CtrlData.rc));
+				else
+					RemoteControlProcess(&(RC_CtrlData.rc));
 			}
 		}break;
 		case KEY_MOUSE_INPUT:              
 		{
 			if(WorkState > 0)
-			{ 
+			{	
 				MouseKeyControlProcess(&RC_CtrlData.mouse,&RC_CtrlData.key);
 			}
 		}break;
@@ -131,7 +153,7 @@ void RemoteDataProcess(uint8_t *pData)
 //初始化遥控器串口DMA接收
 void InitRemoteControl(){
 	if(HAL_UART_Receive_DMA(&RC_UART, rc_data, 18) != HAL_OK){
-			Error_Handler();
+		Error_Handler();
 	} 
 	FunctionTaskInit();
 	rx_free = 1;
@@ -154,8 +176,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 	}
 	else if(UartHandle == &GYRO_UART)
 	{
+		#ifndef USE_IMU
 		#ifdef USE_GYRO
-		gyroUartRxCpltCallback();
+			gyroUartRxCpltCallback();
+		#endif
 		#endif
 	}
 	else if(UartHandle == &JUDGE_UART)
@@ -182,7 +206,7 @@ void UART_IDLE_Handler(UART_HandleTypeDef *UartHandle)
 	if(UartHandle == &DEBUG_UART)
 	{
 		#ifdef DEBUG_MODE
-		ctrlUartRxCpltCallback();
+			ctrlUartRxCpltCallback();
 		#endif
 	}
 }

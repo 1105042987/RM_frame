@@ -28,7 +28,8 @@
 
 
 //IO重命名
-
+#define Close_Laser() 	HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET)
+#define Open_Laser() 	HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_RESET)
 
 
 //pwm重命名

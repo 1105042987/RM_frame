@@ -17,9 +17,6 @@ uint8_t tmp_gyro;
 uint8_t gyro_receiving = 0;
 uint8_t gyroBuffer[80] = {0};
 uint8_t gyroBuffercnt = 0;
-float gyroXAngle,gyroYAngle,gyroZAngle;
-float gyroXspeed,gyroYspeed,gyroZspeed;
-float gyroXacc,gyroYacc,gyroZacc;
 uint8_t Gyro_FirstEnter=0;
 uint8_t sumCheck(void);
 
@@ -42,6 +39,7 @@ SUM = 0x55 + 0x51 + axL + axH + ayL + ayH + azL + azH + TL + TH
 
 void gyroUartRxCpltCallback(void)
 {
+	gyro_data.InitFinish = 1;
 	if(gyro_receiving)
 	{
 		gyroBuffer[gyroBuffercnt] = tmp_gyro;
@@ -52,21 +50,21 @@ void gyroUartRxCpltCallback(void)
 			{
 				if(gyroBuffer[1] == 0x53)
 				{
-					gyroXAngle = (0x00|(gyroBuffer[3]<<8)|(gyroBuffer[2]))/32768.0f*180.0f;
-					gyroYAngle = (0x00|(gyroBuffer[5]<<8)|(gyroBuffer[4]))/32768.0f*180.0f;
-					gyroZAngle = (0x00|(gyroBuffer[7]<<8)|(gyroBuffer[6]))/32768.0f*180.0f;
+					gyro_data.rol = (0x00|(gyroBuffer[3]<<8)|(gyroBuffer[2]))/32768.0f*180.0f;
+					gyro_data.pit = (0x00|(gyroBuffer[5]<<8)|(gyroBuffer[4]))/32768.0f*180.0f;
+					gyro_data.yaw = (0x00|(gyroBuffer[7]<<8)|(gyroBuffer[6]))/32768.0f*180.0f;
 				}
 				else if(gyroBuffer[1] == 0x52)
 				{
-					gyroXspeed = ((short)(gyroBuffer[3]<<8)|gyroBuffer[2])/32768.0f*2000.0f;
-					gyroYspeed = ((short)(gyroBuffer[5]<<8)|gyroBuffer[4])/32768.0f*2000.0f;
-					gyroZspeed = ((short)(gyroBuffer[7]<<8)|gyroBuffer[6])/32768.0f*2000.0f;
+					gyro_data.wx = ((short)(gyroBuffer[3]<<8)|gyroBuffer[2])/32768.0f*2000.0f;
+					gyro_data.wy = ((short)(gyroBuffer[5]<<8)|gyroBuffer[4])/32768.0f*2000.0f;
+					gyro_data.wz = ((short)(gyroBuffer[7]<<8)|gyroBuffer[6])/32768.0f*2000.0f;
 				}
 				else if(gyroBuffer[1] == 0x51)
 				{
-					gyroXacc = ((short)(gyroBuffer[3]<<8)|gyroBuffer[2])/32768.0f*16.0f;
-					gyroYacc = ((short)(gyroBuffer[5]<<8)|gyroBuffer[4])/32768.0f*16.0f;
-					gyroZacc = ((short)(gyroBuffer[7]<<8)|gyroBuffer[6])/32768.0f*16.0f;
+					gyro_data.ax = ((short)(gyroBuffer[3]<<8)|gyroBuffer[2])/32768.0f*16.0f;
+					gyro_data.ay = ((short)(gyroBuffer[5]<<8)|gyroBuffer[4])/32768.0f*16.0f;
+					gyro_data.az = ((short)(gyroBuffer[7]<<8)|gyroBuffer[6])/32768.0f*16.0f;
 				}
 			}
 			gyro_receiving = 0;

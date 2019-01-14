@@ -19,6 +19,7 @@ uint8_t flag = 1;
 fw_PID_Regulator_t PowerLimitationPID = POWER_LIMITATION_PID_DEFAULT;
 
 //底盘功率限制
+#ifdef USE_POWER_LIMIT
 void PowerLimitation(void)
 {
 	int16_t sum = 0;
@@ -84,5 +85,5 @@ void PowerLimitation(void)
 	CMBL.Intensity = CMBLIntensity;
 	CMBR.Intensity = CMBRIntensity;
 }
-
+#endif
 

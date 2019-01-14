@@ -42,7 +42,7 @@ static uint8_t        tx_buff[14] = { 0xff };
 uint8_t               mpu_buff[14];                          /* buffer to save imu raw data */
 uint8_t               ist_buff[6];                           /* buffer to save IST8310 raw data */
 mpu_data_t            mpu_data;
-imu_t                 imu={0};
+GyroData_t            gyro_data={0};
 
 /**
   * @brief  fast inverse square-root, to calculate 1/Sqrt(x)
@@ -306,13 +306,13 @@ void mpu_get_data()
     ist8310_get_data(ist_buff);
     memcpy(&mpu_data.mx, ist_buff, 6);
 
-    memcpy(&imu.ax, &mpu_data.ax, 6 * sizeof(int16_t));
+    memcpy(&gyro_data.ax, &mpu_data.ax, 6 * sizeof(int16_t));
 	
-    imu.temp = 21 + mpu_data.temp / 333.87f;
+    gyro_data.temp = 21 + mpu_data.temp / 333.87f;
 	  /* 2000dps -> rad/s */
-	  imu.wx   = mpu_data.gx / 16.384f / 57.3f; 
-    imu.wy   = mpu_data.gy / 16.384f / 57.3f; 
-    imu.wz   = mpu_data.gz / 16.384f / 57.3f;
+	gyro_data.wx   = mpu_data.gx / 16.384f / 57.3f; 
+    gyro_data.wy   = mpu_data.gy / 16.384f / 57.3f; 
+    gyro_data.wz   = mpu_data.gz / 16.384f / 57.3f;
 }
 
 
@@ -349,7 +349,7 @@ uint8_t id;
 	*/
 uint8_t mpu_device_init(void)
 {
-	imu.FirstEnter = 1;
+	gyro_data.FirstEnter = 1;
 	MPU_DELAY(100);
 
 	id                               = mpu_read_byte(MPU6500_WHO_AM_I);
@@ -419,9 +419,9 @@ void init_quaternion(void)
 {
 	int16_t hx, hy;//hz;
 	
-	hx = imu.mx;
-	hy = imu.my;
-	//hz = imu.mz;
+	hx = gyro_data.mx;
+	hy = gyro_data.my;
+	//hz = gyro_data.mz;
 	
 	#ifdef BOARD_DOWN
 	if (hx < 0 && hy < 0) 
@@ -595,15 +595,15 @@ void imu_ahrs_update(void)
 	float q2q3 = q2*q3;
 	float q3q3 = q3*q3;   
 
-	gx = imu.wx;
-	gy = imu.wy;
-	gz = imu.wz;
-	ax = imu.ax;
-	ay = imu.ay;
-	az = imu.az;
-	mx = imu.mx;
-	my = imu.my;
-	mz = imu.mz;
+	gx = gyro_data.wx;
+	gy = gyro_data.wy;
+	gz = gyro_data.wz;
+	ax = gyro_data.ax;
+	ay = gyro_data.ay;
+	az = gyro_data.az;
+	mx = gyro_data.mx;
+	my = gyro_data.my;
+	mz = gyro_data.mz;
 
 	now_update  = HAL_GetTick(); //ms
 	halfT       = ((float)(now_update - last_update) / 2000.0f);
@@ -682,10 +682,10 @@ void imu_ahrs_update(void)
 void imu_attitude_update(void)
 {
 	/* yaw    -pi----pi */
-	imu.yaw = -atan2(2*q1*q2 + 2*q0*q3, -2*q2*q2 - 2*q3*q3 + 1)* 57.3; 
+	gyro_data.yaw = -atan2(2*q1*q2 + 2*q0*q3, -2*q2*q2 - 2*q3*q3 + 1)* 57.3; 
 	/* pitch  -pi/2----pi/2 */
-	imu.pit = -asin(-2*q1*q3 + 2*q0*q2)* 57.3;   
+	gyro_data.pit = -asin(-2*q1*q3 + 2*q0*q2)* 57.3;   
 	/* roll   -pi----pi  */	
-	imu.rol =  atan2(2*q2*q3 + 2*q0*q1, -2*q1*q1 - 2*q2*q2 + 1)* 57.3;
+	gyro_data.rol =  atan2(2*q2*q3 + 2*q0*q1, -2*q1*q1 - 2*q2*q2 + 1)* 57.3;
 }
 

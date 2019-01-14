@@ -49,7 +49,7 @@ void WorkStateFSM(void)
 		{
 			//if (inputmode == STOP) WorkState = STOP_STATE;
 			if(prepare_time < 2000) prepare_time++;	
-			if(prepare_time >= 2000 && imu.InitFinish == 1 && isCan11FirstRx == 1 && isCan12FirstRx == 1 && isCan21FirstRx == 1 && isCan22FirstRx == 1)//开机二秒后且imu初始化完成且所有can电机上电完成后进入正常模式
+			if(prepare_time >= 2000 && gyro_data.InitFinish == 1 && isCan11FirstRx == 1 && isCan12FirstRx == 1 && isCan21FirstRx == 1 && isCan22FirstRx == 1)//开机二秒后且gyro初始化完成且所有can电机上电完成后进入正常模式
 			{
 				playMusicSuperMario();
 				CMRotatePID.Reset(&CMRotatePID);
@@ -112,18 +112,33 @@ void ControlRotate(void)
 void Chassis_Data_Decoding()
 {
 	ControlRotate();
-	CMFL.TargetAngle = (  ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
+	
+	#ifdef USE_CHASSIS_FOLLOW
+		float gap = (GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f;
+		int16_t fb = ChassisSpeedRef.forward_back_ref;
+		int16_t rl = ChassisSpeedRef.left_right_ref;
+		ChassisSpeedRef.forward_back_ref = cos(gap)*fb-sin(gap)*rl;
+		ChassisSpeedRef.left_right_ref = sin(gap)*fb+cos(gap)*rl;
+	#endif
+	
+	CMFL.Target = ( ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
+	CMFR.Target = (-ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
+	CMBL.Target = ( ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
+	CMBR.Target = (-ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
+	/*
+	CMFL.Target = (  ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						+ ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						+ rotate_speed					*0.075)*160;
-	CMFR.TargetAngle = (- ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
+	CMFR.Target = (- ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						+ ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						+ rotate_speed					*0.075)*160;
-	CMBL.TargetAngle = (  ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
+	CMBL.Target = (  ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						- ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						+ rotate_speed					*0.075)*160;
-	CMBR.TargetAngle = (- ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
+	CMBR.Target = (- ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						- ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						+ rotate_speed					*0.075)*160;
+	*/
 }
 
 //主控制循环
@@ -138,20 +153,24 @@ void controlLoop()
 		
 		for(int i=0;i<8;i++) if(can1[i]!=0) (can1[i]->Handle)(can1[i]);
 		for(int i=0;i<8;i++) if(can2[i]!=0) (can2[i]->Handle)(can2[i]);
-		
-		OptionalFunction();
+		#ifdef USE_SUPER_CAP
+			Cap_Control();
+		#endif
+		#ifdef USE_POWER_LIMIT
+			PowerLimitation();
+		#endif
 		
 		#ifdef CAN11
-		setCAN11();
+			setCAN11();
 		#endif
 		#ifdef CAN12
-		setCAN12();
+			setCAN12();
 		#endif
 		#ifdef CAN21
-		setCAN21();
+			setCAN21();
 		#endif
 		#ifdef CAN22
-		setCAN22();
+			setCAN22();
 		#endif
 	}
 }
@@ -162,12 +181,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if (htim->Instance == htim6.Instance)//2ms时钟`
 	{
 		HAL_NVIC_DisableIRQ(TIM6_DAC_IRQn);
-		//imu解算
-		mpu_get_data();
-		imu_ahrs_update();
-		imu_attitude_update();
-		if(imu.FirstEnter == 1) imu.InitCount++;
-		if(imu.InitCount == 1000) {imu.InitFinish = 1;imu.FirstEnter = 0;imu.InitCount = 0;}
+		#ifdef USE_IMU
+			//imu解算
+			mpu_get_data();
+			imu_ahrs_update();
+			imu_attitude_update();
+			if(gyro_data.FirstEnter == 1) gyro_data.InitCount++;
+			if(gyro_data.InitCount == 1000) {gyro_data.InitFinish = 1;gyro_data.FirstEnter = 0;gyro_data.InitCount = 0;}
+		#endif
 		//主循环在时间中断中启动
 		controlLoop();
 		
@@ -194,28 +215,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					counter = 0;
 				}
 				else counter++;				
-					rc_cnt = 0;
+				rc_cnt = 0;
 			}
 			else
 			{
 				if(rc_first_frame == 0) 
 				{
-				   WorkState = PREPARE_STATE;
-				   HAL_UART_AbortReceive(&RC_UART);
-				   while(HAL_UART_Receive_DMA(&RC_UART, rc_data, 18)!= HAL_OK);
-  				 rc_cnt = 0;
-				   rc_first_frame = 1;
+					WorkState = PREPARE_STATE;
+					HAL_UART_AbortReceive(&RC_UART);
+					while(HAL_UART_Receive_DMA(&RC_UART, rc_data, 18)!= HAL_OK);
+					rc_cnt = 0;
+					rc_first_frame = 1;
 				}
 			}
 			rc_update = 0;
 		}
 		
 	}
-	else if (htim->Instance == htim10.Instance)  //10ms，处理上位机数据，优先级不高
+	else if (htim->Instance == htim10.Instance)  //10ms
 	{
 		
-		#ifdef DEBUG_MODE
-		//zykProcessData();
-		#endif
 	}
 }

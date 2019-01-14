@@ -19,6 +19,7 @@ CapControl_t Control_SuperCap={0,0};
 uint8_t i=0;
 float v_tem[5];
 
+#ifdef USE_SUPER_CAP
 void Cap_Control(void)
 {
 	for(i=0;i<5;i++)
@@ -79,4 +80,5 @@ void Cap_Control(void)
 		}
 	}
 }
+#endif 
 /**/

@@ -59,7 +59,7 @@ void enemyINFOProcess()
 	enemy_gun.z=enemy_scope.z+scope_gun.z;
 	aim.y=atan(enemy_gun.x/enemy_gun.z)/const_pi*180.0;
 	aim.p=atan(enemy_gun.y/enemy_gun.z)/const_pi*180.0+(GM_PITCH_ZERO - GMP.RxMsg6623.angle) * 360.0 / 8192.0 ;
-	//aim.p=atan(k_aim+((aim_mode)?(1.0):(-1.0))*sqrt(k_aim*k_aim-2.0*k_aim*enemy.y/sqrt(enemy.x*enemy.x+enemy.z*enemy.z)-1.0))/const_pi*180.0-GMP.RealAngle;
+	//aim.p=atan(k_aim+((aim_mode)?(1.0):(-1.0))*sqrt(k_aim*k_aim-2.0*k_aim*enemy.y/sqrt(enemy.x*enemy.x+enemy.z*enemy.z)-1.0))/const_pi*180.0-GMP.Real;
 }
 
 void autoAimGMCTRL()
@@ -69,8 +69,8 @@ void autoAimGMCTRL()
 	{
 		if(aim_cnt<5)
 		{
-			GMY.TargetAngle+=aim.y/5;
-			GMP.TargetAngle-=aim.p/5;
+			GMY.Target+=aim.y/5;
+			GMP.Target-=aim.p/5;
 			aim_cnt++;
 		}
 		else
