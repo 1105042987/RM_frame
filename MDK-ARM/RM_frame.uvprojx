@@ -579,6 +579,11 @@
               <FilePath>..\Tasks\Src\GyroReadTask.c</FilePath>
             </File>
             <File>
+              <FileName>bsp_imu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Tasks\Src\bsp_imu.c</FilePath>
+            </File>
+            <File>
               <FileName>pid_regulator.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Tasks\Src\pid_regulator.c</FilePath>
@@ -587,11 +592,6 @@
               <FileName>RMLib.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\Tasks\Src\RMLib.lib</FilePath>
-            </File>
-            <File>
-              <FileName>bsp_imu.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Tasks\Src\bsp_imu.c</FilePath>
             </File>
           </Files>
         </Group>

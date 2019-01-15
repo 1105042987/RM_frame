@@ -86,5 +86,10 @@ typedef enum
 
 extern WorkState_e WorkState;
 void WorkStateFSM(void);
+#ifdef USE_CHASSIS_FOLLOW
+extern uint8_t ChassisTwistState;
+void ChassisTwist(void);
+void ChassisDeTwist(void);
+#endif
 
 #endif /*__ CONTROLTASK_H */

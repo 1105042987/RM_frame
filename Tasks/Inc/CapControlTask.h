@@ -22,7 +22,8 @@ typedef __packed struct
 }CapControl_t;
 
 extern CapControl_t Control_SuperCap;
-extern void Cap_Control(void);
+void Cap_Control(void);
+void LED_Show_SuperCap_Voltage(uint8_t flag);
 
 #define FUNC__CAP__RECHARGE()	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_5 , GPIO_PIN_RESET);\
 								HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4 , GPIO_PIN_SET)

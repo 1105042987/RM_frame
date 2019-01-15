@@ -147,7 +147,6 @@ void ControlGMY(MotorINFO* id)
 		MINMAX(id->Target, id->Real - (GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate - 40.0f, id->Real - (GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate + 40.0f);
 		#endif
 		
-		
 		if(GMYReseted==0) id->positionPID.outputMax = 1.0;
 		else id->positionPID.outputMax = 10.0;
 		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,-ThisSpeed);

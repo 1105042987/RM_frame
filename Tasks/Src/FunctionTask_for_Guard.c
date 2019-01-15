@@ -4,12 +4,14 @@
   * Description        : 用于记录机器人独有的功能
   ******************************************************************************
   *
-  * Copyright (c) 2019 Team JiaoLong-Shanghai Jiao Tong University
+  * Copyright (c) 2018 Team TPP-Shanghai Jiao Tong University
   * All rights reserved.
   *
   ******************************************************************************
   */
 #include "includes.h"
+#define  FRICTION_SPEED 5000
+#define  STIR_STEP_ANGLE 60
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
@@ -25,6 +27,8 @@ int16_t channelrcol = 0;
 int16_t channellrow = 0;
 int16_t channellcol = 0;
 uint8_t ShootState = 0;
+uint8_t ChassisTwistState = 0;
+int 	ChassisTwistGapAngle = 0;
 
 //初始化
 void FunctionTaskInit()
@@ -40,12 +44,14 @@ void FunctionTaskInit()
 	
 	KeyboardMode=NO_CHANGE;
 	ShootState = 0;
+	ChassisTwistState = 0;
+	ChassisTwistGapAngle = 0;
 }
 //限位与同步
 void Limit_and_Synchronization()
 {
 	//MINMAX(UD1.Target,-900,270);//limit
-	//FRICR.Target = -FRICL.Target;
+	FRICR.Target = -FRICL.Target;
 }
 //******************
 //遥控器模式功能编写
@@ -61,13 +67,34 @@ void RemoteControlProcess(Remote *rc)
 	if(WorkState == NORMAL_STATE)
 	{	
 		Standardized_Chassis_Move(1);
+		#ifdef USE_AUTOAIM
+			autoAimGMCTRL();
+		#endif
+		ShootState = 0;
+		FRICL.Target = 0;
+		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
+		Standardized_Chassis_Move(1);
+		ShootState = 1;
+		FRICL.Target = FRICTION_SPEED;
+		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
+		Standardized_Chassis_Move(1);
+		ShootState = 1;
+		FRICL.Target = FRICTION_SPEED;
+		Delay(20,{STIR.Target-=STIR_STEP_ANGLE;});
+		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
 	}
+	//状态保证
+	Control_SuperCap.release_power = 0;
+	Control_SuperCap.stop_power = 0;
+	ChassisTwistState = 0;
+	HAL_GPIO_WritePin(GPIOG, 0xff<<1, GPIO_PIN_SET);
+	Limit_and_Synchronization();
 }
 //**************************
 //遥控器**测试**模式功能编写
@@ -82,14 +109,43 @@ void RemoteTestProcess(Remote *rc)
 	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	if(WorkState == NORMAL_STATE)
 	{	
+		Control_SuperCap.release_power = 0;
+		Control_SuperCap.stop_power = 0;
+		ChassisTwistState = 0;
 		Standardized_Chassis_Move(1);
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
+		Control_SuperCap.release_power = 1;
+		Control_SuperCap.stop_power = 0;
+		ChassisTwistState = 0;
+		if(Control_SuperCap.C_voltage>1200)
+			Standardized_Chassis_Move(2);
+		else 
+			Standardized_Chassis_Move(1);
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{	
+		Control_SuperCap.release_power = 0;
+		Control_SuperCap.stop_power = 0;
+		ChassisTwistState = 1;
+		Standardized_Chassis_Move(1);
 	}
+	//底盘摆动
+	if(ChassisTwistState) LJHTwist();
+	else ChassisDeTwist();
+	//超级电容电量显示
+	if(Control_SuperCap.C_voltage<1100)
+		HAL_GPIO_WritePin(GPIOG, 0xff<<1, GPIO_PIN_SET);
+	else{
+		HAL_GPIO_WritePin(GPIOG, 0xff<<1, GPIO_PIN_SET);
+		int unlight = 7-(Control_SuperCap.C_voltage-1100)/143;
+		if(unlight<0) unlight=0;
+		HAL_GPIO_WritePin(GPIOG, 0x1fe>>unlight, GPIO_PIN_RESET);
+	}
+	//状态保证
+	ShootState = 0;
+	FRICL.Target = 0;
 	Limit_and_Synchronization();
 }
 //****************
@@ -114,21 +170,27 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	
 	if(mouse->last_press_l==1)//左短按
 	{
-		
+		if(ShootState && abs(STIR.Target-STIR.Real)<5.0) STIR.Target-=STIR_STEP_ANGLE;
 	}
 	if(mouse->last_press_l>50)//左长按
 	{
-		
+		if(ShootState && abs(STIR.Target-STIR.Real)<5.0) STIR.Target-=STIR_STEP_ANGLE;
 	}
 	if(mouse->last_press_r==1)//右短按
 	{
-		
+		ShootState=1;
+		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
+		FRICL.Target = FRICTION_SPEED;
 	}
 	if(mouse->last_press_r>50)//右长按
 	{
-		
+		ShootState = 0;
+		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_RESET);
+		FRICL.Target = 0;
 	}
 	
+	Control_SuperCap.release_power = 0;
+	Control_SuperCap.stop_power = 0;
 	KeyboardModeFSM(key);
 	
 	switch (KeyboardMode)
@@ -181,8 +243,20 @@ void KeyboardModeFSM(Key *key)
 	}
 	else if(key->v & KEY_SHIFT)//Shift
 	{
-		KM_FORWORD_BACK_SPEED=  HIGH_FORWARD_BACK_SPEED;
-		KM_LEFT_RIGHT_SPEED = HIGH_LEFT_RIGHT_SPEED;
+		//SuperCap Control
+		Control_SuperCap.release_power = 1;
+		Control_SuperCap.stop_power = 0;
+		if(Control_SuperCap.C_voltage>1200)
+		{
+			KM_FORWORD_BACK_SPEED=  HIGH_FORWARD_BACK_SPEED;
+			KM_LEFT_RIGHT_SPEED = HIGH_LEFT_RIGHT_SPEED;
+		}
+		else
+		{
+			KM_FORWORD_BACK_SPEED=  NORMAL_FORWARD_BACK_SPEED;
+			KM_LEFT_RIGHT_SPEED = NORMAL_LEFT_RIGHT_SPEED;
+		}
+		
 		KeyboardMode=SHIFT;
 	}
 	else if(key->v & KEY_CTRL)//Ctrl
@@ -199,6 +273,36 @@ void KeyboardModeFSM(Key *key)
 	}	
 }
 
+void ChassisTwist(void)
+{
+	switch (ChassisTwistGapAngle)
+	{
+		case 0:
+		{
+			ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;
+		}break;
+		case CHASSIS_TWIST_ANGLE_LIMIT:
+		{
+			if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+			{ChassisTwistGapAngle = -CHASSIS_TWIST_ANGLE_LIMIT;}break;
+		}
+		case -CHASSIS_TWIST_ANGLE_LIMIT:
+		{
+			if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+			{ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;}break;
+		}
+	}
+}
+
+void ChassisDeTwist(void)
+{
+	ChassisTwistGapAngle = 0;
+}
+
+void LJHTwist(void)
+{
+	ChassisTwist();
+}
 void Standardized_Chassis_Move(float Rate)
 {
 	ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF*Rate;

@@ -80,5 +80,21 @@ void Cap_Control(void)
 		}
 	}
 }
+void LED_Show_SuperCap_Voltage(uint8_t flag)
+{
+	if(flag==0)
+	{
+		HAL_GPIO_WritePin(GPIOG, 0x1fe, GPIO_PIN_SET);
+		return;
+	}
+	if(Control_SuperCap.C_voltage<1100)
+		HAL_GPIO_WritePin(GPIOG, 0x1fe, GPIO_PIN_SET);
+	else{
+		HAL_GPIO_WritePin(GPIOG, 0x1fe, GPIO_PIN_SET);
+		int unlight = 7-(Control_SuperCap.C_voltage-1100)/143;
+		if(unlight<0) unlight=0;
+		HAL_GPIO_WritePin(GPIOG, 0x1fe>>unlight, GPIO_PIN_RESET);
+	}
+}
 #endif 
 /**/

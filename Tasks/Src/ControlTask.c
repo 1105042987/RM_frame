@@ -15,6 +15,12 @@ WorkState_e WorkState = PREPARE_STATE;
 uint16_t prepare_time = 0;
 uint16_t counter = 0;
 double rotate_speed = 0;
+
+#ifdef USE_CHASSIS_FOLLOW
+uint8_t ChassisTwistState = 0;
+int ChassisTwistGapAngle = 0;
+#endif
+
 MusicNote SuperMario[] = {
 	{H3, 100}, {0, 50}, 
 	{H3, 250}, {0, 50}, 
@@ -108,6 +114,33 @@ void ControlRotate(void)
 	if(ChassisTwistState) MINMAX(CMRotatePID.output,-10,10);
 	rotate_speed = CMRotatePID.output * 13 + ChassisSpeedRef.forward_back_ref * 0.01 + ChassisSpeedRef.left_right_ref * 0.01;
 }
+#ifdef USE_CHASSIS_FOLLOW
+void ChassisTwist(void)
+{
+	switch (ChassisTwistGapAngle)
+	{
+		case 0:
+		{
+			ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;
+		}break;
+		case CHASSIS_TWIST_ANGLE_LIMIT:
+		{
+			if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+			{ChassisTwistGapAngle = -CHASSIS_TWIST_ANGLE_LIMIT;}break;
+		}
+		case -CHASSIS_TWIST_ANGLE_LIMIT:
+		{
+			if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+			{ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;}break;
+		}
+	}
+}
+
+void ChassisDeTwist(void)
+{
+	ChassisTwistGapAngle = 0;
+}
+#endif
 
 void Chassis_Data_Decoding()
 {
