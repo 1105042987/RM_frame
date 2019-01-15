@@ -24,7 +24,6 @@ int16_t channelrrow = 0;
 int16_t channelrcol = 0;
 int16_t channellrow = 0;
 int16_t channellcol = 0;
-uint8_t ShootState = 0;
 
 //初始化
 void FunctionTaskInit()
@@ -39,7 +38,6 @@ void FunctionTaskInit()
 	ChassisSpeedRef.rotate_ref = 0.0f;
 	
 	KeyboardMode=NO_CHANGE;
-	ShootState = 0;
 }
 //限位与同步
 void Limit_and_Synchronization()
@@ -68,6 +66,7 @@ void RemoteControlProcess(Remote *rc)
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
 	}
+	Limit_and_Synchronization();
 }
 //**************************
 //遥控器**测试**模式功能编写
