@@ -147,7 +147,7 @@ void Chassis_Data_Decoding()
 	ControlRotate();
 	
 	#ifdef USE_CHASSIS_FOLLOW
-		float gap = (GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f;
+		float gap = (GM_YAW_ZERO - GMY.RxMsg6623.angle) * 6.28 / 8192.0f;
 		int16_t fb = ChassisSpeedRef.forward_back_ref;
 		int16_t rl = ChassisSpeedRef.left_right_ref;
 		ChassisSpeedRef.forward_back_ref = cos(gap)*fb-sin(gap)*rl;
