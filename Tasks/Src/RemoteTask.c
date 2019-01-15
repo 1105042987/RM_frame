@@ -131,9 +131,9 @@ void RemoteDataProcess(uint8_t *pData)
 			if(WorkState > 0)
 			{
 				if(remote_test_mode==0) 
-					RemoteTestProcess(&(RC_CtrlData.rc));
-				else
 					RemoteControlProcess(&(RC_CtrlData.rc));
+				else
+					RemoteTestProcess(&(RC_CtrlData.rc));
 			}
 		}break;
 		case KEY_MOUSE_INPUT:              

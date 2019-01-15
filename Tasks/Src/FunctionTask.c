@@ -146,7 +146,6 @@ void RemoteTestProcess(Remote *rc)
 	//×´Ì¬±£Ö¤
 	ShootState = 0;
 	FRICL.Target = 0;
-	FRICR.Target = 0;
 	Limit_and_Synchronization();
 }
 //****************
