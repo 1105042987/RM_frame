@@ -4,9 +4,9 @@
 ### 电机配置
 
 使用者在MotorTask.c中配置电机相应信息，具有三种已规范初始化方法：
-> 1. NomalMotorInfo(用于控制位置速度双环电机，控制函数选择ControlNM)
+> 1. AngleBasedMotorInfo(用于控制位置速度双环电机，控制函数选择ControlNM)
 > 1. GimbalMotorInfo(用于控制云台电机，控制函数选择ControlGMY或者ControlGMP)
-> 1. ChassisMotorInfo(用于控制单速度环电机，控制函数选择ControlCM)
+> 1. SpeedBasedMotorInfo(用于控制单速度环电机，控制函数选择ControlCM)
 
 初始化完成后将其挂在在对应的MotorINFO canx[8] 数组上，其中x可取1、2，分别代表两条can线，在数组中的位置表示电机id号码，0-7号位一一对应0x201-0x208。
 
@@ -27,7 +27,9 @@ FunctionTask.c中书写所有的控制代码，如：从遥控器/键鼠接收�
 |-|-|
 | DEBUG_MODE | 启用云台调参模式，配合PCInterFace.exe可以观察云台响应曲线，调整pid各项参数|
 |TEST_MODE  |用于测试各项未完成功能|
-|USE_AUTOAIM |启用自瞄功|
+|USE_AUTOAIM |启用自瞄功能|
 |USE_IMU     |启用板载陀螺仪（与USE_GYRO冲突，同时启用优先）|
 |USE_GYRO    |启用外置陀螺仪（与USE_IMU冲突）|
 |USE_CHASSIS_FOLLOW |启用底盘跟随云台功能，不开启时底盘独立运动 |
+|USE_SUPER_CAP|启用超级电容功能|
+|USE_POWER_LIMIT|启用功率限制|
