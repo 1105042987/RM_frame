@@ -38,16 +38,25 @@ void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef* hcan)
 void InitCanReception()
 {
 	#ifndef CAN11
-	isCan11FirstRx = 1;
+		isCan11FirstRx = 1;
 	#endif
 	#ifndef CAN12
-	isCan12FirstRx = 1;
+		isCan12FirstRx = 1;
 	#endif
 	#ifndef CAN21
-	isCan21FirstRx = 1;
+		isCan21FirstRx = 1;
 	#endif
 	#ifndef CAN22
-	isCan22FirstRx = 1;
+		isCan22FirstRx = 1;
+	#endif
+	
+	can1_type = 1;
+	can2_type = 1;
+	#ifdef CAN12
+		can1_type = 2;
+	#endif
+	#ifdef CAN22
+		can2_type = 2;
 	#endif
 	
 	//http://www.eeworld.com.cn/mcu/article_2016122732674_3.html

@@ -129,43 +129,45 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	}
 	
 	KeyboardModeFSM(key);
-	
-	switch (KeyboardMode)
+	//*****Don't Use WASD******
+	switch (KeyboardMode)	
 	{
 		case SHIFT_CTRL:		//State Change
 		{
 			
-			break;
-		}
-		case CTRL:				//slow
+		}break;
+		case CTRL:
 		{
 			
-		}//DO NOT NEED TO BREAK
-		case SHIFT:				//quick
+		}break;
+		case SHIFT:
 		{
 			
-		}//DO NOT NEED TO BREAK
-		case NO_CHANGE:			//normal
-		{//CM Movement Process
-			if(key->v & KEY_W)  		//key: w
-				ChassisSpeedRef.forward_back_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
-			else if(key->v & KEY_S) 	//key: s
-				ChassisSpeedRef.forward_back_ref = -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
-			else
-			{
-				ChassisSpeedRef.forward_back_ref = 0;
-				FBSpeedRamp.ResetCounter(&FBSpeedRamp);
-			}
-			if(key->v & KEY_D)  		//key: d
-				ChassisSpeedRef.left_right_ref =  KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
-			else if(key->v & KEY_A) 	//key: a
-				ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
-			else
-			{
-				ChassisSpeedRef.left_right_ref = 0;
-				LRSpeedRamp.ResetCounter(&LRSpeedRamp);
-			}
-		}
+		}break;
+		case NO_CHANGE:
+		{
+			
+		}break;
+	}
+	//CM Movement Process 
+	//shift: High Speed , ctrl: Low Speed  , shift+ctrl: Don't Move
+	if(key->v & KEY_W)  		//key: w
+		ChassisSpeedRef.forward_back_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+	else if(key->v & KEY_S) 	//key: s
+		ChassisSpeedRef.forward_back_ref = -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+	else
+	{
+		ChassisSpeedRef.forward_back_ref = 0;
+		FBSpeedRamp.ResetCounter(&FBSpeedRamp);
+	}
+	if(key->v & KEY_D)  		//key: d
+		ChassisSpeedRef.left_right_ref =  KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+	else if(key->v & KEY_A) 	//key: a
+		ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+	else
+	{
+		ChassisSpeedRef.left_right_ref = 0;
+		LRSpeedRamp.ResetCounter(&LRSpeedRamp);
 	}
 	Limit_and_Synchronization();
 }
@@ -174,8 +176,8 @@ void KeyboardModeFSM(Key *key)
 {
 	if((key->v & 0x30) == 0x30)//Shift_Ctrl
 	{
-		KM_FORWORD_BACK_SPEED=  LOW_FORWARD_BACK_SPEED;
-		KM_LEFT_RIGHT_SPEED = LOW_LEFT_RIGHT_SPEED;
+		KM_FORWORD_BACK_SPEED=  0;
+		KM_LEFT_RIGHT_SPEED = 0;
 		KeyboardMode=SHIFT_CTRL;
 	}
 	else if(key->v & KEY_SHIFT)//Shift

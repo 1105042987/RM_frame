@@ -255,7 +255,7 @@ void setCAN11()
 		}
 		can1_update = 0;
 		#ifdef CAN12
-		can1_type = 2;
+			can1_type = 2;
 		#endif
 		HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 		HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
@@ -306,7 +306,9 @@ void setCAN12()
 			Error_Handler();
 		}
 		can1_update = 0;
-		can1_type = 1;
+		#ifdef CAN11
+			can1_type = 1;
+		#endif
 		HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 		HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
 		HAL_NVIC_EnableIRQ(USART1_IRQn);
@@ -357,7 +359,7 @@ void setCAN21()
 		}
 		can2_update = 0;
 		#ifdef CAN22
-		can2_type = 2;
+			can2_type = 2;
 		#endif
 		HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 		HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
@@ -408,7 +410,9 @@ void setCAN22()
 			Error_Handler();
 		}
 		can2_update = 0;
-		can2_type = 1;
+		#ifdef CAN21
+			can2_type = 1;
+		#endif
 		HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 		HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
 		HAL_NVIC_EnableIRQ(USART1_IRQn);
