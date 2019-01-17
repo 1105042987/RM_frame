@@ -38,7 +38,7 @@
 #define USE_IMU
 #define USE_CHASSIS_FOLLOW
 #define USE_SUPER_CAP
-#define USE_POWER_LIMIT
+#define USE_POWER_LIMIT 	80
 #define USE_AUTOAIM
 
 /***can线启用设置***/
@@ -47,7 +47,7 @@
 #define CAN21
 //#define CAN22
 
-//can协议板间通信-数字为信号组数
+/***can协议板间通信-数字为通信信号组数***/
 //#define CAN13	1
 #define CAN23	1
 

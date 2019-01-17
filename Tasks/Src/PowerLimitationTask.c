@@ -20,14 +20,22 @@ fw_PID_Regulator_t PowerLimitationPID = POWER_LIMITATION_PID_DEFAULT;
 
 //底盘功率限制
 #ifdef USE_POWER_LIMIT
+#define POW_M  USE_POWER_LIMIT
 void PowerLimitation(void)
 {
 	int16_t sum = 0;
 	int16_t CM_current_max;
+	#ifndef GUARD
 	int16_t CMFLIntensity = CMFL.Intensity;
 	int16_t CMFRIntensity = CMFR.Intensity;
 	int16_t CMBLIntensity = CMBL.Intensity;
 	int16_t CMBRIntensity = CMBR.Intensity;
+	#else
+	int16_t CMFLIntensity = CML.Intensity;
+	int16_t CMFRIntensity = CMR.Intensity;
+	int16_t CMBLIntensity = CML.Intensity;
+	int16_t CMBRIntensity = CMR.Intensity;
+	#endif
 	//离线模式
 	if (JUDGE_State == OFFLINE)
 	{
@@ -42,16 +50,15 @@ void PowerLimitation(void)
 		}
 		//CM_current_max = CM_current_MAX;
 	}
-	
 	//仿桂电策略
-	else if(PowerHeatData.chassisPowerBuffer-((PowerHeatData.chassisPower-80)>0?(PowerHeatData.chassisPower-80):0)*1.0f < 7.0f)
+	else if(PowerHeatData.chassisPowerBuffer-((PowerHeatData.chassisPower-POW_M)>0?(PowerHeatData.chassisPower-POW_M):0)*1.0f < 7.0f)
 	{
 		//CM_current_max = 2730;
 		sum = __fabs(CMFLIntensity) + __fabs(CMFRIntensity) + __fabs(CMBLIntensity) + __fabs(CMBRIntensity);
 		float realPowerBuffer = PowerHeatData.chassisPowerBuffer;
 		float realPower = PowerHeatData.chassisPower;
 		PowerLimitationPID.feedback = realPower;
-		PowerLimitationPID.target = 75;
+		PowerLimitationPID.target = POW_M*0.93;
 		PowerLimitationPID.Calc(&PowerLimitationPID);
 		CM_current_max = PowerLimitationPID.output;
 		//LimitFactor += PowerLimitationPID.output/sum;
@@ -66,24 +73,35 @@ void PowerLimitation(void)
 		CMBLIntensity *= LimitFactor/sum;
 		CMBRIntensity *= LimitFactor/sum;
 	}
-	else if (Control_SuperCap.release_power==0 || PowerHeatData.chassisPower>30)
+	else if (PowerHeatData.chassisPower>30)
 	{
-		//PowerLimitationPID.Reset(&PowerLimitationPID);
-		//LimitFactor = 1.0f;
-		CM_current_max = 10000;
-		sum = __fabs(CMFLIntensity) + __fabs(CMFRIntensity) + __fabs(CMBLIntensity) + __fabs(CMBRIntensity);
-		if(sum > CM_current_max)
+		#ifdef USE_SUPER_CAP
+		if(Control_SuperCap.release_power==0)
+		#endif
 		{
-			CMFLIntensity = (CMFLIntensity/(sum+0.0f))*CM_current_max;
-			CMFRIntensity = (CMFRIntensity/(sum+0.0f))*CM_current_max;
-			CMBLIntensity = (CMBLIntensity/(sum+0.0f))*CM_current_max;
-			CMBRIntensity = (CMBRIntensity/(sum+0.0f))*CM_current_max;
+			//PowerLimitationPID.Reset(&PowerLimitationPID);
+			//LimitFactor = 1.0f;
+			CM_current_max = 10000;
+			sum = __fabs(CMFLIntensity) + __fabs(CMFRIntensity) + __fabs(CMBLIntensity) + __fabs(CMBRIntensity);
+			if(sum > CM_current_max)
+			{
+				CMFLIntensity = (CMFLIntensity/(sum+0.0f))*CM_current_max;
+				CMFRIntensity = (CMFRIntensity/(sum+0.0f))*CM_current_max;
+				CMBLIntensity = (CMBLIntensity/(sum+0.0f))*CM_current_max;
+				CMBRIntensity = (CMBRIntensity/(sum+0.0f))*CM_current_max;
+			}
 		}
 	}
+	
+	#ifndef GUARD
 	CMFL.Intensity = CMFLIntensity;
 	CMFR.Intensity = CMFRIntensity;
 	CMBL.Intensity = CMBLIntensity;
 	CMBR.Intensity = CMBRIntensity;
+	#else
+	CML.Intensity = CMFLIntensity*2;
+	CMR.Intensity = CMFRIntensity*2;
+	#endif
 }
 #endif
 

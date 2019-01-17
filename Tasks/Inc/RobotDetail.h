@@ -4,7 +4,7 @@
 #define USE_IMU
 #define USE_CHASSIS_FOLLOW
 #define USE_SUPER_CAP
-#define USE_POWER_LIMIT
+#define USE_POWER_LIMIT 	80
 #define USE_AUTOAIM
 
 #define CAN11
@@ -15,6 +15,7 @@
 #ifdef GUARD
 #define USE_IMU
 #define USE_AUTOAIM
+#define USE_POWER_LIMIT 	20
 
 #define CAN11
 #define CAN12

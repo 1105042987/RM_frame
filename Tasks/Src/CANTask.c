@@ -201,6 +201,27 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 	}
 }
 
+void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
+{
+	if(hcan == &hcan1) 
+	{
+		if(HAL_CAN_Receive_IT(&hcan1, CAN_FIFO0) != HAL_OK){
+			isRcan1Started = 0;
+		}else{
+			isRcan1Started = 1;
+		}
+	}
+	else if(hcan == &hcan2)
+	{
+		if(HAL_CAN_Receive_IT(&hcan2, CAN_FIFO0) != HAL_OK)
+		{
+			isRcan2Started = 0;
+		}else{
+			isRcan2Started = 1;
+		}
+	}
+}
+
 void setCANMessage(uint8_t index)
 {
 	uint8_t target;
