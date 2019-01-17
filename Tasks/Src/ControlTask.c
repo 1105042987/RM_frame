@@ -143,7 +143,7 @@ void ChassisDeTwist(void)
 	ChassisTwistGapAngle = 0;
 }
 #endif
-
+#ifndef GUARD
 void Chassis_Data_Decoding()
 {
 	ControlRotate();
@@ -161,7 +161,7 @@ void Chassis_Data_Decoding()
 	CMBL.Target = ( ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
 	CMBR.Target = (-ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
 }
-
+#endif
 //主控制循环
 void controlLoop()
 {

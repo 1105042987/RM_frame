@@ -135,15 +135,16 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 					}
 				}
 			}
-			else if(Can1RxMsg.StdId == 0x200||Can1RxMsg.StdId == 0x1ff) flag=1;
-			else if(Can1RxMsg.StdId >= CAN_COMM_BASE_ID)
+			
+		}
+		if(Can1RxMsg.StdId == 0x200||Can1RxMsg.StdId == 0x1ff) flag=1;
+		else if(Can1RxMsg.StdId >= CAN_COMM_BASE_ID)
+		{
+			flag = Can1RxMsg.StdId-CAN_COMM_BASE_ID;
+			if(flag<maxSendSize)
 			{
-				flag = Can1RxMsg.StdId-CAN_COMM_BASE_ID;
-				if(flag<maxSendSize)
-				{
-					for(int i=0;i<4;i++) receiveData[flag].data[i] = CanRxGetU16(Can1RxMsg, i);
-					flag = 1;
-				}
+				for(int i=0;i<4;i++) receiveData[flag].data[i] = CanRxGetU16(Can1RxMsg, i);
+				flag = 1;
 			}
 		}
 		if(flag==0) Error_Handler();

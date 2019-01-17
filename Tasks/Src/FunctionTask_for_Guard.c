@@ -43,7 +43,7 @@ void FunctionTaskInit()
 void Limit_and_Synchronization()
 {
 	//MINMAX(UD1.Target,-900,270);//limit
-	//FRICR.Target = -FRICL.Target;
+	CMR.Target =  -CML.Target;
 }
 //******************
 //遥控器模式功能编写
@@ -58,14 +58,22 @@ void RemoteControlProcess(Remote *rc)
 	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	if(WorkState == NORMAL_STATE)
 	{	
-		
+		if(channelrcol>0&&FUNC__RED_RAY_L__READ()) channelrcol = 0;
+		if(channelrcol<0&&FUNC__RED_RAY_R__READ()) channelrcol = 0;
+		CML.Target += channelrcol*0.01;
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
+		
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
+		
 	}
+	OnePush(FUNC__RED_RAY_M__READ(),{
+		CML.Target = 0;
+		CML.Real = 0;
+	})
 	Limit_and_Synchronization();
 }
 //**************************
@@ -81,13 +89,15 @@ void RemoteTestProcess(Remote *rc)
 	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	if(WorkState == NORMAL_STATE)
 	{	
-		
+		CML.Target = channelrcol*2;
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
+		
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
-	{	
+	{
+		
 	}
 	Limit_and_Synchronization();
 }

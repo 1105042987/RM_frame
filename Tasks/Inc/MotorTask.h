@@ -28,6 +28,8 @@
 #define MAX_YGAP		30
 #define MAX_PGAP		15
 #endif
+
+
 #ifdef TEST_MODE
 #define GM_PITCH_GRAVITY_COMPENSATION -150
 #define GM_PITCH_ZERO 	6700
@@ -122,9 +124,13 @@ typedef struct MotorINFO
 }
 
 
-extern MotorINFO CMFL,CMFR,CMBL,CMBR,GMY,GMP,FRICL,FRICR,STIR,test;
 extern MotorINFO *can1[8],*can2[8];
-
+#ifdef INFANTRY
+extern MotorINFO CMFL,CMFR,CMBL,CMBR,GMY,GMP,FRICL,FRICR,STIR;
+#endif 
+#ifdef GUARD
+extern MotorINFO CML,CMR,GMY,GMP,FRICL,FRICR,STIR;
+#endif
 void InitMotor(MotorINFO *id);
 void Motor_ID_Setting(void);
 
