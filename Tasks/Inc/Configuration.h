@@ -36,20 +36,20 @@
 /***功能选择***/
 //#define USE_GYRO
 #define USE_IMU
-#define USE_CHASSIS_FOLLOW
-#define USE_SUPER_CAP
-#define USE_POWER_LIMIT 	80
+//#define USE_CHASSIS_FOLLOW
+//#define USE_SUPER_CAP
+#define USE_POWER_LIMIT 	20
 #define USE_AUTOAIM
 
 /***can线启用设置***/
-#define CAN11
-#define CAN12
-#define CAN21
+//#define CAN11
+//#define CAN12
+//#define CAN21
 //#define CAN22
 
 /***can协议板间通信-数字为通信信号组数***/
 //#define CAN13	1
-#define CAN23	1
+//#define CAN23	1
 
 /*其他设置*/
 //#define FRIC_PWM_MODE
@@ -65,7 +65,7 @@
 #define TEN_MS_TIM				htim10
 #define BUZZER_TIM 				htim12
 
-#define RC_UART 				huart1
+#define RC_UART 					huart1
 #define JUDGE_UART 				huart6
 #define GYRO_UART 				huart7
 #define AUTOAIM_UART 			huart8

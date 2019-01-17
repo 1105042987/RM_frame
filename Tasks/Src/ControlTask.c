@@ -53,6 +53,7 @@ void WorkStateFSM(void)
 	{
 		case PREPARE_STATE:				//准备模式
 		{
+			isCan11FirstRx=1;
 			//if (inputmode == STOP) WorkState = STOP_STATE;
 			if(prepare_time < 2000) prepare_time++;	
 			if(prepare_time >= 2000 && gyro_data.InitFinish == 1 && isCan11FirstRx == 1 && isCan12FirstRx == 1 && isCan21FirstRx == 1 && isCan22FirstRx == 1)//开机二秒后且gyro初始化完成且所有can电机上电完成后进入正常模式

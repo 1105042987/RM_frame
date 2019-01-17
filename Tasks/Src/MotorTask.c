@@ -13,6 +13,7 @@
 
 void ControlNM(MotorINFO *id);
 void ControlCM(MotorINFO *id);
+void ControlANTI_CM(MotorINFO *id);
 void ControlGMY(MotorINFO *id);
 void ControlGMP(MotorINFO *id);
 
@@ -31,18 +32,18 @@ MotorINFO CMFL = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DE
 MotorINFO CMFR = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
 MotorINFO CMBL = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
 MotorINFO CMBR = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
-MotorINFO FRICL = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
-MotorINFO FRICR = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
+MotorINFO FRICL = SpeedBased_MOTORINFO_Init(&ControlANTI_CM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
+MotorINFO FRICR = SpeedBased_MOTORINFO_Init(&ControlANTI_CM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
 //************************************************************************
 //		     Gimbal_MOTORINFO_Init(rdc,func,ppid,spid)
 //************************************************************************
 //使用云台电机时，请务必确定校准过零点
 MotorINFO GMP  = Gimbal_MOTORINFO_Init(2.0,&ControlGMP,
 									   fw_PID_INIT(0.5,0,0.9, 	100.0, 100.0, 100.0, 10.0),
-									   fw_PID_INIT(920,30,0, 	5000.0, 5000.0, 5000.0, 5000.0));
+									   fw_PID_INIT(920,30,0, 	5000.0, 5000.0, 5000.0, 0.0));
 MotorINFO GMY  = Gimbal_MOTORINFO_Init(1.0,&ControlGMY,
 									   fw_PID_INIT(0.6,0,0.5, 	100.0, 100.0, 100.0, 10.0),
-									   fw_PID_INIT(2500,100,0, 	5000.0, 5000.0, 5000.0, 5000.0));
+									   fw_PID_INIT(2500,100,0, 	5000.0, 5000.0, 5000.0, 0.0));
 
 //*************************************************************************
 //			AngleBased_MOTORINFO_Init(rdc,func,ppid,spid)
@@ -51,14 +52,14 @@ MotorINFO STIR = AngleBased_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
 								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
 MotorINFO CML = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
-								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
+								fw_PID_INIT(20.0, 0.0, 5.0, 	1500.0, 1500.0, 1500.0, 1500.0),
+								fw_PID_INIT(30, 0.0, 5.0, 		15000.0, 15000.0, 15000.0, 15000.0));
 MotorINFO CMR = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
-								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
+								fw_PID_INIT(20.0, 0.0, 5.0, 	1500.0, 1500.0, 1500.0, 1500.0),
+								fw_PID_INIT(30, 0.0, 5.0, 		15000.0, 15000.0, 15000.0, 15000.0));
 
-MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
-MotorINFO* can2[8]={&CMFL,&CMFR,&CMBL,&CMBR,0,0,0,0};
+MotorINFO* can1[8]={&FRICL,&FRICR,0,0,0,0,0,0};
+MotorINFO* can2[8]={&CML,&CMR,0,0,&GMY,&GMP,&STIR,0};
 
 
 void ControlNM(MotorINFO* id)
@@ -104,6 +105,15 @@ void ControlCM(MotorINFO* id)
 	id->offical_speedPID.fdb = id->RxMsgC6x0.rotateSpeed;
 	id->offical_speedPID.Calc(&(id->offical_speedPID));
 	id->Intensity=(1.30f)*id->offical_speedPID.output;
+}
+void ControlANTI_CM(MotorINFO* id)
+{
+	//Target 代作为目标速度
+	if(id==0) return;
+	id->offical_speedPID.ref = (float)(id->Target);
+	id->offical_speedPID.fdb = id->RxMsgC6x0.rotateSpeed;
+	id->offical_speedPID.Calc(&(id->offical_speedPID));
+	id->Intensity=(-1.30f)*id->offical_speedPID.output;
 }
 
 void ControlGMY(MotorINFO* id)

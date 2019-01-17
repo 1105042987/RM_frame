@@ -122,7 +122,7 @@ int main(void)
   MX_TIM7_Init();
   MX_TIM10_Init();
   MX_TIM2_Init();
-  MX_IWDG_Init();
+  //MX_IWDG_Init();
   MX_TIM5_Init();
   MX_USART3_UART_Init();
   MX_UART7_Init();
@@ -139,7 +139,9 @@ int main(void)
 	InitCanReception();
 	
 	//串口
-	InitAutoAim();
+	#ifdef USE_AUTOAIM
+		InitAutoAim();
+	#endif
 	InitRemoteControl();
 	InitJudgeUart();
 	#ifdef USE_IMU
@@ -148,6 +150,8 @@ int main(void)
 	#else
 		#ifdef USE_GRYO
 			InitGyroUart();
+		#else
+			gyro_data.InitFinish=1;
 		#endif
 	#endif
 	#ifdef DEBUG_MODE
@@ -171,7 +175,7 @@ int main(void)
 	HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 	HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
 	HAL_NVIC_EnableIRQ(USART1_IRQn);
-	HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
+	HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn); 
 	HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
 	HAL_NVIC_EnableIRQ(TIM7_IRQn);
 	#ifdef DEBUG_MODE
@@ -183,7 +187,7 @@ int main(void)
 	HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&ADC_Value,160);
 	
 	//看门狗
-	MX_IWDG_Init();							//Cube配置完记得注释掉上面自动生成的看门狗初始化函数
+	//MX_IWDG_Init();							//Cube配置完记得注释掉上面自动生成的看门狗初始化函数
 	
 	
   /* USER CODE END 2 */
