@@ -12,10 +12,18 @@
 #include "includes.h"
 
 #define CanRxGetU16(canRxMsg, num) (((uint16_t)canRxMsg.Data[num * 2] << 8) | (uint16_t)canRxMsg.Data[num * 2 + 1])
+#define CAN_COMM_BASE_ID 0x300
 uint8_t isRcan1Started = 0, isRcan2Started = 0;
 uint8_t isCan11FirstRx = 0, isCan12FirstRx = 0, isCan21FirstRx = 0, isCan22FirstRx = 0;
 CanRxMsgTypeDef Can1RxMsg,Can2RxMsg;
-ESCC6x0RxMsg_t CMFLRx,CMBLRx,CMFRRx,CMBRRx;
+#ifdef CAN13
+CAN_DATA_t 		sendData,receiveData[CAN13];
+uint8_t maxSendSize = CAN13;
+#endif
+#ifdef CAN23
+CAN_DATA_t 		sendData,receiveData[CAN23];
+uint8_t maxSendSize = CAN23;
+#endif
 uint8_t can1_update = 1;
 uint8_t can1_type = 1;
 uint8_t can2_update = 1;
@@ -28,8 +36,7 @@ void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef* hcan)
 	if(hcan == &hcan1){
 		can1_update = 1;
 	}
-	else if(hcan == &hcan2)
-	{
+	else if(hcan == &hcan2){
 		can2_update = 1;
 	}
 }
@@ -117,7 +124,7 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 					case ESC_C6x0:
 					{
 						can1[i]->RxMsgC6x0.angle		 = CanRxGetU16(Can1RxMsg, 0);
-						can1[i]->RxMsgC6x0.RotateSpeed   = CanRxGetU16(Can1RxMsg, 1);
+						can1[i]->RxMsgC6x0.rotateSpeed   = CanRxGetU16(Can1RxMsg, 1);
 						can1[i]->RxMsgC6x0.moment		 = CanRxGetU16(Can1RxMsg, 2);
 					}
 					case ESC_6623:
@@ -127,10 +134,19 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 						can1[i]->RxMsg6623.giveIntensity = CanRxGetU16(Can1RxMsg, 2);
 					}
 				}
-				
+			}
+			else if(Can1RxMsg.StdId == 0x200||Can1RxMsg.StdId == 0x1ff) flag=1;
+			else if(Can1RxMsg.StdId >= CAN_COMM_BASE_ID)
+			{
+				flag = Can1RxMsg.StdId-CAN_COMM_BASE_ID;
+				if(flag<maxSendSize)
+				{
+					for(int i=0;i<4;i++) receiveData[flag].data[i] = CanRxGetU16(Can1RxMsg, i);
+					flag = 1;
+				}
 			}
 		}
-		if(!flag) Error_Handler();
+		if(flag==0) Error_Handler();
 		if(HAL_CAN_Receive_IT(&hcan1, CAN_FIFO0) != HAL_OK){
 			isRcan1Started = 0;
 		}else{
@@ -152,7 +168,7 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 					case ESC_C6x0:
 					{
 						can2[i]->RxMsgC6x0.angle		 = CanRxGetU16(Can2RxMsg, 0);
-						can2[i]->RxMsgC6x0.RotateSpeed   = CanRxGetU16(Can2RxMsg, 1);
+						can2[i]->RxMsgC6x0.rotateSpeed   = CanRxGetU16(Can2RxMsg, 1);
 						can2[i]->RxMsgC6x0.moment		 = CanRxGetU16(Can2RxMsg, 2);
 					}
 					case ESC_6623:
@@ -162,10 +178,19 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 						can2[i]->RxMsg6623.giveIntensity = CanRxGetU16(Can2RxMsg, 2);
 					}
 				}
-				
 			}
 		}
-		if(!flag) Error_Handler();
+		if(Can2RxMsg.StdId == 0x200||Can2RxMsg.StdId == 0x1ff) flag=1;
+		else if(Can2RxMsg.StdId >= CAN_COMM_BASE_ID)
+		{
+			flag = Can2RxMsg.StdId-CAN_COMM_BASE_ID;
+			if(flag<maxSendSize)
+			{
+				for(int i=0;i<4;i++) receiveData[flag].data[i] = CanRxGetU16(Can2RxMsg, i);
+				flag = 1;
+			}
+		}
+		if(flag==0) Error_Handler();
 		if(HAL_CAN_Receive_IT(&hcan2, CAN_FIFO0) != HAL_OK)
 		{
 			isRcan2Started = 0;
@@ -173,6 +198,84 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 			isRcan2Started = 1;
 		}
 	}
+}
+
+void setCANMessage(uint8_t index)
+{
+	uint8_t target;
+	#ifdef CAN13
+	#ifndef CAN23
+		CAN_HandleTypeDef* hcan_P = &hcan1;
+		uint8_t* type = &can1_type;
+		uint8_t* update = &can1_update;
+		#ifdef CAN11
+			target=1;
+		#else
+		#ifdef CAN12
+			target=2; 
+		#else
+			target=3;
+		#endif
+		#endif
+	#endif
+	#endif
+	#ifdef CAN23
+	#ifndef CAN13
+		CAN_HandleTypeDef* hcan_P = &hcan2;
+		uint8_t* type = &can2_type;
+		uint8_t* update = &can2_update;
+		#ifdef CAN21
+			target=1;
+		#else
+		#ifdef CAN22
+			target=2; 
+		#else
+			target=3;
+		#endif
+		#endif
+	#endif
+	#endif
+	
+	CanTxMsgTypeDef pData;
+	hcan_P->pTxMsg = &pData;
+	
+	hcan_P->pTxMsg->StdId = CAN_COMM_BASE_ID+index;
+	hcan_P->pTxMsg->ExtId = 0;
+	hcan_P->pTxMsg->IDE = CAN_ID_STD;
+	hcan_P->pTxMsg->RTR = CAN_RTR_DATA;
+	hcan_P->pTxMsg->DLC = 0x08;
+
+	for(int i=0;i<4;i++){
+		hcan_P->pTxMsg->Data[i*2]   = (uint8_t)(sendData.data[i] >> 8);
+		hcan_P->pTxMsg->Data[i*2+1] = (uint8_t)sendData.data[i];
+	}
+	if(*update == 1 && *type == 3)
+	{
+		HAL_NVIC_DisableIRQ(CAN1_RX0_IRQn);
+		HAL_NVIC_DisableIRQ(CAN2_RX0_IRQn);
+		HAL_NVIC_DisableIRQ(USART1_IRQn);
+		HAL_NVIC_DisableIRQ(DMA2_Stream2_IRQn);
+		HAL_NVIC_DisableIRQ(TIM6_DAC_IRQn);
+		HAL_NVIC_DisableIRQ(TIM7_IRQn);
+		#ifdef DEBUG_MODE
+			HAL_NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
+		#endif
+		if(HAL_CAN_Transmit_IT(hcan_P) != HAL_OK)
+		{
+			Error_Handler();
+		}
+		*update = 0;
+		*type = target;
+		HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
+		HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
+		HAL_NVIC_EnableIRQ(USART1_IRQn);
+		HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
+		HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
+		HAL_NVIC_EnableIRQ(TIM7_IRQn);
+		#ifdef DEBUG_MODE
+			HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
+		#endif
+  }
 }
 
 

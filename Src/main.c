@@ -155,17 +155,16 @@ int main(void)
 	#endif
 	
 	//计时器
-	HAL_TIM_Base_Start_IT(&htim6);
-	HAL_TIM_Base_Start_IT(&htim7);
-	//HAL_TIM_Base_Start_IT(&htim10);
-	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
-	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
-	#ifdef FRIC_PWM_MODE
-		HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_2);
-		__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_2,800);
-		__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_3,800);
-	#endif /*FRIC_PWM_MODE*/
+	HAL_TIM_Base_Start_IT(&ONE_MS_TIM);
+	HAL_TIM_Base_Start_IT(&TWO_MS_TIM);
+	//HAL_TIM_Base_Start_IT(&TEN_MS_TIM);
 	InitPWM();
+	#ifdef FRIC_PWM_MODE
+		HAL_TIM_PWM_Start(&STEER_TIM,TIM_CHANNEL_2);
+		HAL_TIM_PWM_Start(&STEER_TIM,TIM_CHANNEL_3);
+		__HAL_TIM_SetCompare(&STEER_TIM,TIM_CHANNEL_2,800);
+		__HAL_TIM_SetCompare(&STEER_TIM,TIM_CHANNEL_3,800);
+	#endif /*FRIC_PWM_MODE*/
 
 	
 	//中断
@@ -181,7 +180,7 @@ int main(void)
 	#endif
 	
 	//ADC
-	//HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&ADC_Value,160);
+	HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&ADC_Value,160);
 	
 	//看门狗
 	MX_IWDG_Init();							//Cube配置完记得注释掉上面自动生成的看门狗初始化函数

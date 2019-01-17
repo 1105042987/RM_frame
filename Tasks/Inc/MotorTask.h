@@ -14,25 +14,34 @@
 
 #include "includes.h"
 
-//³µÐÍÑ¡Ôñ
-#define INFANTRY2
-
-
-#ifdef INFANTRY4
-#define GM_PITCH_GRAVITY_COMPENSATION 800
-#define GM_PITCH_ZERO 	7788
-#define GM_YAW_ZERO 	4640
-#endif
-#ifdef INFANTRY2
+#if INFANTRY==2
 #define GM_PITCH_GRAVITY_COMPENSATION 0
 #define GM_PITCH_ZERO 	3740
 #define GM_YAW_ZERO 	1310
+#define MAX_YGAP		40
+#define MAX_PGAP		20
+#endif
+#if INFANTRY==4
+#define GM_PITCH_GRAVITY_COMPENSATION 800
+#define GM_PITCH_ZERO 	7788
+#define GM_YAW_ZERO 	4640
+#define MAX_YGAP		30
+#define MAX_PGAP		15
 #endif
 #ifdef TEST_MODE
 #define GM_PITCH_GRAVITY_COMPENSATION -150
 #define GM_PITCH_ZERO 	6700
 #define GM_YAW_ZERO 	1900
+#define MAX_YGAP		40
+#define MAX_PGAP		20
 #endif
+#ifdef GUARD
+//Î´²âÊÔ
+#define GM_PITCH_GRAVITY_COMPENSATION 0
+#define GM_PITCH_ZERO 	3740
+#define GM_YAW_ZERO 	1310
+#endif
+
 #define CHASSIS_SPEED_ATTENUATION   (1.30f)
 #define NORMALIZE_ANGLE180(angle) angle = ((angle) > 180) ? ((angle) - 360) : (((angle) < -180) ? (angle) + 360 : angle)
 #define CHASSIS_MOTOR_ROTATE_PID_DEFAULT \

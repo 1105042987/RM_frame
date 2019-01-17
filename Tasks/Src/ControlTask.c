@@ -111,7 +111,9 @@ void ControlRotate(void)
 	CMRotatePID.ref = 0;
 	CMRotatePID.fdb = ChassisSpeedRef.rotate_ref;
 	CMRotatePID.Calc(&CMRotatePID);
-	if(ChassisTwistState) MINMAX(CMRotatePID.output,-10,10);
+	#ifdef USE_CHASSIS_FOLLOW
+		if(ChassisTwistState) MINMAX(CMRotatePID.output,-10,10);
+	#endif
 	rotate_speed = CMRotatePID.output * 13 + ChassisSpeedRef.forward_back_ref * 0.01 + ChassisSpeedRef.left_right_ref * 0.01;
 }
 #ifdef USE_CHASSIS_FOLLOW
@@ -158,20 +160,6 @@ void Chassis_Data_Decoding()
 	CMFR.Target = (-ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
 	CMBL.Target = ( ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
 	CMBR.Target = (-ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
-	/*
-	CMFL.Target = (  ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						+ ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						+ rotate_speed					*0.075)*160;
-	CMFR.Target = (- ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						+ ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						+ rotate_speed					*0.075)*160;
-	CMBL.Target = (  ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						- ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						+ rotate_speed					*0.075)*160;
-	CMBR.Target = (- ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						- ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						+ rotate_speed					*0.075)*160;
-	*/
 }
 
 //主控制循环
@@ -182,7 +170,9 @@ void controlLoop()
 	
 	if(WorkState > 0)
 	{
-		Chassis_Data_Decoding();
+		#ifndef GUARD
+			Chassis_Data_Decoding();
+		#endif
 		
 		for(int i=0;i<8;i++) if(can1[i]!=0) (can1[i]->Handle)(can1[i]);
 		for(int i=0;i<8;i++) if(can2[i]!=0) (can2[i]->Handle)(can2[i]);
@@ -205,13 +195,20 @@ void controlLoop()
 		#ifdef CAN22
 			setCAN22();
 		#endif
+		#ifdef CAN23
+			setCANMessage(0);
+		#else
+		#ifdef CAN13
+			setCANMessage(0);
+		#endif
+		#endif
 	}
 }
 
 //时间中断入口函数
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	if (htim->Instance == htim6.Instance)//2ms时钟`
+	if (htim->Instance == TWO_MS_TIM.Instance)//2ms时钟
 	{
 		HAL_NVIC_DisableIRQ(TIM6_DAC_IRQn);
 		#ifdef USE_IMU
@@ -227,12 +224,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		
 		HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
 	}
-	else if (htim->Instance == htim7.Instance)//ims时钟
+	else if (htim->Instance == ONE_MS_TIM.Instance)//ims时钟
 	{
 		
 		rc_cnt++;
 		if(auto_counter > 0) auto_counter--;
-		
 		if (rx_free == 1 && tx_free == 1)
 		{
 			if( (rc_cnt <= 17) && (rc_first_frame == 1))

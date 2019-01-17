@@ -514,19 +514,14 @@
           <GroupName>Tasks</GroupName>
           <Files>
             <File>
-              <FileName>includes.h</FileName>
+              <FileName>Configuration.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\Inc\includes.h</FilePath>
+              <FilePath>..\Tasks\Inc\Configuration.h</FilePath>
             </File>
             <File>
-              <FileName>AuxDevice.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Tasks\Inc\AuxDevice.h</FilePath>
-            </File>
-            <File>
-              <FileName>FunctionTask.c</FileName>
+              <FileName>FunctionTask_for_Guard.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Tasks\Src\FunctionTask.c</FilePath>
+              <FilePath>..\Tasks\Src\FunctionTask_for_Guard.c</FilePath>
             </File>
             <File>
               <FileName>MotorTask.c</FileName>

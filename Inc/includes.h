@@ -12,23 +12,7 @@
 #ifndef __INCLUDES_H
 #define __INCLUDES_H
 
-//#define DEBUG_MODE
-//#define TEST_MODE
-
-//#define USE_GYRO
-#define USE_IMU
-#define USE_CHASSIS_FOLLOW
-#define USE_SUPER_CAP
-#define USE_POWER_LIMIT
-#define USE_AUTOAIM
-
-//#define FRIC_PWM_MODE
-
-#define CAN11
-#define CAN12
-#define CAN21
-//#define CAN22
-
+#include "Configuration.h"
 #include "main.h"
 #include "stm32f4xx_hal.h"
 #include "can.h"
@@ -41,7 +25,6 @@
 #include "adc.h"
 #include "math.h"
 
-#include "AuxDevice.h"
 #include "RemoteTask.h"
 #include "FunctionTask.h"
 #include "pid_regulator.h"

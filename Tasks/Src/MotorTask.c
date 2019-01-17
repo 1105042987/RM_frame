@@ -79,7 +79,7 @@ void ControlNM(MotorINFO* id)
 			else//正常
 				id->Real = id->Real + (ThisAngle - id->lastRead) * 360 / 8192.0 / id->ReductionRate;
 		}
-		ThisSpeed = id->RxMsgC6x0.RotateSpeed * 6 / id->ReductionRate;		//单位：度每秒
+		ThisSpeed = id->RxMsgC6x0.rotateSpeed * 6 / id->ReductionRate;		//单位：度每秒
 		
 		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
 		
@@ -96,7 +96,7 @@ void ControlCM(MotorINFO* id)
 	//Target 代作为目标速度
 	if(id==0) return;
 	id->offical_speedPID.ref = (float)(id->Target);
-	id->offical_speedPID.fdb = id->RxMsgC6x0.RotateSpeed;
+	id->offical_speedPID.fdb = id->RxMsgC6x0.rotateSpeed;
 	id->offical_speedPID.Calc(&(id->offical_speedPID));
 	id->Intensity=(1.30f)*id->offical_speedPID.output;
 }
@@ -137,11 +137,8 @@ void ControlGMY(MotorINFO* id)
 		if(abs(id->Real-id->Target)<5) GMYReseted = 1;
 		id->lastRead = ThisAngle ;
 		
-		#ifdef INFANTRY2
-		MINMAX(id->Target, id->Real - (GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate - 40.0f, id->Real - (GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate + 40.0f);
-		#endif
-		#ifdef INFANTRY4
-		MINMAX(id->Target, id->Real - (GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate - 30.0f, id->Real - (GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate + 30.0f);
+		#ifdef INFANTRY
+		MINMAX(id->Target, id->Real - (GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate - MAX_YGAP, id->Real - (GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate + MAX_YGAP);
 		#endif
 		#ifdef TEST_MODE
 		MINMAX(id->Target, id->Real - (GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate - 40.0f, id->Real - (GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate + 40.0f);
@@ -193,11 +190,8 @@ void ControlGMP(MotorINFO* id)
 		}
 		if(abs(id->Real-id->Target)<5) GMPReseted = 1;
 		id->lastRead = ThisAngle ;
-		#ifdef INFANTRY2
-		MINMAX(id->Target, id->Real - (GM_PITCH_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate - 20.0f, id->Real - (GM_PITCH_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate + 20.0f);
-		#endif
-		#ifdef INFANTRY4
-		MINMAX(id->Target, id->Real - (GM_PITCH_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate - 15.0f, id->Real - (GM_PITCH_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate + 30.0f);
+		#ifdef INFANTRY
+		MINMAX(id->Target, id->Real - (GM_PITCH_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate - MAX_PGAP, id->Real - (GM_PITCH_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate + MAX_PGAP);
 		#endif
 		#ifdef TEST_MODE
 		MINMAX(id->Target, id->Real - (GM_PITCH_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate - 20.0f, id->Real - (GM_PITCH_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate + 30.0f);
@@ -256,6 +250,10 @@ void setCAN11()
 		can1_update = 0;
 		#ifdef CAN12
 			can1_type = 2;
+		#else
+		#ifdef CAN13
+			can1_type = 3;
+		#endif
 		#endif
 		HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 		HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
@@ -306,8 +304,13 @@ void setCAN12()
 			Error_Handler();
 		}
 		can1_update = 0;
+		
+		#ifdef CAN13
+			can1_type = 3;
+		#else
 		#ifdef CAN11
 			can1_type = 1;
+		#endif
 		#endif
 		HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 		HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
@@ -360,6 +363,10 @@ void setCAN21()
 		can2_update = 0;
 		#ifdef CAN22
 			can2_type = 2;
+		#else
+		#ifdef CAN23
+			can2_type = 3;
+		#endif
 		#endif
 		HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 		HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
@@ -410,8 +417,12 @@ void setCAN22()
 			Error_Handler();
 		}
 		can2_update = 0;
+		#ifdef CAN23
+			can2_type = 3;
+		#else
 		#ifdef CAN21
 			can2_type = 1;
+		#endif
 		#endif
 		HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 		HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
