@@ -50,8 +50,8 @@ MotorINFO GMY  = Gimbal_MOTORINFO_Init(1.0,&ControlGMY,
 //			Normal_MOTORINFO_Init(rdc,func,ppid,spid)
 //*************************************************************************
 MotorINFO STIR = Normal_MOTORINFO_Init(36.0,&ControlSTIR,
-								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
-								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
+								fw_PID_INIT(815.0, 0.0, 1.7, 	15000.0, 15000.0, 15000.0, 15000.0),
+								fw_PID_INIT(1.0, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
 								
 
 MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};

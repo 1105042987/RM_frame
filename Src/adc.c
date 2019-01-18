@@ -100,7 +100,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     PC0     ------> ADC1_IN10
     PC2     ------> ADC1_IN12 
     */
-    GPIO_InitStruct.Pin = Cap_V_Pin|Vol_Pin;
+    GPIO_InitStruct.Pin = Cap_V_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -126,7 +126,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
     PC0     ------> ADC1_IN10
     PC2     ------> ADC1_IN12 
     */
-    HAL_GPIO_DeInit(GPIOC, Cap_V_Pin|Vol_Pin);
+    HAL_GPIO_DeInit(GPIOC, Cap_V_Pin);
 
   /* USER CODE BEGIN ADC1_MspDeInit 1 */
 

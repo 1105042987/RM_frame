@@ -160,7 +160,7 @@ void RemoteControlProcess(Remote *rc)
 			ShootState = 1;
 			FRICL.TargetAngle = 5000;
 			FRICR.TargetAngle = -5000;
-			Delay(20,{STIR.TargetAngle-=60;});
+			Delay(5,{STIR.TargetAngle-=60;});
 		}
 		else
 		{
