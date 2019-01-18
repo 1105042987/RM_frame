@@ -21,6 +21,7 @@ MusicNote SuperMario[] = {
 
 PID_Regulator_t CMRotatePID = CHASSIS_MOTOR_ROTATE_PID_DEFAULT; 
 extern int32_t auto_counter;//自动取弹时间中断常量
+extern int32_t auto_wait;   //限位器等待
 extern int32_t auto_lock; //锁定底盘
 extern int32_t cnt_clk;    //登岛时间中断常量
 
@@ -39,7 +40,7 @@ void WorkStateFSM(void)
 	{
 		case PREPARE_STATE:				//准备模式
 		{
-			if (inputmode == STOP) WorkState = STOP_STATE;
+			//if (inputmode == STOP) WorkState = STOP_STATE;
 			if(prepare_time < 2000) prepare_time++;	
 			if(prepare_time == 2000)//开机二秒进入正常模式
 			{
@@ -80,6 +81,7 @@ void WorkStateFSM(void)
 		{
 			for(int i=0;i<8;i++) {InitMotor(can1[i]);InitMotor(can2[i]);}
 			setCAN11();setCAN12();setCAN21();setCAN22();
+			for(int i=0;i<8;i++) {can1[i]->Intensity = 0;can2[i]->Intensity = 0;}
 			if (inputmode == REMOTE_INPUT || inputmode == KEY_MOUSE_INPUT)
 			{
 				WorkState = PREPARE_STATE;
@@ -163,7 +165,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		rc_cnt++;
 		if(auto_counter > 0) auto_counter--;
 		if(cnt_clk > 0) cnt_clk--;
-		if(auto_lock>0) auto_lock--;
+		if(auto_wait>0) auto_wait--;
 		
 		if (rc_update)
 		{

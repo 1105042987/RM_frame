@@ -12,6 +12,8 @@
 #include "includes.h"
 
 void ControlNM(MotorINFO *id);
+void ControlUM(MotorINFO *id);
+void ControlUFM(MotorINFO *id);
 void ControlCM(MotorINFO *id);
 #ifdef USE_GYRO
 void ControlGMY(MotorINFO *id);
@@ -51,45 +53,50 @@ MotorINFO GMY  = Gimbal_MOTORINFO_Init(-1.0,&ControlGMY,
 //			Normal_MOTORINFO_Init(rdc,func,ppid,spid)
 //*************************************************************************
 MotorINFO STIR = Normal_MOTORINFO_Init(36.0,&ControlNM,
-								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
-								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
-MotorINFO NMUDL = Normal_MOTORINFO_Init(36.0,&ControlNM,
-								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
-								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
-MotorINFO NMUDR = Normal_MOTORINFO_Init(36.0,&ControlNM,
-								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
-								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
+								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
+								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
+MotorINFO NMUDL = Normal_MOTORINFO_Init(19.0,&ControlNM,
+								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
+								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
+MotorINFO NMUDR = Normal_MOTORINFO_Init(19.0,&ControlNM,
+								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
+								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
 								
 MotorINFO NMUDFL = Normal_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
-								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));								
+								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
+								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));								
 MotorINFO NMUDFR = Normal_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
-								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));		
-MotorINFO UM1 = Normal_MOTORINFO_Init(36.0,&ControlNM,
-								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
-								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));								
-MotorINFO UM2 = Normal_MOTORINFO_Init(36.0,&ControlNM,
-								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
-								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));	
+								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
+								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));		
+MotorINFO UM1 = Normal_MOTORINFO_Init(19.0,&ControlNM,
+								fw_PID_INIT(7.5, 0.2, 0.1, 	3000.0, 3000.0, 3000.0, 3000.0),
+								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));								
+MotorINFO UM2 = Normal_MOTORINFO_Init(19.0,&ControlNM,
+								fw_PID_INIT(7.5, 0.2, 0.1, 	3000.0, 3000.0, 3000.0, 3000.0),
+								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));	
 MotorINFO MDL1 = Normal_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
-								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));								
+								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
+								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));								
 MotorINFO MDL2 = Normal_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
-								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));		
-MotorINFO UFM = Normal_MOTORINFO_Init(36.0,&ControlNM,
-								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
-								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));								
+								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
+								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));		
+MotorINFO UFM = Normal_MOTORINFO_Init(19.0,&ControlNM,
+								fw_PID_INIT(30.0, 0.0, 0.0, 	2000.0, 2000.0, 2000.0, 2000.0),//500 15000 10
+								fw_PID_INIT(10, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));	
+MotorINFO ULM = Normal_MOTORINFO_Init(36.0,&ControlNM,
+								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
+								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));								
 							
-
+//2006是36 3508是19
 //MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
 //MotorINFO* can2[8]={&CMFL,&CMFR,&CMBL,&CMBR,&NMUDL,&NMUDR,0,0};
 
-MotorINFO* can1[8]={&CMFL,&CMFR,&CMBL,&CMBR,&NMUDL,&NMUDR,&UFM,0};
-MotorINFO* can2[8]={&MDL1,&MDL2,&UM1,&UM2,&NMUDFL,&NMUDFR,0,0};
+MotorINFO* can1[8]={&CMFL,&CMFR,&CMBL,&CMBR,&NMUDL,&NMUDR,&ULM,0};
+MotorINFO* can2[8]={&MDL1,&MDL2,&UM1,&UM2,&NMUDFR,&NMUDFL,&UFM,0};
 
-
+int16_t someIntensity;
+uint16_t someEncoder;
+double someRealAngle;
 void ControlNM(MotorINFO* id)
 {
 	if(id==0) return;
@@ -113,11 +120,11 @@ void ControlNM(MotorINFO* id)
 			else//正常
 				id->RealAngle = id->RealAngle + (ThisAngle - id->lastRead) * 360 / 8192.0 / id->ReductionRate;
 		}
-		ThisSpeed = id->RxMsgC6x0.RotateSpeed * 6;		//单位：度每秒
+		ThisSpeed = id->RxMsgC6x0.RotateSpeed * 6 / id->ReductionRate;		//单位：度每秒
 		
 		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->TargetAngle,id->RealAngle,ThisSpeed);
 		
-		id->s_count = 0;
+		id->s_count = 1;
 		id->lastRead = ThisAngle;
 	}
 	else
@@ -125,6 +132,7 @@ void ControlNM(MotorINFO* id)
 		id->s_count++;
 	}		
 }
+
 void ControlCM(MotorINFO* id)
 {
 	//TargetAngle 代作为目标速度
@@ -237,6 +245,9 @@ void setCAN11()
 	hcan1.pTxMsg->RTR = CAN_RTR_DATA;
 	hcan1.pTxMsg->DLC = 0x08;
 	
+	someEncoder = UFM.RxMsgC6x0.angle;
+	someRealAngle = UFM.RealAngle;
+	someIntensity = UFM.Intensity;
 	for(int i=0;i<4;i++){
 		if(can1[i]==0) {
 			hcan1.pTxMsg->Data[i*2]   = 0;
