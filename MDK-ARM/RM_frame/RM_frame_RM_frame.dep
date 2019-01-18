@@ -721,7 +721,7 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x5C235167)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x5C235167)
 F (..\Inc\includes.h)(0x5C413779)()
 F (..\Tasks\Inc\AuxDevice.h)(0x5C412CDB)()
-F (..\Tasks\Src\FunctionTask.c)(0x5C413B31)(-c --cpu Cortex-M4.fp -D__MICROLIB -g -O2 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../Tasks/Inc --C99-I D:\RM\RM_frame\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.13.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="518" -D_RTE_ -DSTM32F427xx -DUSE_HAL_DRIVER -DSTM32F427xx --C99-o .\rm_frame\functiontask.o --omf_browse .\rm_frame\functiontask.crf --depend .\rm_frame\functiontask.d)
+F (..\Tasks\Src\FunctionTask.c)(0x5C418156)(-c --cpu Cortex-M4.fp -D__MICROLIB -g -O2 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../Tasks/Inc --C99-I D:\RM\RM_frame\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.13.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="518" -D_RTE_ -DSTM32F427xx -DUSE_HAL_DRIVER -DSTM32F427xx --C99-o .\rm_frame\functiontask.o --omf_browse .\rm_frame\functiontask.crf --depend .\rm_frame\functiontask.d)
 I (../Inc/includes.h)(0x5C413779)
 I (../Inc/main.h)(0x5C412CD4)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x5C235167)
@@ -772,7 +772,7 @@ I (../Tasks/Inc/RemoteTask.h)(0x5C412CDB)
 I (../Tasks/Inc/FunctionTask.h)(0x5C412CDB)
 I (../Tasks/Inc/pid_regulator.h)(0x5C235168)
 I (../Tasks/Inc/CANTask.h)(0x5C235168)
-I (../Tasks/Inc/MotorTask.h)(0x5C412CDB)
+I (../Tasks/Inc/MotorTask.h)(0x5C41867B)
 I (../Tasks/Inc/ControlTask.h)(0x5C412CDB)
 I (../Tasks/Inc/drivers_ramp.h)(0x5C235168)
 I (../Tasks/Inc/AutoAimTask.h)(0x5C235168)
@@ -787,7 +787,7 @@ I (C:\Keil_v5\ARM\ARMCC\include\stdarg.h)(0x569DEA3A)
 I (C:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x569DEA3A)
 I (C:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x569DEA3A)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x569DEA3A)
-F (..\Tasks\Src\MotorTask.c)(0x5C4147C2)(-c --cpu Cortex-M4.fp -D__MICROLIB -g -O2 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../Tasks/Inc --C99-I D:\RM\RM_frame\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.13.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="518" -D_RTE_ -DSTM32F427xx -DUSE_HAL_DRIVER -DSTM32F427xx --C99-o .\rm_frame\motortask.o --omf_browse .\rm_frame\motortask.crf --depend .\rm_frame\motortask.d)
+F (..\Tasks\Src\MotorTask.c)(0x5C415F9D)(-c --cpu Cortex-M4.fp -D__MICROLIB -g -O2 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../Tasks/Inc --C99-I D:\RM\RM_frame\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.13.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="518" -D_RTE_ -DSTM32F427xx -DUSE_HAL_DRIVER -DSTM32F427xx --C99-o .\rm_frame\motortask.o --omf_browse .\rm_frame\motortask.crf --depend .\rm_frame\motortask.d)
 I (../Inc/includes.h)(0x5C413779)
 I (../Inc/main.h)(0x5C412CD4)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x5C235167)
@@ -838,7 +838,7 @@ I (../Tasks/Inc/RemoteTask.h)(0x5C412CDB)
 I (../Tasks/Inc/FunctionTask.h)(0x5C412CDB)
 I (../Tasks/Inc/pid_regulator.h)(0x5C235168)
 I (../Tasks/Inc/CANTask.h)(0x5C235168)
-I (../Tasks/Inc/MotorTask.h)(0x5C412CDB)
+I (../Tasks/Inc/MotorTask.h)(0x5C41867B)
 I (../Tasks/Inc/ControlTask.h)(0x5C412CDB)
 I (../Tasks/Inc/drivers_ramp.h)(0x5C235168)
 I (../Tasks/Inc/AutoAimTask.h)(0x5C235168)
@@ -904,7 +904,7 @@ I (../Tasks/Inc/RemoteTask.h)(0x5C412CDB)
 I (../Tasks/Inc/FunctionTask.h)(0x5C412CDB)
 I (../Tasks/Inc/pid_regulator.h)(0x5C235168)
 I (../Tasks/Inc/CANTask.h)(0x5C235168)
-I (../Tasks/Inc/MotorTask.h)(0x5C412CDB)
+I (../Tasks/Inc/MotorTask.h)(0x5C41867B)
 I (../Tasks/Inc/ControlTask.h)(0x5C412CDB)
 I (../Tasks/Inc/drivers_ramp.h)(0x5C235168)
 I (../Tasks/Inc/AutoAimTask.h)(0x5C235168)
@@ -970,7 +970,7 @@ I (../Tasks/Inc/RemoteTask.h)(0x5C412CDB)
 I (../Tasks/Inc/FunctionTask.h)(0x5C412CDB)
 I (../Tasks/Inc/pid_regulator.h)(0x5C235168)
 I (../Tasks/Inc/CANTask.h)(0x5C235168)
-I (../Tasks/Inc/MotorTask.h)(0x5C412CDB)
+I (../Tasks/Inc/MotorTask.h)(0x5C41867B)
 I (../Tasks/Inc/ControlTask.h)(0x5C412CDB)
 I (../Tasks/Inc/drivers_ramp.h)(0x5C235168)
 I (../Tasks/Inc/AutoAimTask.h)(0x5C235168)
@@ -1036,7 +1036,7 @@ I (../Tasks/Inc/RemoteTask.h)(0x5C412CDB)
 I (../Tasks/Inc/FunctionTask.h)(0x5C412CDB)
 I (../Tasks/Inc/pid_regulator.h)(0x5C235168)
 I (../Tasks/Inc/CANTask.h)(0x5C235168)
-I (../Tasks/Inc/MotorTask.h)(0x5C412CDB)
+I (../Tasks/Inc/MotorTask.h)(0x5C41867B)
 I (../Tasks/Inc/ControlTask.h)(0x5C412CDB)
 I (../Tasks/Inc/drivers_ramp.h)(0x5C235168)
 I (../Tasks/Inc/AutoAimTask.h)(0x5C235168)
@@ -1102,7 +1102,7 @@ I (../Tasks/Inc/RemoteTask.h)(0x5C412CDB)
 I (../Tasks/Inc/FunctionTask.h)(0x5C412CDB)
 I (../Tasks/Inc/pid_regulator.h)(0x5C235168)
 I (../Tasks/Inc/CANTask.h)(0x5C235168)
-I (../Tasks/Inc/MotorTask.h)(0x5C412CDB)
+I (../Tasks/Inc/MotorTask.h)(0x5C41867B)
 I (../Tasks/Inc/ControlTask.h)(0x5C412CDB)
 I (../Tasks/Inc/drivers_ramp.h)(0x5C235168)
 I (../Tasks/Inc/AutoAimTask.h)(0x5C235168)
@@ -1169,7 +1169,7 @@ I (../Tasks/Inc/RemoteTask.h)(0x5C412CDB)
 I (../Tasks/Inc/FunctionTask.h)(0x5C412CDB)
 I (../Tasks/Inc/pid_regulator.h)(0x5C235168)
 I (../Tasks/Inc/CANTask.h)(0x5C235168)
-I (../Tasks/Inc/MotorTask.h)(0x5C412CDB)
+I (../Tasks/Inc/MotorTask.h)(0x5C41867B)
 I (../Tasks/Inc/ControlTask.h)(0x5C412CDB)
 I (../Tasks/Inc/drivers_ramp.h)(0x5C235168)
 I (../Tasks/Inc/AutoAimTask.h)(0x5C235168)
@@ -1235,7 +1235,7 @@ I (../Tasks/Inc/RemoteTask.h)(0x5C412CDB)
 I (../Tasks/Inc/FunctionTask.h)(0x5C412CDB)
 I (../Tasks/Inc/pid_regulator.h)(0x5C235168)
 I (../Tasks/Inc/CANTask.h)(0x5C235168)
-I (../Tasks/Inc/MotorTask.h)(0x5C412CDB)
+I (../Tasks/Inc/MotorTask.h)(0x5C41867B)
 I (../Tasks/Inc/ControlTask.h)(0x5C412CDB)
 I (../Tasks/Inc/drivers_ramp.h)(0x5C235168)
 I (../Tasks/Inc/AutoAimTask.h)(0x5C235168)
@@ -1301,7 +1301,7 @@ I (../Tasks/Inc/RemoteTask.h)(0x5C412CDB)
 I (../Tasks/Inc/FunctionTask.h)(0x5C412CDB)
 I (../Tasks/Inc/pid_regulator.h)(0x5C235168)
 I (../Tasks/Inc/CANTask.h)(0x5C235168)
-I (../Tasks/Inc/MotorTask.h)(0x5C412CDB)
+I (../Tasks/Inc/MotorTask.h)(0x5C41867B)
 I (../Tasks/Inc/ControlTask.h)(0x5C412CDB)
 I (../Tasks/Inc/drivers_ramp.h)(0x5C235168)
 I (../Tasks/Inc/AutoAimTask.h)(0x5C235168)
@@ -1367,7 +1367,7 @@ I (../Tasks/Inc/RemoteTask.h)(0x5C412CDB)
 I (../Tasks/Inc/FunctionTask.h)(0x5C412CDB)
 I (../Tasks/Inc/pid_regulator.h)(0x5C235168)
 I (../Tasks/Inc/CANTask.h)(0x5C235168)
-I (../Tasks/Inc/MotorTask.h)(0x5C412CDB)
+I (../Tasks/Inc/MotorTask.h)(0x5C41867B)
 I (../Tasks/Inc/ControlTask.h)(0x5C412CDB)
 I (../Tasks/Inc/drivers_ramp.h)(0x5C235168)
 I (../Tasks/Inc/AutoAimTask.h)(0x5C235168)
@@ -1433,7 +1433,7 @@ I (../Tasks/Inc/RemoteTask.h)(0x5C412CDB)
 I (../Tasks/Inc/FunctionTask.h)(0x5C412CDB)
 I (../Tasks/Inc/pid_regulator.h)(0x5C235168)
 I (../Tasks/Inc/CANTask.h)(0x5C235168)
-I (../Tasks/Inc/MotorTask.h)(0x5C412CDB)
+I (../Tasks/Inc/MotorTask.h)(0x5C41867B)
 I (../Tasks/Inc/ControlTask.h)(0x5C412CDB)
 I (../Tasks/Inc/drivers_ramp.h)(0x5C235168)
 I (../Tasks/Inc/AutoAimTask.h)(0x5C235168)
@@ -1499,7 +1499,7 @@ I (../Tasks/Inc/RemoteTask.h)(0x5C412CDB)
 I (../Tasks/Inc/FunctionTask.h)(0x5C412CDB)
 I (../Tasks/Inc/pid_regulator.h)(0x5C235168)
 I (../Tasks/Inc/CANTask.h)(0x5C235168)
-I (../Tasks/Inc/MotorTask.h)(0x5C412CDB)
+I (../Tasks/Inc/MotorTask.h)(0x5C41867B)
 I (../Tasks/Inc/ControlTask.h)(0x5C412CDB)
 I (../Tasks/Inc/drivers_ramp.h)(0x5C235168)
 I (../Tasks/Inc/AutoAimTask.h)(0x5C235168)
@@ -1612,7 +1612,7 @@ I (../Tasks/Inc/RemoteTask.h)(0x5C412CDB)
 I (../Tasks/Inc/FunctionTask.h)(0x5C412CDB)
 I (../Tasks/Inc/pid_regulator.h)(0x5C235168)
 I (../Tasks/Inc/CANTask.h)(0x5C235168)
-I (../Tasks/Inc/MotorTask.h)(0x5C412CDB)
+I (../Tasks/Inc/MotorTask.h)(0x5C41867B)
 I (../Tasks/Inc/ControlTask.h)(0x5C412CDB)
 I (../Tasks/Inc/drivers_ramp.h)(0x5C235168)
 I (../Tasks/Inc/AutoAimTask.h)(0x5C235168)

@@ -130,8 +130,8 @@ void RemoteControlProcess(Remote *rc)
 		if(SuperCTestMode==0)
 		{
 			ShootState = 1;
-			FRICL.TargetAngle = 5000;
-			FRICR.TargetAngle = -5000;
+			FRICL.TargetAngle = 7000;
+			FRICR.TargetAngle = -7000;
 		}
 		else
 		{
@@ -158,8 +158,8 @@ void RemoteControlProcess(Remote *rc)
 		if(SuperCTestMode==0)
 		{
 			ShootState = 1;
-			FRICL.TargetAngle = 5000;
-			FRICR.TargetAngle = -5000;
+			FRICL.TargetAngle = 7000;
+			FRICR.TargetAngle = -7000;
 			Delay(5,{STIR.TargetAngle-=60;});
 		}
 		else
