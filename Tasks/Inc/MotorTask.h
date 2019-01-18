@@ -17,12 +17,12 @@
 #ifdef INFANTRY4
 #define GM_PITCH_GRAVITY_COMPENSATION 800
 #define GM_PITCH_ZERO 	7788
-#define GM_YAW_ZERO 	4640
+#define GM_YAW_ZERO 	4730
 #endif
 #ifdef INFANTRY2
 #define GM_PITCH_GRAVITY_COMPENSATION 0
-#define GM_PITCH_ZERO 	3740
-#define GM_YAW_ZERO 	1310
+#define GM_PITCH_ZERO 	3560
+#define GM_YAW_ZERO 	1320
 #endif
 #ifdef GM_TEST
 #define GM_PITCH_GRAVITY_COMPENSATION -150
@@ -45,6 +45,16 @@
 {\
 	0,0,{0,0},\
 	12.0f,0.17f,8.0f,\
+	0,0,0,\
+	10000,10000,10000,\
+	0,7000,0,0,0,\
+	&PID_Calc,&PID_Reset,\
+}
+
+#define FRIC_MOTOR_SPEED_PID_DEFAULT \
+{\
+	0,0,{0,0},\
+	10.0f,0.17f,7.3f,\
 	0,0,0,\
 	10000,10000,10000,\
 	0,7000,0,0,0,\

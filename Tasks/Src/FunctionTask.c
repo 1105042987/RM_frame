@@ -362,6 +362,7 @@ void MouseModeFSM(Mouse *mouse)
 			else
 			{
 				MouseLMode = LONG_CLICK;
+				if(ShootState && abs(STIR.TargetAngle-STIR.RealAngle)<60.0) STIR.TargetAngle-=120;
 			}
 		}break;
 		case NO_CLICK:

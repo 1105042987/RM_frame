@@ -150,7 +150,9 @@ int main(void)
 
 	/*****陀螺仪初始化结束*****/
 	MX_IWDG_Init();							//Cube配置完记得注释掉上面自动生成的看门狗初始化函数
-	InitAutoAim();
+	#ifdef	USE_AUTOAIM
+		InitAutoAim();
+	#endif /*USE_AUTOAIM*/
 	#ifdef DEBUG_MODE
 	ctrlUartInit();
 	//时间中断

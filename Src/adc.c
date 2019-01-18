@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * COPYRIGHT(c) 2018 STMicroelectronics
+  * COPYRIGHT(c) 2019 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -93,16 +93,17 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
   /* USER CODE BEGIN ADC1_MspInit 0 */
 
   /* USER CODE END ADC1_MspInit 0 */
-    /* ADC1 clock enable */
+    /* Peripheral clock enable */
     __HAL_RCC_ADC1_CLK_ENABLE();
   
     /**ADC1 GPIO Configuration    
-    PC0     ------> ADC1_IN10 
+    PC0     ------> ADC1_IN10
+    PC2     ------> ADC1_IN12 
     */
-    GPIO_InitStruct.Pin = Cap_V_Pin;
+    GPIO_InitStruct.Pin = Cap_V_Pin|Vol_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(Cap_V_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /* USER CODE BEGIN ADC1_MspInit 1 */
 
@@ -122,9 +123,10 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
     __HAL_RCC_ADC1_CLK_DISABLE();
   
     /**ADC1 GPIO Configuration    
-    PC0     ------> ADC1_IN10 
+    PC0     ------> ADC1_IN10
+    PC2     ------> ADC1_IN12 
     */
-    HAL_GPIO_DeInit(Cap_V_GPIO_Port, Cap_V_Pin);
+    HAL_GPIO_DeInit(GPIOC, Cap_V_Pin|Vol_Pin);
 
   /* USER CODE BEGIN ADC1_MspDeInit 1 */
 

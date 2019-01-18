@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * COPYRIGHT(c) 2018 STMicroelectronics
+  * COPYRIGHT(c) 2019 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -184,7 +184,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
   /* USER CODE BEGIN UART7_MspInit 0 */
 
   /* USER CODE END UART7_MspInit 0 */
-    /* UART7 clock enable */
+    /* Peripheral clock enable */
     __HAL_RCC_UART7_CLK_ENABLE();
   
     /**UART7 GPIO Configuration    
@@ -229,7 +229,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
   /* USER CODE BEGIN UART8_MspInit 0 */
 
   /* USER CODE END UART8_MspInit 0 */
-    /* UART8 clock enable */
+    /* Peripheral clock enable */
     __HAL_RCC_UART8_CLK_ENABLE();
   
     /**UART8 GPIO Configuration    
@@ -292,7 +292,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
   /* USER CODE BEGIN USART1_MspInit 0 */
 
   /* USER CODE END USART1_MspInit 0 */
-    /* USART1 clock enable */
+    /* Peripheral clock enable */
     __HAL_RCC_USART1_CLK_ENABLE();
   
     /**USART1 GPIO Configuration    
@@ -337,7 +337,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
   /* USER CODE BEGIN USART2_MspInit 0 */
 
   /* USER CODE END USART2_MspInit 0 */
-    /* USART2 clock enable */
+    /* Peripheral clock enable */
     __HAL_RCC_USART2_CLK_ENABLE();
   
     /**USART2 GPIO Configuration    
@@ -382,7 +382,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
   /* USER CODE BEGIN USART3_MspInit 0 */
 
   /* USER CODE END USART3_MspInit 0 */
-    /* USART3 clock enable */
+    /* Peripheral clock enable */
     __HAL_RCC_USART3_CLK_ENABLE();
   
     /**USART3 GPIO Configuration    
@@ -427,7 +427,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
   /* USER CODE BEGIN USART6_MspInit 0 */
 
   /* USER CODE END USART6_MspInit 0 */
-    /* USART6 clock enable */
+    /* Peripheral clock enable */
     __HAL_RCC_USART6_CLK_ENABLE();
   
     /**USART6 GPIO Configuration    

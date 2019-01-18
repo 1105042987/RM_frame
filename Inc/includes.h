@@ -16,7 +16,7 @@
 #define INFANTRY2
 
 //#define DEBUG_MODE
-#define USE_AUTOAIM
+//#define USE_AUTOAIM
 //#define USE_GYRO
 #define USE_IMU
 #define USE_CHASSIS_FOLLOW
@@ -24,7 +24,7 @@
 
 #define CAN11
 #define CAN12
-#define CAN21
+#define CAN21 
 //#define CAN22
 
 #include "main.h"

@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * COPYRIGHT(c) 2018 STMicroelectronics
+  * COPYRIGHT(c) 2019 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -250,7 +250,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
   /* USER CODE BEGIN TIM2_MspInit 0 */
 
   /* USER CODE END TIM2_MspInit 0 */
-    /* TIM2 clock enable */
+    /* Peripheral clock enable */
     __HAL_RCC_TIM2_CLK_ENABLE();
   /* USER CODE BEGIN TIM2_MspInit 1 */
 
@@ -261,7 +261,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
   /* USER CODE BEGIN TIM6_MspInit 0 */
 
   /* USER CODE END TIM6_MspInit 0 */
-    /* TIM6 clock enable */
+    /* Peripheral clock enable */
     __HAL_RCC_TIM6_CLK_ENABLE();
 
     /* TIM6 interrupt Init */
@@ -276,7 +276,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
   /* USER CODE BEGIN TIM7_MspInit 0 */
 
   /* USER CODE END TIM7_MspInit 0 */
-    /* TIM7 clock enable */
+    /* Peripheral clock enable */
     __HAL_RCC_TIM7_CLK_ENABLE();
 
     /* TIM7 interrupt Init */
@@ -291,7 +291,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
   /* USER CODE BEGIN TIM10_MspInit 0 */
 
   /* USER CODE END TIM10_MspInit 0 */
-    /* TIM10 clock enable */
+    /* Peripheral clock enable */
     __HAL_RCC_TIM10_CLK_ENABLE();
 
     /* TIM10 interrupt Init */
@@ -306,7 +306,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
   /* USER CODE BEGIN TIM12_MspInit 0 */
 
   /* USER CODE END TIM12_MspInit 0 */
-    /* TIM12 clock enable */
+    /* Peripheral clock enable */
     __HAL_RCC_TIM12_CLK_ENABLE();
   /* USER CODE BEGIN TIM12_MspInit 1 */
 
@@ -322,7 +322,7 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* tim_pwmHandle)
   /* USER CODE BEGIN TIM5_MspInit 0 */
 
   /* USER CODE END TIM5_MspInit 0 */
-    /* TIM5 clock enable */
+    /* Peripheral clock enable */
     __HAL_RCC_TIM5_CLK_ENABLE();
   /* USER CODE BEGIN TIM5_MspInit 1 */
 

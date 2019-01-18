@@ -1,4 +1,4 @@
---cpu=Cortex-M4.fp
+--cpu Cortex-M4.fp
 ".\rm_frame\stm32f4xx_hal_adc.o"
 ".\rm_frame\stm32f4xx_hal_adc_ex.o"
 ".\rm_frame\stm32f4xx_hal_can.o"
