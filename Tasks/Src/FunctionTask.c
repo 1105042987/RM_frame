@@ -130,8 +130,8 @@ void RemoteControlProcess(Remote *rc)
 		if(SuperCTestMode==0)
 		{
 			ShootState = 1;
-			FRICL.TargetAngle = 7000;
-			FRICR.TargetAngle = -7000;
+			FRICL.TargetAngle = 8100;
+			FRICR.TargetAngle = -8100;
 		}
 		else
 		{
@@ -158,9 +158,9 @@ void RemoteControlProcess(Remote *rc)
 		if(SuperCTestMode==0)
 		{
 			ShootState = 1;
-			FRICL.TargetAngle = 7000;
-			FRICR.TargetAngle = -7000;
-			Delay(5,{STIR.TargetAngle-=60;});
+			FRICL.TargetAngle = 8100;
+			FRICR.TargetAngle = -8100;
+			Delay(20,{STIR.TargetAngle-=60;});
 		}
 		else
 		{
@@ -238,7 +238,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		{
 			if(ShootState)
 			{
-				
+				Delay(5,{STIR.TargetAngle-=60;});
 			}
 		}
 		default: break;
@@ -283,6 +283,21 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 				ChassisSpeedRef.left_right_ref = 0;
 				LRSpeedRamp.ResetCounter(&LRSpeedRamp);
+			}
+			
+			if(key->v & KEY_Z)  		//key: Z 12m/s
+			{
+				FRICL.TargetAngle = 5000;
+				FRICR.TargetAngle = -5000;
+			}else if(key->v & KEY_X) 	//key: X 20m/s
+			{
+				FRICL.TargetAngle = 7000;
+				FRICR.TargetAngle = -7000;
+			}
+			else if(key->v & KEY_C) 	//key: C 28m/s
+			{
+				FRICL.TargetAngle = 8100;
+				FRICR.TargetAngle = -8100;
 			}
 		}
 	}
@@ -362,7 +377,6 @@ void MouseModeFSM(Mouse *mouse)
 			else
 			{
 				MouseLMode = LONG_CLICK;
-				if(ShootState && abs(STIR.TargetAngle-STIR.RealAngle)<60.0) STIR.TargetAngle-=120;
 			}
 		}break;
 		case NO_CLICK:
