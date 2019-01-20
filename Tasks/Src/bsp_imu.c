@@ -310,7 +310,7 @@ void mpu_get_data()
 	
     gyro_data.temp = 21 + mpu_data.temp / 333.87f;
 	  /* 2000dps -> rad/s */
-	gyro_data.wx   = mpu_data.gx / 16.384f / 57.3f; 
+		gyro_data.wx   = mpu_data.gx / 16.384f / 57.3f; 
     gyro_data.wy   = mpu_data.gy / 16.384f / 57.3f; 
     gyro_data.wz   = mpu_data.gz / 16.384f / 57.3f;
 }

@@ -40,8 +40,8 @@
 #ifdef GUARD
 //Œ¥≤‚ ‘
 #define GM_PITCH_GRAVITY_COMPENSATION 0
-#define GM_PITCH_ZERO 	3740
-#define GM_YAW_ZERO 	1310
+#define GM_PITCH_ZERO 	2495
+#define GM_YAW_ZERO 	4490
 #endif
 */
 #define CHASSIS_SPEED_ATTENUATION   (1.30f)

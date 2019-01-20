@@ -62,9 +62,9 @@ void RemoteControlProcess(Remote *rc)
 	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	if(WorkState == NORMAL_STATE)
 	{	
-		if(channelrcol>0&&FUNC__RED_RAY_L__READ()) channelrcol = 0;
-		if(channelrcol<0&&FUNC__RED_RAY_R__READ()) channelrcol = 0;
-		CML.Target += channelrcol*0.01;
+		//if(channelrcol>0&&FUNC__RED_RAY_L__READ()) channelrcol = 0;
+		//if(channelrcol<0&&FUNC__RED_RAY_R__READ()) channelrcol = 0;
+		CML.Target += channelrcol*0.04;
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
@@ -74,10 +74,11 @@ void RemoteControlProcess(Remote *rc)
 	{
 		
 	}
-	OnePush(FUNC__RED_RAY_M__READ(),{
+	/*OnePush(FUNC__RED_RAY_M__READ(),{
 		CML.Target = 0;
 		CML.Real = 0;
 	})
+	*/
 	Limit_and_Synchronization();
 }
 //**************************
