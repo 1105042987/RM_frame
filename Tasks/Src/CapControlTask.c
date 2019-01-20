@@ -20,7 +20,7 @@ uint8_t i=0;
 float v_tem[5];
 
 #ifdef USE_SUPER_CAP
-extern MotorINFO** ChassisMotorGroup;
+extern MotorINFO* ChassisMotorGroup[4];
 void Cap_Control(void)
 {
 	for(i=0;i<5;i++)

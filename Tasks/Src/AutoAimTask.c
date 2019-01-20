@@ -52,7 +52,7 @@ void AutoAimRxEnemyINFO()
 	RX_ENEMY_SIGNAL();
 }
 
-extern MotorINFO** GimbalMotorGroup;
+extern MotorINFO* GimbalMotorGroup[4];
 #define GMP (*GimbalMotorGroup[0])
 #define GMY (*GimbalMotorGroup[1])
 void enemyINFOProcess()

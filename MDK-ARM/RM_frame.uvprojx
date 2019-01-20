@@ -519,19 +519,29 @@
               <FilePath>..\Tasks\Inc\Configuration.h</FilePath>
             </File>
             <File>
-              <FileName>FunctionTask_for_Guard.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Tasks\Src\FunctionTask_for_Guard.c</FilePath>
+              <FileName>RobotDetail.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Tasks\Inc\RobotDetail.h</FilePath>
             </File>
             <File>
-              <FileName>MotorTask.c</FileName>
+              <FileName>RobotMotor.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Tasks\Inc\RobotMotor.h</FilePath>
+            </File>
+            <File>
+              <FileName>FunctionTask.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Tasks\Src\MotorTask.c</FilePath>
+              <FilePath>..\Tasks\Src\FunctionTask.c</FilePath>
             </File>
             <File>
               <FileName>ControlTask.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Tasks\Src\ControlTask.c</FilePath>
+            </File>
+            <File>
+              <FileName>MotorTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Tasks\Src\MotorTask.c</FilePath>
             </File>
             <File>
               <FileName>RemoteTask.c</FileName>

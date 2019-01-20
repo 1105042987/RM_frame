@@ -48,23 +48,23 @@ MotorINFO GMY  = Gimbal_MOTORINFO_Init(1.0,&ControlGMY, 1310 , 0 , 40 ,
 //			AngleBased_MOTORINFO_Init(rdc,func,ppid,spid)
 //*************************************************************************
 MotorINFO STIR = AngleBased_MOTORINFO_Init(36.0,&ControlNM,
-								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1080.0),
+								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1200.0),
 								fw_PID_INIT_EASY(30, 0.0, 0.0,	 15000.0));
 MotorINFO CML = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1080.0),
+								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1200.0),
 								fw_PID_INIT_EASY(30, 0.0, 0.0,	 15000.0));
 MotorINFO CMR = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1080.0),
+								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1200.0),
 								fw_PID_INIT_EASY(30, 0.0, 0.0,	 15000.0));
 
-MotorINFO* can2[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
-MotorINFO* can1[8]={&CMFL,&CMFR,&CMBL,&CMBR,0,0,0,0};
+MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
+MotorINFO* can2[8]={&CML,&CMR,&CMBL,&CMBR,0,0,0,0};
 
 
 
-//MotorINFO* ChassisMotorGroup[4]={&CML,&CMR,0,0};			// 非四电机例子
+MotorINFO* ChassisMotorGroup[4]={&CML,&CMR,0,0};			// 非四电机例子
 
-MotorINFO* ChassisMotorGroup[4]={&CMFL,&CMFR,&CMBL,&CMBR};
+//MotorINFO* ChassisMotorGroup[4]={&CMFL,&CMFR,&CMBL,&CMBR};
 
 
 #ifdef USE_CHASSIS_FOLLOW

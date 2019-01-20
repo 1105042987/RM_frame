@@ -131,7 +131,7 @@ void WorkStateFSM(void)
 	}
 }
 #ifdef USE_CHASSIS_FOLLOW
-extern MotorINFO** GimbalMotorGroup;
+extern MotorINFO* GimbalMotorGroup[2];
 void ChassisTwist(void)
 {
 	switch (ChassisTwistGapAngle)
@@ -176,7 +176,7 @@ void ControlRotate(void)
 	#endif
 	rotate_speed = CMRotatePID.output * 13 + ChassisSpeedRef.forward_back_ref * 0.01 + ChassisSpeedRef.left_right_ref * 0.01;
 }
-extern MotorINFO** ChassisMotorGroup;
+extern MotorINFO* ChassisMotorGroup[4];
 void Chassis_Data_Decoding()
 {
 	ControlRotate();
@@ -189,15 +189,15 @@ void Chassis_Data_Decoding()
 		ChassisSpeedRef.left_right_ref = sin(gap)*fb+cos(gap)*rl;
 	#endif
 	
-	if(ChassisMotorGroup[3]==0){
-		ChassisMotorGroup[0]->Target += ChassisSpeedRef.forward_back_ref * 12;
-		ChassisMotorGroup[1]->Target = -ChassisMotorGroup[0]->Target;
-	}
-	else{
+	if(ChassisMotorGroup[3]!=0){
 		ChassisMotorGroup[0]->Target = ( ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
 		ChassisMotorGroup[1]->Target = (-ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
 		ChassisMotorGroup[2]->Target = ( ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
 		ChassisMotorGroup[3]->Target = (-ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
+	}
+	else{
+		ChassisMotorGroup[0]->Target += ChassisSpeedRef.forward_back_ref * 0.008;
+		ChassisMotorGroup[1]->Target = -ChassisMotorGroup[0]->Target;
 	}
 	
 	//CMFL.Target = ( ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
@@ -240,6 +240,7 @@ void controlLoop()
 		#ifdef CAN22
 			setCAN22();
 		#endif
+		
 		#ifdef CAN23
 			setCANMessage(0);
 		#else
@@ -255,7 +256,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim->Instance == TWO_MS_TIM.Instance)//2ms时钟
 	{
-		HAL_NVIC_DisableIRQ(TIM6_DAC_IRQn);
+		//HAL_NVIC_DisableIRQ(TIM6_DAC_IRQn);
 		#ifdef USE_IMU
 			//imu解算
 			mpu_get_data();
@@ -267,7 +268,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		//主循环在时间中断中启动
 		controlLoop();
 		
-		HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
+		//HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
 	}
 	else if (htim->Instance == ONE_MS_TIM.Instance)//ims时钟
 	{

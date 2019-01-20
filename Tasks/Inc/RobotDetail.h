@@ -17,14 +17,14 @@
 //											GUARD
 //***********************************************************************************************************
 #ifdef GUARD
-#define USE_IMU
+//#define USE_IMU
 #define USE_AUTOAIM
 #define USE_POWER_LIMIT 	20
 
 #define CAN11
-#define CAN21
-#define CAN22
-#define CAN13	1
+//#define CAN21
+//#define CAN22
+//#define CAN13	1
 #endif
 //***********************************************************************************************************
 //											HERO

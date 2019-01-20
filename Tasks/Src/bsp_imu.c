@@ -349,7 +349,6 @@ uint8_t id;
 	*/
 uint8_t mpu_device_init(void)
 {
-	gyro_data.FirstEnter = 1;
 	MPU_DELAY(100);
 
 	id                               = mpu_read_byte(MPU6500_WHO_AM_I);
@@ -417,6 +416,7 @@ void mpu_offset_call(void)
 	*/
 void init_quaternion(void)
 {
+	gyro_data.InitFinish = 1;
 	int16_t hx, hy;//hz;
 	
 	hx = gyro_data.mx;

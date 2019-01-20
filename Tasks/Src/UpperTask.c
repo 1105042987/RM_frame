@@ -54,7 +54,7 @@ void ctrlUartInit(){
 		printf( "InitCtrlUart error" );
 	} 
 }
-extern MotorINFO** GimbalMotorGroup;
+extern MotorINFO* GimbalMotorGroup[2];
 #define GMP (*GimbalMotorGroup[0])
 #define GMY (*GimbalMotorGroup[1])
 void zykProcessData()

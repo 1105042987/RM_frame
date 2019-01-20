@@ -16,6 +16,15 @@
 //底盘功率限制
 #ifdef USE_POWER_LIMIT
 #define POW_M  USE_POWER_LIMIT
+#if USE_POWER_LIMIT > 50
+#define COARSE 	0.6
+#define FINE 	0.8
+#else
+#define COARSE 	0.8
+#define FINE 	0.9
+#endif
+float Power_Pool=0;
+float Power_Pool_History_Max = 0;
 float SpeedAttenuation = 1.0f;
 float LimitFactor = 1.0f;
 uint8_t flag = 1;
@@ -26,58 +35,37 @@ float PowerLimitation()
 {
 	static float windows = 1.0;
 	static float rate = 0.1;
-	#ifdef GUARD
-	PowerBufferMax = 40;//假设
-	#endif
-	if (JUDGE_State == OFFLINE) return 1.0;
-	else if(PowerHeatData.chassisPower < 5) return 1.0;
+	//static int cnt=0;
+	Power_Pool += (PowerHeatData.chassisPower-POW_M)*0.02f;
+	if(Power_Pool<0) Power_Pool=0;
+	/*if(Power_Pool>40) cnt++;
+	else cnt=0;
+	if(cnt==52) {windows -=0.01f;}*/
+	OnePush(Power_Pool>40,{windows -=0.01f;});
+	if (JUDGE_State == OFFLINE) return windows;
 	else 
 	{
 		if(PowerHeatData.chassisPower > POW_M) 
-		{
-			if(PowerHeatData.chassisPowerBuffer > PowerBufferMax*0.6){
-				if(windows==rate){
-					windows/=2;
-					rate = 0.1f*windows;
-				}
-				else{
-					if(rate<windows){
-						rate*=2;
-						if(rate>windows) rate = windows;
-					}
-				}
+		{	
+			if(Power_Pool>Power_Pool_History_Max) Power_Pool_History_Max = Power_Pool;
+			if(Power_Pool<40){
+				rate = rate*0.95f>rate-0.02f?rate*0.95f:rate-0.02f;
 			}
 			else{
-				rate = rate*0.9f>rate-0.05f?rate*0.9f:rate-0.05f;
-				windows = rate;
+				rate /= 2;
 			}
 		}
-		else if(PowerHeatData.chassisPower < POW_M * 0.8f)
+		else if(PowerHeatData.chassisPower < POW_M * COARSE)
 		{
-			if(rate<windows){
-				rate*=2;
-				if(rate>windows) rate = windows;
-			}
-			else{
-				rate*=1.1f;
-				//rate+=0.05f;
-				windows=rate;
-			}
+			rate+=0.02f;
 		}
-		#if USE_POWER_LIMIT > 50
-		else if(PowerHeatData.chassisPower < POW_M * 0.9f)
+		else if(PowerHeatData.chassisPower < POW_M * FINE)
 		{
-			if(rate<windows){
-				rate*=2;
-				if(rate>windows) rate = windows;
-			}
-			else{
-				rate+=0.02f;
-				windows=rate;
-			}
+			rate+=0.001f;
 		}
-		#endif
 	}
+	if(rate>windows)
+		rate=windows;
 	return rate;
 }
 /*
