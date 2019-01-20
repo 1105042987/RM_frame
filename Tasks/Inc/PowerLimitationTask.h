@@ -15,7 +15,7 @@
 #include "includes.h"
 
 extern float SpeedAttenuation;
-extern void PowerLimitation(void);
+extern float PowerLimitation(void);
 extern void SpeedLimitation(void);
 extern void getRealSpeed(void);
 extern uint8_t flag;

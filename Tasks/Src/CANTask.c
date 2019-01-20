@@ -17,12 +17,15 @@ uint8_t isRcan1Started = 0, isRcan2Started = 0;
 uint8_t isCan11FirstRx = 0, isCan12FirstRx = 0, isCan21FirstRx = 0, isCan22FirstRx = 0;
 CanRxMsgTypeDef Can1RxMsg,Can2RxMsg;
 #ifdef CAN13
-CAN_DATA_t 		sendData,receiveData[CAN13];
-uint8_t maxSendSize = CAN13;
-#endif
+#define CAN3
+CAN_DATA_t 	sendData,receiveData[CAN13];
+uint8_t 	maxSendSize = CAN13;
+#else
 #ifdef CAN23
-CAN_DATA_t 		sendData,receiveData[CAN23];
-uint8_t maxSendSize = CAN23;
+#define CAN3
+CAN_DATA_t 	sendData,receiveData[CAN23];
+uint8_t 	maxSendSize = CAN23;
+#endif
 #endif
 uint8_t can1_update = 1;
 uint8_t can1_type = 1;
@@ -137,6 +140,7 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 			}
 			
 		}
+		#ifdef CAN3
 		if(Can1RxMsg.StdId == 0x200||Can1RxMsg.StdId == 0x1ff) flag=1;
 		else if(Can1RxMsg.StdId >= CAN_COMM_BASE_ID)
 		{
@@ -147,6 +151,7 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 				flag = 1;
 			}
 		}
+		#endif
 		if(flag==0) Error_Handler();
 		if(HAL_CAN_Receive_IT(&hcan1, CAN_FIFO0) != HAL_OK){
 			isRcan1Started = 0;
@@ -181,6 +186,7 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 				}
 			}
 		}
+		#ifdef CAN3
 		if(Can2RxMsg.StdId == 0x200||Can2RxMsg.StdId == 0x1ff) flag=1;
 		else if(Can2RxMsg.StdId >= CAN_COMM_BASE_ID)
 		{
@@ -191,6 +197,7 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 				flag = 1;
 			}
 		}
+		#endif
 		if(flag==0) Error_Handler();
 		if(HAL_CAN_Receive_IT(&hcan2, CAN_FIFO0) != HAL_OK)
 		{
@@ -221,7 +228,7 @@ void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
 		}
 	}
 }
-
+#ifdef CAN3
 void setCANMessage(uint8_t index)
 {
 	uint8_t target;
@@ -299,5 +306,6 @@ void setCANMessage(uint8_t index)
 		#endif
   }
 }
+#endif
 
 

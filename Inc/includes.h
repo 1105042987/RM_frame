@@ -12,6 +12,9 @@
 #ifndef __INCLUDES_H
 #define __INCLUDES_H
 
+#include "pid_regulator.h"
+#include "CANTask.h"
+#include "MotorTask.h"
 #include "Configuration.h"
 #include "main.h"
 #include "stm32f4xx_hal.h"
@@ -27,9 +30,6 @@
 
 #include "RemoteTask.h"
 #include "FunctionTask.h"
-#include "pid_regulator.h"
-#include "CANTask.h"
-#include "MotorTask.h"
 #include "ControlTask.h"
 #include "drivers_ramp.h"
 #include "AutoAimTask.h"

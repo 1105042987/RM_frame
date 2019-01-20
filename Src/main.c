@@ -122,7 +122,7 @@ int main(void)
   MX_TIM7_Init();
   MX_TIM10_Init();
   MX_TIM2_Init();
-  MX_IWDG_Init();
+  //MX_IWDG_Init();
   MX_TIM5_Init();
   MX_USART3_UART_Init();
   MX_UART7_Init();
@@ -139,7 +139,9 @@ int main(void)
 	InitCanReception();
 	
 	//´®¿Ú
-	InitAutoAim();
+	#ifdef USE_AUTOAIM
+		InitAutoAim();
+	#endif
 	InitRemoteControl();
 	InitJudgeUart();
 	#ifdef USE_IMU
@@ -148,6 +150,8 @@ int main(void)
 	#else
 		#ifdef USE_GRYO
 			InitGyroUart();
+		#else
+			gyro_data.InitFinish=1;
 		#endif
 	#endif
 	#ifdef DEBUG_MODE

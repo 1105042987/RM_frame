@@ -20,6 +20,7 @@ uint8_t i=0;
 float v_tem[5];
 
 #ifdef USE_SUPER_CAP
+extern MotorINFO** ChassisMotorGroup;
 void Cap_Control(void)
 {
 	for(i=0;i<5;i++)
@@ -67,9 +68,12 @@ void Cap_Control(void)
 			}
 			else
 			{
-				if(fabs(CMFL.offical_speedPID.fdb)<2000&&fabs(CMFR.offical_speedPID.fdb)<2000
-					&&fabs(CMBL.offical_speedPID.fdb)<2000&&fabs(CMBR.offical_speedPID.fdb)<2000
-					&&can_power_in==1)
+				uint8_t CM_flag = 1;
+				for(int i=0;i<4;i++){
+					if(ChassisMotorGroup[i]!=0) 
+						CM_flag&=(fabs(ChassisMotorGroup[i]->offical_speedPID.fdb)<2000);
+				}
+				if(CM_flag&&can_power_in==1)
 				{		
 					FUNC__CAP__RECHARGE();
 				}

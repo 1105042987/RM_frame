@@ -13,13 +13,74 @@
 #include "includes.h"
 #include "math.h"
 
+//底盘功率限制
+#ifdef USE_POWER_LIMIT
+#define POW_M  USE_POWER_LIMIT
 float SpeedAttenuation = 1.0f;
 float LimitFactor = 1.0f;
 uint8_t flag = 1;
 fw_PID_Regulator_t PowerLimitationPID = POWER_LIMITATION_PID_DEFAULT;
+int16_t PowerBufferMax = 80;
 
-//底盘功率限制
-#ifdef USE_POWER_LIMIT
+float PowerLimitation()
+{
+	static float windows = 1.0;
+	static float rate = 0.1;
+	#ifdef GUARD
+	PowerBufferMax = 40;//假设
+	#endif
+	if (JUDGE_State == OFFLINE) return 1.0;
+	else if(PowerHeatData.chassisPower < 5) return 1.0;
+	else 
+	{
+		if(PowerHeatData.chassisPower > POW_M) 
+		{
+			if(PowerHeatData.chassisPowerBuffer > PowerBufferMax*0.6){
+				if(windows==rate){
+					windows/=2;
+					rate = 0.1f*windows;
+				}
+				else{
+					if(rate<windows){
+						rate*=2;
+						if(rate>windows) rate = windows;
+					}
+				}
+			}
+			else{
+				rate = rate*0.9f>rate-0.05f?rate*0.9f:rate-0.05f;
+				windows = rate;
+			}
+		}
+		else if(PowerHeatData.chassisPower < POW_M * 0.8f)
+		{
+			if(rate<windows){
+				rate*=2;
+				if(rate>windows) rate = windows;
+			}
+			else{
+				rate*=1.1f;
+				//rate+=0.05f;
+				windows=rate;
+			}
+		}
+		#if USE_POWER_LIMIT > 50
+		else if(PowerHeatData.chassisPower < POW_M * 0.9f)
+		{
+			if(rate<windows){
+				rate*=2;
+				if(rate>windows) rate = windows;
+			}
+			else{
+				rate+=0.02f;
+				windows=rate;
+			}
+		}
+		#endif
+	}
+	return rate;
+}
+/*
 #define POW_M  USE_POWER_LIMIT
 void PowerLimitation(void)
 {
@@ -73,23 +134,22 @@ void PowerLimitation(void)
 		CMBLIntensity *= LimitFactor/sum;
 		CMBRIntensity *= LimitFactor/sum;
 	}
+	#ifdef USE_SUPER_CAP
+	else if(Control_SuperCap.release_power==0||PowerHeatData.chassisPower>30)
+	#else
 	else if (PowerHeatData.chassisPower>30)
+	#endif
 	{
-		#ifdef USE_SUPER_CAP
-		if(Control_SuperCap.release_power==0)
-		#endif
+		//PowerLimitationPID.Reset(&PowerLimitationPID);
+		//LimitFactor = 1.0f;
+		CM_current_max = 10000;
+		sum = __fabs(CMFLIntensity) + __fabs(CMFRIntensity) + __fabs(CMBLIntensity) + __fabs(CMBRIntensity);
+		if(sum > CM_current_max)
 		{
-			//PowerLimitationPID.Reset(&PowerLimitationPID);
-			//LimitFactor = 1.0f;
-			CM_current_max = 10000;
-			sum = __fabs(CMFLIntensity) + __fabs(CMFRIntensity) + __fabs(CMBLIntensity) + __fabs(CMBRIntensity);
-			if(sum > CM_current_max)
-			{
-				CMFLIntensity = (CMFLIntensity/(sum+0.0f))*CM_current_max;
-				CMFRIntensity = (CMFRIntensity/(sum+0.0f))*CM_current_max;
-				CMBLIntensity = (CMBLIntensity/(sum+0.0f))*CM_current_max;
-				CMBRIntensity = (CMBRIntensity/(sum+0.0f))*CM_current_max;
-			}
+			CMFLIntensity = (CMFLIntensity/(sum+0.0f))*CM_current_max;
+			CMFRIntensity = (CMFRIntensity/(sum+0.0f))*CM_current_max;
+			CMBLIntensity = (CMBLIntensity/(sum+0.0f))*CM_current_max;
+			CMBRIntensity = (CMBRIntensity/(sum+0.0f))*CM_current_max;
 		}
 	}
 	
@@ -103,5 +163,6 @@ void PowerLimitation(void)
 	CMR.Intensity = CMFRIntensity*2;
 	#endif
 }
+*/
 #endif
 

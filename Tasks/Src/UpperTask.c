@@ -54,7 +54,9 @@ void ctrlUartInit(){
 		printf( "InitCtrlUart error" );
 	} 
 }
-
+extern MotorINFO** GimbalMotorGroup;
+#define GMP (*GimbalMotorGroup[0])
+#define GMY (*GimbalMotorGroup[1])
 void zykProcessData()
 {
     char data[15];
@@ -75,7 +77,7 @@ void zykProcessData()
     }
     else if(strncmp(buf,"SHOWYS",6)==0)
     {	//clolor order: R:target G:real B:adjust
-    	float realSpeed2=-gyroZspeed/(float)(32.8);
+    	float realSpeed2=-gyro_data.wz/(float)(32.8);
     	fw_printf("#DATA%.2f@%.2f@%.2f$",GMY.positionPID.output,realSpeed2,GMY.speedPID.output);
     }
     else if(strncmp(buf,"SHOWYP",6)==0)
@@ -84,7 +86,7 @@ void zykProcessData()
     }
     else if(strncmp(buf,"SHOWPS",6)==0)
     {	//clolor order: R:target G:real B:adjust
-    	float realSpeed2=-gyroXspeed/(float)(32.8);
+    	float realSpeed2=-gyro_data.wx/(float)(32.8);
     	fw_printf("#DATA%.2f@%.2f@%.2f$",GMP.positionPID.output,realSpeed2,GMP.speedPID.output);
     }
     else if(strncmp(buf,"SHOWPP",6)==0)

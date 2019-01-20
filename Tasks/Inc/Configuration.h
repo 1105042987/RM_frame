@@ -15,15 +15,16 @@
 //*****************************
 //         机器人选择
 //*****************************
-//#define CONFIGURATION
+#define CONFIGURATION
+
 //#define INFANTRY	2
 //#define INFANTRY	4
 //#define INFANTRY	5
-#define GUARD		"UP"
+//#define GUARD		"UP"
 //#define GUARD		"DOWN"
 //#define ENGINEER
-//#define HERO_MAIN
-//#define HERO_SUB
+//#define HERO		“MAIN”
+//#define HERO		"SUB"
 
 //*********************************************************
 //     机器人模块功能配置(机器人选择CONFIGUATION时启用)
@@ -35,21 +36,21 @@
 
 /***功能选择***/
 //#define USE_GYRO
-#define USE_IMU
-#define USE_CHASSIS_FOLLOW
-#define USE_SUPER_CAP
-#define USE_POWER_LIMIT 	80
-#define USE_AUTOAIM
+//#define USE_IMU
+//#define USE_CHASSIS_FOLLOW
+//#define USE_SUPER_CAP
+//#define USE_POWER_LIMIT 	20
+//#define USE_AUTOAIM
 
 /***can线启用设置***/
-#define CAN11
-#define CAN12
-#define CAN21
+//#define CAN11
+//#define CAN12
+//#define CAN21
 //#define CAN22
 
 /***can协议板间通信-数字为通信信号组数***/
 //#define CAN13	1
-#define CAN23	1
+//#define CAN23	1
 
 /*其他设置*/
 //#define FRIC_PWM_MODE

@@ -18,6 +18,14 @@
 
 #define PID_I_CNT 4
 #define MINMAX(value, min, max) value = (value < min) ? min : (value > max ? max : value)
+#define fw_PID_INIT_EASY(Kp, Ki, Kd, OutputMax){\
+	0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ,\
+	Kp, Ki, Kd, 0.0, 0.0, 0.0, \
+	OutputMax, OutputMax, OutputMax, 0.0, \
+	OutputMax, \
+	{0.0}, \
+	&fw_PID_Calc, &fw_PID_Reset \
+}
 #define fw_PID_INIT(Kp, Ki, Kd, KpMax, KiMax, KdMax, OutputMax) { \
 	0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ,\
 	Kp, Ki, Kd, 0.0, 0.0, 0.0, \

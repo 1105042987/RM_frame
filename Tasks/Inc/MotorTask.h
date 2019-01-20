@@ -13,7 +13,7 @@
 #define __CANMOTOR_H
 
 #include "includes.h"
-
+/*
 #if INFANTRY==2
 #define GM_PITCH_GRAVITY_COMPENSATION 0
 #define GM_PITCH_ZERO 	3740
@@ -43,7 +43,7 @@
 #define GM_PITCH_ZERO 	3740
 #define GM_YAW_ZERO 	1310
 #endif
-
+*/
 #define CHASSIS_SPEED_ATTENUATION   (1.30f)
 #define NORMALIZE_ANGLE180(angle) angle = ((angle) > 180) ? ((angle) - 360) : (((angle) < -180) ? (angle) + 360 : angle)
 #define CHASSIS_MOTOR_ROTATE_PID_DEFAULT \
@@ -116,21 +116,15 @@ typedef struct MotorINFO
 	FW_PID_DEFAULT,FW_PID_DEFAULT,spid,0 \
 }
 
-#define Gimbal_MOTORINFO_Init(rdc,func,ppid,spid)\
+#define Gimbal_MOTORINFO_Init(rdc,func,zero,compensation,maxrange,ppid,spid)\
 {\
 	ESC_6623,0,0,0,rdc,\
-	{0,0,0},{0,0,0},0,0,1,0,0,func,\
+	{zero,compensation,maxrange},{0,0,0},0,0,1,0,0,func,\
 	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0 \
 }
 
 
 extern MotorINFO *can1[8],*can2[8];
-#ifdef INFANTRY
-extern MotorINFO CMFL,CMFR,CMBL,CMBR,GMY,GMP,FRICL,FRICR,STIR;
-#endif 
-#ifdef GUARD
-extern MotorINFO CML,CMR,GMY,GMP,FRICL,FRICR,STIR;
-#endif
 void InitMotor(MotorINFO *id);
 void Motor_ID_Setting(void);
 
