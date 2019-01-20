@@ -77,7 +77,6 @@ void WorkStateFSM(void)
 	{
 		case PREPARE_STATE:				//准备模式
 		{
-			isCan11FirstRx=1;
 			//if (inputmode == STOP) WorkState = STOP_STATE;
 			if(prepare_time < 0xff) prepare_time++;	
 			if(prepare_time == 0xff && gyro_data.InitFinish == 1 && isCan11FirstRx == 1 && 
