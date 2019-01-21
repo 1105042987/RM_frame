@@ -10,7 +10,7 @@
   ******************************************************************************
   */
 #include "includes.h"
-
+#define  STIR_STEP_ANGLE 60
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 MouseMode_e MouseLMode = NO_CLICK;
 MouseMode_e MouseRMode = NO_CLICK;
@@ -29,6 +29,9 @@ int16_t channellcol = 0;
 int16_t testIntensity = 0;
 uint8_t SuperCTestMode = 0;
 uint8_t ShootState = 0;
+uint8_t cdflag0 = 0;
+uint8_t burst = 0;
+uint16_t allowBullet0 = 0;
 uint8_t ChassisTwistState = 0;
 
 //初始化
@@ -190,6 +193,52 @@ void MouseModeFSM(Mouse *mouse);
 //****************
 //键鼠模式功能编写
 //****************
+void ShootOneBullet()
+{
+	#ifdef USE_HEAT_LIMIT_INFANTRY
+	if(JUDGE_State == ONLINE && fakeHeat0 > (maxHeat0 - realBulletSpeed0) && !burst)cdflag0 = 1;
+	else cdflag0 = 0;
+	if((STIR.TargetAngle - STIR.RealAngle <= 50) && burst)
+	{
+		if(((!cdflag0) || JUDGE_State == OFFLINE))
+		{
+			if(maxHeat0>fakeHeat0)allowBullet0 = (maxHeat0-fakeHeat0)/realBulletSpeed0;
+			else allowBullet0 = 0;
+			if(allowBullet0 >= 6)allowBullet0 = 6;
+			for(int i=0;i<allowBullet0;i++)
+			{
+				if(fakeHeat0 < (maxHeat0 - 1*realBulletSpeed0))
+				{
+					STIR.TargetAngle -= STIR_STEP_ANGLE;
+					fakeHeat0 += realBulletSpeed0;
+				}
+				else 
+				{
+					if(STIR.RealAngle - STIR.TargetAngle <= 0)STIR.TargetAngle = -STIR_STEP_ANGLE * floor(-STIR.RealAngle/STIR_STEP_ANGLE);
+				}
+			}
+			allowBullet0 = 0;
+		}
+	}
+	else if((STIR.RealAngle - STIR.TargetAngle <= 1))
+	{
+		if(((!cdflag0) || JUDGE_State == OFFLINE) && fakeHeat0 < (maxHeat0 - realBulletSpeed0))
+		{
+			if(fakeHeat0 < (maxHeat0 - 1*realBulletSpeed0))
+			{
+				{
+					STIR.TargetAngle -= STIR_STEP_ANGLE;
+					fakeHeat0 += realBulletSpeed0;
+				}
+			}
+			else if(STIR.RealAngle - STIR.TargetAngle <= 0)STIR.TargetAngle = -STIR_STEP_ANGLE * floor(-STIR.RealAngle/STIR_STEP_ANGLE);
+		}
+	}
+	#else
+	//STIR.TargetAngle -= STIR_STEP_ANGLE;
+	#endif
+}
+
 void MouseKeyControlProcess(Mouse *mouse, Key *key)
 {	
 	if(WorkState <= 0) return;
@@ -232,13 +281,14 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	{
 		case SHORT_CLICK:
 		{
+			if(ShootState && abs(STIR.TargetAngle-STIR.RealAngle)<5.0) {ShootOneBullet();}
 			//if(ShootState) Delay(20,{STIR.TargetAngle-=60;});
 		}break;
 		case LONG_CLICK:
 		{
 			if(ShootState)
 			{
-				Delay(5,{STIR.TargetAngle-=60;});
+				if(ShootState && abs(STIR.TargetAngle-STIR.RealAngle)<5.0) {ShootOneBullet();}//fakeHeat0=fakeHeat0+realBulletSpeed0;
 			}
 		}
 		default: break;
@@ -358,7 +408,7 @@ void MouseModeFSM(Mouse *mouse)
 				MouseLMode = NO_CLICK;
 				counterl = 0;
 			}
-			else if(counterl>=50)
+			else if(counterl>=100)
 			{
 				MouseLMode = LONG_CLICK;
 				counterl = 0;
@@ -384,7 +434,7 @@ void MouseModeFSM(Mouse *mouse)
 			if(mouse->press_l)
 			{
 				MouseLMode = SHORT_CLICK;
-				if(ShootState && abs(STIR.TargetAngle-STIR.RealAngle)<5.0) STIR.TargetAngle-=60;
+				//if(ShootState && abs(STIR.TargetAngle-STIR.RealAngle)<5.0) {ShootOneBullet();}
 			}
 		}break;
 	}

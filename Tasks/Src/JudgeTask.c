@@ -153,9 +153,13 @@ uint16_t maxHeat0 = 480;
 uint16_t remainHeat0 = 480;
 uint16_t maxHeat1 = 480;
 uint16_t remainHeat1 = 480;
-float cooldown = 72;
+uint16_t realHeat0 = 0;
+float fakeHeat0 = 0;
+float realBulletSpeed0 = 22;
+float cooldown0 = 72;
 uint8_t shoot0Cnt = 0;
 uint8_t shoot1Cnt = 0;
+uint8_t syncCnt0 = 0;
 
 void Judge_Refresh_Power()
 {
@@ -181,6 +185,7 @@ void Judge_Refresh_Power()
 		bs[i] = (unsigned char)buffer[i+25];
 	}
 
+	realHeat0 = PowerHeatData.shooterHeat0;
 	remainHeat0 = maxHeat0 - PowerHeatData.shooterHeat0;
 	remainHeat1 = maxHeat1 - PowerHeatData.shooterHeat1;
 	JUDGE_Received = 1;
@@ -207,10 +212,10 @@ void Judge_Refresh_State()
 	remainHP = RobotState.remainHP;
 	switch(maxHP)
 	{
-		case 1000:{maxHeat0 = 120;cooldown = 18;}break;
-		case 1250:{maxHeat0 = 240;cooldown = 36;}break;
-		case 1500:{maxHeat0 = 480;cooldown = 72;}break;
-		default:{maxHeat0 = 480;cooldown = 72;}break;
+		case 1000:{maxHeat0 = 120;cooldown0 = 18;}break;
+		case 1250:{maxHeat0 = 240;cooldown0 = 36;}break;
+		case 1500:{maxHeat0 = 480;cooldown0 = 72;}break;
+		default:{maxHeat0 = 480;cooldown0 = 72;}break;
 	}
 	JUDGE_Received = 1;
 }
@@ -235,6 +240,7 @@ void Judge_Refresh_Shoot()
 		bsd[i] = (unsigned char)cs[i];
 	}
 	
+	if(buffer[7]==1)realBulletSpeed0 = ShootData0.bulletSpeed;
 	JUDGE_Received = 1;
 }
 

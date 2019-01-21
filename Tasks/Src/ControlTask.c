@@ -156,6 +156,13 @@ void controlLoop()
 	}
 }
 
+void heatCalc()//2ms
+{
+	if(syncCnt0 > 35 && JUDGE_State == ONLINE){fakeHeat0 = realHeat0;}
+	else if(fakeHeat0 >= cooldown0/500)fakeHeat0 -= cooldown0/500;
+	else fakeHeat0 = 0;
+}
+
 //时间中断入口函数
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -170,6 +177,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(imu.InitCount == 1000) {imu.InitFinish = 1;imu.FirstEnter = 0;imu.InitCount = 0;}
 		//主循环在时间中断中启动
 		controlLoop();
+		heatCalc();
 		
 		HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
 	}

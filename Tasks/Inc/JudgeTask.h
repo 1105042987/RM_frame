@@ -96,5 +96,11 @@ extern extShootData_t ShootData0;
 extern extShootData_t ShootData1;
 extern JudgeState_e JUDGE_State;
 extern extShowData_t user_data;
+extern float fakeHeat0;
+extern float realBulletSpeed0;
+extern uint16_t realHeat0;
+extern uint8_t syncCnt0;
+extern float cooldown0;
+extern uint16_t maxHeat0;
 
 #endif /*__ JUDGETASK_H */
