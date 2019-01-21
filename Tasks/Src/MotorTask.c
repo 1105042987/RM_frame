@@ -69,10 +69,10 @@ MotorINFO NMUDFR = Normal_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
 								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));		
 MotorINFO UM1 = Normal_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT(7.5, 0.2, 0.1, 	3000.0, 3000.0, 3000.0, 3000.0),
+								fw_PID_INIT(10, 0.1, 0.0, 	4000.0, 4000.0, 4000.0, 4000.0),
 								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));								
 MotorINFO UM2 = Normal_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT(7.5, 0.2, 0.1, 	3000.0, 3000.0, 3000.0, 3000.0),
+								fw_PID_INIT(10, 0.1, 0.0, 	4000.0, 4000.0, 4000.0, 4000.0),
 								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));	
 MotorINFO MDL1 = Normal_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
@@ -81,7 +81,7 @@ MotorINFO MDL2 = Normal_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
 								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));		
 MotorINFO UFM = Normal_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT(30.0, 0.0, 0.0, 	2000.0, 2000.0, 2000.0, 2000.0),//500 15000 10
+								fw_PID_INIT(30.0, 0.0, 0.0, 	4000.0, 4000.0, 4000.0, 4000.0),//500 15000 10
 								fw_PID_INIT(10, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));	
 MotorINFO ULM = Normal_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),

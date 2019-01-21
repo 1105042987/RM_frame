@@ -24,12 +24,13 @@
 
 extern uint32_t AutoGet_Start;  
 extern uint32_t AutoGet_TotalStep;
+extern uint32_t AutoGet_Alreadywaited;
 extern uint32_t Claw_AlreadyRollOut;
 extern uint32_t Claw_AlreadyWaited;
 extern uint32_t Claw_AlreadyTight;
 extern uint32_t Claw_UpToPosition;
 extern uint16_t Claw_TruePosition[5];
-extern uint32_t Claw_UpAngle;
+extern int32_t Claw_UpAngle;
 extern uint32_t Claw_TakeThisBox;
 extern uint32_t Claw_SelfInspecting;
 extern uint32_t Claw_FindingNextBox;
@@ -45,6 +46,7 @@ extern uint32_t Sensor_b;
 
 
 extern int32_t auto_counter;		//用于准确延时的完成某事件
+extern int32_t auto_waiter;
 extern int32_t cnt_clk;
 extern int32_t auto_wait;
 extern int16_t cnt;

@@ -248,6 +248,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			else if(key->v & KEY_E)
 			{
 				Claw_FindingNextBox=0;
+				Sensor_Ready[0]=0;
 			}
 			
 		}
@@ -255,6 +256,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		Claw_SelfInspect();
 		Claw_GoToNextBox_lower();
 		Claw_Up();
+		Box_Land();
 		AutoGet_SwitchState();
 	}
 	Limit_and_Synchronization();

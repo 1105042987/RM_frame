@@ -166,6 +166,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(auto_counter > 0) auto_counter--;
 		if(cnt_clk > 0) cnt_clk--;
 		if(auto_wait>0) auto_wait--;
+		if(auto_waiter>0)auto_waiter--;
 		
 		if (rc_update)
 		{
