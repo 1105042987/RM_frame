@@ -47,7 +47,7 @@ void FunctionTaskInit()
 void Limit_and_Synchronization()
 {
 	//MINMAX(UD1.Target,-900,270);//limit
-	CMR.Target =  -CML.Target;
+	//CMR.Target =  -CML.Target;
 }
 //******************
 //遥控器模式功能编写

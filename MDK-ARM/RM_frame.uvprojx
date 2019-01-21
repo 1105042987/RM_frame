@@ -529,9 +529,9 @@
               <FilePath>..\Tasks\Inc\RobotMotor.h</FilePath>
             </File>
             <File>
-              <FileName>FunctionTask.c</FileName>
+              <FileName>FunctionTask_for_Guard.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Tasks\Src\FunctionTask.c</FilePath>
+              <FilePath>..\Tasks\Src\FunctionTask_for_Guard.c</FilePath>
             </File>
             <File>
               <FileName>ControlTask.c</FileName>

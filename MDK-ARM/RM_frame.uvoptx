@@ -232,12 +232,12 @@
         <Ww>
           <count>8</count>
           <WinNumber>1</WinNumber>
-          <ItemText>GMP.RxMsg6623.angle,0x0A</ItemText>
+          <ItemText>CMR,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
           <WinNumber>1</WinNumber>
-          <ItemText>GMP.RxMsgC6x0.angle,0x0A</ItemText>
+          <ItemText>CML,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>10</count>
@@ -262,7 +262,7 @@
         <Ww>
           <count>14</count>
           <WinNumber>1</WinNumber>
-          <ItemText>testIntensity,0x0A</ItemText>
+          <ItemText>ChassisSpeedRef.forward_back_ref,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>15</count>
@@ -344,6 +344,46 @@
           <WinNumber>1</WinNumber>
           <ItemText>isCan22FirstRx</ItemText>
         </Ww>
+        <Ww>
+          <count>31</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>gyro_data.InitFinish</ItemText>
+        </Ww>
+        <Ww>
+          <count>32</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>can1_type</ItemText>
+        </Ww>
+        <Ww>
+          <count>33</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>ChassisMotorGroup[0]</ItemText>
+        </Ww>
+        <Ww>
+          <count>34</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>rate</ItemText>
+        </Ww>
+        <Ww>
+          <count>35</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>PowerHeatData.chassisPowerBuffer</ItemText>
+        </Ww>
+        <Ww>
+          <count>36</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>PowerHeatData.chassisPower</ItemText>
+        </Ww>
+        <Ww>
+          <count>37</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Power_Pool</ItemText>
+        </Ww>
+        <Ww>
+          <count>38</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Power_Pool_History_Max</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>
@@ -423,7 +463,7 @@
       <DebugFlag>
         <trace>0</trace>
         <periodic>1</periodic>
-        <aLwin>1</aLwin>
+        <aLwin>0</aLwin>
         <aCover>0</aCover>
         <aSer1>0</aSer1>
         <aSer2>0</aSer2>
@@ -778,8 +818,8 @@
       <Focus>0</Focus>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Tasks\Src\FunctionTask.c</PathWithFileName>
-      <FilenameWithoutPath>FunctionTask.c</FilenameWithoutPath>
+      <PathWithFileName>..\Tasks\Src\FunctionTask_for_Guard.c</PathWithFileName>
+      <FilenameWithoutPath>FunctionTask_for_Guard.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

@@ -207,7 +207,7 @@ void Chassis_Data_Decoding()
 }
 //主控制循环
 #ifdef USE_POWER_LIMIT
-float rate;
+float rate=1.0f;
 #endif
 void controlLoop()
 {
@@ -224,7 +224,7 @@ void controlLoop()
 			Cap_Control();
 		#endif
 		#ifdef USE_POWER_LIMIT
-			rate=PowerLimitation();
+			//rate=PowerLimitation();
 			for(int i=0;i<4;i++) if(ChassisMotorGroup[i]!=0)ChassisMotorGroup[i]->Intensity*=rate;
 		#endif
 		

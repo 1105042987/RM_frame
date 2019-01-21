@@ -16,7 +16,7 @@
 //底盘功率限制
 #ifdef USE_POWER_LIMIT
 #define POW_M  USE_POWER_LIMIT
-#if USE_POWER_LIMIT > 50
+#if USE_POWER_LIMIT < 50
 #define COARSE 	0.6
 #define FINE 	0.8
 #else
@@ -35,33 +35,27 @@ float PowerLimitation()
 {
 	static float windows = 1.0;
 	static float rate = 0.1;
-	//static int cnt=0;
-	Power_Pool += (PowerHeatData.chassisPower-POW_M)*0.02f;
+	Power_Pool += (PowerHeatData.chassisPower-POW_M)*0.1f;
 	if(Power_Pool<0) Power_Pool=0;
-	/*if(Power_Pool>40) cnt++;
-	else cnt=0;
-	if(cnt==52) {windows -=0.01f;}*/
-	OnePush(Power_Pool>40,{windows -=0.01f;});
+	if(Power_Pool>150) {
+		windows -=0.01f;
+		rate/=2;
+	}
 	if (JUDGE_State == OFFLINE) return windows;
 	else 
 	{
 		if(PowerHeatData.chassisPower > POW_M) 
 		{	
 			if(Power_Pool>Power_Pool_History_Max) Power_Pool_History_Max = Power_Pool;
-			if(Power_Pool<40){
-				rate = rate*0.95f>rate-0.02f?rate*0.95f:rate-0.02f;
-			}
-			else{
-				rate /= 2;
-			}
+			rate = rate*0.95f>rate-0.02f?rate*0.95f:rate-0.02f;
 		}
 		else if(PowerHeatData.chassisPower < POW_M * COARSE)
 		{
-			rate+=0.02f;
+			rate+=0.04f;
 		}
 		else if(PowerHeatData.chassisPower < POW_M * FINE)
 		{
-			rate+=0.001f;
+			rate+=0.01f;
 		}
 	}
 	if(rate>windows)

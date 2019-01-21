@@ -17,7 +17,7 @@
 //											GUARD
 //***********************************************************************************************************
 #ifdef GUARD
-//#define USE_IMU
+#define USE_IMU
 #define USE_AUTOAIM
 #define USE_POWER_LIMIT 	20
 

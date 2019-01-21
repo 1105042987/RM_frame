@@ -19,7 +19,7 @@ void InitJudgeUart(void){
 	tx_free = 1;
 	Send_User_Data();
 	if(HAL_UART_Receive_DMA(&JUDGE_UART, &tmp_judge, 1) != HAL_OK){
-			Error_Handler();
+		Error_Handler();
 	}
 }
 uint8_t receiving = 0;
@@ -156,7 +156,7 @@ uint16_t remainHeat1 = 480;
 float cooldown = 72;
 uint8_t shoot0Cnt = 0;
 uint8_t shoot1Cnt = 0;
-
+extern float rate;
 void Judge_Refresh_Power()
 {
 	//printf("verify OK\r\n");
@@ -184,7 +184,7 @@ void Judge_Refresh_Power()
 	remainHeat0 = maxHeat0 - PowerHeatData.shooterHeat0;
 	remainHeat1 = maxHeat1 - PowerHeatData.shooterHeat1;
 	JUDGE_Received = 1;
-	
+	rate = PowerLimitation();
 }
 
 void Judge_Refresh_State()
