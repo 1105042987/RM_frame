@@ -155,7 +155,7 @@ void ControlGMY(MotorINFO* id)
 			id->lastRead = ThisAngle;
 			id->RealAngle =(double)(GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate;
 			NORMALIZE_ANGLE180(id->RealAngle);
-			id->FirstEnter = 0;
+			//id->FirstEnter = 0;
 			return;
 		}
 		
