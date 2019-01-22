@@ -35,7 +35,7 @@
 #include "AutoAimTask.h"
 #include "JudgeTask.h"
 #include "UpperTask.h"
-#include "CapControlTask.h"
+#include "Cap2ControlTask.h"
 #include "PowerLimitationTask.h"
 #include "GyroReadTask.h"
 #include "bsp_imu.h"
