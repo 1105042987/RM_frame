@@ -187,7 +187,7 @@ int main(void)
 	HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&ADC_Value,160);
 	
 	//看门狗
-	//MX_IWDG_Init();							//Cube配置完记得注释掉上面自动生成的看门狗初始化函数
+	MX_IWDG_Init();							//Cube配置完记得注释掉上面自动生成的看门狗初始化函数
 	
 	
   /* USER CODE END 2 */

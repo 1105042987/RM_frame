@@ -25,14 +25,12 @@ void Cap_Control(void)
 {
 	for(i=0;i<5;i++)
 	{
-		
 		HAL_ADC_Start(&hadc1);
 		while(HAL_ADC_PollForConversion(&hadc1,100) != HAL_OK);
 		v_tem[i]=HAL_ADC_GetValue(&hadc1)*29.19f/40.96f;
 		HAL_ADC_Stop(&hadc1);
 		
 	}
-	
 	for(i=0;i<5;i++){
 		Control_SuperCap.C_voltage += v_tem[i];
 	}

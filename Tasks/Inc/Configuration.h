@@ -17,10 +17,10 @@
 //*****************************
 //#define CONFIGURATION
 
-//#define INFANTRY	2
+#define INFANTRY	2
 //#define INFANTRY	4
 //#define INFANTRY	5
-#define GUARD		"UP"
+//#define GUARD		"UP"
 //#define GUARD		"DOWN"
 //#define ENGINEER
 //#define HERO		°∞MAIN°±
@@ -41,6 +41,7 @@
 //#define USE_SUPER_CAP
 //#define USE_POWER_LIMIT 	20
 //#define USE_AUTOAIM
+//#define USE_HEAT_LIMIT_INFANTRY
 
 
 /***canœﬂ∆Ù”√…Ë÷√***/

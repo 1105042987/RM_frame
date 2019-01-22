@@ -10,7 +10,6 @@
   ******************************************************************************
   */
 #include "includes.h"
-#define  FRICTION_SPEED 5000
 #define  STIR_STEP_ANGLE 60
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
@@ -19,6 +18,8 @@ ChassisSpeed_Ref_t ChassisSpeedRef;
 void KeyboardModeFSM(Key *key);
 void MouseModeFSM(Mouse *mouse);
 void Standardized_Chassis_Move(float Rate);
+void ShootOneBullet();
+
 #include "RobotMotor.h"
 #ifdef CONFIGURATION
 extern MotorINFO CMFL,CMFR,CMBL,CMBR,GMY,GMP,FRICL,FRICR,STIR,CML,CMR;
@@ -31,6 +32,10 @@ int16_t channelrcol = 0;
 int16_t channellrow = 0;
 int16_t channellcol = 0;
 uint8_t ShootState = 0;
+uint8_t cdflag0 = 0;
+uint8_t burst = 0;
+uint16_t allowBullet0 = 0;
+uint16_t FtictionSpeed = 5000;
 
 //初始化
 void FunctionTaskInit()
@@ -79,14 +84,14 @@ void RemoteControlProcess(Remote *rc)
 	{
 		Standardized_Chassis_Move(1);
 		ShootState = 1;
-		FRICL.Target = FRICTION_SPEED;
+		FRICL.Target = FtictionSpeed;
 		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
 		Standardized_Chassis_Move(1);
 		ShootState = 1;
-		FRICL.Target = FRICTION_SPEED;
+		FRICL.Target = FtictionSpeed;
 		Delay(20,{STIR.Target-=STIR_STEP_ANGLE;});
 		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
 	}
@@ -94,7 +99,9 @@ void RemoteControlProcess(Remote *rc)
 	Control_SuperCap.release_power = 0;
 	Control_SuperCap.stop_power = 0;
 	ChassisTwistState = 0;
-	LED_Show_SuperCap_Voltage(0);
+	#ifdef USE_SUPER_CAP
+		LED_Show_SuperCap_Voltage(0);
+	#endif
 	Limit_and_Synchronization();
 }
 //**************************
@@ -136,7 +143,9 @@ void RemoteTestProcess(Remote *rc)
 	if(ChassisTwistState) ChassisTwist();
 	else ChassisDeTwist();
 	//超级电容电量显示
-	LED_Show_SuperCap_Voltage(1);
+	#ifdef USE_SUPER_CAP
+		LED_Show_SuperCap_Voltage(1);
+	#endif
 	//状态保证
 	ShootState = 0;
 	FRICL.Target = 0;
@@ -164,17 +173,17 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	
 	if(mouse->last_press_l==1)//左短按
 	{
-		if(ShootState && abs(STIR.Target-STIR.Real)<5.0) STIR.Target-=STIR_STEP_ANGLE;
+		if(ShootState)ShootOneBullet();
 	}
 	if(mouse->last_press_l>50)//左长按
 	{
-		if(ShootState && abs(STIR.Target-STIR.Real)<5.0) STIR.Target-=STIR_STEP_ANGLE;
+		if(ShootState)ShootOneBullet();
 	}
 	if(mouse->last_press_r==1)//右短按
 	{
 		ShootState=1;
 		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
-		FRICL.Target = FRICTION_SPEED;
+		FRICL.Target = FtictionSpeed;
 	}
 	if(mouse->last_press_r>50)//右长按
 	{
@@ -186,6 +195,28 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	Control_SuperCap.release_power = 0;
 	Control_SuperCap.stop_power = 0;
 	KeyboardModeFSM(key);
+	
+	if(key->v & KEY_Z)
+	{
+		FtictionSpeed = 5000; //13m/s
+		realBulletSpeed0 = 13;
+		FRICL.Target = FtictionSpeed;
+		ShootState=1;
+	}
+	else if(key->v & KEY_X)
+	{
+		FtictionSpeed = 6500; //20m/s
+		realBulletSpeed0 = 20;
+		FRICL.Target = FtictionSpeed;
+		ShootState=1;
+	}
+	else if(key->v & KEY_C)
+	{
+		FtictionSpeed = 8100; //28m/s
+		realBulletSpeed0 = 28;
+		FRICL.Target = FtictionSpeed;
+		ShootState=1;
+	}
 	
 	switch (KeyboardMode)
 	{
@@ -255,12 +286,14 @@ void KeyboardModeFSM(Key *key)
 	}
 	else if(key->v & KEY_CTRL)//Ctrl
 	{
+		burst = 1;
 		KM_FORWORD_BACK_SPEED=  LOW_FORWARD_BACK_SPEED;
 		KM_LEFT_RIGHT_SPEED = LOW_LEFT_RIGHT_SPEED;
 		KeyboardMode=CTRL;
 	}
 	else
 	{
+		burst = 0;
 		KM_FORWORD_BACK_SPEED=  NORMAL_FORWARD_BACK_SPEED;
 		KM_LEFT_RIGHT_SPEED = NORMAL_LEFT_RIGHT_SPEED;
 		KeyboardMode=NO_CHANGE;
@@ -277,5 +310,51 @@ void Standardized_Chassis_Move(float Rate)
 		GMP.Target += channellcol * RC_GIMBAL_SPEED_REF;
 	#else
 		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
+	#endif
+}
+
+void ShootOneBullet()
+{
+	#ifdef USE_HEAT_LIMIT_INFANTRY
+	if(JUDGE_State == ONLINE && fakeHeat0 > (maxHeat0 - realBulletSpeed0) && !burst)cdflag0 = 1;
+	else cdflag0 = 0;
+	if((STIR.Real - STIR.Target <= 50) && burst)
+	{
+		if(((!cdflag0) || JUDGE_State == OFFLINE))
+		{
+			if(maxHeat0>fakeHeat0)allowBullet0 = (maxHeat0-fakeHeat0)/realBulletSpeed0;
+			else allowBullet0 = 0;
+			if(allowBullet0 >= 6)allowBullet0 = 6;
+			for(int i=0;i<allowBullet0;i++)
+			{
+				if(fakeHeat0 < (maxHeat0 - 1*realBulletSpeed0))
+				{
+					STIR.Target -= STIR_STEP_ANGLE;
+					fakeHeat0 += realBulletSpeed0;
+				}
+				else 
+				{
+					if(STIR.Real - STIR.Target <= 0)STIR.Target = -STIR_STEP_ANGLE * floor(-STIR.Real/STIR_STEP_ANGLE);
+				}
+			}
+			allowBullet0 = 0;
+		}
+	}
+	else if((STIR.Real - STIR.Target <= 5))
+	{
+		if(((!cdflag0) || JUDGE_State == OFFLINE) && fakeHeat0 < (maxHeat0 - realBulletSpeed0))
+		{
+			if(fakeHeat0 < (maxHeat0 - 1*realBulletSpeed0))
+			{
+				{
+					STIR.Target -= STIR_STEP_ANGLE;
+					fakeHeat0 += realBulletSpeed0;
+				}
+			}
+			else if(STIR.Real - STIR.Target <= 0)STIR.Target = -STIR_STEP_ANGLE * floor(-STIR.Real/STIR_STEP_ANGLE);
+		}
+	}
+	#else
+	STIR.Target -= STIR_STEP_ANGLE;
 	#endif
 }

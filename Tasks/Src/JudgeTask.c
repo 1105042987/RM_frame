@@ -147,16 +147,21 @@ extPowerHeatData_t PowerHeatData;
 extShootData_t ShootData0;
 extShootData_t ShootData1;
 
-uint16_t maxHP = 1500;
-uint16_t remainHP;
-uint16_t maxHeat0 = 480;
-uint16_t remainHeat0 = 480;
-uint16_t maxHeat1 = 480;
-uint16_t remainHeat1 = 480;
-float cooldown = 72;
+uint16_t maxHP = MAXHP3;
+uint16_t remainHP = MAXHP3;
+uint16_t maxHeat0 = MAXHEAT03;
+uint16_t remainHeat0 = MAXHEAT03;
+uint16_t maxHeat1 = MAXHEAT03;
+uint16_t remainHeat1 = MAXHEAT03;
+uint16_t realHeat0 = 0;
+float fakeHeat0 = 0;
+float realBulletSpeed0 = 22;
+float cooldown0 = COOLDOWN03;
 uint8_t shoot0Cnt = 0;
 uint8_t shoot1Cnt = 0;
+uint8_t syncCnt0 = 0;
 extern float rate;
+
 void Judge_Refresh_Power()
 {
 	//printf("verify OK\r\n");
@@ -207,10 +212,10 @@ void Judge_Refresh_State()
 	remainHP = RobotState.remainHP;
 	switch(maxHP)
 	{
-		case 1000:{maxHeat0 = 120;cooldown = 18;}break;
-		case 1250:{maxHeat0 = 240;cooldown = 36;}break;
-		case 1500:{maxHeat0 = 480;cooldown = 72;}break;
-		default:{maxHeat0 = 480;cooldown = 72;}break;
+		case MAXHP1:{maxHeat0 = MAXHEAT01;cooldown0 = COOLDOWN01;}break;
+		case MAXHP2:{maxHeat0 = MAXHEAT02;cooldown0 = COOLDOWN02;}break;
+		case MAXHP3:{maxHeat0 = MAXHEAT03;cooldown0 = COOLDOWN03;}break;
+		default:{maxHeat0 = MAXHEAT03;cooldown0 = COOLDOWN03;}break;
 	}
 	JUDGE_Received = 1;
 }
