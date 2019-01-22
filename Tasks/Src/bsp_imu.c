@@ -686,6 +686,6 @@ void imu_attitude_update(void)
 	/* pitch  -pi/2----pi/2 */
 	imu.pit = -asin(-2*q1*q3 + 2*q0*q2)* 57.3;   
 	/* roll   -pi----pi  */	
-	imu.rol =  atan2(2*q2*q3 + 2*q0*q1, -2*q1*q1 - 2*q2*q2 + 1)* 57.3;
+	imu.rol =  -atan2(2*q2*q3 + 2*q0*q1, -2*q1*q1 - 2*q2*q2 + 1)* 57.3;
 }
 
