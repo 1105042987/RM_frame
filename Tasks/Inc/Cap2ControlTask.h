@@ -21,6 +21,15 @@ typedef enum{
   CAP_STATE_RELEASE
 }cap_state;
 
+typedef __packed struct
+{
+	uint8_t release_power;
+	uint8_t stop_power;
+	uint16_t C_voltage;
+}CapControl_t;
+
+extern CapControl_t Control_SuperCap;
+
 /*********************************************************
   * @brief  Initialize the capacitance controller.
   * @param  None
@@ -56,5 +65,7 @@ double Cap_Get_Cap_Voltage(void);
   * @retval The current state of the capacitance controller.
   */
 cap_state Cap_Get_Cap_State(void);
+
+void LED_Show_SuperCap_Voltage(uint8_t flag);
 
 #endif /* __CAP_2_CONTROL_TASK__ */

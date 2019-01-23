@@ -34,12 +34,12 @@ MotorINFO GMY  = Gimbal_MOTORINFO_Init(1.0,&ControlGMY,4640,0,30,
 										fw_PID_INIT_EASY(2500,100,0, 5000));
 #else
 #if INFANTRY == 5
-MotorINFO GMP  = Gimbal_MOTORINFO_Init(2.0,&ControlGMP,3740,0,20,
+MotorINFO GMP  = Gimbal_MOTORINFO_Init(2.0,&ControlGMP,4416,0,20,
 										fw_PID_INIT_EASY(0.5, 0,0.9,100),
-										fw_PID_INIT_EASY(920,30,0, 5000));
-MotorINFO GMY  = Gimbal_MOTORINFO_Init(1.0,&ControlGMY,1310,0,40,
+										fw_PID_INIT_EASY(820,30,0, 5000));
+MotorINFO GMY  = Gimbal_MOTORINFO_Init(1.0,&ControlGMY,5577,0,40,
 										fw_PID_INIT_EASY(0.6, 0,	0.5,100),
-										fw_PID_INIT_EASY(2500,100,0, 5000));
+										fw_PID_INIT_EASY(2000,20,0, 5000));
 #endif
 #endif
 #endif

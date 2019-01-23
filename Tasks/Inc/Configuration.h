@@ -17,9 +17,11 @@
 //*****************************
 //#define CONFIGURATION
 
-#define INFANTRY	2
+//#define OLD_INFANTRY
+#define NEW_INFANTRY
+//#define INFANTRY	2
 //#define INFANTRY	4
-//#define INFANTRY	5
+#define INFANTRY	5
 //#define GUARD		"UP"
 //#define GUARD		"DOWN"
 //#define ENGINEER

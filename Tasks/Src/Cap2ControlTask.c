@@ -77,6 +77,7 @@ static int32_t input_pwm_cmp = 0;
 static int32_t output_pwm_cmp = 0;
 static int16_t recharge_cnt = 0;
 static cap_state CapState = CAP_STATE_STOP;
+CapControl_t Control_SuperCap={0,0};
 
 static void Cap_State(void);
 static void Cap_Ctr(void);
@@ -231,4 +232,21 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
     }
     ADC_val[cnt1] = ADC_tmp[cnt1] / ADC_HITS;
   }
+}
+
+void LED_Show_SuperCap_Voltage(uint8_t flag)
+{
+	if(flag==0)
+	{
+		HAL_GPIO_WritePin(GPIOG, 0x1fe, GPIO_PIN_SET);
+		return;
+	}
+	if(Control_SuperCap.C_voltage<1100)
+		HAL_GPIO_WritePin(GPIOG, 0x1fe, GPIO_PIN_SET);
+	else{
+		HAL_GPIO_WritePin(GPIOG, 0x1fe, GPIO_PIN_SET);
+		int unlight = 7-(Control_SuperCap.C_voltage-1100)/143;
+		if(unlight<0) unlight=0;
+		HAL_GPIO_WritePin(GPIOG, 0x1fe>>unlight, GPIO_PIN_RESET);
+	}
 }

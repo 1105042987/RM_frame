@@ -78,10 +78,10 @@ void WorkStateFSM(void)
 		case PREPARE_STATE:				//准备模式
 		{
 			//if (inputmode == STOP) WorkState = STOP_STATE;
-			if(prepare_time < 0xff) prepare_time++;	
-			if(prepare_time == 0xff && gyro_data.InitFinish == 1 && isCan11FirstRx == 1 && 
+			if(prepare_time < 2000 && gyro_data.InitFinish == 1) prepare_time++;	
+			if(prepare_time == 2000 && gyro_data.InitFinish == 1 && isCan11FirstRx == 1 && 
 				isCan12FirstRx == 1 && isCan21FirstRx == 1 && isCan22FirstRx == 1)
-			//开机0.25秒后且gyro初始化完成且所有can电机上电完成后进入正常模式
+			//开机2秒后且gyro初始化完成且所有can电机上电完成后进入正常模式
 			{
 				if(playMusicSuperMario())
 				{
@@ -214,14 +214,14 @@ void controlLoop()
 	getJudgeState();
 	WorkStateFSM();
 	
-	if(WorkState > 0)
+	if(WorkState > 0)// && WorkState != STOP_STATE)
 	{
 		Chassis_Data_Decoding();
 		
 		for(int i=0;i<8;i++) if(can1[i]!=0) (can1[i]->Handle)(can1[i]);
 		for(int i=0;i<8;i++) if(can2[i]!=0) (can2[i]->Handle)(can2[i]);
 		#ifdef USE_SUPER_CAP
-			//Cap_Control();
+			Cap_Run();
 		#endif
 		#ifdef USE_POWER_LIMIT
 			//rate=PowerLimitation();
