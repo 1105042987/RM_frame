@@ -40,11 +40,11 @@ MotorINFO FRICR = Chassis_MOTORINFO_Init(&ControlCM,FRIC_MOTOR_SPEED_PID_DEFAULT
 //************************************************************************
 //使用云台电机时，请务必确定校准过零点
 MotorINFO GMP  = Gimbal_MOTORINFO_Init(1.0,&ControlGMP,
-									   fw_PID_INIT(0.2,0,0.0, 	100.0, 100.0, 100.0, 10.0),
-									   fw_PID_INIT(920,0,0, 	5000.0, 5000.0, 5000.0, 5000.0));
+									   fw_PID_INIT(0.4,0,0.6, 	100.0, 100.0, 100.0, 10.0),
+									   fw_PID_INIT(1920,20,0, 	10000.0, 10000.0, 10000.0, 5000.0));
 MotorINFO GMY  = Gimbal_MOTORINFO_Init(1.0,&ControlGMY,
-									   fw_PID_INIT(0.2,0,0.0, 100.0, 100.0, 100.0, 10.0),
-									   fw_PID_INIT(1900,0,0, 	5000.0, 5000.0, 5000.0, 5000.0));
+									   fw_PID_INIT(0.5,0,1.2, 100.0, 100.0, 100.0, 10.0),
+									   fw_PID_INIT(2500,30,100, 	10000.0, 10000.0, 10000.0, 5000.0));
 
 //*************************************************************************
 //			Normal_MOTORINFO_Init(rdc,func,ppid,spid)
@@ -145,7 +145,7 @@ void ControlGMY(MotorINFO* id)
 	if(id==0) return;
 	if(id->s_count == 1)
 	{		
-		float 	ThisAngle = (imu.yaw+180.0f);		
+		float 	ThisAngle = imu.yaw;		
 		float 	ThisSpeed = -imu.wz;		
 		int8_t 	dir;
 		if(id->ReductionRate>=0) dir=1;
@@ -155,7 +155,7 @@ void ControlGMY(MotorINFO* id)
 			id->lastRead = ThisAngle;
 			id->RealAngle =(double)(GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate;
 			NORMALIZE_ANGLE180(id->RealAngle);
-			//id->FirstEnter = 0;
+			id->FirstEnter = 0;
 			return;
 		}
 		
@@ -187,10 +187,10 @@ void ControlGMY(MotorINFO* id)
 		#ifdef GM_TEST
 		MINMAX(id->TargetAngle, id->RealAngle - (GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate - 40.0f, id->RealAngle - (GM_YAW_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate + 40.0f);
 		#endif
-		//if(GMYReseted==0) id->positionPID.outputMax = 1.0;
-		//else id->positionPID.outputMax = 10.0;
+		if(GMYReseted==0) id->positionPID.outputMax = 1.0;
+		else id->positionPID.outputMax = 10.0;
 		id->Intensity = -PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->TargetAngle,id->RealAngle,-ThisSpeed);
-	
+		//id->Intensity = 5000;
 		//id->s_count = 0;
 	}
 	else
@@ -203,7 +203,7 @@ void ControlGMP(MotorINFO* id)
 	if(id==0) return;
 	if(id->s_count == 1)
 	{		
-		float 	ThisAngle = imu.rol+180.0f;
+		float 	ThisAngle = -imu.rol;
 		float 	ThisSpeed = imu.wx;
 		int8_t 	dir;
 		if(id->ReductionRate>=0) dir=1;
@@ -245,8 +245,8 @@ void ControlGMP(MotorINFO* id)
 		#ifdef GM_TEST
 		MINMAX(id->TargetAngle, id->RealAngle - (id->RxMsg6623.angle - GM_PITCH_ZERO) * 360.0 / 8192.0 / id->ReductionRate - 20.0f, id->RealAngle - (id->RxMsg6623.angle - GM_PITCH_ZERO) * 360.0 / 8192.0 / id->ReductionRate + 30.0f);
 		#endif
-		//if(GMPReseted==0) id->positionPID.outputMax = 1.0;
-		//else id->positionPID.outputMax = 10.0;
+		if(GMPReseted==0) id->positionPID.outputMax = 1.0;
+		else id->positionPID.outputMax = 10.0;
 		id->Intensity = GM_PITCH_GRAVITY_COMPENSATION - PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->TargetAngle,id->RealAngle,-ThisSpeed);
 
 		MINMAX(id->Intensity,-id->speedPID.outputMax,id->speedPID.outputMax);

@@ -22,11 +22,11 @@
 #define MPU_NSS_LOW HAL_GPIO_WritePin(GPIOF, GPIO_PIN_6, GPIO_PIN_RESET)
 #define MPU_NSS_HIGH HAL_GPIO_WritePin(GPIOF, GPIO_PIN_6, GPIO_PIN_SET)
 
-#define Kp 0.2f                                              /* 
+#define Kp 2.0f                                              /* 
                                                               * proportional gain governs rate of 
                                                               * convergence to accelerometer/magnetometer 
 																															*/
-#define Ki 0.004f                                             /* 
+#define Ki 0.01f                                             /* 
                                                               * integral gain governs rate of 
                                                               * convergence of gyroscope biases 
 																															*/
@@ -686,6 +686,6 @@ void imu_attitude_update(void)
 	/* pitch  -pi/2----pi/2 */
 	imu.pit = -asin(-2*q1*q3 + 2*q0*q2)* 57.3;   
 	/* roll   -pi----pi  */	
-	imu.rol =  -atan2(2*q2*q3 + 2*q0*q1, -2*q1*q1 - 2*q2*q2 + 1)* 57.3;
+	imu.rol =  atan2(2*q2*q3 + 2*q0*q1, -2*q1*q1 - 2*q2*q2 + 1)* 57.3;
 }
 
