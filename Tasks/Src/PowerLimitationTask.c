@@ -21,7 +21,7 @@ fw_PID_Regulator_t PowerLimitationPID = POWER_LIMITATION_PID_DEFAULT;
 //底盘功率限制
 void PowerLimitation(void)
 {
-	int16_t sum = 0;
+	uint16_t sum = 0;
 	int16_t CM_current_max;
 	int16_t CMFLIntensity = CMFL.Intensity;
 	int16_t CMFRIntensity = CMFR.Intensity;
