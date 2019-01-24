@@ -19,12 +19,12 @@
 #define USE_AUTOAIM
 //#define USE_GYRO
 #define USE_IMU
-#define USE_CHASSIS_FOLLOW
+//#define USE_CHASSIS_FOLLOW
 //#define FRIC_PWM_MODE//临时使用，后续不需要
 
 #define CAN11
-#define CAN12
-#define CAN21
+//#define CAN12
+//#define CAN21
 //#define CAN22
 
 #include "main.h"

@@ -44,9 +44,9 @@
 #define CHASSIS_MOTOR_SPEED_PID_DEFAULT \
 {\
 	0,0,{0,0},\
-	12.0f,0.17f,8.0f,\
+	6.0f,0.0f,1.0f,\
 	0,0,0,\
-	10000,10000,10000,\
+	12000,12000,12000,\
 	0,7000,0,0,0,\
 	&PID_Calc,&PID_Reset,\
 }
@@ -109,7 +109,7 @@ typedef struct MotorINFO
 }
 
 
-extern MotorINFO CMFL,CMFR,CMBL,CMBR,GMY,GMP,FRICL,FRICR,STIR,test;
+extern MotorINFO CMFL,CMFR,CMBL,CMBR,GMY,GMP,FRICL,FRICR,STIR,test,YT1,YT2,RQ1,RQ2;
 extern MotorINFO *can1[8],*can2[8];
 
 void InitMotor(MotorINFO *id);

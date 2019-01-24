@@ -18,10 +18,17 @@ float LimitFactor = 1.0f;
 uint8_t flag = 1;
 fw_PID_Regulator_t PowerLimitationPID = POWER_LIMITATION_PID_DEFAULT;
 
+//int32_t sum = 0;
+//	int16_t CM_current_max;
+//	int16_t CMFLIntensity;
+//	int16_t CMFRIntensity;
+//	int16_t CMBLIntensity;
+//	int16_t CMBRIntensity;
+
 //底盘功率限制
 void PowerLimitation(void)
 {
-	int16_t sum = 0;
+	uint16_t sum = 0;
 	int16_t CM_current_max;
 	int16_t CMFLIntensity = CMFL.Intensity;
 	int16_t CMFRIntensity = CMFR.Intensity;
@@ -30,7 +37,7 @@ void PowerLimitation(void)
 	//离线模式
 	if (JUDGE_State == OFFLINE)
 	{
-		CM_current_max = 4000;
+		CM_current_max = 10000;
 		sum = __fabs(CMFLIntensity) + __fabs(CMFRIntensity) + __fabs(CMBLIntensity) + __fabs(CMBRIntensity);
 		if(sum > CM_current_max)
 		{

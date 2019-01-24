@@ -45,7 +45,21 @@ MotorINFO GMY  = Gimbal_MOTORINFO_Init(1.0,&ControlGMY,
 									   fw_PID_INIT(0.6,0,0.5, 100.0, 100.0, 100.0, 10.0),
 									   fw_PID_INIT(2500,100,0, 	5000.0, 5000.0, 5000.0, 5000.0));
 
+MotorINFO YT2 = Normal_MOTORINFO_Init(36.0,&ControlNM,
+								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
+								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
+MotorINFO YT1 = Normal_MOTORINFO_Init(19.0,&ControlNM,
+								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
+								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
+
+MotorINFO RQ1 = Normal_MOTORINFO_Init(19.0,&ControlNM,
+								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
+								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
+MotorINFO RQ2 = Normal_MOTORINFO_Init(19.0,&ControlNM,
+								fw_PID_INIT(1200.0, 0.0, 0.0, 	15000.0, 15000.0, 15000.0, 15000.0),
+								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
 //*************************************************************************
+
 //			Normal_MOTORINFO_Init(rdc,func,ppid,spid)
 //*************************************************************************
 MotorINFO STIR = Normal_MOTORINFO_Init(36.0,&ControlNM,
@@ -53,8 +67,8 @@ MotorINFO STIR = Normal_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
 								
 
-MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
-MotorINFO* can2[8]={&CMFL,&CMFR,&CMBL,&CMBR,0,0,0,0};
+MotorINFO* can2[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
+MotorINFO* can1[8]={&CMFL,&CMFR,&CMBL,&CMBR,&RQ1,&RQ2,&YT1,&YT2};
 
 
 void ControlNM(MotorINFO* id)

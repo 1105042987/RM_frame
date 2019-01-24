@@ -112,23 +112,37 @@ void ControlRotate(void)
 void Chassis_Data_Decoding()
 {
 	ControlRotate();
-	CMFL.TargetAngle = (  ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						+ ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						+ rotate_speed					*0.075)*160;
-	CMFR.TargetAngle = (- ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						+ ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						+ rotate_speed					*0.075)*160;
-	CMBL.TargetAngle = (  ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						- ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						+ rotate_speed					*0.075)*160;
-	CMBR.TargetAngle = (- ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						- ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
-						+ rotate_speed					*0.075)*160;
-}
+//	CMFL.TargetAngle = (  ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
+//						+ ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
+//						+ rotate_speed					*0.075)*160;
+//	CMFR.TargetAngle = (- ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
+//						+ ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
+//						+ rotate_speed					*0.075)*160;
+//	CMBL.TargetAngle = (  ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
+//						- ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
+//						+ rotate_speed					*0.075)*160;
+//	CMBR.TargetAngle = (- ChassisSpeedRef.forward_back_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
+//						- ChassisSpeedRef.left_right_ref	*0.075 *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
+//						+ rotate_speed					*0.075)*160;
 
+		CMFL.TargetAngle = (  ChassisSpeedRef.forward_back_ref	*0.075 
+						+ ChassisSpeedRef.left_right_ref	*0.075 
+						+ ChassisSpeedRef.rotate_ref		*0.075)*160;
+		CMFR.TargetAngle = (- ChassisSpeedRef.forward_back_ref	*0.075 
+						+ ChassisSpeedRef.left_right_ref	*0.075 
+						+ ChassisSpeedRef.rotate_ref		*0.075)*160;
+		CMBL.TargetAngle = (  ChassisSpeedRef.forward_back_ref	*0.075 
+						- ChassisSpeedRef.left_right_ref	*0.075 
+						+ ChassisSpeedRef.rotate_ref		*0.075)*160;
+		CMBR.TargetAngle = (- ChassisSpeedRef.forward_back_ref	*0.075 
+						- ChassisSpeedRef.left_right_ref	*0.075 
+						+ ChassisSpeedRef.rotate_ref		*0.075)*160;	
+	
+}
+	
 //主控制循环
 void controlLoop()
-{
+	{
 	getJudgeState();
 	WorkStateFSM();
 	
