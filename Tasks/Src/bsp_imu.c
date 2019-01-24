@@ -22,11 +22,11 @@
 #define MPU_NSS_LOW HAL_GPIO_WritePin(GPIOF, GPIO_PIN_6, GPIO_PIN_RESET)
 #define MPU_NSS_HIGH HAL_GPIO_WritePin(GPIOF, GPIO_PIN_6, GPIO_PIN_SET)
 
-#define Kp 0.2f                                              /* 
+#define Kp 1.5f                                              /* 
                                                               * proportional gain governs rate of 
                                                               * convergence to accelerometer/magnetometer 
 																															*/
-#define Ki 0.004f                                             /* 
+#define Ki 0.002f                                             /* 
                                                               * integral gain governs rate of 
                                                               * convergence of gyroscope biases 
 																															*/

@@ -100,27 +100,30 @@ typedef struct MotorINFO
 	fw_PID_Regulator_t 	speedPID;
 	PID_Regulator_t		offical_speedPID;
 	int16_t				Intensity;
+	uint16_t			Zero;
+	int16_t			Compensation;
+	int16_t			Maxrange;
 }MotorINFO;
 
 #define AngleBased_MOTORINFO_Init(rdc,func,ppid,spid)\
 {\
 	ESC_C6x0,0,0,0,rdc,\
 	{0,0,0},{0,0,0},0,0,1,0,0,func,\
-	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0 \
+	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0,0,0,0 \
 }
 
 #define SpeedBased_MOTORINFO_Init(func,spid)\
 {\
 	ESC_C6x0,0,0,0,1,\
 	{0,0,0},{0,0,0},0,0,1,0,0,func,\
-	FW_PID_DEFAULT,FW_PID_DEFAULT,spid,0 \
+	FW_PID_DEFAULT,FW_PID_DEFAULT,spid,0,0,0,0 \
 }
 
 #define Gimbal_MOTORINFO_Init(rdc,func,zero,compensation,maxrange,ppid,spid)\
 {\
 	ESC_6623,0,0,0,rdc,\
-	{zero,compensation,maxrange},{0,0,0},0,0,1,0,0,func,\
-	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0 \
+	{0,0,0},{0,0,0},0,0,1,0,0,func,\
+	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0,zero,compensation,maxrange \
 }
 
 

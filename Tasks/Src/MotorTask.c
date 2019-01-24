@@ -132,17 +132,15 @@ void ControlANTI_CM(MotorINFO* id)
 	id->Intensity=(-1.30f)*id->offical_speedPID.output;
 }
 
-void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed)
+float readAngle;
+float tempAngle;
+void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
 {
 	if(id==0) return;
 	if(id->s_count == 0)
 	{
 		static uint8_t Reseted = 0;
-		uint16_t GM_ZERO = id->RxMsgC6x0.angle;
-		uint16_t GM_COMPENSATION = id->RxMsgC6x0.rotateSpeed;
-		uint16_t GM_MAX_RANGE = id->RxMsgC6x0.moment;
-		double 	encoder_real = (GM_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0 / id->ReductionRate;
-		//NORMALIZE_ANGLE180(encoder_real);
+		double 	encoder_real = (id->Zero - id->RxMsg6623.angle) * 360.0 / 8192.0 / fabs(id->ReductionRate);
 		int8_t 	dir;
 		if(id->ReductionRate>=0) dir=1;
 		else dir=-1;
@@ -154,7 +152,7 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed)
 			id->FirstEnter = 0;
 			return;
 		}
-		
+		if(!startUp)return;
 		if(ThisAngle <= id->lastRead)
 		{
 			if((id->lastRead-ThisAngle) > 180)
@@ -169,14 +167,16 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed)
 			else
 				 id->Real += (ThisAngle - id->lastRead)*dir;
 		}
-		if(abs(id->Real-id->Target)<5) Reseted = 1;
+		if(fabs(id->Real-id->Target)<5) Reseted = 1;
 		id->lastRead = ThisAngle ;
 		
-		MINMAX(id->Target, id->Real - encoder_real - GM_MAX_RANGE, id->Real - encoder_real + GM_MAX_RANGE);
+		if(type == 2)MINMAX(id->Target, id->Real - encoder_real - id->Maxrange, id->Real - encoder_real + id->Maxrange);
+		else if(type == 1)MINMAX(id->Target,-id->Maxrange,id->Maxrange);
+
 		if(Reseted==0) id->positionPID.outputMax = 1.0;
 		else id->positionPID.outputMax = 10.0;
 		
-		id->Intensity = GM_COMPENSATION - PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,-ThisSpeed);
+		id->Intensity = id->Compensation - PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,-ThisSpeed);
 		
 		MINMAX(id->Intensity,-id->speedPID.outputMax,id->speedPID.outputMax);
 		
@@ -191,11 +191,11 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed)
 #ifdef OLD_INFANTRY
 void ControlGMP(MotorINFO* id)
 {
-	ControlGM(id,gyro_data.pit+180,gyro_data.wy);
+	ControlGM(id,gyro_data.pit+180,gyro_data.wy,1);
 }
 void ControlGMY(MotorINFO* id)
 {
-	ControlGM(id,gyro_data.yaw+180,gyro_data.wz);
+	ControlGM(id,gyro_data.yaw+180,gyro_data.wz,2);
 }
 #endif
 
@@ -205,11 +205,12 @@ void ControlGMP(MotorINFO* id)
 {
 	pitchAngle = gyro_data.rol+180;
 	NORMALIZE_ANGLE180(pitchAngle);
-	ControlGM(id,-gyro_data.rol,gyro_data.wx);
+	//ControlGM(id,-gyro_data.rol,gyro_data.wx);
+	ControlGM(id,-pitchAngle,gyro_data.wx,1);
 }
 void ControlGMY(MotorINFO* id)
 {
-	ControlGM(id,gyro_data.yaw,-gyro_data.wz);
+	ControlGM(id,gyro_data.yaw,-gyro_data.wz,2);
 }
 #endif
 

@@ -15,6 +15,7 @@ WorkState_e WorkState = PREPARE_STATE;
 uint16_t prepare_time = 0;
 uint16_t counter = 0;
 double rotate_speed = 0;
+uint8_t startUp = 0;
 
 #ifdef USE_CHASSIS_FOLLOW
 uint8_t ChassisTwistState = 0;
@@ -88,6 +89,7 @@ void WorkStateFSM(void)
 					CMRotatePID.Reset(&CMRotatePID);
 					WorkState = NORMAL_STATE;
 					prepare_time = 0;
+					startUp = 1;
 				}
 			}
 		}break;
@@ -143,14 +145,14 @@ void ChassisTwist(void)
 		case CHASSIS_TWIST_ANGLE_LIMIT:
 		{
 			//if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-			if(abs((GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->RxMsgC6x0.angle) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+			if(fabs((GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
 				
 			{ChassisTwistGapAngle = -CHASSIS_TWIST_ANGLE_LIMIT;}break;
 		}
 		case -CHASSIS_TWIST_ANGLE_LIMIT:
 		{
 			//if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-			if(abs((GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->RxMsgC6x0.angle) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+			if(fabs((GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
 			{ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;}break;
 		}
 	}
@@ -165,7 +167,7 @@ void ControlRotate(void)
 {	
 	#ifdef USE_CHASSIS_FOLLOW
 		//ChassisSpeedRef.rotate_ref=(GMY.RxMsg6623.angle - `GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle;
-		ChassisSpeedRef.rotate_ref=(GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->RxMsgC6x0.angle) * 360 / 8192.0f - ChassisTwistGapAngle;
+		ChassisSpeedRef.rotate_ref=(GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle;
 		NORMALIZE_ANGLE180(ChassisSpeedRef.rotate_ref);
 	#endif
 	CMRotatePID.ref = 0;

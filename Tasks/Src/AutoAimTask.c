@@ -52,7 +52,7 @@ void AutoAimRxEnemyINFO()
 	RX_ENEMY_SIGNAL();
 }
 
-extern MotorINFO* GimbalMotorGroup[4];
+extern MotorINFO* GimbalMotorGroup[2];
 #define GMP (*GimbalMotorGroup[0])
 #define GMY (*GimbalMotorGroup[1])
 void enemyINFOProcess()
@@ -62,7 +62,7 @@ void enemyINFOProcess()
 	enemy_gun.z=enemy_scope.z+scope_gun.z;
 	aim.y=atan(enemy_gun.x/enemy_gun.z)/const_pi*180.0;
 	//aim.p=atan(enemy_gun.y/enemy_gun.z)/const_pi*180.0+(GM_PITCH_ZERO - GMP.RxMsg6623.angle) * 360.0 / 8192.0 ;
-	aim.p=atan(enemy_gun.y/enemy_gun.z)/const_pi*180.0+(GMP.RxMsgC6x0.angle - GMP.RxMsg6623.angle) * 360.0 / 8192.0;
+	aim.p=atan(enemy_gun.y/enemy_gun.z)/const_pi*180.0+(GMP.Zero - GMP.RxMsg6623.angle) * 360.0 / 8192.0;
 	//aim.p=atan(k_aim+((aim_mode)?(1.0):(-1.0))*sqrt(k_aim*k_aim-2.0*k_aim*enemy.y/sqrt(enemy.x*enemy.x+enemy.z*enemy.z)-1.0))/const_pi*180.0-GMP.Real;
 }
 

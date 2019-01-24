@@ -1,3 +1,5 @@
+#ifndef ROBOOTDETAIL_H
+#define ROBOOTDETAIL_H
 #ifndef CONFIGURATION
 //***********************************************************************************************************
 //											INFANTRY
@@ -14,8 +16,8 @@
 #define CAN12
 #define CAN21
 
-#define MAXHP1 750
-#define MAXHP2 1000
+#define MAXHP1 1000
+#define MAXHP2 1250
 #define MAXHP3 1500
 
 #define COOLDOWN01 18
@@ -64,4 +66,5 @@
 #define CAN22
 #endif
 
+#endif
 #endif

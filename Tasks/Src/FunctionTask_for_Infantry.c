@@ -35,7 +35,7 @@ uint8_t ShootState = 0;
 uint8_t cdflag0 = 0;
 uint8_t burst = 0;
 uint16_t allowBullet0 = 0;
-uint16_t FtictionSpeed = 5000;
+int16_t FtictionSpeed = -5000;
 
 //³õÊ¼»¯
 void FunctionTaskInit()
@@ -198,21 +198,21 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	
 	if(key->v & KEY_Z)
 	{
-		FtictionSpeed = 5000; //13m/s
+		FtictionSpeed = -5000; //13m/s
 		realBulletSpeed0 = 13;
 		FRICL.Target = FtictionSpeed;
 		ShootState=1;
 	}
 	else if(key->v & KEY_X)
 	{
-		FtictionSpeed = 6500; //20m/s
+		FtictionSpeed = -6500; //20m/s
 		realBulletSpeed0 = 20;
 		FRICL.Target = FtictionSpeed;
 		ShootState=1;
 	}
 	else if(key->v & KEY_C)
 	{
-		FtictionSpeed = 8100; //28m/s
+		FtictionSpeed = -8100; //28m/s
 		realBulletSpeed0 = 28;
 		FRICL.Target = FtictionSpeed;
 		ShootState=1;
@@ -334,7 +334,7 @@ void ShootOneBullet()
 				}
 				else 
 				{
-					if(STIR.Real - STIR.Target <= 0)STIR.Target = -STIR_STEP_ANGLE * floor(-STIR.Real/STIR_STEP_ANGLE);
+					if(STIR.Real - STIR.Target <= 0)STIR.Target = STIR.Real;//-STIR_STEP_ANGLE * floor(-STIR.Real/STIR_STEP_ANGLE);
 				}
 			}
 			allowBullet0 = 0;
@@ -351,7 +351,7 @@ void ShootOneBullet()
 					fakeHeat0 += realBulletSpeed0;
 				}
 			}
-			else if(STIR.Real - STIR.Target <= 0)STIR.Target = -STIR_STEP_ANGLE * floor(-STIR.Real/STIR_STEP_ANGLE);
+			else if(STIR.Real - STIR.Target <= 0)STIR.Target = STIR.Real;//-STIR_STEP_ANGLE * floor(-STIR.Real/STIR_STEP_ANGLE);
 		}
 	}
 	#else

@@ -66,18 +66,18 @@ float PowerLimitation()
 #define POW_M  USE_POWER_LIMIT
 void PowerLimitation(void)
 {
-	int16_t sum = 0;
-	int16_t CM_current_max;
+	float sum = 0;
+	float CM_current_max;
 	#ifndef GUARD
-	int16_t CMFLIntensity = CMFL.Intensity;
-	int16_t CMFRIntensity = CMFR.Intensity;
-	int16_t CMBLIntensity = CMBL.Intensity;
-	int16_t CMBRIntensity = CMBR.Intensity;
+	float CMFLIntensity = CMFL.Intensity;
+	float CMFRIntensity = CMFR.Intensity;
+	float CMBLIntensity = CMBL.Intensity;
+	float CMBRIntensity = CMBR.Intensity;
 	#else
-	int16_t CMFLIntensity = CML.Intensity;
-	int16_t CMFRIntensity = CMR.Intensity;
-	int16_t CMBLIntensity = CML.Intensity;
-	int16_t CMBRIntensity = CMR.Intensity;
+	float CMFLIntensity = CML.Intensity;
+	float CMFRIntensity = CMR.Intensity;
+	float CMBLIntensity = CML.Intensity;
+	float CMBRIntensity = CMR.Intensity;
 	#endif
 	//ÀëÏßÄ£Ê½
 	if (JUDGE_State == OFFLINE)
@@ -142,6 +142,7 @@ void PowerLimitation(void)
 	CMBR.Intensity = CMBRIntensity;
 	#else
 	CML.Intensity = CMFLIntensity*2;
+	
 	CMR.Intensity = CMFRIntensity*2;
 	#endif
 }
