@@ -13,6 +13,7 @@
 
 WorkState_e WorkState = PREPARE_STATE;
 uint16_t prepare_time = 0;
+uint16_t normal_time = 0;
 uint16_t counter = 0;
 double rotate_speed = 0;
 uint8_t startUp = 0;
@@ -78,23 +79,26 @@ void WorkStateFSM(void)
 	{
 		case PREPARE_STATE:				//准备模式
 		{
-			//if (inputmode == STOP) WorkState = STOP_STATE;
-			if(prepare_time < 2000 && gyro_data.InitFinish == 1) prepare_time++;	
-			if(prepare_time == 2000 && gyro_data.InitFinish == 1 && isCan11FirstRx == 1 && 
+			//if(inputmode == STOP) WorkState = STOP_STATE;
+			normal_time = 0;
+			if(prepare_time < 0xff && gyro_data.InitFinish == 1) prepare_time++;	
+			if(prepare_time == 0xff && gyro_data.InitFinish == 1 && isCan11FirstRx == 1 && 
 				isCan12FirstRx == 1 && isCan21FirstRx == 1 && isCan22FirstRx == 1)
 			//开机2秒后且gyro初始化完成且所有can电机上电完成后进入正常模式
 			{
 				if(playMusicSuperMario())
 				{
 					CMRotatePID.Reset(&CMRotatePID);
-					WorkState = NORMAL_STATE;
+					if(inputmode == STOP) WorkState = STOP_STATE;
+					else WorkState = NORMAL_STATE;
 					prepare_time = 0;
-					startUp = 1;
 				}
 			}
 		}break;
 		case NORMAL_STATE:				//正常模式
 		{
+			if(normal_time<10000)normal_time++;
+			if(normal_time>=10000)startUp = 1;
 			if (inputmode == STOP) WorkState = STOP_STATE;
 			if (inputmode == REMOTE_INPUT)
 			{
@@ -184,7 +188,7 @@ void Chassis_Data_Decoding()
 	ControlRotate();
 	
 	#ifdef USE_CHASSIS_FOLLOW
-		float gap = (GimbalMotorGroup[1]->RxMsgC6x0.angle-GimbalMotorGroup[1]->RxMsg6623.angle) * 6.28 / 8192.0f;
+		float gap = (GimbalMotorGroup[1]->Zero-GimbalMotorGroup[1]->RxMsg6623.angle) * 6.28 / 8192.0f;
 		int16_t fb = ChassisSpeedRef.forward_back_ref;
 		int16_t rl = ChassisSpeedRef.left_right_ref;
 		ChassisSpeedRef.forward_back_ref = cos(gap)*fb-sin(gap)*rl;
@@ -226,8 +230,8 @@ void controlLoop()
 			Cap_Run();
 		#endif
 		#ifdef USE_POWER_LIMIT
-			//rate=PowerLimitation();
-			for(int i=0;i<4;i++) if(ChassisMotorGroup[i]!=0)ChassisMotorGroup[i]->Intensity*=rate;
+			PowerLimitation();
+		//for(int i=0;i<4;i++) if(ChassisMotorGroup[i]!=0)ChassisMotorGroup[i]->Intensity*=rate;
 		#endif
 		
 		#ifdef CAN11

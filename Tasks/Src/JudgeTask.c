@@ -189,7 +189,7 @@ void Judge_Refresh_Power()
 	remainHeat0 = maxHeat0 - PowerHeatData.shooterHeat0;
 	remainHeat1 = maxHeat1 - PowerHeatData.shooterHeat1;
 	JUDGE_Received = 1;
-	rate = PowerLimitation();
+	//rate = PowerLimitation();
 }
 
 void Judge_Refresh_State()

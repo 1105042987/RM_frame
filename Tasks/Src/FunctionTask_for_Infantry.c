@@ -166,7 +166,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	
 	#ifdef USE_CHASSIS_FOLLOW
 		GMY.Target += mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT;
-		GMP.Target -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT;
+		if(startUp)GMP.Target -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT;
+		else if(!startUp)GMP.Target += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT;
 	#else
 		ChassisSpeedRef.rotate_ref = -mouse->x * RC_ROTATE_SPEED_REF;
 	#endif
@@ -304,10 +305,11 @@ void KeyboardModeFSM(Key *key)
 void Standardized_Chassis_Move(float Rate)
 {
 	ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF*Rate;
-	ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2*Rate;
+	ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF*Rate;
 	#ifdef USE_CHASSIS_FOLLOW
 		GMY.Target += channellrow * RC_GIMBAL_SPEED_REF;
-		GMP.Target += channellcol * RC_GIMBAL_SPEED_REF;
+		if(startUp)GMP.Target += channellcol * RC_GIMBAL_SPEED_REF;
+		else if(!startUp)GMP.Target -= channellcol * RC_GIMBAL_SPEED_REF;
 	#else
 		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
 	#endif

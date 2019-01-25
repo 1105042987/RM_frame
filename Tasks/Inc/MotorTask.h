@@ -93,6 +93,7 @@ typedef struct MotorINFO
 	double 				Target;
 	uint8_t				s_count;
 	uint8_t 			FirstEnter;
+	uint8_t				gyroFirstEnter;
 	double 				lastRead;
 	double 				Real;
 	void (*Handle)(struct MotorINFO* id);
@@ -101,29 +102,31 @@ typedef struct MotorINFO
 	PID_Regulator_t		offical_speedPID;
 	int16_t				Intensity;
 	uint16_t			Zero;
-	int16_t			Compensation;
-	int16_t			Maxrange;
+	int16_t				Compensation;
+	int16_t				Maxrange;
+	float					encoderAngle;
+	float					encoderLastAngle;
 }MotorINFO;
 
 #define AngleBased_MOTORINFO_Init(rdc,func,ppid,spid)\
 {\
 	ESC_C6x0,0,0,0,rdc,\
-	{0,0,0},{0,0,0},0,0,1,0,0,func,\
-	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0,0,0,0 \
+	{0,0,0},{0,0,0},0,0,1,0,0,0,func,\
+	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0,0,0,0,0,0 \
 }
 
 #define SpeedBased_MOTORINFO_Init(func,spid)\
 {\
 	ESC_C6x0,0,0,0,1,\
-	{0,0,0},{0,0,0},0,0,1,0,0,func,\
-	FW_PID_DEFAULT,FW_PID_DEFAULT,spid,0,0,0,0 \
+	{0,0,0},{0,0,0},0,0,1,0,0,0,func,\
+	FW_PID_DEFAULT,FW_PID_DEFAULT,spid,0,0,0,0,0,0 \
 }
 
 #define Gimbal_MOTORINFO_Init(rdc,func,zero,compensation,maxrange,ppid,spid)\
 {\
 	ESC_6623,0,0,0,rdc,\
-	{0,0,0},{0,0,0},0,0,1,0,0,func,\
-	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0,zero,compensation,maxrange \
+	{0,0,0},{0,0,0},0,0,1,0,0,0,func,\
+	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0,zero,compensation,maxrange,0,0 \
 }
 
 

@@ -31,54 +31,48 @@ uint8_t flag = 1;
 fw_PID_Regulator_t PowerLimitationPID = POWER_LIMITATION_PID_DEFAULT;
 int16_t PowerBufferMax = 80;
 
-float PowerLimitation()
-{
-	static float windows = 1.0;
-	static float rate = 0.1;
-	Power_Pool += (PowerHeatData.chassisPower-POW_M)*0.1f;
-	if(Power_Pool<0) Power_Pool=0;
-	if(Power_Pool>150) {
-		windows -=0.01f;
-		rate/=2;
-	}
-	if (JUDGE_State == OFFLINE) return windows;
-	else 
-	{
-		if(PowerHeatData.chassisPower > POW_M) 
-		{	
-			if(Power_Pool>Power_Pool_History_Max) Power_Pool_History_Max = Power_Pool;
-			rate = rate*0.95f>rate-0.02f?rate*0.95f:rate-0.02f;
-		}
-		else if(PowerHeatData.chassisPower < POW_M * COARSE)
-		{
-			rate+=0.04f;
-		}
-		else if(PowerHeatData.chassisPower < POW_M * FINE)
-		{
-			rate+=0.01f;
-		}
-	}
-	if(rate>windows)
-		rate=windows;
-	return rate;
-}
-/*
+//float PowerLimitation()
+//{
+//	static float windows = 1.0;
+//	static float rate = 0.1;
+//	Power_Pool += (PowerHeatData.chassisPower-POW_M)*0.1f;
+//	if(Power_Pool<0) Power_Pool=0;
+//	if(Power_Pool>150) {
+//		windows -=0.01f;
+//		rate/=2;
+//	}
+//	if (JUDGE_State == OFFLINE) return windows;
+//	else 
+//	{
+//		if(PowerHeatData.chassisPower > POW_M) 
+//		{	
+//			if(Power_Pool>Power_Pool_History_Max) Power_Pool_History_Max = Power_Pool;
+//			rate = rate*0.95f>rate-0.02f?rate*0.95f:rate-0.02f;
+//		}
+//		else if(PowerHeatData.chassisPower < POW_M * COARSE)
+//		{
+//			rate+=0.04f;
+//		}
+//		else if(PowerHeatData.chassisPower < POW_M * FINE)
+//		{
+//			rate+=0.01f;
+//		}
+//	}
+//	if(rate>windows)
+//		rate=windows;
+//	return rate;
+//}
+
 #define POW_M  USE_POWER_LIMIT
 void PowerLimitation(void)
 {
 	float sum = 0;
 	float CM_current_max;
-	#ifndef GUARD
 	float CMFLIntensity = CMFL.Intensity;
 	float CMFRIntensity = CMFR.Intensity;
 	float CMBLIntensity = CMBL.Intensity;
 	float CMBRIntensity = CMBR.Intensity;
-	#else
-	float CMFLIntensity = CML.Intensity;
-	float CMFRIntensity = CMR.Intensity;
-	float CMBLIntensity = CML.Intensity;
-	float CMBRIntensity = CMR.Intensity;
-	#endif
+
 	//ÀëÏßÄ£Ê½
 	if (JUDGE_State == OFFLINE)
 	{
@@ -135,17 +129,12 @@ void PowerLimitation(void)
 		}
 	}
 	
-	#ifndef GUARD
 	CMFL.Intensity = CMFLIntensity;
 	CMFR.Intensity = CMFRIntensity;
 	CMBL.Intensity = CMBLIntensity;
 	CMBR.Intensity = CMBRIntensity;
-	#else
-	CML.Intensity = CMFLIntensity*2;
-	
-	CMR.Intensity = CMFRIntensity*2;
-	#endif
+
 }
-*/
+
 #endif
 

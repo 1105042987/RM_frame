@@ -142,33 +142,70 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
 		static uint8_t Reseted = 0;
 		double 	encoder_real = (id->Zero - id->RxMsg6623.angle) * 360.0 / 8192.0 / fabs(id->ReductionRate);
 		int8_t 	dir;
+		float encoderThisAngle = id->RxMsg6623.angle;
 		if(id->ReductionRate>=0) dir=1;
 		else dir=-1;
 		
 		if(id->FirstEnter==1) {
-			id->lastRead = ThisAngle;
-			id->Real = encoder_real;
-			NORMALIZE_ANGLE180(id->Real);
+			//id->lastRead = ThisAngle;
+			//id->Real = encoder_real;
+			//NORMALIZE_ANGLE180(id->Real);
+			id->encoderLastAngle = encoderThisAngle;
+			id->encoderAngle = (id->Zero - id->RxMsg6623.angle) * 360.0 / 8192.0 / fabs(id->ReductionRate);
 			id->FirstEnter = 0;
 			return;
 		}
-		if(!startUp)return;
-		if(ThisAngle <= id->lastRead)
+		if(encoderThisAngle<=id->encoderLastAngle)
 		{
-			if((id->lastRead-ThisAngle) > 180)
-				 id->Real += (ThisAngle + 360 - id->lastRead)*dir;
-			else
-				 id->Real -= (id->lastRead - ThisAngle)*dir;
+			if((id->encoderLastAngle-encoderThisAngle)>4000)//编码器上溢
+				id->encoderAngle = id->encoderAngle - (encoderThisAngle+8192-id->encoderLastAngle) * 360 / 8192.0 / id->ReductionRate;
+			else//正常
+				id->encoderAngle = id->encoderAngle + (id->encoderLastAngle - encoderThisAngle) * 360 / 8192.0 / id->ReductionRate;
 		}
 		else
 		{
-			if((ThisAngle-id->lastRead) > 180)
-				 id->Real -= (id->lastRead + 360 - ThisAngle)*dir;
-			else
-				 id->Real += (ThisAngle - id->lastRead)*dir;
+			if((encoderThisAngle-id->encoderLastAngle)>4000)//编码器下溢
+				id->encoderAngle = id->encoderAngle + (id->encoderLastAngle+8192-encoderThisAngle) *360 / 8192.0 / id->ReductionRate;
+			else//正常
+				id->encoderAngle = id->encoderAngle - (encoderThisAngle - id->encoderLastAngle) * 360 / 8192.0 / id->ReductionRate;
 		}
-		if(fabs(id->Real-id->Target)<5) Reseted = 1;
-		id->lastRead = ThisAngle ;
+		id->encoderLastAngle = encoderThisAngle;
+		NORMALIZE_ANGLE180(id->encoderAngle);
+		
+		if(!startUp)
+		{
+			id->Real = id->encoderAngle;
+			id->gyroFirstEnter = 0;
+		}
+		else if(startUp)
+		{
+			if(!id->gyroFirstEnter)
+			{
+				id->gyroFirstEnter = 1;
+				id->Real = id->Real - id->encoderAngle + ThisAngle;
+				id->Target = id->Target - id->encoderAngle + ThisAngle;
+				id->lastRead = ThisAngle;
+			}
+			else
+			{
+				if(ThisAngle <= id->lastRead)
+				{
+					if((id->lastRead-ThisAngle) > 180)
+						 id->Real += (ThisAngle + 360 - id->lastRead)*dir;
+					else
+						 id->Real -= (id->lastRead - ThisAngle)*dir;
+				}
+				else
+				{
+					if((ThisAngle-id->lastRead) > 180)
+						 id->Real -= (id->lastRead + 360 - ThisAngle)*dir;
+					else
+						 id->Real += (ThisAngle - id->lastRead)*dir;
+				}
+				if(fabs(id->Real-id->Target)<5) Reseted = 1;
+				id->lastRead = ThisAngle;
+			}
+		}
 		
 		if(type == 2)MINMAX(id->Target, id->Real - encoder_real - id->Maxrange, id->Real - encoder_real + id->Maxrange);
 		else if(type == 1)MINMAX(id->Target,-id->Maxrange,id->Maxrange);
@@ -176,8 +213,10 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
 		if(Reseted==0) id->positionPID.outputMax = 1.0;
 		else id->positionPID.outputMax = 10.0;
 		
-		id->Intensity = id->Compensation - PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,-ThisSpeed);
-		
+		if(!startUp && type == 1)id->Intensity = id->Compensation - PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
+		else 
+			id->Intensity = id->Compensation - PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,-ThisSpeed);
+		if(!startUp && type == 1)id->Intensity *= -1;
 		MINMAX(id->Intensity,-id->speedPID.outputMax,id->speedPID.outputMax);
 		
 		id->s_count = 0;

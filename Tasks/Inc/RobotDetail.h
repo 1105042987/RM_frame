@@ -27,6 +27,8 @@
 #define MAXHEAT01 120
 #define MAXHEAT02 240
 #define MAXHEAT03 480
+
+extern MotorINFO CMFL,CMFR,CMBL,CMBR,FRICL,FRICR,GMP,GMY,STIR;
 #endif
 //***********************************************************************************************************
 //											GUARD
