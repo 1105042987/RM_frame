@@ -16,7 +16,7 @@
 
 //Ò£¿Ø³£Á¿Çø
 #define RC_CHASSIS_SPEED_REF    		1.20f
-#define RC_ROTATE_SPEED_REF 			0.30f
+#define RC_ROTATE_SPEED_REF 			2.5f
 #define RC_GIMBAL_SPEED_REF				0.006f
 
 #define IGNORE_RANGE 					200
@@ -52,7 +52,7 @@
 #define MOUSR_FB_RAMP_TICK_COUNT		60
 
 #define MOUSE_TO_YAW_ANGLE_INC_FACT		0.05f
-#define MOUSE_TO_PITCH_ANGLE_INC_FACT	0.05f
+#define MOUSE_TO_PITCH_ANGLE_INC_FACT	0.02f
 
 #define MK_ROTATE_SPEED_REF 			1.20f
 

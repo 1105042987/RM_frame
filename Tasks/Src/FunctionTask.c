@@ -19,7 +19,8 @@ MouseMode_e MouseRMode = NO_CLICK;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
 ChassisSpeed_Ref_t ChassisSpeedRef; 
-
+int8_t gjl = 0;
+//int16_t flagzc = 0;
 int16_t rl1;
 int16_t rl2;
 int16_t rl3;
@@ -56,7 +57,7 @@ void FunctionTaskInit()
 void OptionalFunction()
 {
 	Cap_Control();
-	PowerLimitation();
+//	PowerLimitation();
 }
 
 void Limit_and_Synchronization()
@@ -83,26 +84,44 @@ void RemoteControlProcess(Remote *rc)
 		Control_SuperCap.release_power = 0;
 		Control_SuperCap.stop_power = 0;
 		
-		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
-		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
-		#ifdef USE_CHASSIS_FOLLOW
-		GMY.TargetAngle += channellrow * RC_GIMBAL_SPEED_REF;
-		GMP.TargetAngle += channellcol * RC_GIMBAL_SPEED_REF;
-		#else
-		ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF;
-		#endif
-		#ifdef USE_AUTOAIM
-		autoAimGMCTRL();
-		#endif /*USE_AUTOAIM*/
 		
-		ChassisTwistState = 0;
+			ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
+			ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
+//		#ifdef USE_CHASSIS_FOLLOW
+//		GMY.TargetAngle += channellrow * RC_GIMBAL_SPEED_REF;
+//		GMP.TargetAngle += channellcol * RC_GIMBAL_SPEED_REF;
+//		#else
+			ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF * 0.4f;
 		
-		ShootState = 0;
-		FRICL.TargetAngle = 0;
-		FRICR.TargetAngle = 0;
+		
+
+//		#endif
+//		#ifdef USE_AUTOAIM
+//		autoAimGMCTRL();
+//		#endif /*USE_AUTOAIM*/
+//		
+//		ChassisTwistState = 0;
+//		
+//		ShootState = 0;
+//		FRICL.TargetAngle = 0;
+//		FRICR.TargetAngle = 0;
 		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
-		
+//		RQ1.TargetAngle = 0;
+//		RQ2.TargetAngle = 0;
+
+  
+  if (channellcol<-200)
+	{
+	  RQ1.TargetAngle = 230;
+		RQ2.TargetAngle = -230;
+	
 	}
+	if (channellcol>200)
+	{
+	  RQ1.TargetAngle = 0;
+		RQ2.TargetAngle = 0;
+	}
+}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
 		//for debug SuperC
@@ -115,56 +134,60 @@ void RemoteControlProcess(Remote *rc)
 		}
 		else
 		{
-			Control_SuperCap.release_power = 0;
-			Control_SuperCap.stop_power = 0;
+			Control_SuperCap.stop_power = 1;
 		}
-		if(Control_SuperCap.C_voltage>1200 && SuperCTestMode==1){
+		if(Control_SuperCap.C_voltage>1200 && SuperCTestMode==1)
+		{
 			ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF * 2;
 			ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF / 2 * 2;
+			ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF * 0.4f;
 		}
-		else
+		else if (SuperCTestMode==1)
 		{
 			ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 			ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF / 2;
+			ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF * 0.4f;
 		}
-		#ifdef USE_CHASSIS_FOLLOW
-		GMY.TargetAngle += channellrow * RC_GIMBAL_SPEED_REF;
-		GMP.TargetAngle += channellcol * RC_GIMBAL_SPEED_REF;
-		#else
-		ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF;
-		#endif
+////		#ifdef USE_CHASSIS_FOLLOW
+//		GMY.TargetAngle += channellrow * RC_GIMBAL_SPEED_REF;
+//		GMP.TargetAngle += channellcol * RC_GIMBAL_SPEED_REF;
+////		#else
+//		ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF;
+//		#endif
 		
-		ChassisTwistState = 0;
-		//RedLine Mode
-		if (SuperCTestMode==0){
+//		ChassisTwistState = 0;
+//		//RedLine Mode
+	else
+	{
 			rl4=HAL_GPIO_ReadPin(GPIOH,GPIO_PIN_10);
 	    rl3=HAL_GPIO_ReadPin(GPIOH,GPIO_PIN_11);
 			rl2=HAL_GPIO_ReadPin(GPIOH,GPIO_PIN_12);
 	if(rl2 == 0&&rl3 == 1&&rl4 == 0)
 		{
-			ChassisSpeedRef.forward_back_ref = 150;
+			ChassisSpeedRef.forward_back_ref = 80;
 			ChassisSpeedRef.rotate_ref  = 0;
 		}
 		
-		if(rl2 == 0&&rl3 == 0&&rl4 == 1)
+		if((rl2 == 0&&rl3 == 0&&rl4 == 1)||(rl2 == 0&&rl3 == 1&&rl4 == 1))
 		{
 			
-		  //auto_counter =100;
-			ChassisSpeedRef.rotate_ref = 17;
-			ChassisSpeedRef.forward_back_ref = 100;
+		 
+			ChassisSpeedRef.rotate_ref = -120;
+			ChassisSpeedRef.forward_back_ref = 80;
 			
 		}
-		if(rl2 == 1&&rl3 == 0&&rl4 == 0)
+		if((rl2 == 1&&rl3 == 0&&rl4 == 0)||(rl2 == 1&&rl3 == 1&&rl4 == 0))
 			{
-		    //auto_counter = 100; 
-				ChassisSpeedRef.rotate_ref = -17;
-				ChassisSpeedRef.forward_back_ref = 150;
+		   
+				ChassisSpeedRef.rotate_ref = 120;
+				ChassisSpeedRef.forward_back_ref = 80;
 					
 		  }
 		}
+			
 //
-//		if(SuperCTestMode==0)
-//		{
+		if(SuperCTestMode==0)
+		{
 //			ShootState = 1;
 //			FRICL.TargetAngle = 5000;
 //			FRICR.TargetAngle = -5000;
@@ -176,24 +199,26 @@ void RemoteControlProcess(Remote *rc)
 //			FRICR.TargetAngle = 0;
 //		}
 		
-		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
+			HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
+		}
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
-		Control_SuperCap.stop_power = 1;
+		Control_SuperCap.stop_power = 0;
+		Control_SuperCap.release_power = 1;
 		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 		#ifdef USE_CHASSIS_FOLLOW
 		GMY.TargetAngle += channellrow * RC_GIMBAL_SPEED_REF;
 		GMP.TargetAngle += channellcol * RC_GIMBAL_SPEED_REF;
 		#else
-		ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF;
+		ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF * 0.4f;
 		#endif
-		
-		ChassisTwistState = 0;
-		
-//		if(SuperCTestMode==0)
-//		{
+//		
+//		ChassisTwistState = 0;
+//		
+////		if(SuperCTestMode==0)
+////		{
 //			ShootState = 1;
 //			FRICL.TargetAngle = 5000;
 //			FRICR.TargetAngle = -5000;
@@ -204,26 +229,30 @@ void RemoteControlProcess(Remote *rc)
 //			ShootState = 0;
 //			FRICL.TargetAngle = 0;
 //			FRICR.TargetAngle = 0;
-//			ChassisTwistState = 1;
-//		}
-		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
+////			ChassisTwistState = 1;
+////		}
+//		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
 		
 	}
-	FreshSuperCState();
+	
 
-	if(ChassisTwistState)
-	{
-		LJHTwist();
-	}
-	else ChassisDeTwist();
-	//Limit_and_Synchronization();
-}
+		FreshSuperCState();
 
+//	if(ChassisTwistState)
+//	{
+//		LJHTwist();
+//	}
+//	else ChassisDeTwist();
+//	//Limit_and_Synchronization();
+} 
+
+	
 
 uint16_t KM_FORWORD_BACK_SPEED 	= NORMAL_FORWARD_BACK_SPEED;
 uint16_t KM_LEFT_RIGHT_SPEED  	= NORMAL_LEFT_RIGHT_SPEED;
 void KeyboardModeFSM(Key *key);
 void MouseModeFSM(Mouse *mouse);
+
 
 //****************
 //键鼠模式功能编写
@@ -235,7 +264,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	MINMAX(mouse->x, -150, 150); 
 	MINMAX(mouse->y, -150, 150); 
 	
-	YT1.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT;
+//	YT1.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT;
 	YT2.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT;
 
 	
@@ -243,7 +272,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	GMY.TargetAngle += mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT;
 	GMP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT;
 	#else
-	ChassisSpeedRef.rotate_ref = -mouse->x * RC_ROTATE_SPEED_REF;
+	ChassisSpeedRef.rotate_ref = mouse->x * RC_ROTATE_SPEED_REF;
 	#endif
 	
 	MouseModeFSM(mouse);
@@ -309,51 +338,102 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		}//DO NOT NEED TO BREAK
 		case NO_CHANGE:			//normal
 		{//CM Movement Process
-			if(key->v & KEY_W)  		//key: w
-				ChassisSpeedRef.forward_back_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+			if(key->v & KEY_W)  		
+			{//key: w
+				if (gjl == 0)
+		{
+			ChassisSpeedRef.forward_back_ref = KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+//			ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
+////		#ifdef USE_CHASSIS_FOLLOW
+////		GMY.TargetAngle += channellrow * RC_GIMBAL_SPEED_REF;
+////		GMP.TargetAngle += channellcol * RC_GIMBAL_SPEED_REF;
+////		#else
+//			ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF * 0.4f;
+		}
+		
+		if (gjl == 1)
+		{
+			ChassisSpeedRef.forward_back_ref = -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+//			ChassisSpeedRef.left_right_ref = -channelrrow * RC_CHASSIS_SPEED_REF/2;
+//			ChassisSpeedRef.rotate_ref = channellrow * RC_ROTATE_SPEED_REF * 0.3f;
+		}
+	}
+			//ChassisSpeedRef.forward_back_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
 			else if(key->v & KEY_S) 	//key: s
+			{	
+			if (gjl == 0 )
+			{
 				ChassisSpeedRef.forward_back_ref = -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+			}
+			if (gjl == 1)
+			{
+				ChassisSpeedRef.forward_back_ref = KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+			}
+		}
 			else
 			{
 				ChassisSpeedRef.forward_back_ref = 0;
 				FBSpeedRamp.ResetCounter(&FBSpeedRamp);
 			}
 			if(key->v & KEY_D)  		//key: d
+			{
+				if (gjl == 0 )
+			{
 				ChassisSpeedRef.left_right_ref =  KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+			}
+			if (gjl == 1)
+			{
+				ChassisSpeedRef.left_right_ref =  -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+			}
+		}
 			else if(key->v & KEY_A) 	//key: a
-				ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
-			if (key->v & KEY_Q)      //key: q
-			{	
-				YT1.TargetAngle = 180;
-				YT2.TargetAngle = 180;
-			}
-			if (key->v & KEY_E)      //key: e
-			{
-				YT1.TargetAngle = 0;
-				YT2.TargetAngle = 0;
-			}
-			if (key->v & KEY_R)      //key: r
-			{
-				flag++;
-			}
-			if (key->v & KEY_V)
-			{
-				Control_SuperCap.release_power = 1;
-				Control_SuperCap.stop_power = 0;
-			}
-			if (key->v & KEY_B)
-			{
-				Control_SuperCap.release_power = 0;
-				Control_SuperCap.stop_power = 1;
-			}
+				{
+				if (gjl == 0 )
+					{
+				ChassisSpeedRef.left_right_ref = - KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+					}
+				if (gjl == 1)
+					{
+				ChassisSpeedRef.left_right_ref =  KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+					}			
+				}
 			else
 			{
 				ChassisSpeedRef.left_right_ref = 0;
 				LRSpeedRamp.ResetCounter(&LRSpeedRamp);
 			}
+			if (key->v & KEY_Q)      //key: q
+			{	
+				gjl = 1;
+				YT1.TargetAngle = 180;
+				YT2.TargetAngle = 0 ;
+			}
+			if (key->v & KEY_E)      //key: e
+			{
+				gjl = 0;
+				YT1.TargetAngle = 0;
+				YT2.TargetAngle = 0;
+			}
+			if (key->v & KEY_Z)
+			{
+				RQ1.TargetAngle = 230;
+				RQ2.TargetAngle = -230;
+			}
+			if (key->v & KEY_X)
+			{
+				RQ1.TargetAngle = 0;
+				RQ2.TargetAngle = 0;
+			}
+			if (KEY_V & KEY_C)
+			{
+				RQ1.TargetAngle = -230;
+				RQ2.TargetAngle = 230;
+			}
+			
+
 		}
 	}
-	//Limit_and_Synchronization();
+//	Limit_and_Synchronization();
 }
 
 void KeyboardModeFSM(Key *key)
@@ -482,21 +562,7 @@ void MouseModeFSM(Mouse *mouse)
 	}
 }
 
-//Rescue Mode
-void Rescue(void)
-{
-	static int16_t flag = 0;
-	if (flag%2 == 0)
-	{
-		RQ1.TargetAngle = 0;
-		RQ2.TargetAngle = 0;
-	}
-	else
-	{
-		RQ1.TargetAngle = 120;
-		RQ2.TargetAngle = 120;
-	}
-}
+
 //用于遥控器模式下超级电容测试模式的控制
 void FreshSuperCState(void)
 {
@@ -574,3 +640,4 @@ void LJHTwist(void)
 {
 	ChassisTwist();
 }
+

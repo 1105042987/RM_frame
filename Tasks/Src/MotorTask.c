@@ -67,7 +67,7 @@ MotorINFO STIR = Normal_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
 								
 
-MotorINFO* can2[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
+MotorINFO* can2[8]={0,0,0,0,0,0,0,0};//{&FRICL,&FRICR,0,0,&GMY,&GMP,0,0};//,&STIR,0};
 MotorINFO* can1[8]={&CMFL,&CMFR,&CMBL,&CMBR,&RQ1,&RQ2,&YT1,&YT2};
 
 

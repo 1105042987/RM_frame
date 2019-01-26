@@ -23,7 +23,7 @@
 //#define FRIC_PWM_MODE//临时使用，后续不需要
 
 #define CAN11
-//#define CAN12
+#define CAN12
 //#define CAN21
 //#define CAN22
 
