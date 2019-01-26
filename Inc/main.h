@@ -71,14 +71,16 @@
 #define LED2_GPIO_Port GPIOG
 #define Cap_V_Pin GPIO_PIN_0
 #define Cap_V_GPIO_Port GPIOC
+#define SwitchB_Pin GPIO_PIN_3
+#define SwitchB_GPIO_Port GPIOC
 #define BUTTON_Pin GPIO_PIN_2
 #define BUTTON_GPIO_Port GPIOB
 #define LED1_Pin GPIO_PIN_1
 #define LED1_GPIO_Port GPIOG
 #define LED_RED_Pin GPIO_PIN_11
 #define LED_RED_GPIO_Port GPIOE
-#define Switch_Pin GPIO_PIN_1
-#define Switch_GPIO_Port GPIOB
+#define SwitchA_Pin GPIO_PIN_1
+#define SwitchA_GPIO_Port GPIOB
 #define LED_GREEN_Pin GPIO_PIN_14
 #define LED_GREEN_GPIO_Port GPIOF
 
