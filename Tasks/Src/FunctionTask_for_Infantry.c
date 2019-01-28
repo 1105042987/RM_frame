@@ -117,26 +117,24 @@ void RemoteTestProcess(Remote *rc)
 	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	if(WorkState == NORMAL_STATE)
 	{	
-		Control_SuperCap.release_power = 0;
-		Control_SuperCap.stop_power = 0;
+    Cap_State_Switch(CAP_STATE_RECHARGE);
 		ChassisTwistState = 0;
 		Standardized_Chassis_Move(1);
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
-		Control_SuperCap.release_power = 1;
-		Control_SuperCap.stop_power = 0;
+    Cap_State_Switch(CAP_STATE_STOP);
 		ChassisTwistState = 0;
+		
+	}
+	if(WorkState == ADDITIONAL_STATE_TWO)
+	{	
+    Cap_State_Switch(CAP_STATE_RELEASE);
+		ChassisTwistState = 1;
 		if(Control_SuperCap.C_voltage>1200)
 			Standardized_Chassis_Move(2);
 		else 
 			Standardized_Chassis_Move(1);
-	}
-	if(WorkState == ADDITIONAL_STATE_TWO)
-	{	
-		Control_SuperCap.release_power = 0;
-		Control_SuperCap.stop_power = 0;
-		ChassisTwistState = 1;
 		Standardized_Chassis_Move(1);
 	}
 	//µ×ÅÌ°Ú¶¯
