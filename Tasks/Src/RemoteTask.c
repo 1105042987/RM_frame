@@ -189,7 +189,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 	else if(UartHandle == &AUTOAIM_UART)
 	{
 		#ifdef USE_AUTOAIM
-		AutoAimRxEnemyINFO();
+		AutoAimUartRxCpltCallback();
 		#endif /*USE_AUTOAIM*/
 	}
 }

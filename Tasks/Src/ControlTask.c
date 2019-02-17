@@ -320,6 +320,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			rc_update = 0;
 		}
 		
+		//自瞄数据解算（3ms）
+		static int aim_cnt=0;
+		aim_cnt++;
+		if(aim_cnt==3)
+		{
+			EnemyINFOProcess();
+			aim_cnt=0;
+		}
 	}
 	else if (htim->Instance == htim10.Instance)  //10ms
 	{
