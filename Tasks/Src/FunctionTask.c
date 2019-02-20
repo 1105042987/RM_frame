@@ -80,13 +80,13 @@ void RemoteControlProcess(Remote *rc)
 		if(LastState != WorkState){
 			Cap_State_Switch(CAP_STATE_RECHARGE);
 		}
-		ChassisSpeedRef.forward_back_ref = channellcol * RC_CHASSIS_SPEED_REF;//×óÓÒ²¦¸Ëµ÷»»
+		ChassisSpeedRef.forward_back_ref = channellcol * RC_CHASSIS_SPEED_REF;
 		ChassisSpeedRef.left_right_ref   = channellrow * RC_CHASSIS_SPEED_REF/3*2;
 		#ifdef USE_CHASSIS_FOLLOW
 		GMY.TargetAngle += channelrrow * RC_GIMBAL_SPEED_REF;
 		GMP.TargetAngle -= channelrcol * RC_GIMBAL_SPEED_REF;
 		#else
-		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
+		ChassisSpeedRef.rotate_ref = -channelrrow * RC_ROTATE_SPEED_REF;
 		#endif
 		
 		ChassisTwistState = 0;
@@ -113,11 +113,15 @@ void RemoteControlProcess(Remote *rc)
 		if  (LastState != WorkState){
 		Cap_State_Switch(CAP_STATE_STOP);
 		}
+		
+		ChassisSpeedRef.forward_back_ref = channellcol * RC_CHASSIS_SPEED_REF;
+		ChassisSpeedRef.left_right_ref   = channellrow * RC_CHASSIS_SPEED_REF/3*2;
+		
 		#ifdef USE_CHASSIS_FOLLOW
 		GMY.TargetAngle += channelrrow * RC_GIMBAL_SPEED_REF;
 		GMP.TargetAngle -= channelrcol * RC_GIMBAL_SPEED_REF;
 		#else
-		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
+		ChassisSpeedRef.rotate_ref = -channelrrow * RC_ROTATE_SPEED_REF;
 		#endif
 		
 		ChassisTwistState = 0;
@@ -172,7 +176,7 @@ void RemoteControlProcess(Remote *rc)
 		GMY.TargetAngle += channelrrow * RC_GIMBAL_SPEED_REF;
 		GMP.TargetAngle -= channelrcol * RC_GIMBAL_SPEED_REF;
 		#else
-		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
+		ChassisSpeedRef.rotate_ref = -channelrrow * RC_ROTATE_SPEED_REF;
 		#endif
 		
 		ChassisTwistState = 0;
