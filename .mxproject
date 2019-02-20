@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=F:/交大/robomaster/校队/RM_frame/Inc
+HeaderPath=E:/RM/英雄2/Inc
 HeaderFiles=gpio.h;can.h;dma.h;spi.h;usart.h;stm32f4xx_it.h;stm32f4xx_hal_conf.h;main.h;tim.h;adc.h;iwdg.h;
-SourcePath=F:/交大/robomaster/校队/RM_frame/Src
+SourcePath=E:/RM/英雄2/Src
 SourceFiles=gpio.c;can.c;dma.c;spi.c;usart.c;stm32f4xx_it.c;stm32f4xx_hal_msp.c;main.c;tim.c;adc.c;iwdg.c;
 
 [PreviousLibFiles]

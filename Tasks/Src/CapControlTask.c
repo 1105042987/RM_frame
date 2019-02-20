@@ -14,6 +14,8 @@
 #include "includes.h"
 #include "math.h"
 
+#ifdef USE_CAPCONTROL_ONE
+
 uint8_t can_power_in=0;
 CapControl_t Control_SuperCap={0,0};
 uint8_t i=0;
@@ -79,4 +81,5 @@ void Cap_Control(void)
 		}
 	}
 }
-/**/
+
+#endif //USE_CAPCONTROL_ONE

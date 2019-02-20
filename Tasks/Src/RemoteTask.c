@@ -19,7 +19,7 @@ FunctionMode_e functionmode = UPPER_POS;
 RemoteSwitch_t g_switch1;
 
 
-/*æ‹¨æ†æ•°æ®å¤„ç†*/   
+/*²¦¸ËÊı¾İ´¦Àí*/   
 void GetRemoteSwitchAction(RemoteSwitch_t *sw, uint8_t val)
 {
 	static uint32_t switch_cnt = 0;
@@ -27,8 +27,8 @@ void GetRemoteSwitchAction(RemoteSwitch_t *sw, uint8_t val)
 	sw->switch_value_raw = val;
 	sw->switch_value_buf[sw->buf_index] = sw->switch_value_raw;
 
-	//value1 value2çš„å€¼å…¶å®æ˜¯ä¸€æ ·çš„
-	//value1é«˜4ä½å§‹ç»ˆä¸º0
+	//value1 value2µÄÖµÆäÊµÊÇÒ»ÑùµÄ
+	//value1¸ß4Î»Ê¼ÖÕÎª0
 	sw->switch_value1 = (sw->switch_value_buf[sw->buf_last_index] << 2)|
 	(sw->switch_value_buf[sw->buf_index]);
 
@@ -36,7 +36,7 @@ void GetRemoteSwitchAction(RemoteSwitch_t *sw, uint8_t val)
 
 	sw->switch_value2 = (sw->switch_value_buf[sw->buf_end_index]<<4)|sw->switch_value1;	
 
-	//å¦‚æœä¸¤æ¬¡æ•°æ®ä¸€æ ·ï¼Œå³æ²¡æœ‰æ›´æ–°æ•°æ®ï¼Œæ‹¨æ†ä¸åŠ¨
+	//Èç¹ûÁ½´ÎÊı¾İÒ»Ñù£¬¼´Ã»ÓĞ¸üĞÂÊı¾İ£¬²¦¸Ë²»¶¯
 	if(sw->switch_value_buf[sw->buf_index] == sw->switch_value_buf[sw->buf_last_index])
 	{
 		switch_cnt++;	
@@ -45,12 +45,12 @@ void GetRemoteSwitchAction(RemoteSwitch_t *sw, uint8_t val)
 	{
 		switch_cnt = 0;
 	}
-	//å¦‚æœæ‹¨æ†ç»´æŒäº†ä¸€å®šæ—¶é—´ï¼Œå³è¿ç»­æ¥äº†40å¸§ä¸€æ ·çš„æ•°æ®ï¼Œåˆ™æŠŠæ‹¨æ†æ•°æ®å†™å…¥switch_long_value
+	//Èç¹û²¦¸ËÎ¬³ÖÁËÒ»¶¨Ê±¼ä£¬¼´Á¬ĞøÀ´ÁË40Ö¡Ò»ÑùµÄÊı¾İ£¬Ôò°Ñ²¦¸ËÊı¾İĞ´Èëswitch_long_value
 	if(switch_cnt >= 40)
 	{
 		sw->switch_long_value = sw->switch_value_buf[sw->buf_index]; 	
 	}
-	//æŒ‡å‘ä¸‹ä¸€ä¸ªç¼“å†²åŒº
+	//Ö¸ÏòÏÂÒ»¸ö»º³åÇø
 	sw->buf_last_index = sw->buf_index;
 	sw->buf_index++;		
 	if(sw->buf_index == REMOTE_SWITCH_VALUE_BUF_DEEP)
@@ -60,7 +60,7 @@ void GetRemoteSwitchAction(RemoteSwitch_t *sw, uint8_t val)
 }
 
 
-//é¥æ§å™¨æ•°æ®è§£ç®—
+//Ò£¿ØÆ÷Êı¾İ½âËã
 void RemoteDataProcess(uint8_t *pData)
 {
 	HAL_IWDG_Refresh(&hiwdg);
@@ -68,19 +68,19 @@ void RemoteDataProcess(uint8_t *pData)
 	{
 			return;
 	}
-	//é¥æ§å™¨ 11*4 + 2*2 = 48ï¼Œéœ€è¦ 6 Bytes
-	//16ä½ï¼Œåªçœ‹ä½11ä½
+	//Ò£¿ØÆ÷ 11*4 + 2*2 = 48£¬ĞèÒª 6 Bytes
+	//16Î»£¬Ö»¿´µÍ11Î»
 	RC_CtrlData.rc.ch0 = ((int16_t)pData[0] | ((int16_t)pData[1] << 8)) & 0x07FF; 
 	RC_CtrlData.rc.ch1 = (((int16_t)pData[1] >> 3) | ((int16_t)pData[2] << 5)) & 0x07FF;
 	RC_CtrlData.rc.ch2 = (((int16_t)pData[2] >> 6) | ((int16_t)pData[3] << 2) |
 											 ((int16_t)pData[4] << 10)) & 0x07FF;
 	RC_CtrlData.rc.ch3 = (((int16_t)pData[4] >> 1) | ((int16_t)pData[5]<<7)) & 0x07FF;
 	
-	//16ä½ï¼Œåªçœ‹æœ€ä½ä¸¤ä½
+	//16Î»£¬Ö»¿´×îµÍÁ½Î»
 	RC_CtrlData.rc.s1 = ((pData[5] >> 4) & 0x000C) >> 2;
 	RC_CtrlData.rc.s2 = ((pData[5] >> 4) & 0x0003);
 
-	//é¼ æ ‡éœ€è¦ 8 Bytes
+	//Êó±êĞèÒª 8 Bytes
 	RC_CtrlData.mouse.x = ((int16_t)pData[6]) | ((int16_t)pData[7] << 8);
 	RC_CtrlData.mouse.y = ((int16_t)pData[8]) | ((int16_t)pData[9] << 8);
 	RC_CtrlData.mouse.z = ((int16_t)pData[10]) | ((int16_t)pData[11] << 8);    
@@ -88,21 +88,21 @@ void RemoteDataProcess(uint8_t *pData)
 	RC_CtrlData.mouse.press_l = pData[12];
 	RC_CtrlData.mouse.press_r = pData[13];
 	
-	//é”®ç›˜éœ€è¦ 2 Bytes = 16 bits ï¼Œæ¯ä¸€ä½å¯¹åº”ä¸€ä¸ªé”®
+	//¼üÅÌĞèÒª 2 Bytes = 16 bits £¬Ã¿Ò»Î»¶ÔÓ¦Ò»¸ö¼ü
 	RC_CtrlData.key.v = ((int16_t)pData[14]) | ((int16_t)pData[15] << 8);
 
-	//è¾“å…¥çŠ¶æ€è®¾ç½®
+	//ÊäÈë×´Ì¬ÉèÖÃ
 	if(RC_CtrlData.rc.s2 == 1) inputmode = REMOTE_INPUT;
 	else if(RC_CtrlData.rc.s2 == 3) inputmode = KEY_MOUSE_INPUT; 
 	else inputmode = STOP; 
 	
-	//åŠŸèƒ½çŠ¶æ€è®¾ç½®
+	//¹¦ÄÜ×´Ì¬ÉèÖÃ
 	if(RC_CtrlData.rc.s1 == 1) functionmode = UPPER_POS; 
 	else if(RC_CtrlData.rc.s1 == 3) functionmode = MIDDLE_POS; 
-	else functionmode = LOWER_POS; 
+	else functionmode = LOWER_POS;
 	
-	//å·¦ä¸Šè§’æ‹¨æ†çŠ¶æ€ï¼ˆRC_CtrlData.rc.s1ï¼‰è·å–
-	//ç”¨äºé¥æ§å™¨å‘å°„æ§åˆ¶
+	///×óÉÏ½Ç²¦¸Ë×´Ì¬£¨RC_CtrlData.rc.s1£©»ñÈ¡
+	//ÓÃÓÚÒ£¿ØÆ÷·¢Éä¿ØÖÆ
 	GetRemoteSwitchAction(&g_switch1, RC_CtrlData.rc.s1);
 	
 	switch(inputmode)
@@ -128,7 +128,7 @@ void RemoteDataProcess(uint8_t *pData)
 	}	
 }
 
-//åˆå§‹åŒ–é¥æ§å™¨ä¸²å£DMAæ¥æ”¶
+//³õÊ¼»¯Ò£¿ØÆ÷´®¿ÚDMA½ÓÊÕ
 void InitRemoteControl(){
 	if(HAL_UART_Receive_DMA(&RC_UART, rc_data, 18) != HAL_OK){
 			Error_Handler();
@@ -137,7 +137,7 @@ void InitRemoteControl(){
 	rx_free = 1;
 }
 
-//é¥æ§å™¨ä¸²å£ä¸­æ–­å…¥å£å‡½æ•°ï¼Œä»æ­¤å¤„å¼€å§‹æ‰§è¡Œ
+//Ò£¿ØÆ÷´®¿ÚÖĞ¶ÏÈë¿Úº¯Êı£¬´Ó´Ë´¦¿ªÊ¼Ö´ĞĞ
 uint8_t rc_first_frame = 0;
 uint8_t rc_update = 0;
 uint8_t rc_cnt = 0;
@@ -160,21 +160,23 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 	}
 	else if(UartHandle == &JUDGE_UART)
 	{
-		judgeUartRxCpltCallback();  //è£åˆ¤ç³»ç»Ÿæ•°æ®è§£ç®—
+		judgeUartRxCpltCallback();  //²ÃÅĞÏµÍ³Êı¾İ½âËã
 	}
 	else if(UartHandle == &AUTOAIM_UART)
 	{
 		#ifdef USE_AUTOAIM
-		AutoAimRxEnemyINFO();
+		AutoAimUartRxCpltCallback();
 		#endif /*USE_AUTOAIM*/
 	}
 }
-
+extern uint8_t sendfinish;
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
 	if(UartHandle == &JUDGE_UART)
 	{
 		tx_free = 1;
+	}else if(UartHandle == &huart8){
+		sendfinish = 1;
 	}
 }
 void UART_IDLE_Handler(UART_HandleTypeDef *UartHandle)

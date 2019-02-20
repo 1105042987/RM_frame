@@ -1,7 +1,8 @@
 /**
   ******************************************************************************
-  * File Name          : main.hpp
-  * Description        : This file contains the common defines of the application
+  * @file           : main.h
+  * @brief          : Header for main.c file.
+  *                   This file contains the common defines of the application.
   ******************************************************************************
   ** This notice applies to any and all portions of this file
   * that are not between comment pairs USER CODE BEGIN and
@@ -9,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * COPYRIGHT(c) 2018 STMicroelectronics
+  * COPYRIGHT(c) 2019 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -35,12 +36,13 @@
   *
   ******************************************************************************
   */
+
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __MAIN_H
-#define __MAIN_H
-  /* Includes ------------------------------------------------------------------*/
+#ifndef __MAIN_H__
+#define __MAIN_H__
 
 /* Includes ------------------------------------------------------------------*/
+
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -71,8 +73,6 @@
 #define LED2_GPIO_Port GPIOG
 #define Cap_V_Pin GPIO_PIN_0
 #define Cap_V_GPIO_Port GPIOC
-#define BUTTON_Pin GPIO_PIN_2
-#define BUTTON_GPIO_Port GPIOB
 #define LED1_Pin GPIO_PIN_1
 #define LED1_GPIO_Port GPIOG
 #define LED_RED_Pin GPIO_PIN_11
@@ -101,13 +101,6 @@ void _Error_Handler(char *, int);
 }
 #endif
 
-/**
-  * @}
-  */ 
+#endif /* __MAIN_H__ */
 
-/**
-  * @}
-*/ 
-
-#endif /* __MAIN_H */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

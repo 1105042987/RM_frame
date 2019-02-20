@@ -21,8 +21,8 @@
 #define RC_UART 					huart1
 #define JUDGE_UART 				huart6
 #define GYRO_UART 				huart7
-#define AUTOAIM_UART 			huart8
-#define UPPER_UART 				huart8
+#define AUTOAIM_UART 			huart7
+#define UPPER_UART 				huart7
 
 #define BUZZER_CHANNEL			TIM_CHANNEL_1
 

@@ -50,6 +50,18 @@ void InitCanReception()
 	isCan22FirstRx = 1;
 	#endif
 	
+	can1_type=1;
+	can2_type=1;
+	#ifdef CAN12
+		can1_type=2;
+	#endif
+	#ifdef CAN13
+		can1_type=3;
+	#endif
+	#ifdef CAN22
+		can2_type=2;
+	#endif
+	
 	//http://www.eeworld.com.cn/mcu/article_2016122732674_3.html
 	hcan1.pRxMsg = &Can1RxMsg;
 	/*##-- Configure the CAN1 Filter ###########################################*/
@@ -114,12 +126,18 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 					case ESC_6623:
 					{
 						can1[i]->RxMsg6623.angle		 = CanRxGetU16(Can1RxMsg, 0);
+						if(can1[i]==&GMY) can1[i]->RxMsg6623.angle=(can1[i]->RxMsg6623.angle>(4096+GM_YAW_ZERO))?(can1[i]->RxMsg6623.angle-8192):can1[i]->RxMsg6623.angle;
 						can1[i]->RxMsg6623.realIntensity = CanRxGetU16(Can1RxMsg, 1);
 						can1[i]->RxMsg6623.giveIntensity = CanRxGetU16(Can1RxMsg, 2);
 					}
 				}
-				
 			}
+		}
+		if(Can1RxMsg.StdId==0x200 || Can1RxMsg.StdId==0x1FF)
+			flag=1;
+		else if(Can1RxMsg.StdId==0x300)
+		{
+			flag=1;
 		}
 		if(!flag) Error_Handler();
 		if(HAL_CAN_Receive_IT(&hcan1, CAN_FIFO0) != HAL_OK){
@@ -166,4 +184,23 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 	}
 }
 
-
+void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
+{
+	if(hcan == &hcan1) 
+	{
+		if(HAL_CAN_Receive_IT(&hcan1, CAN_FIFO0) != HAL_OK){
+			isRcan1Started = 0;
+		}else{
+			isRcan1Started = 1;
+		}
+	}
+	else if(hcan == &hcan2)
+	{
+		if(HAL_CAN_Receive_IT(&hcan2, CAN_FIFO0) != HAL_OK)
+		{
+			isRcan2Started = 0;
+		}else{
+			isRcan2Started = 1;
+		}
+	}
+}

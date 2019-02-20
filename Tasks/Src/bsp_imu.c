@@ -26,7 +26,7 @@
                                                               * proportional gain governs rate of 
                                                               * convergence to accelerometer/magnetometer 
 																															*/
-#define Ki 0.004f                                             /* 
+#define Ki 0.06f                                             /* 
                                                               * integral gain governs rate of 
                                                               * convergence of gyroscope biases 
 																															*/

@@ -33,6 +33,7 @@
 ".\rm_frame\pid_regulator.o"
 "..\Tasks\Src\RMLib.lib"
 ".\rm_frame\bsp_imu.o"
+".\rm_frame\cap2controltask.o"
 ".\rm_frame\main.o"
 ".\rm_frame\gpio.o"
 ".\rm_frame\adc.o"
