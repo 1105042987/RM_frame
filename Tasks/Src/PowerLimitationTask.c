@@ -27,6 +27,8 @@ void PowerLimitation(void)
 	int16_t CMFRIntensity = CMFR.Intensity;
 	int16_t CMBLIntensity = CMBL.Intensity;
 	int16_t CMBRIntensity = CMBR.Intensity;
+	
+	static int16_t FLILast,FRILast,BLILast,BRILast;
 	//ÀëÏßÄ£Ê½
 	if (JUDGE_State == OFFLINE)
 	{
@@ -48,17 +50,18 @@ void PowerLimitation(void)
 		//CM_current_max = 2730;
 		sum = __fabs(CMFLIntensity) + __fabs(CMFRIntensity) + __fabs(CMBLIntensity) + __fabs(CMBRIntensity);
 		float realPowerBuffer = PowerHeatData.chassisPowerBuffer;
-		float realPower = PowerHeatData.chassisPower;
+		/*float realPower = PowerHeatData.chassisPower;
 		PowerLimitationPID.feedback = realPower;
 		PowerLimitationPID.target = 70;
 		PowerLimitationPID.Calc(&PowerLimitationPID);
-		CM_current_max = PowerLimitationPID.output;
+		CM_current_max = PowerLimitationPID.output;*/
+		
 		//LimitFactor += PowerLimitationPID.output/sum;
 		//if(CM_current_max > 0.5) CM_current_max = 0;
 		//if(CM_current_max < -sum) CM_current_max = -sum;
-		if(realPowerBuffer < 0) realPowerBuffer = 0;
+		//if(realPowerBuffer < 0) realPowerBuffer = 0;
 		//LimitFactor = 50/(((realPower-80)>0?(realPower-80):0)+1) * pow((realPowerBuffer),2);
-		LimitFactor = 2500 + 192*pow((realPowerBuffer),1);
+		LimitFactor = 3200+320*realPowerBuffer;//2500 + 192*pow((realPowerBuffer),1);
 		if(LimitFactor > sum) LimitFactor = sum;
 		CMFLIntensity *= LimitFactor/sum;
 		CMFRIntensity *= LimitFactor/sum;
@@ -72,14 +75,24 @@ void PowerLimitation(void)
 		//LimitFactor = 1.0f;
 		CM_current_max = 12000;
 		sum = __fabs(CMFLIntensity) + __fabs(CMFRIntensity) + __fabs(CMBLIntensity) + __fabs(CMBRIntensity);
-		if(sum > CM_current_max)
-		{
+		if(sum > CM_current_max){
 			CMFLIntensity = (CMFLIntensity/(sum+0.0f))*CM_current_max;
 			CMFRIntensity = (CMFRIntensity/(sum+0.0f))*CM_current_max;
 			CMBLIntensity = (CMBLIntensity/(sum+0.0f))*CM_current_max;
 			CMBRIntensity = (CMBRIntensity/(sum+0.0f))*CM_current_max;
 		}
 	}
+	else{
+		if(abs(CMFLIntensity-FLILast)>1000){CMFLIntensity=FLILast+(CMFLIntensity-FLILast>0?1:-1)*80;}
+		if(abs(CMFRIntensity-FRILast)>1000){CMFRIntensity=FRILast+(CMFRIntensity-FRILast>0?1:-1)*80;}
+		if(abs(CMBLIntensity-BLILast)>1000){CMBLIntensity=BLILast+(CMBLIntensity-BLILast>0?1:-1)*80;}
+		if(abs(CMBRIntensity-BRILast)>1000){CMBRIntensity=BRILast+(CMBRIntensity-BRILast>0?1:-1)*80;}
+	}
+	FLILast=CMFLIntensity;
+	FRILast=CMFRIntensity;
+	BLILast=CMBLIntensity;
+	BRILast=CMBRIntensity;
+	
 	CMFL.Intensity = CMFLIntensity;
 	CMFR.Intensity = CMFRIntensity;
 	CMBL.Intensity = CMBLIntensity;

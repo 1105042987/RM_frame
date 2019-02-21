@@ -16,7 +16,7 @@
 #include "includes.h"
 
 #define CAP_USE_CURR
-#define CAP_AUTO_RECHARGE
+//#define CAP_AUTO_RECHARGE
 #define CAP_DEBUG
 
 #define ADC_CHANNALS            (4)
@@ -27,17 +27,17 @@
 #define ICIN                    (2)       //PB1 Channel 9
 #define UCK1                    (3)       //PC0 Channel 10
 #define RECHARGE_POWER_MAX      (72)
-#define RELEASE_POWER_MAX       (70)
+#define RELEASE_POWER_MAX       (68)//70
 #define RECHARGE_CURR_MAX       (3.0)
 #define RELEASE_CURR_MAX        (3.0)
-#define RELEASE_POW_RATE        (1.3)
+#define RELEASE_POW_RATE        (1.4)//1.3
 #define RECHARGE_POW_RATE       ((PowerHeatData.chassisPower > RECHARGE_POWER_MAX)?\
                                 ((RECHARGE_VOLTAGE_MAX - VAL__CAP_VOLTAGE) / (RECHARGE_VOLTAGE_MAX - RELEASE_VOLTAGE_MIN) * (1.4-0.8) + 0.8):\
                                 ((RECHARGE_VOLTAGE_MAX - VAL__CAP_VOLTAGE) / (RECHARGE_VOLTAGE_MAX - RELEASE_VOLTAGE_MIN) * (1.4-1.0) + 1.0))
 #define INPUT_PWM_PERCENT_MAX   (100)
 #define OUTPUT_PWM_PERCENT_MAX  (100)
 #define RECHARGE_VOLTAGE_MAX    (21.5)
-#define RELEASE_VOLTAGE_MIN     (6.0)
+#define RELEASE_VOLTAGE_MIN     (8.0)//6
 #define RE_RECHARGE_VOLTAGE     (19.0)
 #define OUT_VOL_PWM_TIM         htim8
 #define OUT_VOL_PWM_CHANNEL     TIM_CHANNEL_2
@@ -89,7 +89,7 @@ static void Cap_Ctr(void);
 #define DEBUG_HITS    (4000)
 #define DEBUG_AMOUNT  (4)
 static uint8_t cnt=0;
-static int32_t cps[DEBUG_AMOUNT][DEBUG_HITS];
+int32_t cps[DEBUG_AMOUNT][DEBUG_HITS];
 static uint32_t ncnt=0;
 #if DEBUG_HITS * DEBUG_AMOUNT * 4 > 65535
   #error Cap debug info bytes must below 65535, try to change the DEBUG_AMOUNT and DEBUG_HITS
@@ -186,6 +186,21 @@ static void Cap_Ctr_STOP() {
 	}
 #else
 	(void)0;
+	#ifdef CAP_DEBUG
+		/*
+			Control_SuperCap.C_voltage = 100*Cap_Get_Cap_Voltage();
+	Control_SuperCap.P_voltage = 100*Cap_Get_Power_Voltage();
+	Control_SuperCap.P_Power = 100*Cap_Get_Power_Voltage()*Cap_Get_Power_CURR();*/
+    if(++cnt >=5 && ncnt < DEBUG_HITS){
+      cps[0][ncnt] = PowerHeatData.chassisPower * 100;
+      cps[1][ncnt] = PowerHeatData.chassisPowerBuffer  * 100;
+      cps[2][ncnt] = Cap_Get_Power_Voltage()*Cap_Get_Power_CURR()*100;
+      cps[3][ncnt++] = VAL__INPUT_PWM_PERCENT * 100;
+      cnt = 0;
+    }else if(ncnt >= DEBUG_HITS){
+      HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+    }
+#endif
 #endif
 	return;
 }
@@ -201,8 +216,8 @@ static void Cap_Ctr_RECHARGE() {
 	Control_SuperCap.P_voltage = 100*Cap_Get_Power_Voltage();
 	Control_SuperCap.P_Power = 100*Cap_Get_Power_Voltage()*Cap_Get_Power_CURR();*/
     if(++cnt >=5 && ncnt < DEBUG_HITS){
-      cps[0][ncnt] = PowerHeatData.chassisPowerBuffer * 100;
-      cps[1][ncnt] = Cap_Get_Cap_Voltage() * 100;
+      cps[0][ncnt] = PowerHeatData.chassisPower * 100;
+      cps[1][ncnt] = PowerHeatData.chassisPowerBuffer  * 100;
       cps[2][ncnt] = Cap_Get_Power_Voltage()*Cap_Get_Power_CURR()*100;
       cps[3][ncnt++] = VAL__INPUT_PWM_PERCENT * 100;
       cnt = 0;
@@ -212,7 +227,7 @@ static void Cap_Ctr_RECHARGE() {
 #endif /* CAP_DEBUG */
 		if (recharge_cnt < 250) {
 			recharge_cnt++;
-			FUNC__RECAL_INPUT_PWM(0.0004f);//0.0005f
+			FUNC__RECAL_INPUT_PWM(0.0005f);//0.0005f
 		}
 		else {
 			FUNC__RECAL_INPUT_PWM(0.0015f);//0.002f
@@ -234,8 +249,8 @@ static void Cap_Ctr_RELEASE() {
 
 #ifdef CAP_DEBUG
     if(++cnt>=5 && ncnt<DEBUG_HITS){
-      cps[0][ncnt] = PowerHeatData.chassisPowerBuffer * 100;
-      cps[1][ncnt] = Cap_Get_Cap_Voltage() * 100;
+      cps[0][ncnt] = PowerHeatData.chassisPower * 100;
+      cps[1][ncnt] = PowerHeatData.chassisPowerBuffer  * 100;
       cps[2][ncnt] = Cap_Get_Power_Voltage()*Cap_Get_Power_CURR()*100;
       cps[3][ncnt++] = VAL__OUTPUT_PWM_PERCENT * 100;
       cnt = 0;

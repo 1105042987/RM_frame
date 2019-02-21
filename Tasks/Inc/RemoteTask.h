@@ -102,6 +102,6 @@ extern uint8_t rx_free;
 void RemoteDataProcess(uint8_t *pData);
 void InitRemoteControl(void);
 void RemoteControlProcess(Remote *rc);
-void MouseKeyControlProcess(Mouse *mouse, Key *key);
+void MouseKeyControlProcess(Mouse *mouse, Key *key,Remote *rc);
 
 #endif /*__ REMOTETASK_H */

@@ -160,6 +160,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>Cap_Get_Cap_Voltage,0x0A</ItemText>
         </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Control_SuperCap,0x0A</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>

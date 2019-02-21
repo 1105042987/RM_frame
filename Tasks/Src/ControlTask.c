@@ -71,29 +71,41 @@ void WorkStateFSM(void)
 		case NORMAL_STATE:				//正常模式
 		{
 			if (inputmode == STOP) WorkState = STOP_STATE;
+			
+			if(functionmode == MIDDLE_POS) WorkState = ADDITIONAL_STATE_ONE;
+			if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
+			/*
 			if (inputmode == REMOTE_INPUT)
 			{
 				if(functionmode == MIDDLE_POS) WorkState = ADDITIONAL_STATE_ONE;
 				if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
-			}
+			}*/
 		}break;
 		case ADDITIONAL_STATE_ONE:		//附加模式一
 		{
 			if (inputmode == STOP) WorkState = STOP_STATE;
+			
+			if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
+			if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
+			/*
 			if (inputmode == REMOTE_INPUT)
 			{
 				if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
 				if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
-			}
+			}*/
 		}break;
 		case ADDITIONAL_STATE_TWO:		//附加模式二
 		{
 			if (inputmode == STOP) WorkState = STOP_STATE;
+			
+			if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
+			if(functionmode == MIDDLE_POS) WorkState = ADDITIONAL_STATE_ONE;
+			/*
 			if (inputmode == REMOTE_INPUT)
 			{
 				if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
 				if(functionmode == MIDDLE_POS) WorkState = ADDITIONAL_STATE_ONE;
-			}
+			}*/
 		}break;
 		case STOP_STATE:				//紧急停止
 		{
@@ -185,7 +197,7 @@ void ControlRotate(void)
 void Chassis_Data_Decoding()
 {
 	ControlRotate();
-	
+	/*//
 	CMFL.TargetAngle = (  (ChassisSpeedRef.forward_back_ref + fabs(rotate_speed*0.06)) *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						+ ChassisSpeedRef.left_right_ref *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						+ rotate_speed)*12;
@@ -198,12 +210,14 @@ void Chassis_Data_Decoding()
 	CMBR.TargetAngle = (- (ChassisSpeedRef.forward_back_ref + fabs(rotate_speed*0.06)) *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						- ChassisSpeedRef.left_right_ref *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						+ rotate_speed)*12;
-	/*//
+	*///
+	///
+	rotate_speed-=0.1;
 	CMFL.TargetAngle = (  ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref	+ rotate_speed)*12;
 	CMFR.TargetAngle = (- ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
 	CMBL.TargetAngle = (  ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
 	CMBR.TargetAngle = (- ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref	+ rotate_speed)*12;
-	*///
+	///
 }
 
 //主控制循环
@@ -221,8 +235,6 @@ void controlLoop()
 		
 		for(int i=0;i<8;i++) if(can1[i]!=0) (can1[i]->Handle)(can1[i]);
 		for(int i=0;i<8;i++) if(can2[i]!=0) (can2[i]->Handle)(can2[i]);
-		
-		
 /*/混合pid开始(覆盖之前底盘pid)
 		static float kp=12,ki=0.17,kd=2;
 		static float e1,e2,e3,e4,e12,e13,e14,e23,e24,e34;//偏差，p
