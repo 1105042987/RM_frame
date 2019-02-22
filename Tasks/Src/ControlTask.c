@@ -197,7 +197,7 @@ void ControlRotate(void)
 void Chassis_Data_Decoding()
 {
 	ControlRotate();
-	/*//
+	///
 	CMFL.TargetAngle = (  (ChassisSpeedRef.forward_back_ref + fabs(rotate_speed*0.06)) *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						+ ChassisSpeedRef.left_right_ref *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						+ rotate_speed)*12;
@@ -210,14 +210,14 @@ void Chassis_Data_Decoding()
 	CMBR.TargetAngle = (- (ChassisSpeedRef.forward_back_ref + fabs(rotate_speed*0.06)) *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)-sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						- ChassisSpeedRef.left_right_ref *(cos((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f)+sin((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 6.28 / 8192.0f))
 						+ rotate_speed)*12;
-	*///
 	///
+	/*//
 	rotate_speed-=0.1;
 	CMFL.TargetAngle = (  ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref	+ rotate_speed)*12;
 	CMFR.TargetAngle = (- ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
 	CMBL.TargetAngle = (  ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
 	CMBR.TargetAngle = (- ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref	+ rotate_speed)*12;
-	///
+	*///
 }
 
 //主控制循环

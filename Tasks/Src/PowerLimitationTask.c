@@ -28,6 +28,7 @@ void PowerLimitation(void)
 	int16_t CMBLIntensity = CMBL.Intensity;
 	int16_t CMBRIntensity = CMBR.Intensity;
 	
+	sum = __fabs(CMFLIntensity) + __fabs(CMFRIntensity) + __fabs(CMBLIntensity) + __fabs(CMBRIntensity);
 	static int16_t FLILast,FRILast,BLILast,BRILast;
 	//ÀëÏßÄ£Ê½
 	if (JUDGE_State == OFFLINE)
@@ -48,7 +49,6 @@ void PowerLimitation(void)
 	else if(PowerHeatData.chassisPowerBuffer-((PowerHeatData.chassisPower-80)>0?(PowerHeatData.chassisPower-80):0)*0.5f < 10.0f)
 	{
 		//CM_current_max = 2730;
-		sum = __fabs(CMFLIntensity) + __fabs(CMFRIntensity) + __fabs(CMBLIntensity) + __fabs(CMBRIntensity);
 		float realPowerBuffer = PowerHeatData.chassisPowerBuffer;
 		/*float realPower = PowerHeatData.chassisPower;
 		PowerLimitationPID.feedback = realPower;
@@ -74,7 +74,6 @@ void PowerLimitation(void)
 		//PowerLimitationPID.Reset(&PowerLimitationPID);
 		//LimitFactor = 1.0f;
 		CM_current_max = 12000;
-		sum = __fabs(CMFLIntensity) + __fabs(CMFRIntensity) + __fabs(CMBLIntensity) + __fabs(CMBRIntensity);
 		if(sum > CM_current_max){
 			CMFLIntensity = (CMFLIntensity/(sum+0.0f))*CM_current_max;
 			CMFRIntensity = (CMFRIntensity/(sum+0.0f))*CM_current_max;
@@ -82,11 +81,27 @@ void PowerLimitation(void)
 			CMBRIntensity = (CMBRIntensity/(sum+0.0f))*CM_current_max;
 		}
 	}
-	else{
-		if(abs(CMFLIntensity-FLILast)>1000){CMFLIntensity=FLILast+(CMFLIntensity-FLILast>0?1:-1)*80;}
-		if(abs(CMFRIntensity-FRILast)>1000){CMFRIntensity=FRILast+(CMFRIntensity-FRILast>0?1:-1)*80;}
-		if(abs(CMBLIntensity-BLILast)>1000){CMBLIntensity=BLILast+(CMBLIntensity-BLILast>0?1:-1)*80;}
-		if(abs(CMBRIntensity-BRILast)>1000){CMBRIntensity=BRILast+(CMBRIntensity-BRILast>0?1:-1)*80;}
+	else if(sum>12000&&abs(CMFLIntensity-FLILast)>1000){
+		
+	  FLILast=(CMFLIntensity>0?1:-1)*abs(FLILast);
+	  FRILast=(CMFRIntensity>0?1:-1)*abs(FRILast);
+	  BLILast=(CMBLIntensity>0?1:-1)*abs(BLILast);
+	  BRILast=(CMBRIntensity>0?1:-1)*abs(BRILast);
+		
+		CMFLIntensity=FLILast+(CMFLIntensity-FLILast)*0.1;
+		CMFRIntensity=FRILast+(CMFRIntensity-FRILast)*0.1;
+		CMBLIntensity=BLILast+(CMBLIntensity-BLILast)*0.1;
+		CMBRIntensity=BRILast+(CMBRIntensity-BRILast)*0.1;
+		/*
+		CMFLIntensity=FLILast+(CMFLIntensity-FLILast>0?1:-1)*100;
+    CMFRIntensity=FRILast+(CMFRIntensity-FRILast>0?1:-1)*100;
+		CMBLIntensity=BLILast+(CMBLIntensity-BLILast>0?1:-1)*100;
+		CMBRIntensity=BRILast+(CMBRIntensity-BRILast>0?1:-1)*100;*/
+		/*
+		if(abs(CMFLIntensity-FLILast)>1000){CMFLIntensity=FLILast+(CMFLIntensity-FLILast>0?1:-1)*100;}
+		if(abs(CMFRIntensity-FRILast)>1000){CMFRIntensity=FRILast+(CMFRIntensity-FRILast>0?1:-1)*100;}
+		if(abs(CMBLIntensity-BLILast)>1000){CMBLIntensity=BLILast+(CMBLIntensity-BLILast>0?1:-1)*100;}
+		if(abs(CMBRIntensity-BRILast)>1000){CMBRIntensity=BRILast+(CMBRIntensity-BRILast>0?1:-1)*100;}*/
 	}
 	FLILast=CMFLIntensity;
 	FRILast=CMFRIntensity;

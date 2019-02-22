@@ -49,10 +49,9 @@ void FunctionTaskInit(){
 	
 	KeyboardMode=NO_CHANGE;
 }
-
 void OptionalFunction(){
 	//if(Cap_Get_Cap_State()!=CAP_STATE_RELEASE)
-		PowerLimitation();
+	PowerLimitation();
 }
 
 void Limit_and_Synchronization(){
@@ -238,10 +237,16 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key,Remote *rc){
 		channelrrow = (rc->ch0 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 		channelrcol = (rc->ch1 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 		channellrow = (rc->ch2 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
-		channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
+		channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET);
+		
 		ChassisSpeedRef.forward_back_ref = channellcol * RC_CHASSIS_SPEED_REF;
-		ChassisSpeedRef.left_right_ref   = channellrow * RC_CHASSIS_SPEED_REF;
+		ChassisSpeedRef.left_right_ref   = channellrow * RC_CHASSIS_SPEED_REF/3*2;
+		#ifdef USE_CHASSIS_FOLLOW
+		GMY.TargetAngle += channelrrow * RC_GIMBAL_SPEED_REF;
+		GMP.TargetAngle -= channelrcol * RC_GIMBAL_SPEED_REF;
+		#else
 		ChassisSpeedRef.rotate_ref = -channelrrow * RC_ROTATE_SPEED_REF;
+		#endif
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){//用于串口发送功率数据@唐欣阳
 		if(sendfinish){

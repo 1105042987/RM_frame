@@ -65,11 +65,11 @@ MotorINFO GATE = Normal_MOTORINFO_Init(36,&ControlNM,
 								fw_PID_INIT(1200.0, 0.0, 0.0, 	20000.0, 15000.0, 15000.0, 20000.0),
 								fw_PID_INIT(1, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
 		
-//MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,&GATE};
-//MotorINFO* can2[8]={&CMFL,&CMFR,&CMBL,&CMBR,&SGMY,&SGMP,&SSTIR,0};
+MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,&GATE};
+MotorINFO* can2[8]={&CMFL,&CMFR,&CMBL,&CMBR,&SGMY,&SGMP,&SSTIR,0};
 
-MotorINFO* can2[8]={0,0,0,0,0,0,0,0};
-MotorINFO* can1[8]={&CMFL,&CMFR,&CMBL,&CMBR,0,0,0,0};
+//MotorINFO* can2[8]={0,0,0,0,0,0,0,0};
+//MotorINFO* can1[8]={&CMFL,&CMFR,&CMBL,&CMBR,0,0,0,0};
 
 void ControlNM(MotorINFO* id)
 {
