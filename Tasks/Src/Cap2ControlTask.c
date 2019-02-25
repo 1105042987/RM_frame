@@ -13,6 +13,7 @@
 
 #include <math.h>
 #include <string.h>
+
 #include "includes.h"
 
 #define CAP_USE_CURR

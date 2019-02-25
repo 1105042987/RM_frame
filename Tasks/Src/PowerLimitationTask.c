@@ -62,6 +62,11 @@ int16_t PowerBufferMax = 80;
 //		rate=windows;
 //	return rate;
 //}
+extern MotorINFO** ChassisMotorGroup;
+#define CMFL (*ChassisMotorGroup[0])
+#define CMFR (*ChassisMotorGroup[1])
+#define CMBL (*ChassisMotorGroup[2])
+#define CMBR (*ChassisMotorGroup[3])
 
 #define POW_M  USE_POWER_LIMIT
 void PowerLimitation(void)

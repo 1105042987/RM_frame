@@ -101,7 +101,11 @@ extern uint8_t rx_free;
 
 void RemoteDataProcess(uint8_t *pData);
 void InitRemoteControl(void);
+#ifdef SLAVE_MODE
+void RemoteControlProcess(void);
+#else
 void RemoteControlProcess(Remote *rc);
+#endif
 void RemoteTestProcess(Remote *rc);
 void MouseKeyControlProcess(Mouse *mouse, Key *key);
 

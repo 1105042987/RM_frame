@@ -77,6 +77,31 @@ typedef enum
 	ONLINE = 0,
 	OFFLINE = 1,
 }JudgeState_e;
+#ifdef HERO
+#define MAXHP1 1000
+#define MAXHP2 1250
+#define MAXHP3 1500
+
+#define COOLDOWN01 18
+#define COOLDOWN02 36
+#define COOLDOWN03 72
+
+#define MAXHEAT01 120
+#define MAXHEAT02 240
+#define MAXHEAT03 480
+#else
+#define MAXHP1 1000
+#define MAXHP2 1250
+#define MAXHP3 1500
+
+#define COOLDOWN01 18
+#define COOLDOWN02 36
+#define COOLDOWN03 72
+
+#define MAXHEAT01 120
+#define MAXHEAT02 240
+#define MAXHEAT03 480
+#endif
 
 void judgeUartRxCpltCallback(void);
 void Send_User_Data(void);

@@ -18,8 +18,6 @@
 #ifndef DEBUG_MODE
 #ifdef	USE_AUTOAIM
 
-#define GMP_ANGLE		(double)((GMP.RxMsg6623.angle-GM_PITCH_ZERO)/8192.0*2*const_pi)
-
 #define RX_ENEMY_START		Enemy_INFO[0]
 #define RX_ENEMY_X1				Enemy_INFO[1]
 #define RX_ENEMY_X2 			Enemy_INFO[2]

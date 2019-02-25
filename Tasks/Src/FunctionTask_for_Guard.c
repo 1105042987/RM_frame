@@ -21,6 +21,13 @@ void Standardized_Chassis_Move(float Rate);
 #ifdef CONFIGURATION
 extern MotorINFO CMFL,CMFR,CMBL,CMBR,GMY,GMP,FRICL,FRICR,STIR,CML,CMR;
 #endif
+#ifdef CAN13
+extern CAN_DATA_t 	sendData[CAN13],receiveData[CAN13];
+#else
+#ifdef CAN23
+extern CAN_DATA_t 	sendData[CAN23],receiveData[CAN23];
+#endif
+#endif
 
 int32_t auto_counter=0;		//用于准确延时的完成某事件
 
@@ -28,6 +35,7 @@ int16_t channelrrow = 0;
 int16_t channelrcol = 0;
 int16_t channellrow = 0;
 int16_t channellcol = 0;
+
 
 //初始化
 void FunctionTaskInit()
@@ -52,6 +60,8 @@ void Limit_and_Synchronization()
 //******************
 //遥控器模式功能编写
 //******************
+#if GUARD == 'U'
+//上平台代码
 void RemoteControlProcess(Remote *rc)
 {
 	if(WorkState <= 0) return;
@@ -60,25 +70,58 @@ void RemoteControlProcess(Remote *rc)
 	channelrcol = (rc->ch1 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	channellrow = (rc->ch2 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
+	
+	sendData[0].data[0]=(int16_t)WorkState;
 	if(WorkState == NORMAL_STATE)
-	{	
+	{//手动模式
 		Standardized_Chassis_Move(1);
+		sendData[0].data[1]=channelrrow;
+		sendData[0].data[2]=channellcol;
+		sendData[0].data[3]=(int16_t)(fakeHeat0*20);
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
-	{
+	{//自动模式
 		
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
 		
 	}
-	/*OnePush(FUNC__RED_RAY_M__READ(),{
+	OnePush(FUNC__RED_RAY_M__READ(),{
 		CML.Target = 0;
 		CML.Real = 0;
-	})
-	*/
+	});
 	Limit_and_Synchronization();
 }
+#endif
+#if GUARD == 'D'
+//下平台代码
+void RemoteControlProcess()
+{
+	WorkState = (WorkState_e)receiveData[0].data[0];
+	if(WorkState <= 0) return;
+	//max=660
+	channelrrow = receiveData[0].data[1]; 
+	channelrcol = 0;
+	channellrow = 0;
+	channellcol = receiveData[0].data[2]; 
+	fakeHeat0=receiveData[0].data[3]/(float)(20.0);
+	if(WorkState == NORMAL_STATE)
+	{	
+		GMY.Target+=channelrrow;
+		GMP.Target+=channellcol;
+	}
+	if(WorkState == ADDITIONAL_STATE_ONE)
+	{
+		AutoAimGMCTRL();
+	}
+	if(WorkState == ADDITIONAL_STATE_TWO)
+	{
+		
+	}
+	Limit_and_Synchronization();
+}
+#endif
 //**************************
 //遥控器**测试**模式功能编写
 //**************************

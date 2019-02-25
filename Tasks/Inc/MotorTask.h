@@ -104,8 +104,8 @@ typedef struct MotorINFO
 	uint16_t			Zero;
 	int16_t				Compensation;
 	int16_t				Maxrange;
-	float					encoderAngle;
-	float					encoderLastAngle;
+	float				encoderAngle;
+	float				encoderLastAngle;
 }MotorINFO;
 
 #define AngleBased_MOTORINFO_Init(rdc,func,ppid,spid)\

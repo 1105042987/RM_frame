@@ -18,12 +18,12 @@ uint8_t isCan11FirstRx = 0, isCan12FirstRx = 0, isCan21FirstRx = 0, isCan22First
 CanRxMsgTypeDef Can1RxMsg,Can2RxMsg;
 #ifdef CAN13
 #define CAN3
-CAN_DATA_t 	sendData,receiveData[CAN13];
+CAN_DATA_t 	sendData[CAN13],receiveData[CAN13];
 uint8_t 	maxSendSize = CAN13;
 #else
 #ifdef CAN23
 #define CAN3
-CAN_DATA_t 	sendData,receiveData[CAN23];
+CAN_DATA_t 	sendData[CAN23],receiveData[CAN23];
 uint8_t 	maxSendSize = CAN23;
 #endif
 #endif
@@ -31,6 +31,7 @@ uint8_t can1_update = 1;
 uint8_t can1_type = 1;
 uint8_t can2_update = 1;
 uint8_t can2_type = 1;
+uint8_t Control_Update=0;
 
 /********************CAN发送*****************************/
 //CAN数据标记发送，保证发送资源正常
@@ -149,6 +150,7 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 			{
 				for(int i=0;i<4;i++) receiveData[flag].data[i] = CanRxGetU16(Can1RxMsg, i);
 				flag = 1;
+				Control_Update=1;
 			}
 		}
 		#endif
@@ -195,6 +197,7 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 			{
 				for(int i=0;i<4;i++) receiveData[flag].data[i] = CanRxGetU16(Can2RxMsg, i);
 				flag = 1;
+				Control_Update=1;
 			}
 		}
 		#endif
@@ -275,8 +278,8 @@ void setCANMessage(uint8_t index)
 	hcan_P->pTxMsg->DLC = 0x08;
 
 	for(int i=0;i<4;i++){
-		hcan_P->pTxMsg->Data[i*2]   = (uint8_t)(sendData.data[i] >> 8);
-		hcan_P->pTxMsg->Data[i*2+1] = (uint8_t)sendData.data[i];
+		hcan_P->pTxMsg->Data[i*2]   = (uint8_t)(sendData[index].data[i] >> 8);
+		hcan_P->pTxMsg->Data[i*2+1] = (uint8_t)sendData[index].data[i];
 	}
 	if(*update == 1 && *type == 3)
 	{

@@ -17,16 +17,15 @@
 //*****************************
 //#define CONFIGURATION
 
-//#define OLD_INFANTRY
-#define NEW_INFANTRY
+//#define NEW_INFANTRY
 //#define INFANTRY	2
 //#define INFANTRY	4
-#define INFANTRY	5
-//#define GUARD		"UP"
-//#define GUARD		"DOWN"
+//#define INFANTRY	5
+//#define GUARD		'U'
+#define GUARD		'D'
 //#define ENGINEER
-//#define HERO		“MAIN”
-//#define HERO		"SUB"
+//#define HERO		'M'
+//#define HERO		'S'
 
 //*********************************************************
 //     机器人模块功能配置(机器人选择CONFIGUATION时启用)
@@ -35,20 +34,21 @@
 /***模式选择***/
 //#define DEBUG_MODE
 //#define TEST_MODE
+//#define SLAVE_MDOE
 
 /***功能选择***/
 //#define USE_GYRO
-//#define USE_IMU
+#define USE_IMU
 //#define USE_CHASSIS_FOLLOW
 //#define USE_SUPER_CAP
-//#define USE_POWER_LIMIT 	20
-//#define USE_AUTOAIM
+#define USE_POWER_LIMIT 	20
+#define USE_AUTOAIM
 //#define USE_HEAT_LIMIT_INFANTRY
 
 
 /***can线启用设置***/
-//#define CAN11
-//#define CAN12
+#define CAN11
+#define CAN12
 #define CAN21
 //#define CAN22
 

@@ -5,6 +5,7 @@
 //											INFANTRY
 //***********************************************************************************************************
 #ifdef INFANTRY
+
 #define USE_IMU
 #define USE_CHASSIS_FOLLOW
 #define USE_SUPER_CAP
@@ -15,33 +16,25 @@
 #define CAN11
 #define CAN12
 #define CAN21
-
-#define MAXHP1 1000
-#define MAXHP2 1250
-#define MAXHP3 1500
-
-#define COOLDOWN01 18
-#define COOLDOWN02 36
-#define COOLDOWN03 72
-
-#define MAXHEAT01 120
-#define MAXHEAT02 240
-#define MAXHEAT03 480
-
-extern MotorINFO CMFL,CMFR,CMBL,CMBR,FRICL,FRICR,GMP,GMY,STIR;
 #endif
 //***********************************************************************************************************
 //											GUARD
 //***********************************************************************************************************
 #ifdef GUARD
-#define USE_IMU
-#define USE_AUTOAIM
-#define USE_POWER_LIMIT 	20
-
-#define CAN11
-//#define CAN21
-//#define CAN22
-//#define CAN13	1
+#if GUARD == 'U'
+	#define USE_POWER_LIMIT 	20
+	
+	#define CAN11
+	#define CAN23 	1
+#else
+	#define SLAVE_MODE
+	#define USE_IMU
+	#define USE_AUTOAIM
+	
+	#define CAN21
+	#define CAN22
+	#define CAN13	1
+#endif
 #endif
 //***********************************************************************************************************
 //											HERO

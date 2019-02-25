@@ -79,7 +79,6 @@ void WorkStateFSM(void)
 	{
 		case PREPARE_STATE:				//准备模式
 		{
-			//if(inputmode == STOP) WorkState = STOP_STATE;
 			normal_time = 0;
 			if(prepare_time < 0xff && gyro_data.InitFinish == 1) prepare_time++;	
 			if(prepare_time == 0xff && gyro_data.InitFinish == 1 && isCan11FirstRx == 1 && 
@@ -95,6 +94,7 @@ void WorkStateFSM(void)
 				}
 			}
 		}break;
+		#ifndef SLAVE_MODE
 		case NORMAL_STATE:				//正常模式
 		{
 			if(normal_time<10000)normal_time++;
@@ -134,6 +134,16 @@ void WorkStateFSM(void)
 				FunctionTaskInit();
 			}
 		}break;
+		#else
+		case NORMAL_STATE:
+		case ADDITIONAL_STATE_ONE:
+		case ADDITIONAL_STATE_TWO:break;
+		case STOP_STATE:
+		{
+			for(int i=0;i<8;i++) {InitMotor(can1[i]);InitMotor(can2[i]);}
+			setCAN11();setCAN12();setCAN21();setCAN22();
+		}break;
+		#endif
 	}
 }
 #ifdef USE_CHASSIS_FOLLOW
@@ -248,10 +258,22 @@ void controlLoop()
 		#endif
 		
 		#ifdef CAN23
-			setCANMessage(0);
+			static int MSG_cnt=0;
+			if(MSG_cnt < CAN23)
+			{
+				setCANMessage(MSG_cnt);
+				MSG_cnt++;
+			}
+			else MSG_cnt=0;
 		#else
 		#ifdef CAN13
-			setCANMessage(0);
+			static int MSG_cnt=0;
+			if(MSG_cnt < CAN13)
+			{
+				setCANMessage(MSG_cnt);
+				MSG_cnt++;
+			}
+			else MSG_cnt=0;
 		#endif
 		#endif
 	}
@@ -265,6 +287,7 @@ void heatCalc()//2ms
 }
 
 //时间中断入口函数
+extern int8_t Control_Update;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim->Instance == TWO_MS_TIM.Instance)//2ms时钟
@@ -282,13 +305,30 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		controlLoop();
 		heatCalc();
 		
+		#ifdef USE_AUTOAIM
+		//自瞄数据解算（6ms）
+		static uint8_t aim_cnt=0;
+		if(++aim_cnt==3)
+		{
+			EnemyINFOProcess();
+			aim_cnt=0;
+		}
+		#endif
+		
 		//HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
 	}
 	else if (htim->Instance == ONE_MS_TIM.Instance)//ims时钟
 	{
-		
 		rc_cnt++;
 		if(auto_counter > 0) auto_counter--;
+		#ifdef SLAVE_MODE
+		if(Control_Update==1)
+		{
+			Control_Update=0;
+			HAL_IWDG_Refresh(&hiwdg);
+			RemoteControlProcess();
+		}
+		#else
 		if (rx_free == 1 && tx_free == 1)
 		{
 			if( (rc_cnt <= 17) && (rc_first_frame == 1))
@@ -319,15 +359,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			}
 			rc_update = 0;
 		}
+		#endif
 		
-		//自瞄数据解算（3ms）
-		static int aim_cnt=0;
-		aim_cnt++;
-		if(aim_cnt==3)
-		{
-			EnemyINFOProcess();
-			aim_cnt=0;
-		}
 	}
 	else if (htim->Instance == htim10.Instance)  //10ms
 	{

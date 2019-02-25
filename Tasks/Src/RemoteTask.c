@@ -18,7 +18,7 @@ FunctionMode_e functionmode = UPPER_POS;
 
 RemoteSwitch_t g_switch1;
 
-
+#ifndef SLAVE_MODE
 /*拨杆数据处理*/   
 void GetRemoteSwitchAction(RemoteSwitch_t *sw, uint8_t val)
 {
@@ -149,6 +149,7 @@ void RemoteDataProcess(uint8_t *pData)
 		}break;
 	}	
 }
+#endif
 
 //初始化遥控器串口DMA接收
 void InitRemoteControl(){

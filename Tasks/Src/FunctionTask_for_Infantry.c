@@ -74,7 +74,7 @@ void RemoteControlProcess(Remote *rc)
 	{	
 		Standardized_Chassis_Move(1);
 		#ifdef USE_AUTOAIM
-			autoAimGMCTRL();
+			AutoAimGMCTRL();
 		#endif
 		ShootState = 0;
 		FRICL.Target = 0;

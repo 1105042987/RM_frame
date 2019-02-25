@@ -140,12 +140,11 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
 	if(id->s_count == 0)
 	{
 		static uint8_t Reseted = 0;
-		double 	encoder_real = (id->Zero - id->RxMsg6623.angle) * 360.0 / 8192.0 / fabs(id->ReductionRate);
-		int8_t 	dir;
-		float encoderThisAngle = id->RxMsg6623.angle;
-		if(id->ReductionRate>=0) dir=1;
-		else dir=-1;
+		double encoder_real = (id->Zero - id->RxMsg6623.angle) * 360.0 / 8192.0 / fabs(id->ReductionRate);
+		int8_t dir;
+		float  encoderThisAngle = id->RxMsg6623.angle;
 		
+		if(id->ReductionRate>=0) dir=1;else dir=-1;
 		if(id->FirstEnter==1) {
 			//id->lastRead = ThisAngle;
 			//id->Real = encoder_real;
@@ -158,16 +157,16 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
 		if(encoderThisAngle<=id->encoderLastAngle)
 		{
 			if((id->encoderLastAngle-encoderThisAngle)>4000)//编码器上溢
-				id->encoderAngle = id->encoderAngle - (encoderThisAngle+8192-id->encoderLastAngle) * 360 / 8192.0 / id->ReductionRate;
+				id->encoderAngle = id->encoderAngle - (encoderThisAngle+8192-id->encoderLastAngle) * 360 / (float)(8192.0) / id->ReductionRate;
 			else//正常
-				id->encoderAngle = id->encoderAngle + (id->encoderLastAngle - encoderThisAngle) * 360 / 8192.0 / id->ReductionRate;
+				id->encoderAngle = id->encoderAngle + (id->encoderLastAngle - encoderThisAngle) * 360 / (float)(8192.0) / id->ReductionRate;
 		}
 		else
 		{
 			if((encoderThisAngle-id->encoderLastAngle)>4000)//编码器下溢
-				id->encoderAngle = id->encoderAngle + (id->encoderLastAngle+8192-encoderThisAngle) *360 / 8192.0 / id->ReductionRate;
+				id->encoderAngle = id->encoderAngle + (id->encoderLastAngle+8192-encoderThisAngle) *360 / (float)(8192.0) / id->ReductionRate;
 			else//正常
-				id->encoderAngle = id->encoderAngle - (encoderThisAngle - id->encoderLastAngle) * 360 / 8192.0 / id->ReductionRate;
+				id->encoderAngle = id->encoderAngle - (encoderThisAngle - id->encoderLastAngle) * 360 / (float)(8192.0) / id->ReductionRate;
 		}
 		id->encoderLastAngle = encoderThisAngle;
 		NORMALIZE_ANGLE180(id->encoderAngle);
@@ -226,18 +225,6 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
 		id->s_count++;
 	}		
 }
-
-#ifdef OLD_INFANTRY
-void ControlGMP(MotorINFO* id)
-{
-	ControlGM(id,gyro_data.pit+180,gyro_data.wy,1);
-}
-void ControlGMY(MotorINFO* id)
-{
-	ControlGM(id,gyro_data.yaw+180,gyro_data.wz,2);
-}
-#endif
-
 #ifdef NEW_INFANTRY
 double pitchAngle;
 void ControlGMP(MotorINFO* id)
@@ -250,6 +237,15 @@ void ControlGMP(MotorINFO* id)
 void ControlGMY(MotorINFO* id)
 {
 	ControlGM(id,gyro_data.yaw,-gyro_data.wz,2);
+}
+#else
+void ControlGMP(MotorINFO* id)
+{
+	ControlGM(id,gyro_data.pit+180,gyro_data.wy,1);
+}
+void ControlGMY(MotorINFO* id)
+{
+	ControlGM(id,gyro_data.yaw+180,gyro_data.wz,2);
 }
 #endif
 

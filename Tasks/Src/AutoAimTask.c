@@ -27,6 +27,10 @@ uint16_t aim_cnt=0;																													//自瞄分频延时变量
 int16_t current_yaw=0,current_pitch=0;																			//当前云台角度
 int16_t receive_cnt=0,receive_rcd=0;																				//检测上位机信号帧数
 double bullet_speed=10.0,bullet_speed_adjust=0,yaw_adjust=0,pitch_adjust=0;	//校准发射变量
+extern MotorINFO* GimbalMotorGroup[2];
+#define GMP (*GimbalMotorGroup[0])
+#define GMY (*GimbalMotorGroup[1])
+#define GMP_ANGLE		(double)((GimbalMotorGroup[0]->RxMsg6623.angle-GimbalMotorGroup[0]->Zero)/8192.0*2*const_pi)
 
 //********************************************************************************************//
 
@@ -46,7 +50,7 @@ void InitAutoAim()
 	enemy_gun.x=0;		enemy_gun.y=0;		enemy_gun.z=200;
 	
 	//设置坐标初始值（根据不同安装情况调整这3个参数）
-	scope_gun.x=0;		scope_gun.y=-8;		scope_gun.z=0;
+	scope_gun.x=0;		scope_gun.y=0;		scope_gun.z=0;
 }
 
 //**************************************************************************//
@@ -57,7 +61,7 @@ void InitAutoAim()
 void AutoAimUartRxCpltCallback()
 {
 	//串口数据解码
-	if(!find_enemy&&RX_ENEMY_START=='s'&&RX_ENEMY_END=='e')
+	if(RX_ENEMY_START=='s'&&RX_ENEMY_END=='e')
 	{
 		enemy_scope.x=(float)((RX_ENEMY_X1<<8)|RX_ENEMY_X2)*k_coordinate;
 		enemy_scope.y=(float)((RX_ENEMY_Y1<<8)|RX_ENEMY_Y2)*k_coordinate;
@@ -181,7 +185,7 @@ void AutoAimGMCTRL()
 	{
 		case 1: AutoAimNormal(); break;		//自瞄
 		case 2: AutoAimBuff(); break;			//打符
-		case 3: break;										//吊射？
+		case 3: break;							//吊射？
 		default: break;
 	}
 	
