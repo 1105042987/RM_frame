@@ -22,6 +22,13 @@ uint8_t startUp = 0;
 uint8_t ChassisTwistState = 0;
 int ChassisTwistGapAngle = 0;
 #endif
+#ifdef CAN13
+extern CAN_DATA_t 	sendData[CAN13],receiveData[CAN13];
+#else
+#ifdef CAN23
+extern CAN_DATA_t 	sendData[CAN23],receiveData[CAN23];
+#endif
+#endif
 
 MusicNote SuperMario[] = {
 	{H3, 100}, {0, 50}, 
@@ -128,6 +135,15 @@ void WorkStateFSM(void)
 		{
 			for(int i=0;i<8;i++) {InitMotor(can1[i]);InitMotor(can2[i]);}
 			setCAN11();setCAN12();setCAN21();setCAN22();
+			#ifdef CAN13
+				sendData[0].data[0]=-1;
+				setCANMessage(0);
+			#else
+				#ifdef CAN23
+					sendData[0].data[0]=-1;
+					setCANMessage(0);
+				#endif
+			#endif
 			if (inputmode == REMOTE_INPUT || inputmode == KEY_MOUSE_INPUT)
 			{
 				WorkState = PREPARE_STATE;
@@ -324,9 +340,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		#ifdef SLAVE_MODE
 		if(Control_Update==1)
 		{
-			Control_Update=0;
 			HAL_IWDG_Refresh(&hiwdg);
-			RemoteControlProcess();
+			Control_Update=0;
+			if(WorkState!=PREPARE_STATE)
+			{
+				if(WorkState==STOP_STATE&&receiveData[0].data[0]>0) WorkState = PREPARE_STATE;
+				else WorkState = (WorkState_e)receiveData[0].data[0];
+				RemoteControlProcess();
+			}
 		}
 		#else
 		if (rx_free == 1 && tx_free == 1)

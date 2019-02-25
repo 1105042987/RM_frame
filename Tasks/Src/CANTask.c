@@ -69,6 +69,12 @@ void InitCanReception()
 	#ifdef CAN22
 		can2_type = 2;
 	#endif
+	#ifdef CAN13
+		can1_type = 3;
+	#endif
+	#ifdef CAN23
+		can2_type = 3;
+	#endif
 	
 	//http://www.eeworld.com.cn/mcu/article_2016122732674_3.html
 	hcan1.pRxMsg = &Can1RxMsg;

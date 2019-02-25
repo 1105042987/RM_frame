@@ -98,7 +98,6 @@ void RemoteControlProcess(Remote *rc)
 //下平台代码
 void RemoteControlProcess()
 {
-	WorkState = (WorkState_e)receiveData[0].data[0];
 	if(WorkState <= 0) return;
 	//max=660
 	channelrrow = receiveData[0].data[1]; 
@@ -113,7 +112,7 @@ void RemoteControlProcess()
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
-		AutoAimGMCTRL();
+		//AutoAimGMCTRL();
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
