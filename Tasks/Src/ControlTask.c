@@ -105,7 +105,7 @@ void WorkStateFSM(void)
 		case NORMAL_STATE:				//正常模式
 		{
 			if(normal_time<10000)normal_time++;
-			if(normal_time>=10000)startUp = 1;
+			if(normal_time>=10)startUp = 1;
 			if (inputmode == STOP) WorkState = STOP_STATE;
 			if (inputmode == REMOTE_INPUT)
 			{

@@ -18,7 +18,7 @@ ChassisSpeed_Ref_t ChassisSpeedRef;
 void KeyboardModeFSM(Key *key);
 void MouseModeFSM(Mouse *mouse);
 void Standardized_Chassis_Move(float Rate);
-void ShootOneBullet();
+void ShootOneBullet(void);
 
 #include "RobotMotor.h"
 #ifdef CONFIGURATION
@@ -315,7 +315,7 @@ void Standardized_Chassis_Move(float Rate)
 	#endif
 }
 
-void ShootOneBullet()
+void ShootOneBullet(void)
 {
 	#ifdef USE_HEAT_LIMIT_INFANTRY
 	if(JUDGE_State == ONLINE && fakeHeat0 > (maxHeat0 - realBulletSpeed0) && !burst)cdflag0 = 1;

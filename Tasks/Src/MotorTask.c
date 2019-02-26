@@ -142,7 +142,7 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
 		static uint8_t Reseted = 0;
 		double encoder_real = (id->Zero - id->RxMsg6623.angle) * 360.0 / 8192.0 / fabs(id->ReductionRate);
 		int8_t dir;
-		float  encoderThisAngle = id->RxMsg6623.angle;
+		int16_t encoderThisAngle = id->RxMsg6623.angle;
 		
 		if(id->ReductionRate>=0) dir=1;else dir=-1;
 		if(id->FirstEnter==1) {
@@ -176,7 +176,7 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
 			id->Real = id->encoderAngle;
 			id->gyroFirstEnter = 0;
 		}
-		else if(startUp)
+		else
 		{
 			if(!id->gyroFirstEnter)
 			{
@@ -206,16 +206,19 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
 			}
 		}
 		
-		if(type == 2)MINMAX(id->Target, id->Real - encoder_real - id->Maxrange, id->Real - encoder_real + id->Maxrange);
-		else if(type == 1)MINMAX(id->Target,-id->Maxrange,id->Maxrange);
+		if(type == 'Y')
+			MINMAX(id->Target, id->Real - encoder_real - id->Maxrange, id->Real - encoder_real + id->Maxrange);
+		else if(type == 'P')
+			MINMAX(id->Target,-id->Maxrange,id->Maxrange);
 
 		if(Reseted==0) id->positionPID.outputMax = 1.0;
 		else id->positionPID.outputMax = 10.0;
 		
-		if(!startUp && type == 1)id->Intensity = id->Compensation - PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
-		else 
-			id->Intensity = id->Compensation - PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,-ThisSpeed);
-		if(!startUp && type == 1)id->Intensity *= -1;
+		if(!startUp && type=='P')
+			id->Intensity = id->Compensation + PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
+		else
+			id->Intensity = id->Compensation - PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
+		
 		MINMAX(id->Intensity,-id->speedPID.outputMax,id->speedPID.outputMax);
 		
 		id->s_count = 0;
@@ -229,23 +232,22 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
 double pitchAngle;
 void ControlGMP(MotorINFO* id)
 {
-	pitchAngle = gyro_data.rol+180;
+	pitchAngle = gyro_data.rol;
 	NORMALIZE_ANGLE180(pitchAngle);
-	//ControlGM(id,-gyro_data.rol,gyro_data.wx);
-	ControlGM(id,-pitchAngle,gyro_data.wx,1);
+	ControlGM(id,-pitchAngle,-gyro_data.wx,'P');
 }
 void ControlGMY(MotorINFO* id)
 {
-	ControlGM(id,gyro_data.yaw,-gyro_data.wz,2);
+	ControlGM(id,gyro_data.yaw,-gyro_data.wz,'Y');
 }
 #else
 void ControlGMP(MotorINFO* id)
 {
-	ControlGM(id,gyro_data.pit+180,gyro_data.wy,1);
+	ControlGM(id,gyro_data.pit+180,gyro_data.wy,'P');
 }
 void ControlGMY(MotorINFO* id)
 {
-	ControlGM(id,gyro_data.yaw+180,gyro_data.wz,2);
+	ControlGM(id,gyro_data.yaw+180,gyro_data.wz,'Y');
 }
 #endif
 
