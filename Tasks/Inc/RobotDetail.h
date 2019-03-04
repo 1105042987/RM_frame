@@ -24,15 +24,15 @@
 #if GUARD == 'U'
 	//#define USE_POWER_LIMIT 	20
 	
-	//#define CAN11
+	#define CAN21
 	#define CAN13 	1
 #else
 	#define SLAVE_MODE
-	//#define USE_IMU
-	//#define USE_AUTOAIM
+	#define USE_IMU
+	#define USE_AUTOAIM
 	
-	//#define CAN21
-	//#define CAN22
+	//#define CAN11
+	#define CAN12
 	#define CAN13	1
 #endif
 #endif

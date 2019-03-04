@@ -62,11 +62,11 @@ MotorINFO* GimbalMotorGroup[2]={&GMP,&GMY};
 //电机信息：
 MotorINFO FRICL = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
 MotorINFO FRICR = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
-MotorINFO GMP  = Gimbal_MOTORINFO_Init(2.0,&ControlGMP, 2495 , 0 , 20 ,
-									   fw_PID_INIT_EASY(0.5,0,0.9, 	100.0),
+MotorINFO GMP  = Gimbal_MOTORINFO_Init(2.0,&ControlGMP, 4405 , 0 , 20 ,
+									   fw_PID_INIT_EASY(0.5,0,0.9, 	0.0),
 									   fw_PID_INIT_EASY(920,30,0, 	5000.0));
-MotorINFO GMY  = Gimbal_MOTORINFO_Init(1.0,&ControlGMY, 4490 , 0 , 40 ,
-									   fw_PID_INIT_EASY(0.6,0,0.5, 	100.0),
+MotorINFO GMY  = Gimbal_MOTORINFO_Init(1.0,&ControlGMY, 4235 , 0 , 40 ,
+									   fw_PID_INIT_EASY(0.6,0,0.5, 	0.0),
 									   fw_PID_INIT_EASY(2500,100,0, 5000.0));
 									   
 MotorINFO STIR = AngleBased_MOTORINFO_Init(36.0,&ControlNM,
@@ -78,8 +78,8 @@ MotorINFO CML = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
 MotorINFO CMR = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1500.0),
 								fw_PID_INIT_EASY(40, 0.0, 5.0,	 15000.0));
-MotorINFO* can1[8]={&CML,&CMR,0,0,0,0,0,0};
-MotorINFO* can2[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
+MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
+MotorINFO* can2[8]={&CML,&CMR,0,0,0,0,0,0};
 MotorINFO* GimbalMotorGroup[2]={&GMP,&GMY};
 MotorINFO* ChassisMotorGroup[4]={&CML,&CMR,0,0};
 #endif

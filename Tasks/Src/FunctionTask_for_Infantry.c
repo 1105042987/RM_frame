@@ -10,6 +10,7 @@
   ******************************************************************************
   */
 #include "includes.h"
+#ifdef INFANTRY
 #define  STIR_STEP_ANGLE 60
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//Ð±ÆÂº¯Êý
@@ -308,6 +309,7 @@ void Standardized_Chassis_Move(float Rate)
 	ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF*Rate;
 	#ifdef USE_CHASSIS_FOLLOW
 		GMY.Target += channellrow * RC_GIMBAL_SPEED_REF;
+		if(abs(channellrow)>200) ChassisTwistState = 0;
 		if(startUp)GMP.Target += channellcol * RC_GIMBAL_SPEED_REF;
 		else if(!startUp)GMP.Target -= channellcol * RC_GIMBAL_SPEED_REF;
 	#else
@@ -360,3 +362,4 @@ void ShootOneBullet(void)
 	STIR.Target -= STIR_STEP_ANGLE;
 	#endif
 }
+#endif

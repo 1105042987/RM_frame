@@ -594,9 +594,19 @@
               <FilePath>..\Tasks\Src\Cap2ControlTask.c</FilePath>
             </File>
             <File>
+              <FileName>FunctionTask_for_Infantry.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Tasks\Src\FunctionTask_for_Infantry.c</FilePath>
+            </File>
+            <File>
               <FileName>FunctionTask_for_Guard.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Tasks\Src\FunctionTask_for_Guard.c</FilePath>
+            </File>
+            <File>
+              <FileName>FunctionTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Tasks\Src\FunctionTask.c</FilePath>
             </File>
           </Files>
         </Group>

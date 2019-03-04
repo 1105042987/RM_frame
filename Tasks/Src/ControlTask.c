@@ -214,11 +214,14 @@ void Chassis_Data_Decoding()
 	ControlRotate();
 	
 	#ifdef USE_CHASSIS_FOLLOW
-		float gap = (GimbalMotorGroup[1]->Zero-GimbalMotorGroup[1]->RxMsg6623.angle) * 6.28 / 8192.0f;
-		int16_t fb = ChassisSpeedRef.forward_back_ref;
-		int16_t rl = ChassisSpeedRef.left_right_ref;
-		ChassisSpeedRef.forward_back_ref = cos(gap)*fb-sin(gap)*rl;
-		ChassisSpeedRef.left_right_ref = sin(gap)*fb+cos(gap)*rl;
+		if(ChassisTwistGapAngle!=0)
+		{
+			float gap = (GimbalMotorGroup[1]->Zero-GimbalMotorGroup[1]->RxMsg6623.angle) * 6.28 / 8192.0f;
+			int16_t fb = ChassisSpeedRef.forward_back_ref;
+			int16_t rl = ChassisSpeedRef.left_right_ref;
+			ChassisSpeedRef.forward_back_ref = cos(gap)*fb-sin(gap)*rl;
+			ChassisSpeedRef.left_right_ref = sin(gap)*fb+cos(gap)*rl;
+		}
 	#endif
 	
 	if(ChassisMotorGroup[3]!=0){

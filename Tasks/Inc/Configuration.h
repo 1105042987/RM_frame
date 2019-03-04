@@ -17,12 +17,12 @@
 //*****************************
 //#define CONFIGURATION
 
-#define NEW_INFANTRY
+//#define NEW_INFANTRY
 //#define INFANTRY	2
-#define INFANTRY	4
+//#define INFANTRY	4
 //#define INFANTRY	5
 //#define GUARD		'U'
-//#define GUARD		'D'
+#define GUARD		'D'
 //#define ENGINEER
 //#define HERO		'M'
 //#define HERO		'S'
@@ -38,18 +38,18 @@
 
 /***功能选择***/
 //#define USE_GYRO
-#define USE_IMU
+//#define USE_IMU
 //#define USE_CHASSIS_FOLLOW
 //#define USE_SUPER_CAP
-#define USE_POWER_LIMIT 	20
-#define USE_AUTOAIM
+//#define USE_POWER_LIMIT 	20
+//#define USE_AUTOAIM
 //#define USE_HEAT_LIMIT_INFANTRY
 
 
 /***can线启用设置***/
-#define CAN11
+//#define CAN11
 #define CAN12
-#define CAN21
+//#define CAN21
 //#define CAN22
 
 /***can协议板间通信-数字为通信信号组数***/

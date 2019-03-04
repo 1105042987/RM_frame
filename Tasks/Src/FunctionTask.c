@@ -10,6 +10,7 @@
   ******************************************************************************
   */
 #include "includes.h"
+#ifdef CONFIGURATION
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//Ð±ÆÂº¯Êý
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
@@ -61,6 +62,8 @@ void RemoteControlProcess(Remote *rc)
 	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	if(WorkState == NORMAL_STATE)
 	{	
+		GMY.Target+=channellrow * RC_GIMBAL_SPEED_REF;
+		GMP.Target+=channellcol * RC_GIMBAL_SPEED_REF;
 		Standardized_Chassis_Move(1);
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
@@ -84,6 +87,8 @@ void RemoteTestProcess(Remote *rc)
 	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	if(WorkState == NORMAL_STATE)
 	{	
+		GMY.Target+=channellrow * RC_GIMBAL_SPEED_REF;
+		GMP.Target+=channellcol * RC_GIMBAL_SPEED_REF;
 		Standardized_Chassis_Move(1);
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
@@ -206,11 +211,14 @@ void KeyboardModeFSM(Key *key)
 void Standardized_Chassis_Move(float Rate)
 {
 	ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF*Rate;
-	ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2*Rate;
+	ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF*Rate;
 	#ifdef USE_CHASSIS_FOLLOW
 		GMY.Target += channellrow * RC_GIMBAL_SPEED_REF;
-		GMP.Target += channellcol * RC_GIMBAL_SPEED_REF;
+		if(abs(channellrow)>200) ChassisTwistState = 0;
+		if(startUp)GMP.Target += channellcol * RC_GIMBAL_SPEED_REF;
+		else if(!startUp)GMP.Target -= channellcol * RC_GIMBAL_SPEED_REF;
 	#else
 		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
 	#endif
 }
+#endif

@@ -36,7 +36,7 @@ MotorINFO FRICR = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_D
 //		     Gimbal_MOTORINFO_Init(rdc,func,zero,compensation,maxrange,ppid,spid)
 //***********************************************************************************
 //使用云台电机时，请务必确定校准过零点
-MotorINFO GMP  = Gimbal_MOTORINFO_Init(2.0,&ControlGMP, 3740 , 0 , 20 ,
+MotorINFO GMP  = Gimbal_MOTORINFO_Init(1.0,&ControlGMP, 3740 , 0 , 20 ,
 									   fw_PID_INIT_EASY(0.5,0,0.9, 	100.0),
 									   fw_PID_INIT_EASY(920,30,0, 	5000.0));
 									   
@@ -132,6 +132,8 @@ void ControlANTI_CM(MotorINFO* id)
 	id->Intensity=(-1.30f)*id->offical_speedPID.output;
 }
 
+
+#ifdef NEW_INFANTRY
 float readAngle;
 float tempAngle;
 void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
@@ -228,7 +230,6 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
 		id->s_count++;
 	}		
 }
-#ifdef NEW_INFANTRY
 double pitchAngle;
 void ControlGMP(MotorINFO* id)
 {
@@ -241,6 +242,63 @@ void ControlGMY(MotorINFO* id)
 	ControlGM(id,gyro_data.yaw,-gyro_data.wz,'Y');
 }
 #else
+void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
+{
+	if(id==0) return;
+	if(id->s_count == 1)
+	{
+		static uint8_t Reseted = 0;
+		float EncoderAngle = (id->Zero - id->RxMsg6623.angle) * 360 / 8192.0f / id->ReductionRate;
+		NORMALIZE_ANGLE180(EncoderAngle);
+		int8_t 	dir;
+		if(id->ReductionRate>=0) dir=1;
+		else dir=-1;
+		
+		if(id->FirstEnter==1) {
+			id->lastRead = ThisAngle;
+			id->Real = EncoderAngle;
+			id->FirstEnter = 0;
+			return;
+		}
+		
+		if(ThisAngle <= id->lastRead)
+		{
+			if((id->lastRead-ThisAngle) > 180)
+				 id->Real += (ThisAngle + 360 - id->lastRead)*dir;
+			else
+				 id->Real -= (id->lastRead - ThisAngle)*dir;
+		}
+		else
+		{
+			if((ThisAngle-id->lastRead) > 180)
+				 id->Real -= (id->lastRead + 360 - ThisAngle)*dir;
+			else
+				 id->Real += (ThisAngle - id->lastRead)*dir;
+		}
+		if(abs(id->Real-id->Target)<5) Reseted = 1;
+		id->lastRead = ThisAngle ;
+		if(type == 'Y')
+			MINMAX(id->Target, id->Real - EncoderAngle - id->Maxrange, id->Real - EncoderAngle + id->Maxrange);
+		else if(type == 'P')
+			MINMAX(id->Target,-id->Maxrange,id->Maxrange);
+		
+		if(Reseted==0) id->positionPID.outputMax = 1.0;
+		else id->positionPID.outputMax = 8.0;
+		
+		if(type=='P')
+			id->Intensity = id->Compensation + PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
+		else
+			id->Intensity = id->Compensation - PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
+		
+		MINMAX(id->Intensity,-id->speedPID.outputMax,id->speedPID.outputMax);
+		
+		//id->s_count = 0;
+	}
+	else
+	{
+		id->s_count++;
+	}		
+}
 void ControlGMP(MotorINFO* id)
 {
 	ControlGM(id,gyro_data.pit+180,gyro_data.wy,'P');
