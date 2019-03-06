@@ -55,7 +55,7 @@ void FunctionTaskInit()
 //限位与同步
 void Limit_and_Synchronization()
 {
-	//MINMAX(UD1.Target,-900,270);//limit
+	MINMAX(GMP.Target,-30,20);//limit
 	//CMR.Target =  -CML.Target;
 }
 //******************

@@ -155,8 +155,8 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 			if(flag<maxSendSize)
 			{
 				for(int i=0;i<4;i++) receiveData[flag].data[i] = CanRxGetU16(Can1RxMsg, i);
+				if(flag==maxSendSize-1) Control_Update=1;
 				flag = 1;
-				Control_Update=1;
 			}
 		}
 		#endif
@@ -202,8 +202,8 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 			if(flag<maxSendSize)
 			{
 				for(int i=0;i<4;i++) receiveData[flag].data[i] = CanRxGetU16(Can2RxMsg, i);
-				flag = 1;
 				if(flag==maxSendSize-1) Control_Update=1;
+				flag = 1;
 			}
 		}
 		#endif

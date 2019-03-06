@@ -102,7 +102,6 @@ int main(void)
 	HAL_NVIC_DisableIRQ(DMA1_Stream1_IRQn);
 	HAL_NVIC_DisableIRQ(DMA1_Stream5_IRQn);
 	HAL_NVIC_DisableIRQ(DMA2_Stream1_IRQn);
-	
 	HAL_NVIC_DisableIRQ(CAN1_RX0_IRQn);
 	HAL_NVIC_DisableIRQ(CAN2_RX0_IRQn);
 	HAL_NVIC_DisableIRQ(USART1_IRQn);

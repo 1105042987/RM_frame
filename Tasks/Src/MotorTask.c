@@ -37,11 +37,11 @@ MotorINFO FRICR = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_D
 //***********************************************************************************
 //使用云台电机时，请务必确定校准过零点
 MotorINFO GMP  = Gimbal_MOTORINFO_Init(1.0,&ControlGMP, 3740 , 0 , 20 ,
-									   fw_PID_INIT_EASY(0.5,0,0.9, 	100.0),
+									   fw_PID_INIT_EASY(0.5,0,0.9, 	0.0),
 									   fw_PID_INIT_EASY(920,30,0, 	5000.0));
 									   
 MotorINFO GMY  = Gimbal_MOTORINFO_Init(1.0,&ControlGMY, 1310 , 0 , 40 ,
-									   fw_PID_INIT_EASY(0.6,0,0.5, 	100.0),
+									   fw_PID_INIT_EASY(0.6,0,0.5, 	0.0),
 									   fw_PID_INIT_EASY(2500,100,0, 5000.0));
 
 //*************************************************************************
@@ -286,8 +286,8 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
 		else id->positionPID.outputMax = 8.0;
 		
 		if(type=='P')
-			id->Intensity = id->Compensation + PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
-		else
+		{	id->Target=0;
+			id->Intensity = id->Compensation +PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);}	else
 			id->Intensity = id->Compensation - PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
 		
 		MINMAX(id->Intensity,-id->speedPID.outputMax,id->speedPID.outputMax);
