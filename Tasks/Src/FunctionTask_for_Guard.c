@@ -22,13 +22,6 @@ void Standardized_Chassis_Move(float Rate);
 #ifdef CONFIGURATION
 extern MotorINFO CMFL,CMFR,CMBL,CMBR,GMY,GMP,FRICL,FRICR,STIR,CML,CMR;
 #endif
-#ifdef CAN13
-extern CAN_DATA_t 	sendData[CAN13],receiveData[CAN13];
-#else
-#ifdef CAN23
-extern CAN_DATA_t 	sendData[CAN23],receiveData[CAN23];
-#endif
-#endif
 
 int32_t auto_counter=0;		//用于准确延时的完成某事件
 
@@ -76,6 +69,8 @@ void RemoteControlProcess(Remote *rc)
 	if(WorkState == NORMAL_STATE)
 	{//手动模式
 		Standardized_Chassis_Move(1);
+//		CML.Target+=channelrrow*0.05;
+//		CMR.Target-=channelrrow*0.05;
 		sendData[0].data[1]=channelrrow;
 		sendData[0].data[2]=channellcol;
 		sendData[0].data[3]=(int16_t)(fakeHeat0*20);
@@ -85,7 +80,7 @@ void RemoteControlProcess(Remote *rc)
 		
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
-	{
+	{	
 		
 	}
 	OnePush(FUNC__RED_RAY_M__READ(),{
@@ -108,8 +103,8 @@ void RemoteControlProcess()
 	fakeHeat0=receiveData[0].data[3]/(float)(20.0);
 	if(WorkState == NORMAL_STATE)
 	{	
-		GMY.Target+=channelrrow;
-		GMP.Target+=channellcol;
+		GMY.Target+=channelrrow * RC_GIMBAL_SPEED_REF;
+		GMP.Target+=channellcol * RC_GIMBAL_SPEED_REF;
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{

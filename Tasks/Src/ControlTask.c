@@ -22,13 +22,6 @@ uint8_t startUp = 0;
 uint8_t ChassisTwistState = 0;
 int ChassisTwistGapAngle = 0;
 #endif
-#ifdef CAN13
-extern CAN_DATA_t 	sendData[CAN13],receiveData[CAN13];
-#else
-#ifdef CAN23
-extern CAN_DATA_t 	sendData[CAN23],receiveData[CAN23];
-#endif
-#endif
 
 MusicNote SuperMario[] = {
 	{H3, 100}, {0, 50}, 
@@ -71,12 +64,50 @@ uint8_t playMusicSuperMario(void){
 			return 1;
 		}
 	}
-	
-	//for(int i = 0; i < sizeof(SuperMario) / sizeof(MusicNote); i++){
-	//		PLAY(SuperMario[i].note, SuperMario[i].time);
-	//}
-
 	return 0;
+}
+void sendAllData(uint8_t isStop)
+{
+	if(isStop) for(int i=0;i<8;i++) {InitMotor(can1[i]);InitMotor(can2[i]);}
+	#ifdef CAN11
+		setCAN11();
+	#endif
+	#ifdef CAN12
+		setCAN12();
+	#endif
+	#ifdef CAN21
+		setCAN21();
+	#endif
+	#ifdef CAN22
+		setCAN22();
+	#endif
+	#ifdef CAN23
+			static int MSG_cnt=0;
+			if(isStop){
+				sendData[0].data[0]=-1;
+				setCANMessage(0);
+				MSG_cnt=0;
+			}
+			else{
+				setCANMessage(MSG_cnt);
+				MSG_cnt++;
+				MSG_cnt%=CAN23;
+			}
+		#else
+		#ifdef CAN13
+			static int MSG_cnt=0;
+			if(isStop){
+				sendData[0].data[0]=-1;
+				setCANMessage(0);
+				MSG_cnt=0;
+			}
+			else{
+				setCANMessage(MSG_cnt);
+				MSG_cnt++;
+				MSG_cnt%=CAN13;
+			}
+		#endif
+		#endif
 }
 
 //状态机切换
@@ -133,17 +164,7 @@ void WorkStateFSM(void)
 		}break;
 		case STOP_STATE:				//紧急停止
 		{
-			for(int i=0;i<8;i++) {InitMotor(can1[i]);InitMotor(can2[i]);}
-			setCAN11();setCAN12();setCAN21();setCAN22();
-			#ifdef CAN13
-				sendData[0].data[0]=-1;
-				setCANMessage(0);
-			#else
-				#ifdef CAN23
-					sendData[0].data[0]=-1;
-					setCANMessage(0);
-				#endif
-			#endif
+			sendAllData(1);
 			if (inputmode == REMOTE_INPUT || inputmode == KEY_MOUSE_INPUT)
 			{
 				WorkState = PREPARE_STATE;
@@ -156,8 +177,7 @@ void WorkStateFSM(void)
 		case ADDITIONAL_STATE_TWO:break;
 		case STOP_STATE:
 		{
-			for(int i=0;i<8;i++) {InitMotor(can1[i]);InitMotor(can2[i]);}
-			setCAN11();setCAN12();setCAN21();setCAN22();
+			sendAllData(1);
 		}break;
 		#endif
 	}
@@ -232,7 +252,7 @@ void Chassis_Data_Decoding()
 	}
 	else{
 		ChassisMotorGroup[0]->Target += ChassisSpeedRef.forward_back_ref * 0.008;
-		ChassisMotorGroup[1]->Target = -ChassisMotorGroup[0]->Target;
+		ChassisMotorGroup[1]->Target = ChassisMotorGroup[0]->Target;
 	}
 	
 	//CMFL.Target = ( ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
@@ -263,38 +283,7 @@ void controlLoop()
 		//for(int i=0;i<4;i++) if(ChassisMotorGroup[i]!=0)ChassisMotorGroup[i]->Intensity*=rate;
 		#endif
 		
-		#ifdef CAN11
-			setCAN11();
-		#endif
-		#ifdef CAN12
-			setCAN12();
-		#endif
-		#ifdef CAN21
-			setCAN21();
-		#endif
-		#ifdef CAN22
-			setCAN22();
-		#endif
-		
-		#ifdef CAN23
-			static int MSG_cnt=0;
-			if(MSG_cnt < CAN23)
-			{
-				setCANMessage(MSG_cnt);
-				MSG_cnt++;
-			}
-			else MSG_cnt=0;
-		#else
-		#ifdef CAN13
-			static int MSG_cnt=0;
-			if(MSG_cnt < CAN13)
-			{
-				setCANMessage(MSG_cnt);
-				MSG_cnt++;
-			}
-			else MSG_cnt=0;
-		#endif
-		#endif
+		sendAllData(0);
 	}
 }
 

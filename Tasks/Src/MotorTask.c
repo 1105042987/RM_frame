@@ -248,7 +248,7 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
 	if(id->s_count == 1)
 	{
 		static uint8_t Reseted = 0;
-		float EncoderAngle = (id->Zero - id->RxMsg6623.angle) * 360 / 8192.0f / id->ReductionRate;
+		float EncoderAngle = -(id->Zero - id->RxMsg6623.angle) * 360 / 8192.0f / id->ReductionRate;
 		NORMALIZE_ANGLE180(EncoderAngle);
 		int8_t 	dir;
 		if(id->ReductionRate>=0) dir=1;
@@ -279,17 +279,16 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
 		id->lastRead = ThisAngle ;
 		if(type == 'Y')
 			MINMAX(id->Target, id->Real - EncoderAngle - id->Maxrange, id->Real - EncoderAngle + id->Maxrange);
-		else if(type == 'P')
-			MINMAX(id->Target,-id->Maxrange,id->Maxrange);
 		
 		if(Reseted==0) id->positionPID.outputMax = 1.0;
 		else id->positionPID.outputMax = 8.0;
 		
 		if(type=='P')
-		{	id->Target=0;
-			id->Intensity = id->Compensation +PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);}	else
-			id->Intensity = id->Compensation - PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
-		
+			id->Intensity = id->Compensation + PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
+		else{
+			id->Target=0;
+		id->Intensity = id->Compensation - PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
+		}  
 		MINMAX(id->Intensity,-id->speedPID.outputMax,id->speedPID.outputMax);
 		
 		//id->s_count = 0;

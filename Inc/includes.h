@@ -12,10 +12,10 @@
 #ifndef __INCLUDES_H
 #define __INCLUDES_H
 
+#include "Configuration.h"
 #include "pid_regulator.h"
 #include "CANTask.h"
 #include "MotorTask.h"
-#include "Configuration.h"
 #include "main.h"
 #include "stm32f4xx_hal.h"
 #include "can.h"
