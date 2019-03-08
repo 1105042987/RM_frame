@@ -90,6 +90,7 @@ void WorkStateFSM(void)
 		}break;
 	}
 }
+
 void ControlRotate(void)
 {	
 //	#ifdef USE_CHASSIS_FOLLOW

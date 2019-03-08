@@ -9,7 +9,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * COPYRIGHT(c) 2018 STMicroelectronics
+  * COPYRIGHT(c) 2019 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -53,9 +53,8 @@
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
-
 /* USER CODE BEGIN PV */
-uint32_t ADC_value[10];//用于存储红外传感器的返回数据
+uint32_t ADC_value[160];//用于存储红外传感器的返回数据
 uint32_t ADC2_value[10];
 /* Private variables ---------------------------------------------------------*/
 
@@ -128,7 +127,6 @@ int main(void)
   MX_USART3_UART_Init();
   MX_UART7_Init();
   MX_ADC1_Init();
-  MX_ADC2_Init();
 
   /* USER CODE BEGIN 2 */
 	//各模块初始化
@@ -167,12 +165,12 @@ int main(void)
 	//打开四个24V电源
 	HAL_GPIO_WritePin(GPIOH,1<<5,1);
 	HAL_GPIO_WritePin(GPIOI,1<<5,0);
-	//HAL_GPIO_WritePin(GPIOH,1<<2,0);//爪子的向前弹出
-	//HAL_GPIO_WritePin(GPIOH,1<<4,1);//弹射装置1是放下 0是弹起
-	//HAL_GPIO_WritePin(GPIOI,1<<5,1);//爪子抓紧与松开
-	//开启红外传感器，并把数据存在ADC_value里
-  HAL_ADC_Start_DMA(&hadc1,ADC_value,10);
-  HAL_ADC_Start_DMA(&hadc2,ADC2_value,10);
+	//HAL_GPIO_WritePin(GPIOH,1<<2,0);//爪子的向前弹�?
+	//HAL_GPIO_WritePin(GPIOH,1<<4,1);//弹射装置1是放�? 0是弹�?
+	//HAL_GPIO_WritePin(GPIOI,1<<5,1);//爪子抓紧与松�?
+	//�?启红外传感器，并把数据存在ADC_value�?
+  HAL_ADC_Start_DMA(&hadc1,ADC_value,160);
+  //HAL_ADC_Start_DMA(&hadc2,ADC2_value,10);
 	
   /* USER CODE END 2 */
 
@@ -180,6 +178,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+		RefreshADC();
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */

@@ -11,6 +11,24 @@
   */
 	#include "includes.h"
 	
+#define FIRSTBOX 0
+#define SECONDBOX 820
+#define THIRDBOX 1600             //ÕâÎå¸öÊÇÏä×ÓÎ»ÖÃ
+#define FOURTHBOX 400
+#define FIFTHBOX 1200
+
+#define LOWERCRITICIAL 2000      //µºÏÂÁÙ½çÖµ
+#define UPPERCRITICIAL 1000 //´ı²âÊÔ
+
+#define UPLEVEL 864    //Ì§ÉıÊ±µÄºÏÊÊ¸ß¶È
+#define UPPROTECT 800  //Ì§ÉıµÄÁÙ½ç±£»¤Öµ
+
+#define OUTANGLE 185  //×¥Ïä×ÓµÄ½Ç¶ÈÖµ
+#define INANGLE  34   //´ø×ÅÏä×Ó»ØÀ´µÄ½Ç¶ÈÖµ
+
+#define THROWANGLE 180 //ÈÓµôÏä×ÓÊ±ÔÚÕâ¸ö½Ç¶ÈËÉ×¦×Ó
+
+Distance_Couple_t distance_couple;
 uint32_t AutoGet_Start=0;  
 uint32_t AutoGet_TotalStep=1;
 uint32_t AutoGet_Alreadywaited=0;
@@ -24,8 +42,11 @@ uint32_t Claw_TakeThisBox=0;
 uint32_t Claw_SelfInspecting=0;
 uint32_t Claw_FindingNextBox=0;
 //´æ´¢ºìÍâ´«¸ĞÆ÷µÄÊıÖµ
-extern uint32_t ADC_value[10];
+extern uint32_t ADC_value[160];
 extern uint32_t ADC2_value[10];
+uint32_t adgl=0,adgr=0;
+uint32_t disgl=0,disgr=0;
+
 //Ïû¶¶ÓÃ±äÁ¿
 uint32_t Sensor_Tmp[2];
 uint16_t Sensor_Count[2];
@@ -41,18 +62,73 @@ int32_t auto_wait=0;
 int16_t cnt = 0;
 uint32_t ifset=-5;//ÓÃÓÚ×Ô¼ì
 
-uint32_t average(uint32_t a[])//ÓÃÓÚ¼ÆËãºìÍâ´«»Ø¾àÀëÊı¾İµÄÆ½¾ùÖµ
+void RefreshADC()
 {
-	uint32_t ave;
-	uint32_t sum=0;
-	for(int j=0;j<sizeof(a);j++)
+	for(uint16_t i=0;i<160;i++)
 	{
-		sum+=a[j];
+		if(i%8==0)adfl+=ADC_value[i];
+		if(i%8==1)adfr+=ADC_value[i];
+		if(i%8==2)adbl+=ADC_value[i];
+		if(i%8==3)adbr+=ADC_value[i];
+		if(i%8==4)addf+=ADC_value[i];
+		if(i%8==5)addb+=ADC_value[i];
+		if(i%8==6)adgl+=ADC_value[i];
+		if(i%8==7)adgr+=ADC_value[i];
 	}
-	ave=sum/sizeof(a);
+	adfl=adfl/21;
+	adfr=adfr/21;
+	adbl=adbl/21;
+	adbr=adbr/21;
+	addf=addf/21;
+	addb=addb/21;
+	adgl=adgl/21;
+	adgr=adgr/21;
 	
-	return ave;
+	adfr=adfl;
+	
+	disfl=adfl;
+	disfr=adfr;
+	disbl=adbl;
+	disbr=adbr;
+	disdf=addf;
+	disdb=addb;
+	disgl=adgl;
+	disgr=adgr;
+	
+	distance_couple.frontl.val_ref	= adfl;
+		distance_couple.frontr.val_ref	= adfr;
+		distance_couple.frontf.val_ref	= addf;
+		distance_couple.backl.val_ref	= adbl;
+		distance_couple.backr.val_ref	= adbr;
+		distance_couple.backb.val_ref	= addb;
+		distance_couple.left.val_ref	= adgl;
+		distance_couple.right.val_ref	= adgr;
+		
+		
+		FLAG_SET(distance_couple.frontf);
+		FLAG_SET(distance_couple.frontr);
+		FLAG_SET(distance_couple.frontl);
+		FLAG_SET(distance_couple.backb);
+		FLAG_SET(distance_couple.backr);
+		FLAG_SET(distance_couple.backl);
+		FLAG_SET(distance_couple.left);
+		FLAG_SET(distance_couple.right);
+		
+		distance_couple.move_flags = 0;
+		distance_couple.move_flags = ((distance_couple.left.flag)								*512) +
+									 ((distance_couple.right.flag) 								*256) +
+									 ((distance_couple.frontl.flag) 							*128) +
+									 ((distance_couple.frontr.flag) 							* 64) +
+									 ((distance_couple.backl.flag) 								* 32) +
+									 ((distance_couple.backr.flag) 								* 16) +
+									 ((distance_couple.frontr.flag&distance_couple.frontl.flag) *  8) +
+									 ((distance_couple.frontf.flag) 							*  4) +
+									 ((distance_couple.backb.flag)								*  2) +
+									 ((distance_couple.backr.flag&distance_couple.backl.flag)	*  1);
+		//µÍ°ËÎ»£ºµÍËÄÎ» »ù´¡ÅĞ¶¨£¬¸ßËÄÎ» ¾«Ï¸ÅĞ¶¨£¨×ªÏò£©
+		//¸ß°ËÎ»£ºµÍËÄÎ» ×¥È¡ÅĞ¶¨
 }
+
 uint8_t hasReach(MotorINFO* id, double distance)//ÓÃÓÚÅĞ¶Ïµç»úÊÇ·ñµ½Î»
 {
 	if(fabs(id->RealAngle - id->TargetAngle) < distance)return 1;
@@ -60,16 +136,16 @@ uint8_t hasReach(MotorINFO* id, double distance)//ÓÃÓÚÅĞ¶Ïµç»úÊÇ·ñµ½Î»
 }
 void Sensor_Read_Lower()//ÓÃÓÚ¼ì²âºìÍâ´«¸ĞÆ÷ÊÇ·ñ¼ì²âµ½Á½¸ö¿ÕÏ¶
 {
-	if(Sensor_Tmp[0]<2000&&average(ADC_value)<2000)
+	if(Sensor_Tmp[0]<LOWERCRITICIAL&&adgl<LOWERCRITICIAL)
 		Sensor_Count[0]=1;
 	else
-	{Sensor_Tmp[0]=average(ADC_value);Sensor_Count[0]=0;}
+	{Sensor_Tmp[0]=adgl;Sensor_Count[0]=0;}
 	if(Sensor_Count[0]==1&&Sensor_Ready[0]==0)
 		Sensor_Ready[0]=1;
-	if(Sensor_Tmp[1]<2000&&average(ADC2_value)<2000)
+	if(Sensor_Tmp[1]<LOWERCRITICIAL&&adgr<LOWERCRITICIAL)
 		Sensor_Count[1]=1;
 	else
-	{Sensor_Tmp[1]=average(ADC2_value);Sensor_Count[1]=0;}
+	{Sensor_Tmp[1]=adgr;Sensor_Count[1]=0;}
 	if(Sensor_Count[1]==1&&Sensor_Ready[0]==1)
 		Sensor_Ready[0]=2;
 		
@@ -78,8 +154,8 @@ void Claw_Rollout()//×¦×Ó×ª³öÓë×ª»Ø
 {
 	if(auto_counter==0&&Claw_AlreadyRollOut==0)
 	{
-		UM1.TargetAngle=185;
-		UM2.TargetAngle=-185;
+		UM1.TargetAngle=OUTANGLE;
+		UM2.TargetAngle=-OUTANGLE;
 	}
 	if((hasReach(&UM1, 10) || hasReach(&UM2, 10))&&Claw_AlreadyRollOut==0&&UM1.TargetAngle==185)
 	{Claw_AlreadyRollOut=1;}
@@ -89,8 +165,8 @@ void Claw_Rollin()
 {
 	if(auto_counter==0&&Claw_AlreadyRollOut==1)
 	{
-		UM1.TargetAngle=34;
-    UM2.TargetAngle=-34;
+		UM1.TargetAngle=INANGLE;
+    UM2.TargetAngle=-INANGLE;
 		Claw_AlreadyRollOut=2;
 	}
 	if((hasReach(&UM1, 5) || hasReach(&UM2, 5))&&Claw_AlreadyRollOut==2)
@@ -106,7 +182,7 @@ void Claw_Tight()//×¦×Ó×¥½ôÓëËÉ¿ª
 {
 	if(Claw_AlreadyRollOut==1&&Claw_AlreadyTight==0)
 	{
-		HAL_GPIO_WritePin(GPIOI,1<<5,1);
+		CLAWTIGHT;
 		auto_counter=300;
 		Claw_AlreadyTight=1;
 	}
@@ -116,7 +192,7 @@ void Claw_Loose()
 {
 	if(auto_counter==0&&auto_waiter==0)
 	   {
-	HAL_GPIO_WritePin(GPIOI,1<<5,0);
+	CLAWLOOSE;
 	if(Claw_AlreadyWaited==0)
 	{
 		auto_wait=100;
@@ -128,7 +204,7 @@ void Box_launch()//µ¯Ò©Ïäµ¯Éä×°ÖÃ
 {
 	if(auto_wait==0&&Claw_AlreadyWaited==1)
 	{
-	  HAL_GPIO_WritePin(GPIOH,1<<4,1);
+	  LAUNCH;
 	  auto_wait=300;
 		Claw_AlreadyWaited=2;
 		AutoGet_TotalStep++;//ĞÂ¼ÓµÄ
@@ -139,7 +215,7 @@ void Box_Land()
 {
 	if(auto_wait==0&&Claw_AlreadyWaited==2)
 	{
-	  HAL_GPIO_WritePin(GPIOH,1<<4,0);
+	  LAND;
 		//AutoGet_TotalStep++;//¸ÕÉ¾³ıµÄ
 		Claw_AlreadyWaited=0;
 	}
@@ -151,23 +227,23 @@ void Claw_GoTo(int a)//×¦×Ó×ßµ½µÚa¸öÏä×ÓµÄÎ»ÖÃ
 	{
 	switch(a)
 	{
-		case 1:{UFM.TargetAngle=0;
+		case 1:{UFM.TargetAngle=FIRSTBOX;
 		        if(hasReach(&UFM,15))
 		           AutoGet_TotalStep++;
 		        break;}
-		case 2:{UFM.TargetAngle=820;
+		case 2:{UFM.TargetAngle=SECONDBOX;
 		        if(hasReach(&UFM,5))
 		           AutoGet_TotalStep++;
 		        break;}
-		case 3:{UFM.TargetAngle=1570;
+		case 3:{UFM.TargetAngle=THIRDBOX;
 		        if(hasReach(&UFM,20))
 		           AutoGet_TotalStep++;
 		        break;}
-		case 4:{UFM.TargetAngle=1200;
+		case 4:{UFM.TargetAngle=FOURTHBOX;
 		        if(hasReach(&UFM,5))
 		           AutoGet_TotalStep++;
 		        break;}
-		case 5:{UFM.TargetAngle=400;
+		case 5:{UFM.TargetAngle=FIFTHBOX;
 		        if(hasReach(&UFM,5))
 		           AutoGet_TotalStep++;
 		        break;}
@@ -207,8 +283,8 @@ void AutoGet_Stop_And_Clear()//×´Ì¬ÇåÁã ×¦×Ó×ª»Ø ºáÒÆµç»úÍ£×ª£¨ÓÃÓÚÒì³£×´¿ö´¦Àíº
 void Box_ThrowForward()//ÏòÇ°ÈÓ³öÏä×Ó
 { 
 	if(auto_counter==0&&auto_waiter==0){
-	UM1.TargetAngle=180;
-	UM2.TargetAngle=-180;
+	UM1.TargetAngle=OUTANGLE;
+	UM2.TargetAngle=-OUTANGLE;
 	if(fabs(UM1.RealAngle-60)<=10||fabs(UM2.RealAngle-(-60))<=10)
 	{
 		CLAWLOOSE;
@@ -340,7 +416,7 @@ void Claw_GetSpecifiedBox()//¼üÊó¿ØÖÆÈ¡ÈÎÒâÎ»ÖÃµ¯
 }
 void Claw_SelfInspect()//×¦×ÓºáÒÆ×Ô¶¯¶ÔÎ»Áãµã
 {
-	if(UFM.RxMsgC6x0.moment>-4000&&NMUDL.RealAngle>500&&Claw_SelfInspecting==1)
+	if(UFM.RxMsgC6x0.moment>-4000&&NMUDL.RealAngle>UPPROTECT&&Claw_SelfInspecting==1)
 		UFM.TargetAngle-=8;
 	if(UFM.RxMsgC6x0.moment<-4000&&Claw_SelfInspecting==1)
 	{
@@ -368,14 +444,14 @@ void Claw_GoToNextBox_lower()//ºìÍâ´«¸ĞÆ÷¿ØÖÆ×¦×Óµ½´ïÏÂÒ»¸öÏä×Ó´¦
 }
 void Claw_Up()//Õû¸ö»ú¹¹µÄÌ§Éı£¬Ì§ÉıÍêºó×¦×Ó×Ô¶¯¶ÔÎ»
 {
-			if(Claw_UpToPosition==1&&Claw_UpAngle<=864&&auto_counter==0)//860
+			if(Claw_UpToPosition==1&&Claw_UpAngle<=UPLEVEL&&auto_counter==0)//860
 			{
 				Claw_UpAngle+=4;
 				NMUDL.TargetAngle=Claw_UpAngle;
 				NMUDR.TargetAngle=-Claw_UpAngle;
 				auto_counter=1;
 			}
-			if(Claw_UpToPosition==1&&hasReach(&NMUDL,10)&&NMUDL.RealAngle>800)
+			if(Claw_UpToPosition==1&&hasReach(&NMUDL,10)&&NMUDL.RealAngle>UPPROTECT)
 				Claw_SelfInspecting=1;
 }
 void AutoGet_SwitchState()//Ö´ĞĞÄÄÖÖÈ¡µ¯Ä£Ê½ µºÏÂ/µºÉÏ

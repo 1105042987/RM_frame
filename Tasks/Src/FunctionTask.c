@@ -22,6 +22,8 @@ int16_t channellrow = 0;
 int16_t channellcol = 0;
 int16_t testIntensity = 0;
 
+extern uint32_t AutoClimb_ComeToTop;
+
 
 //初始化
 void FunctionTaskInit()
@@ -48,7 +50,7 @@ void Limit_and_Synchronization()
 {
 	//demo
 	//MINMAX(NMUDL.TargetAngle,-700,700);//limit
-	//NMUDL.TargetAngle = -NMUDR.TargetAngle;//sychronization
+	NMCDL.TargetAngle = NMCDR.TargetAngle;//sychronization
 	UM1.TargetAngle=-UM2.TargetAngle;
 	
 	//demo end
@@ -69,21 +71,38 @@ void RemoteControlProcess(Remote *rc)
 		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 		//ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
-		Sensor_a=average(ADC_value);
-		Sensor_b=average(ADC2_value);
+		Sensor_a=adgl;
+		Sensor_b=adgr;
+		
+		/*
 		//手动挡控制爪子
 		if(channellcol>500)
 		CLAWOUT;//左纵向是爪子的向前弹出
-		if(channellcol<-500)
+		if(channellcol<-500)                                            *********测试时暂时关闭*************
 		CLAWIN;
+		*/
+	//	UM1.TargetAngle+=channellrow*0.001;
+	//	UM2.TargetAngle-=channellrow*0.001;//左横向是爪子的上下移动
 		
-		UM1.TargetAngle+=channellrow*0.001;
-		UM2.TargetAngle-=channellrow*0.001;//左横向是爪子的上下移动
-
+    if(NMCDL.RxMsgC6x0.moment>-12000&&NMCDR.RxMsgC6x0.moment>-14000&&channellcol<0)
+		{
+		NMCDL.TargetAngle+=channellcol*0.06;
+		NMCDR.TargetAngle+=channellcol*0.06;
+		}
+		if(channellcol>0)
+		{
+		NMCDL.TargetAngle+=channellcol*0.06;
+		NMCDR.TargetAngle+=channellcol*0.06;
+		}
+		
+		CM1.TargetAngle+=channellrow*0.01;
+		CM2.TargetAngle+=channellrow*-0.01;
+		
+		
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
-
+/*
 		//手动挡
 		if(channellcol>200){       //UP  左纵向是整个机构的上下
 			NMUDL.TargetAngle += channellcol * 0.01;
@@ -101,8 +120,17 @@ void RemoteControlProcess(Remote *rc)
 				LAUNCH;//右纵向是弹药箱弹出的开关
 			if(channelrcol<-500)
 				LAND;
+*/
+			UFM.TargetAngle-=channellcol*0.01;//左横向是水平电机   向左远离（角度++）向右靠近（角度--）
+      ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
 			
-			UFM.TargetAngle-=channellrow*0.01;//左横向是水平电机   向左远离（角度++）向右靠近（角度--）
+			if(channelrrow>500)
+				AutoClimb_ComeToTop=1;
+			if(channelrrow<-500)
+				AutoClimb_ComeToTop=0;
+			
+			ComeToTop();
+			
 }
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
@@ -115,7 +143,7 @@ void RemoteControlProcess(Remote *rc)
 			//比较健康的moment是3000    靠近电机-3000 远离电机3000 
 			//NMUDL840 NMUDR-840
 			//红外2000 3000
-			if(channelrcol>500&&Claw_UpToPosition==0)//一键抬升整个机构
+			/*if(channelrcol>500&&Claw_UpToPosition==0)//一键抬升整个机构
 			{
 				Claw_UpToPosition=1;
 			}
@@ -132,7 +160,10 @@ void RemoteControlProcess(Remote *rc)
 			  AutoGet_Stop_And_Clear();
 			
 			
-			AutoGet_SwitchState();
+			AutoGet_SwitchState();*/
+			ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
+		  ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
+			Chassis_Choose(1,1);
 			
 			
 	}

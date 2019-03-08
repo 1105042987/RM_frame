@@ -74,26 +74,28 @@ MotorINFO UM1 = Normal_MOTORINFO_Init(19.0,&ControlNM,
 MotorINFO UM2 = Normal_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT(10, 0.1, 0.0, 	4000.0, 4000.0, 4000.0, 4000.0),
 								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));	
-MotorINFO MDL1 = Normal_MOTORINFO_Init(19.0,&ControlNM,
+MotorINFO NMCDL = Normal_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
 								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));								
-MotorINFO MDL2 = Normal_MOTORINFO_Init(19.0,&ControlNM,
+MotorINFO NMCDR = Normal_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
 								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));		
 MotorINFO UFM = Normal_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT(30.0, 0.0, 0.0, 	4000.0, 4000.0, 4000.0, 4000.0),//500 15000 10
 								fw_PID_INIT(10, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));	
-MotorINFO ULM = Normal_MOTORINFO_Init(36.0,&ControlNM,
+MotorINFO CM1 = Normal_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
-								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));								
+								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
+MotorINFO CM2 = Normal_MOTORINFO_Init(36.0,&ControlNM,
+								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
+								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));															
 							
 //2006ÊÇ36 3508ÊÇ19
 //MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
 //MotorINFO* can2[8]={&CMFL,&CMFR,&CMBL,&CMBR,&NMUDL,&NMUDR,0,0};
 
-MotorINFO* can1[8]={&CMFL,&CMFR,&CMBL,&CMBR,&NMUDL,&NMUDR,&ULM,0};
-MotorINFO* can2[8]={&MDL1,&MDL2,&UM1,&UM2,&NMUDFR,&NMUDFL,&UFM,0};
-
+MotorINFO* can1[8]={&CMFL,&CMFR,&CMBL,&CMBR,&NMUDL,&NMUDR,&NMCDL,&NMCDR};
+MotorINFO* can2[8]={&CM1,&CM2,&UM1,&UM2,0,0,&UFM,0};
 int16_t someIntensity;
 uint16_t someEncoder;
 double someRealAngle;

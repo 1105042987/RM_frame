@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * COPYRIGHT(c) 2018 STMicroelectronics
+  * COPYRIGHT(c) 2019 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -52,7 +52,6 @@
 /* USER CODE END Includes */
 
 extern ADC_HandleTypeDef hadc1;
-extern ADC_HandleTypeDef hadc2;
 
 /* USER CODE BEGIN Private defines */
 
@@ -61,7 +60,6 @@ extern ADC_HandleTypeDef hadc2;
 extern void _Error_Handler(char *, int);
 
 void MX_ADC1_Init(void);
-void MX_ADC2_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 

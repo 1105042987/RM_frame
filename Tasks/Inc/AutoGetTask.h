@@ -35,8 +35,12 @@ extern uint32_t Claw_TakeThisBox;
 extern uint32_t Claw_SelfInspecting;
 extern uint32_t Claw_FindingNextBox;
 //存储红外传感器的数值
-extern uint32_t ADC_value[10];
+extern uint32_t ADC_value[160];
 extern uint32_t ADC2_value[10];
+extern uint32_t adfl,adfr,adbl,adbr,addf,addb;
+extern uint32_t adgl,adgr;
+extern uint32_t disfl,disfr,disbl,disbr,disdf,disdb;
+extern uint32_t disgl,disgr;
 //消抖用变量
 extern uint32_t Sensor_Tmp[2];
 extern uint16_t Sensor_Count[2];
@@ -54,8 +58,9 @@ extern uint32_t ifset;//用于自检
 
 
 
-uint32_t average(uint32_t a[]);//用于计算红外传回距离数据的平均值
+
 uint8_t hasReach(MotorINFO* id, double distance);//用于判断电机是否到位
+void RefreshADC();     //刷新红外传感器数值
 void Sensor_Read_Lower();//用于检测红外传感器是否检测到两个空隙
 void Claw_Rollout();//爪子转出与转回
 void Claw_Rollin();
