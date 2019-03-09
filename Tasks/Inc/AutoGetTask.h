@@ -16,8 +16,8 @@
 
 #define CLAWOUT   HAL_GPIO_WritePin(GPIOH,1<<2,1)//爪子弹出
 #define CLAWIN    HAL_GPIO_WritePin(GPIOH,1<<2,0)//爪子进入
-#define CLAWTIGHT HAL_GPIO_WritePin(GPIOI,1<<5,1)//爪子抓紧
-#define CLAWLOOSE HAL_GPIO_WritePin(GPIOI,1<<5,0)//爪子松开
+#define CLAWTIGHT HAL_GPIO_WritePin(GPIOI,1<<3,1)//爪子抓紧
+#define CLAWLOOSE HAL_GPIO_WritePin(GPIOI,1<<3,0)//爪子松开
 #define LAUNCH    HAL_GPIO_WritePin(GPIOH,1<<4,1)//弹射起飞
 #define LAND      HAL_GPIO_WritePin(GPIOH,1<<4,0)//弹射机构归位
 

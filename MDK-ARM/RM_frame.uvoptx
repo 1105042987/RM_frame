@@ -330,6 +330,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>nowstep,0x0A</ItemText>
         </Ww>
+        <Ww>
+          <count>35</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>teeet,0x0A</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>
@@ -781,6 +786,21 @@
           <count>89</count>
           <WinNumber>2</WinNumber>
           <ItemText>NMCDL.RealAngle</ItemText>
+        </Ww>
+        <Ww>
+          <count>90</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>channelrrow</ItemText>
+        </Ww>
+        <Ww>
+          <count>91</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>disgl,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>92</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>disgr,0x0A</ItemText>
         </Ww>
       </WatchWindow2>
       <Tracepoint>

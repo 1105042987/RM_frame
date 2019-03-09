@@ -20,7 +20,7 @@
 #define LOWERCRITICIAL 2000      //岛下临界值
 #define UPPERCRITICIAL 1000 //待测试
 
-#define UPLEVEL 864    //抬升时的合适高度
+#define UPLEVEL 392    //抬升时的合适高度
 #define UPPROTECT 800  //抬升的临界保护值
 
 #define OUTANGLE 185  //抓箱子的角度值
@@ -444,10 +444,10 @@ void Claw_GoToNextBox_lower()//红外传感器控制爪子到达下一个箱子处
 }
 void Claw_Up()//整个机构的抬升，抬升完后爪子自动对位
 {
-			if(Claw_UpToPosition==1&&Claw_UpAngle<=UPLEVEL&&auto_counter==0)//860
+			if(Claw_UpToPosition==1&&Claw_UpAngle<=UPLEVEL&&auto_counter==0)//-394
 			{
 				Claw_UpAngle+=4;
-				NMUDL.TargetAngle=Claw_UpAngle;
+				NMUDL.TargetAngle=-Claw_UpAngle;
 				NMUDR.TargetAngle=-Claw_UpAngle;
 				auto_counter=1;
 			}
