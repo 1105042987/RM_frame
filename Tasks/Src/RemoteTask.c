@@ -140,7 +140,7 @@ void RemoteDataProcess(uint8_t *pData)
 		{
 			if(WorkState > 0)
 			{	
-				MouseKeyControlProcess(&RC_CtrlData.mouse,&RC_CtrlData.key);
+			//	MouseKeyControlProcess(&RC_CtrlData.mouse,&RC_CtrlData.key);
 			}
 		}break;
 		case STOP:               

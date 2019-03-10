@@ -191,6 +191,8 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 						can2[i]->RxMsg6623.realIntensity = CanRxGetU16(Can2RxMsg, 1);
 						can2[i]->RxMsg6623.giveIntensity = CanRxGetU16(Can2RxMsg, 2);
 					}
+				
+						
 				}
 			}
 		}

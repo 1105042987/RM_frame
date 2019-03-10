@@ -1,7 +1,8 @@
 /**
   ******************************************************************************
-  * File Name          : FunctionTask.c
-  * Description        : 用于记录机器人独有的功能
+  * File Name          : FunctionTask_for_Guard.c
+  * Description        : 用于记录哨兵机器人独有的功能
+  * Author			       : 秦绍飞 刘明睿
   ******************************************************************************
   *
   * Copyright (c) 2019 Team JiaoLong-Shanghai Jiao Tong University
@@ -81,7 +82,7 @@ void RemoteControlProcess(Remote *rc)
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{	
-		
+			Delay(20,{STIR.Target-=60;});
 	}
 	OnePush(FUNC__RED_RAY_M__READ(),{
 		CML.Target = 0;
@@ -103,11 +104,16 @@ void RemoteControlProcess()
 	fakeHeat0=receiveData[0].data[3]/(float)(20.0);
 	if(WorkState == NORMAL_STATE)
 	{	
-		GMY.Target+=channelrrow * RC_GIMBAL_SPEED_REF;
-		GMP.Target+=channellcol * RC_GIMBAL_SPEED_REF;
+		GMY.Target+=channelrrow * RC_GIMBAL_SPEED_REF*0.1;
+		GMP.Target+=channellcol * RC_GIMBAL_SPEED_REF*0.1;
+		FRICL.Target = 0;
+		FRICR.Target =0;
+		
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
+		FRICL.Target += 1000;
+		FRICR.Target -=1000;
 		//AutoAimGMCTRL();
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
@@ -145,124 +151,124 @@ void RemoteTestProcess(Remote *rc)
 //****************
 //键鼠模式功能编写
 //****************
-uint16_t KM_FORWORD_BACK_SPEED 	= NORMAL_FORWARD_BACK_SPEED;
-uint16_t KM_LEFT_RIGHT_SPEED  	= NORMAL_LEFT_RIGHT_SPEED;
-void MouseKeyControlProcess(Mouse *mouse, Key *key)
-{	
-	if(WorkState <= 0) return;
-	mouse->last_press_l=mouse->last_press_l*mouse->press_l+mouse->press_l;
-	mouse->last_press_r=mouse->last_press_r*mouse->press_r+mouse->press_r;
-	MINMAX(mouse->x, -150, 150); 
-	MINMAX(mouse->y, -150, 150); 
-	
-	#ifdef USE_CHASSIS_FOLLOW
-		GMY.Target += mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT;
-		GMP.Target -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT;
-	#else
-		ChassisSpeedRef.rotate_ref = -mouse->x * RC_ROTATE_SPEED_REF;
-	#endif
-	
-	if(mouse->last_press_l==1)//左短按
-	{
-		
-	}
-	if(mouse->last_press_l>50)//左长按
-	{
-		
-	}
-	if(mouse->last_press_r==1)//右短按
-	{
-		
-	}
-	if(mouse->last_press_r>50)//右长按
-	{
-		
-	}
-	
-	KeyboardModeFSM(key);
-	//*****Don't Use WASD******
-	switch (KeyboardMode)	
-	{
-		case SHIFT_CTRL:		//State Change
-		{
-			
-		}break;
-		case CTRL:
-		{
-			
-		}break;
-		case SHIFT:
-		{
-			
-		}break;
-		case NO_CHANGE:
-		{
-			
-		}break;
-	}
-	//CM Movement Process 
-	//shift: High Speed , ctrl: Low Speed  , shift+ctrl: Don't Move
-	if(key->v & KEY_W)  		//key: w
-		ChassisSpeedRef.forward_back_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
-	else if(key->v & KEY_S) 	//key: s
-		ChassisSpeedRef.forward_back_ref = -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
-	else
-	{
-		ChassisSpeedRef.forward_back_ref = 0;
-		FBSpeedRamp.ResetCounter(&FBSpeedRamp);
-	}
-	if(key->v & KEY_D)  		//key: d
-		ChassisSpeedRef.left_right_ref =  KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
-	else if(key->v & KEY_A) 	//key: a
-		ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
-	else
-	{
-		ChassisSpeedRef.left_right_ref = 0;
-		LRSpeedRamp.ResetCounter(&LRSpeedRamp);
-	}
-	Limit_and_Synchronization();
-}
+//uint16_t KM_FORWORD_BACK_SPEED 	= NORMAL_FORWARD_BACK_SPEED;
+//uint16_t KM_LEFT_RIGHT_SPEED  	= NORMAL_LEFT_RIGHT_SPEED;
+//void MouseKeyControlProcess(Mouse *mouse, Key *key)
+//{	
+//	if(WorkState <= 0) return;
+//	mouse->last_press_l=mouse->last_press_l*mouse->press_l+mouse->press_l;
+//	mouse->last_press_r=mouse->last_press_r*mouse->press_r+mouse->press_r;
+//	MINMAX(mouse->x, -150, 150); 
+//	MINMAX(mouse->y, -150, 150); 
+//	
+////	#ifdef USE_CHASSIS_FOLLOW
+////		GMY.Target += mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT;
+////		GMP.Target -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT;
+////	#else
+//		ChassisSpeedRef.rotate_ref = -mouse->x * RC_ROTATE_SPEED_REF;
+////	#endif
+//	
+//	if(mouse->last_press_l==1)//左短按
+//	{
+//		
+//	}
+//	if(mouse->last_press_l>50)//左长按
+//	{
+//		
+//	}
+//	if(mouse->last_press_r==1)//右短按
+//	{
+//		
+//	}
+//	if(mouse->last_press_r>50)//右长按
+//	{
+//		
+//	}
+//	
+//	KeyboardModeFSM(key);
+//	//*****Don't Use WASD******
+//	switch (KeyboardMode)	
+//	{
+//		case SHIFT_CTRL:		//State Change
+//		{
+//			
+//		}break;
+//		case CTRL:
+//		{
+//			
+//		}break;
+//		case SHIFT:
+//		{
+//			
+//		}break;
+//		case NO_CHANGE:
+//		{
+//			
+//		}break;
+//	}
+//	//CM Movement Process 
+//	//shift: High Speed , ctrl: Low Speed  , shift+ctrl: Don't Move
+//	if(key->v & KEY_W)  		//key: w
+//		ChassisSpeedRef.forward_back_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+//	else if(key->v & KEY_S) 	//key: s
+//		ChassisSpeedRef.forward_back_ref = -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+//	else
+//	{
+//		ChassisSpeedRef.forward_back_ref = 0;
+//		FBSpeedRamp.ResetCounter(&FBSpeedRamp);
+//	}
+//	if(key->v & KEY_D)  		//key: d
+//		ChassisSpeedRef.left_right_ref =  KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+//	else if(key->v & KEY_A) 	//key: a
+//		ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+//	else
+//	{
+//		ChassisSpeedRef.left_right_ref = 0;
+//		LRSpeedRamp.ResetCounter(&LRSpeedRamp);
+//	}
+//	Limit_and_Synchronization();
+//}
 
-void KeyboardModeFSM(Key *key)
-{
-	if((key->v & 0x30) == 0x30)//Shift_Ctrl
-	{
-		KM_FORWORD_BACK_SPEED=  0;
-		KM_LEFT_RIGHT_SPEED = 0;
-		KeyboardMode=SHIFT_CTRL;
-	}
-	else if(key->v & KEY_SHIFT)//Shift
-	{
-		KM_FORWORD_BACK_SPEED=  HIGH_FORWARD_BACK_SPEED;
-		KM_LEFT_RIGHT_SPEED = HIGH_LEFT_RIGHT_SPEED;
-		KeyboardMode=SHIFT;
-	}
-	else if(key->v & KEY_CTRL)//Ctrl
-	{
-		KM_FORWORD_BACK_SPEED=  LOW_FORWARD_BACK_SPEED;
-		KM_LEFT_RIGHT_SPEED = LOW_LEFT_RIGHT_SPEED;
-		KeyboardMode=CTRL;
-	}
-	else
-	{
-		KM_FORWORD_BACK_SPEED=  NORMAL_FORWARD_BACK_SPEED;
-		KM_LEFT_RIGHT_SPEED = NORMAL_LEFT_RIGHT_SPEED;
-		KeyboardMode=NO_CHANGE;
-	}	
-}
+//void KeyboardModeFSM(Key *key)
+//{
+//	if((key->v & 0x30) == 0x30)//Shift_Ctrl
+//	{
+//		KM_FORWORD_BACK_SPEED=  0;
+//		KM_LEFT_RIGHT_SPEED = 0;
+//		KeyboardMode=SHIFT_CTRL;
+//	}
+//	else if(key->v & KEY_SHIFT)//Shift
+//	{
+//		KM_FORWORD_BACK_SPEED=  HIGH_FORWARD_BACK_SPEED;
+//		KM_LEFT_RIGHT_SPEED = HIGH_LEFT_RIGHT_SPEED;
+//		KeyboardMode=SHIFT;
+//	}
+//	else if(key->v & KEY_CTRL)//Ctrl
+//	{
+//		KM_FORWORD_BACK_SPEED=  LOW_FORWARD_BACK_SPEED;
+//		KM_LEFT_RIGHT_SPEED = LOW_LEFT_RIGHT_SPEED;
+//		KeyboardMode=CTRL;
+//	}
+//	else
+//	{
+//		KM_FORWORD_BACK_SPEED=  NORMAL_FORWARD_BACK_SPEED;
+//		KM_LEFT_RIGHT_SPEED = NORMAL_LEFT_RIGHT_SPEED;
+//		KeyboardMode=NO_CHANGE;
+//	}	
+//}
 
 void Standardized_Chassis_Move(float Rate)
 {
-	ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF*Rate;
-	ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF*Rate;
-	#ifdef USE_CHASSIS_FOLLOW
-		GMY.Target += channellrow * RC_GIMBAL_SPEED_REF;
-		if(abs(channellrow)>200) ChassisTwistState = 0;
-		if(startUp)GMP.Target += channellcol * RC_GIMBAL_SPEED_REF;
-		else if(!startUp)GMP.Target -= channellcol * RC_GIMBAL_SPEED_REF;
-	#else
-		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
-	#endif
+	ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF*Rate*0.5;
+	//ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF*Rate;
+//	#ifdef USE_CHASSIS_FOLLOW
+//		GMY.Target += channellrow * RC_GIMBAL_SPEED_REF;
+//		if(abs(channellrow)>200) ChassisTwistState = 0;
+//		if(startUp)GMP.Target += channellcol * RC_GIMBAL_SPEED_REF;
+//		else if(!startUp)GMP.Target -= channellcol * RC_GIMBAL_SPEED_REF;
+//	#else
+	//	ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
+//	#endif
 }
 #endif
 

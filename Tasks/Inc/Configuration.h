@@ -21,8 +21,8 @@
 //#define INFANTRY	2
 //#define INFANTRY	4
 //#define INFANTRY	5
-#define GUARD		'U'
-//#define GUARD		'D'
+//#define GUARD		'U'
+#define GUARD		'D'
 //#define ENGINEER
 //#define HERO		'M'
 //#define HERO		'S'
@@ -48,7 +48,7 @@
 
 /***canœﬂ∆Ù”√…Ë÷√***/
 //#define CAN11
-#define CAN12
+//#define CAN12
 //#define CAN21
 //#define CAN22
 

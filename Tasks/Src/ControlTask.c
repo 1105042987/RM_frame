@@ -18,10 +18,10 @@ uint16_t counter = 0;
 double rotate_speed = 0;
 uint8_t startUp = 0;
 
-#ifdef USE_CHASSIS_FOLLOW
-uint8_t ChassisTwistState = 0;
-int ChassisTwistGapAngle = 0;
-#endif
+//#ifdef USE_CHASSIS_FOLLOW
+//uint8_t ChassisTwistState = 0;
+//int ChassisTwistGapAngle = 0;
+//#endif
 
 MusicNote SuperMario[] = {
 	{H3, 100}, {0, 50}, 
@@ -182,50 +182,50 @@ void WorkStateFSM(void)
 		#endif
 	}
 }
-#ifdef USE_CHASSIS_FOLLOW
-extern MotorINFO* GimbalMotorGroup[2];
-void ChassisTwist(void)
-{
-	switch (ChassisTwistGapAngle)
-	{
-		case 0:
-		{
-			ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;
-		}break;
-		case CHASSIS_TWIST_ANGLE_LIMIT:
-		{
-			//if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-			if(fabs((GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-				
-			{ChassisTwistGapAngle = -CHASSIS_TWIST_ANGLE_LIMIT;}break;
-		}
-		case -CHASSIS_TWIST_ANGLE_LIMIT:
-		{
-			//if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-			if(fabs((GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-			{ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;}break;
-		}
-	}
-}
+//#ifdef USE_CHASSIS_FOLLOW
+//extern MotorINFO* GimbalMotorGroup[2];
+//void ChassisTwist(void)
+//{
+//	switch (ChassisTwistGapAngle)
+//	{
+//		case 0:
+//		{
+//			ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;
+//		}break;
+//		case CHASSIS_TWIST_ANGLE_LIMIT:
+//		{
+//			//if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+//			if(fabs((GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+//				
+//			{ChassisTwistGapAngle = -CHASSIS_TWIST_ANGLE_LIMIT;}break;
+//		}
+//		case -CHASSIS_TWIST_ANGLE_LIMIT:
+//		{
+//			//if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+//			if(fabs((GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+//			{ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;}break;
+//		}
+//	}
+//}
 
-void ChassisDeTwist(void)
-{
-	ChassisTwistGapAngle = 0;
-}
-#endif
+//void ChassisDeTwist(void)
+//{
+//	ChassisTwistGapAngle = 0;
+//}
+//#endif
 void ControlRotate(void)
 {	
-	#ifdef USE_CHASSIS_FOLLOW
-		//ChassisSpeedRef.rotate_ref=(GMY.RxMsg6623.angle - `GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle;
-		ChassisSpeedRef.rotate_ref=(GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle;
-		NORMALIZE_ANGLE180(ChassisSpeedRef.rotate_ref);
-	#endif
+//	#ifdef USE_CHASSIS_FOLLOW
+//		//ChassisSpeedRef.rotate_ref=(GMY.RxMsg6623.angle - `GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle;
+//		ChassisSpeedRef.rotate_ref=(GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle;
+//		NORMALIZE_ANGLE180(ChassisSpeedRef.rotate_ref);
+//	#endif
 	CMRotatePID.ref = 0;
 	CMRotatePID.fdb = ChassisSpeedRef.rotate_ref;
 	CMRotatePID.Calc(&CMRotatePID);
-	#ifdef USE_CHASSIS_FOLLOW
-		if(ChassisTwistState) MINMAX(CMRotatePID.output,-10,10);
-	#endif
+//	#ifdef USE_CHASSIS_FOLLOW
+//		if(ChassisTwistState) MINMAX(CMRotatePID.output,-10,10);
+//	#endif
 	rotate_speed = CMRotatePID.output * 13 + ChassisSpeedRef.forward_back_ref * 0.01 + ChassisSpeedRef.left_right_ref * 0.01;
 }
 extern MotorINFO* ChassisMotorGroup[4];
@@ -233,27 +233,27 @@ void Chassis_Data_Decoding()
 {
 	ControlRotate();
 	
-	#ifdef USE_CHASSIS_FOLLOW
-		if(ChassisTwistGapAngle!=0)
-		{
-			float gap = (GimbalMotorGroup[1]->Zero-GimbalMotorGroup[1]->RxMsg6623.angle) * 6.28 / 8192.0f;
-			int16_t fb = ChassisSpeedRef.forward_back_ref;
-			int16_t rl = ChassisSpeedRef.left_right_ref;
-			ChassisSpeedRef.forward_back_ref = cos(gap)*fb-sin(gap)*rl;
-			ChassisSpeedRef.left_right_ref = sin(gap)*fb+cos(gap)*rl;
-		}
-	#endif
-	
-	if(ChassisMotorGroup[3]!=0){
-		ChassisMotorGroup[0]->Target = ( ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
-		ChassisMotorGroup[1]->Target = (-ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
-		ChassisMotorGroup[2]->Target = ( ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
-		ChassisMotorGroup[3]->Target = (-ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
-	}
-	else{
+//	#ifdef USE_CHASSIS_FOLLOW
+//		if(ChassisTwistGapAngle!=0)
+//		{
+//			float gap = (GimbalMotorGroup[1]->Zero-GimbalMotorGroup[1]->RxMsg6623.angle) * 6.28 / 8192.0f;
+//			int16_t fb = ChassisSpeedRef.forward_back_ref;
+//			int16_t rl = ChassisSpeedRef.left_right_ref;
+//			ChassisSpeedRef.forward_back_ref = cos(gap)*fb-sin(gap)*rl;
+//			ChassisSpeedRef.left_right_ref = sin(gap)*fb+cos(gap)*rl;
+//		}
+//	#endif
+//	
+//	if(ChassisMotorGroup[3]!=0){
+//		ChassisMotorGroup[0]->Target = ( ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
+//		ChassisMotorGroup[1]->Target = (-ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
+//		ChassisMotorGroup[2]->Target = ( ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
+//		ChassisMotorGroup[3]->Target = (-ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
+//	}
+//	else{
 		ChassisMotorGroup[0]->Target += ChassisSpeedRef.forward_back_ref * 0.008;
 		ChassisMotorGroup[1]->Target = ChassisMotorGroup[0]->Target;
-	}
+//	}
 	
 	//CMFL.Target = ( ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
 	//CMFR.Target = (-ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
