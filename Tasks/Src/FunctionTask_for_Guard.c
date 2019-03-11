@@ -104,8 +104,8 @@ void RemoteControlProcess()
 	fakeHeat0=receiveData[0].data[3]/(float)(20.0);
 	if(WorkState == NORMAL_STATE)
 	{	
-		GMY.Target+=channelrrow * RC_GIMBAL_SPEED_REF*0.1;
-		GMP.Target+=channellcol * RC_GIMBAL_SPEED_REF*0.1;
+		GMY.Target+=channelrrow * RC_GIMBAL_SPEED_REF*0.1f;
+		GMP.Target+=channellcol * RC_GIMBAL_SPEED_REF*0.1f;
 		FRICL.Target = 0;
 		FRICR.Target =0;
 		
@@ -259,7 +259,7 @@ void RemoteTestProcess(Remote *rc)
 
 void Standardized_Chassis_Move(float Rate)
 {
-	ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF*Rate*0.5;
+	ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF*Rate*0.5f;
 	//ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF*Rate;
 //	#ifdef USE_CHASSIS_FOLLOW
 //		GMY.Target += channellrow * RC_GIMBAL_SPEED_REF;

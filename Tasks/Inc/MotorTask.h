@@ -124,11 +124,16 @@ typedef struct MotorINFO
 
 #define Gimbal_MOTORINFO_Init(rdc,func,zero,compensation,maxrange,ppid,spid)\
 {\
+	ESC_6623,0,0,0,rdc,\
+	{0,0,0},{0,0,0},0,0,1,0,0,0,func,\
+	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0,zero,compensation,maxrange,0,0 \
+}
+#define Gimbal6020_MOTORINFO_Init(rdc,func,zero,compensation,maxrange,ppid,spid)\
+{\
 	ESC_C6x0,0,0,0,rdc,\
 	{0,0,0},{0,0,0},0,0,1,0,0,0,func,\
 	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0,zero,compensation,maxrange,0,0 \
 }
-
 
 extern MotorINFO *can1[8],*can2[8];
 void InitMotor(MotorINFO *id);

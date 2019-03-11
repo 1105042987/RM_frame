@@ -121,7 +121,7 @@ void ControlGM6020(MotorINFO* id)
 		uint16_t 	ThisAngle;	
 		double 		ThisSpeed;	
 		ThisAngle = id->RxMsgC6x0.angle;				//未处理角度
-				float EncoderAngle = -(1000- id->RxMsgC6x0.angle) * 360 / 8192.0f / id->ReductionRate;
+				float EncoderAngle = -(id->Zero - id->RxMsgC6x0.angle) * 360 / 8192.0f / id->ReductionRate;
 		NORMALIZE_ANGLE180(EncoderAngle);
 		if(id->FirstEnter==1) {id->lastRead = ThisAngle;
 			id->Real=EncoderAngle;
@@ -290,11 +290,15 @@ void ControlGMY6020(MotorINFO* id)
 		uint16_t 	ThisAngle;	
 		double 		ThisSpeed;	
 		ThisAngle = gyro_data.yaw;				//未处理角度
-				float EncoderAngle = -(1000- id->RxMsgC6x0.angle) * 360 / 8192.0f / id->ReductionRate;
+		float EncoderAngle = -(1000- id->RxMsgC6x0.angle) * 360 / 8192.0f / id->ReductionRate;
 		NORMALIZE_ANGLE180(EncoderAngle);
-		if(id->FirstEnter==1) {id->lastRead = ThisAngle;
+		if(id->FirstEnter==1) 
+		{
+			id->lastRead = ThisAngle;
 			id->Real=EncoderAngle;
-		id->FirstEnter = 0;return;}
+			id->FirstEnter = 0;
+			return;
+		}
 		
 		if(ThisAngle <= id->lastRead)
 		{
@@ -311,7 +315,7 @@ void ControlGMY6020(MotorINFO* id)
 				 id->Real += (ThisAngle - id->lastRead);
 		}
 		ThisSpeed = id->RxMsgC6x0.rotateSpeed * 6 / id->ReductionRate;		//单位：度每秒
-
+    
 		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
 		
 		id->s_count = 0;
