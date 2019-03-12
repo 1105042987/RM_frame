@@ -26,9 +26,9 @@ MotorINFO FRICL = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_D
 MotorINFO FRICR = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
 
 
-MotorINFO GMP  =  Gimbal6020_MOTORINFO_Init(1.0,&ControlGM6020,1000,0,20,
-								fw_PID_INIT_EASY(1200.0, 0.0, 0.0, 15000.0),
-								fw_PID_INIT_EASY(2.0, 0.0, 0.1,	 5000.0));
+MotorINFO GMP  =  Gimbal6020_MOTORINFO_Init(1.0,&ControlGM6020,1200,-1900,20,
+								fw_PID_INIT_EASY(80, 2, 20, 5000.0),
+								fw_PID_INIT_EASY(12, 2, 2,	 15000.0));
 
 //MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(1.0,&ControlGM6020,2700,0,20,
 //								fw_PID_INIT_EASY(1200.0, 0.0, 0.0, 1080.0),
@@ -37,9 +37,9 @@ MotorINFO GMP  =  Gimbal6020_MOTORINFO_Init(1.0,&ControlGM6020,1000,0,20,
 //MotorINFO GMP  =  Gimbal6020_MOTORINFO_Init(1.0,&ControlGMP,1000,-1700,20,
 //								fw_PID_INIT_EASY(0.5, 0.01, 0.2, 1000),
 //								fw_PID_INIT_EASY(1500, 80, 0,	 15000));
-MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(1.0,&ControlGMY,2700,0,20,
-								fw_PID_INIT_EASY(0.5, 0.05, 0.1, 1000),
-								fw_PID_INIT_EASY(2000, 100, 20,	 15000));
+MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(1.0,&ControlGMY,2700,400,20,
+								fw_PID_INIT_EASY(0.32, 0.02, 0.2, 10),
+								fw_PID_INIT_EASY(3000, 500, 200, 15000));
 
 MotorINFO STIR = AngleBased_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1200.0),
@@ -113,7 +113,7 @@ void ControlGM6020(MotorINFO* id){
 		}
 		ThisSpeed = id->RxMsgC6x0.rotateSpeed * 6 / id->ReductionRate;		//单位：度每秒
 		
-		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
+		id->Intensity = id->Compensation +PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
 		
 		id->s_count = 0;
 		id->lastRead = ThisAngle;
@@ -161,7 +161,7 @@ void ControlGMY6020(MotorINFO* id){
 		}
 		ThisSpeed = id->RxMsgC6x0.rotateSpeed * 6 / id->ReductionRate;		//单位：度每秒
     
-		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
+		id->Intensity = id->Compensation +PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
 		
 		id->s_count = 0;
 		id->lastRead = ThisAngle;
@@ -229,7 +229,7 @@ void ControlGMP(MotorINFO* id){
 	ControlGM(id,imu.pit,imu.wy,'P');
 }
 void ControlGMY(MotorINFO* id){
-	ControlGM(id,imu.yaw,imu.wz,'Y');
+	ControlGM(id,imu.yaw,-imu.wz,'Y');
 }
 //#endif
 

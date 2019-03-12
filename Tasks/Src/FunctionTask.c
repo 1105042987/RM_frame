@@ -91,11 +91,14 @@ void RemoteControlProcess()
 	channellrow = receiveData[0].data[1];//leftRight
 	channellcol = receiveData[0].data[2];//upDown
 	fakeHeat0=receiveData[0].data[3]/(float)(20.0);
+	
+	GMY.Target+=channellrow * RC_GIMBAL_SPEED_REF*0.1f;
+	GMP.Target+=channellcol * RC_GIMBAL_SPEED_REF*0.1f;
 	if(WorkState == NORMAL_STATE)
 	{	
-		GMY.Target+=channellrow * RC_GIMBAL_SPEED_REF*0.1f;
-		GMP.Target+=channellcol * RC_GIMBAL_SPEED_REF*0.1f;
-		FRICL.Target = 0;
+//		GMY.Target+=channellrow * RC_GIMBAL_SPEED_REF*0.1f;
+//		GMP.Target+=channellcol * RC_GIMBAL_SPEED_REF*0.1f;
+		FRICL.Target =0;
 		FRICR.Target =0;
 		
 	}
