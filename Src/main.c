@@ -155,7 +155,7 @@ int main(void)
 		#ifdef USE_GRYO
 			InitGyroUart();
 		#else
-			imu.InitFinish=1;
+			gyro_data.InitFinish=1;
 		#endif
 	#endif
 	#ifdef DEBUG_MODE

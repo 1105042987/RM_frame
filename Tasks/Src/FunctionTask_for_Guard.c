@@ -11,6 +11,7 @@
   ******************************************************************************
   */
 #include "includes.h"
+#ifdef GUARD
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
@@ -18,8 +19,13 @@ ChassisSpeed_Ref_t ChassisSpeedRef;
 void KeyboardModeFSM(Key *key);
 void MouseModeFSM(Mouse *mouse);
 void Standardized_Chassis_Move(float Rate);
+#include "RobotMotor.h"
+#ifdef CONFIGURATION
+extern MotorINFO CMFL,CMFR,CMBL,CMBR,GMY,GMP,FRICL,FRICR,STIR,CML,CMR;
+#endif
 
 int32_t auto_counter=0;		//用于准确延时的完成某事件
+
 int16_t channelrrow = 0;
 int16_t channelrcol = 0;
 int16_t channellrow = 0;

@@ -16,6 +16,7 @@
 #ifndef DEBUG_MODE
 #ifdef	USE_AUTOAIM
 
+
 //*****************************************声明变量******************************************//
 
 GMINFO_t aim,aim_rcd;																												//目标角度
@@ -26,8 +27,10 @@ uint16_t aim_cnt=0;																													//自瞄分频延时变量
 int16_t current_yaw=0,current_pitch=0;																			//当前云台角度
 int16_t receive_cnt=0,receive_rcd=0;																				//检测上位机信号帧数
 double bullet_speed=10.0,bullet_speed_adjust=0,yaw_adjust=0,pitch_adjust=0;	//校准发射变量
-
-#define GMP_ANGLE		(double)((GMP.RxMsg6623.angle-GMP.Zero)/8192.0*2*const_pi)
+extern MotorINFO* GimbalMotorGroup[2];
+#define GMP (*GimbalMotorGroup[0])
+#define GMY (*GimbalMotorGroup[1])
+#define GMP_ANGLE		(double)((GimbalMotorGroup[0]->RxMsg6623.angle-GimbalMotorGroup[0]->Zero)/8192.0*2*const_pi)
 
 //********************************************************************************************//
 

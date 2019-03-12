@@ -9,7 +9,8 @@
   *
   ******************************************************************************
   */
-	#include "includes.h"
+#include "includes.h"
+#ifdef CONFIGURATION
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
@@ -17,13 +18,16 @@ ChassisSpeed_Ref_t ChassisSpeedRef;
 void KeyboardModeFSM(Key *key);
 void MouseModeFSM(Mouse *mouse);
 void Standardized_Chassis_Move(float Rate);
-
+#include "RobotMotor.h"
+#ifdef CONFIGURATION
+extern MotorINFO CMFL,CMFR,CMBL,CMBR,GMY,GMP,FRICL,FRICR,STIR,CML,CMR;
+#endif
 int32_t auto_counter=0;		//用于准确延时的完成某事件
+
 int16_t channelrrow = 0;
 int16_t channelrcol = 0;
 int16_t channellrow = 0;
 int16_t channellcol = 0;
-
 
 //初始化
 void FunctionTaskInit()
@@ -42,15 +46,12 @@ void FunctionTaskInit()
 //限位与同步
 void Limit_and_Synchronization()
 {
-	MINMAX(GMP.Target,-30,20);//limit
-	MINMAX(GMY.Target,-30,30);//limit
-	//CMR.Target =  -CML.Target;
+	//MINMAX(UD1.Target,-900,270);//limit
+	//FRICR.Target = -FRICL.Target;
 }
 //******************
 //遥控器模式功能编写
 //******************
-#if GUARD == 'U'
-//上平台代码
 void RemoteControlProcess(Remote *rc)
 {
 	if(WorkState <= 0) return;
@@ -59,60 +60,20 @@ void RemoteControlProcess(Remote *rc)
 	channelrcol = (rc->ch1 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	channellrow = (rc->ch2 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
-	
-	sendData[0].data[0]=(int16_t)WorkState;
-	if(WorkState == NORMAL_STATE){//手动模式
-		ChassisSpeedRef.left_right_ref = -channelrrow * RC_CHASSIS_SPEED_REF;
-		sendData[0].data[1]=channellrow;
-		sendData[0].data[2]=channellcol;
-		sendData[0].data[3]=(int16_t)(fakeHeat0*20);
-	}
-	if(WorkState == ADDITIONAL_STATE_ONE){//自动模式
-		
-	}
-	if(WorkState == ADDITIONAL_STATE_TWO){
-		STIR.Target-=3;
-	}
-	OnePush(FUNC__RED_RAY_M__READ(),{
-		CML.Target = 0;
-		CML.Real = 0;
-	});
-	Limit_and_Synchronization();
-}
-#endif
-#if GUARD == 'D'
-//下平台代码
-void RemoteControlProcess()
-{
-	if(WorkState <= 0) return;
-	//max=660
-	channelrrow = 0;
-	channelrcol = 0;
-	channellrow = receiveData[0].data[1];//leftRight
-	channellcol = receiveData[0].data[2];//upDown
-	fakeHeat0=receiveData[0].data[3]/(float)(20.0);
 	if(WorkState == NORMAL_STATE)
 	{	
-		GMY.Target+=channellrow * RC_GIMBAL_SPEED_REF*0.1f;
-		GMP.Target+=channellcol * RC_GIMBAL_SPEED_REF*0.1f;
-		FRICL.Target = 0;
-		FRICR.Target =0;
-		
+		GMY.Target+=channellrow * RC_GIMBAL_SPEED_REF;
+		GMP.Target+=channellcol * RC_GIMBAL_SPEED_REF;
+		Standardized_Chassis_Move(1);
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
-		FRICL.Target =1000;
-		FRICR.Target =-1000;
-		//AutoAimGMCTRL();
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
 	{
-		FRICL.Target =1000;
-		FRICR.Target =-1000;
 	}
 	Limit_and_Synchronization();
 }
-#endif
 //**************************
 //遥控器**测试**模式功能编写
 //**************************
@@ -126,15 +87,15 @@ void RemoteTestProcess(Remote *rc)
 	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	if(WorkState == NORMAL_STATE)
 	{	
-		CML.Target = channelrcol*2;
+		GMY.Target+=channellrow * RC_GIMBAL_SPEED_REF;
+		GMP.Target+=channellcol * RC_GIMBAL_SPEED_REF;
+		Standardized_Chassis_Move(1);
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
-		
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO)
-	{
-		
+	{	
 	}
 	Limit_and_Synchronization();
 }
@@ -151,12 +112,12 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	MINMAX(mouse->x, -150, 150); 
 	MINMAX(mouse->y, -150, 150); 
 	
-//	#ifdef USE_CHASSIS_FOLLOW
-//		GMY.Target += mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT;
-//		GMP.Target -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT;
-//	#else
+	#ifdef USE_CHASSIS_FOLLOW
+		GMY.Target += mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT;
+		GMP.Target -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT;
+	#else
 		ChassisSpeedRef.rotate_ref = -mouse->x * RC_ROTATE_SPEED_REF;
-//	#endif
+	#endif
 	
 	if(mouse->last_press_l==1)//左短按
 	{
@@ -249,7 +210,7 @@ void KeyboardModeFSM(Key *key)
 
 void Standardized_Chassis_Move(float Rate)
 {
-	ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF*Rate*0.5f;
+	ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF*Rate;
 	ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF*Rate;
 	#ifdef USE_CHASSIS_FOLLOW
 		GMY.Target += channellrow * RC_GIMBAL_SPEED_REF;
@@ -260,3 +221,4 @@ void Standardized_Chassis_Move(float Rate)
 		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
 	#endif
 }
+#endif
