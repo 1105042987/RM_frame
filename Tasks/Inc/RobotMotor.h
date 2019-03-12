@@ -83,7 +83,7 @@ MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(1.0,&ControlGM6020,1000,0,20,
 //								fw_PID_INIT_EASY(30, 0.0, 0.0,	 15000.0));
 MotorINFO STIR = AngleBased_MOTORINFO_Init(1.0,&ControlNM,
 								fw_PID_INIT_EASY(1.0, 0.0, 0.0, 1080.0),
-								fw_PID_INIT_EASY(9.0, 0.1, 0.1,	 15000.0));
+								fw_PID_INIT_EASY(10.0, 0.1, 0.1,	 15000.0));
 MotorINFO CML = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1500.0),
 								fw_PID_INIT_EASY(40, 0.0, 5.0,	 15000.0));

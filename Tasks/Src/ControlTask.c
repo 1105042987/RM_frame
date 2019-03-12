@@ -18,23 +18,19 @@ uint16_t counter = 0;
 double rotate_speed = 0;
 uint8_t startUp = 0;
 
-//#ifdef USE_CHASSIS_FOLLOW
-//uint8_t ChassisTwistState = 0;
-//int ChassisTwistGapAngle = 0;
-//#endif
+#ifdef USE_CHASSIS_FOLLOW
+uint8_t ChassisTwistState = 0;
+int ChassisTwistGapAngle = 0;
+#endif
 
 MusicNote SuperMario[] = {
-	{H3, 100}, {0, 50}, 
-	{H3, 250}, {0, 50}, 
-	{H3, 100}, {0, 50}, 
-	{0, 150},
-	{H1, 100}, {0, 50},  
-	{H3, 250}, {0, 50},
-	{H5, 250}, {0, 50},
-	{0, 300},
-	{M5, 250}, {0, 50},
-	{0, 300},
-	{H1, 250}, {0, 50}
+	#if GUARD == 'U'
+		{H3, 100}, {0, 50},
+		{H3, 100}, {0, 50}
+	#else
+		{H3, 100}, {0, 50}, 
+		{H1, 250}, {0, 50}
+	#endif
 };
 
 PID_Regulator_t CMRotatePID = CHASSIS_MOTOR_ROTATE_PID_DEFAULT; 
@@ -111,20 +107,15 @@ void sendAllData(uint8_t isStop)
 }
 
 //状态机切换
-void WorkStateFSM(void)
-{
-	switch (WorkState)
-	{
-		case PREPARE_STATE:				//准备模式
-		{
+void WorkStateFSM(void){
+	switch (WorkState){
+		case PREPARE_STATE:{			//准备模式
 			normal_time = 0;
-			if(prepare_time < 0xff && gyro_data.InitFinish == 1) prepare_time++;	
-			if(prepare_time == 0xff && gyro_data.InitFinish == 1 && isCan11FirstRx == 1 && 
-				isCan12FirstRx == 1 && isCan21FirstRx == 1 && isCan22FirstRx == 1)
+			if(prepare_time < 0xff && imu.InitFinish == 1) prepare_time++;	
+			if(prepare_time == 0xff && imu.InitFinish == 1 && isCan11FirstRx == 1 && 
+				isCan12FirstRx == 1 && isCan21FirstRx == 1 && isCan22FirstRx == 1){
 			//开机2秒后且gyro初始化完成且所有can电机上电完成后进入正常模式
-			{
-				if(playMusicSuperMario())
-				{
+				if(playMusicSuperMario()){
 					CMRotatePID.Reset(&CMRotatePID);
 					if(inputmode == STOP) WorkState = STOP_STATE;
 					else WorkState = NORMAL_STATE;
@@ -138,8 +129,7 @@ void WorkStateFSM(void)
 			if(normal_time<10000)normal_time++;
 			if(normal_time>=10)startUp = 1;
 			if (inputmode == STOP) WorkState = STOP_STATE;
-			if (inputmode == REMOTE_INPUT)
-			{
+			if (inputmode == REMOTE_INPUT){
 				if(functionmode == MIDDLE_POS) WorkState = ADDITIONAL_STATE_ONE;
 				if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
 			}
@@ -147,8 +137,7 @@ void WorkStateFSM(void)
 		case ADDITIONAL_STATE_ONE:		//附加模式一
 		{
 			if (inputmode == STOP) WorkState = STOP_STATE;
-			if (inputmode == REMOTE_INPUT)
-			{
+			if (inputmode == REMOTE_INPUT){
 				if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
 				if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
 			}
@@ -162,11 +151,9 @@ void WorkStateFSM(void)
 				if(functionmode == MIDDLE_POS) WorkState = ADDITIONAL_STATE_ONE;
 			}
 		}break;
-		case STOP_STATE:				//紧急停止
-		{
+		case STOP_STATE:{				//紧急停止
 			sendAllData(1);
-			if (inputmode == REMOTE_INPUT || inputmode == KEY_MOUSE_INPUT)
-			{
+			if (inputmode == REMOTE_INPUT || inputmode == KEY_MOUSE_INPUT){
 				WorkState = PREPARE_STATE;
 				FunctionTaskInit();
 			}
@@ -175,85 +162,68 @@ void WorkStateFSM(void)
 		case NORMAL_STATE:
 		case ADDITIONAL_STATE_ONE:
 		case ADDITIONAL_STATE_TWO:break;
-		case STOP_STATE:
-		{
+		case STOP_STATE:{
 			sendAllData(1);
 		}break;
 		#endif
 	}
 }
-//#ifdef USE_CHASSIS_FOLLOW
-//extern MotorINFO* GimbalMotorGroup[2];
-//void ChassisTwist(void)
-//{
-//	switch (ChassisTwistGapAngle)
-//	{
-//		case 0:
-//		{
-//			ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;
-//		}break;
-//		case CHASSIS_TWIST_ANGLE_LIMIT:
-//		{
-//			//if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-//			if(fabs((GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-//				
-//			{ChassisTwistGapAngle = -CHASSIS_TWIST_ANGLE_LIMIT;}break;
-//		}
-//		case -CHASSIS_TWIST_ANGLE_LIMIT:
-//		{
-//			//if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-//			if(fabs((GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-//			{ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;}break;
-//		}
-//	}
-//}
+#ifdef USE_CHASSIS_FOLLOW
+extern MotorINFO* GimbalMotorGroup[2];
+void ChassisTwist(void){
+	switch (ChassisTwistGapAngle){
+		case 0:{
+			ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;
+		}break;
+		case CHASSIS_TWIST_ANGLE_LIMIT:{
+			//if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+			if(fabs((GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+				
+			{ChassisTwistGapAngle = -CHASSIS_TWIST_ANGLE_LIMIT;}break;
+		}
+		case -CHASSIS_TWIST_ANGLE_LIMIT:{
+			//if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+			if(fabs((GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
+			{ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;}break;
+		}
+	}
+}
 
-//void ChassisDeTwist(void)
-//{
-//	ChassisTwistGapAngle = 0;
-//}
-//#endif
-void ControlRotate(void)
-{	
-//	#ifdef USE_CHASSIS_FOLLOW
-//		//ChassisSpeedRef.rotate_ref=(GMY.RxMsg6623.angle - `GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle;
-//		ChassisSpeedRef.rotate_ref=(GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle;
-//		NORMALIZE_ANGLE180(ChassisSpeedRef.rotate_ref);
-//	#endif
+void ChassisDeTwist(void)
+{
+	ChassisTwistGapAngle = 0;
+}
+#endif
+void ControlRotate(void){	
+	#ifdef USE_CHASSIS_FOLLOW
+		//ChassisSpeedRef.rotate_ref=(GMY.RxMsg6623.angle - `GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle;
+		ChassisSpeedRef.rotate_ref=(GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle;
+		NORMALIZE_ANGLE180(ChassisSpeedRef.rotate_ref);
+	#endif
 	CMRotatePID.ref = 0;
 	CMRotatePID.fdb = ChassisSpeedRef.rotate_ref;
 	CMRotatePID.Calc(&CMRotatePID);
-//	#ifdef USE_CHASSIS_FOLLOW
-//		if(ChassisTwistState) MINMAX(CMRotatePID.output,-10,10);
-//	#endif
+	#ifdef USE_CHASSIS_FOLLOW
+		if(ChassisTwistState) MINMAX(CMRotatePID.output,-10,10);
+	#endif
 	rotate_speed = CMRotatePID.output * 13 + ChassisSpeedRef.forward_back_ref * 0.01 + ChassisSpeedRef.left_right_ref * 0.01;
 }
 extern MotorINFO* ChassisMotorGroup[4];
-void Chassis_Data_Decoding()
-{
+void Chassis_Data_Decoding(){
 	ControlRotate();
 	
-//	#ifdef USE_CHASSIS_FOLLOW
-//		if(ChassisTwistGapAngle!=0)
-//		{
-//			float gap = (GimbalMotorGroup[1]->Zero-GimbalMotorGroup[1]->RxMsg6623.angle) * 6.28 / 8192.0f;
-//			int16_t fb = ChassisSpeedRef.forward_back_ref;
-//			int16_t rl = ChassisSpeedRef.left_right_ref;
-//			ChassisSpeedRef.forward_back_ref = cos(gap)*fb-sin(gap)*rl;
-//			ChassisSpeedRef.left_right_ref = sin(gap)*fb+cos(gap)*rl;
-//		}
-//	#endif
-//	
-//	if(ChassisMotorGroup[3]!=0){
-//		ChassisMotorGroup[0]->Target = ( ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
-//		ChassisMotorGroup[1]->Target = (-ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
-//		ChassisMotorGroup[2]->Target = ( ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
-//		ChassisMotorGroup[3]->Target = (-ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
-//	}
-//	else{
-		ChassisMotorGroup[0]->Target += ChassisSpeedRef.forward_back_ref * 0.008;
-		ChassisMotorGroup[1]->Target = ChassisMotorGroup[0]->Target;
-//	}
+	#ifdef USE_CHASSIS_FOLLOW
+		if(ChassisTwistGapAngle!=0){
+			float gap = (GimbalMotorGroup[1]->Zero-GimbalMotorGroup[1]->RxMsg6623.angle) * 6.28 / 8192.0f;
+			int16_t fb = ChassisSpeedRef.forward_back_ref;
+			int16_t rl = ChassisSpeedRef.left_right_ref;
+			ChassisSpeedRef.forward_back_ref = cos(gap)*fb-sin(gap)*rl;
+			ChassisSpeedRef.left_right_ref = sin(gap)*fb+cos(gap)*rl;
+		}
+	#endif
+
+	CML.Target += ChassisSpeedRef.left_right_ref * 0.008;
+	CMR.Target = CML.Target;
 	
 	//CMFL.Target = ( ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
 	//CMFR.Target = (-ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
@@ -269,8 +239,7 @@ void controlLoop()
 	getJudgeState();
 	WorkStateFSM();
 	
-	if(WorkState > 0)// && WorkState != STOP_STATE)
-	{
+	if(WorkState > 0){// && WorkState != STOP_STATE)
 		Chassis_Data_Decoding();
 		
 		for(int i=0;i<8;i++) if(can1[i]!=0) (can1[i]->Handle)(can1[i]);
@@ -287,8 +256,7 @@ void controlLoop()
 	}
 }
 
-void heatCalc()//2ms
-{
+void heatCalc(){//2ms
 	if(syncCnt0 > 35 && JUDGE_State == ONLINE){fakeHeat0 = realHeat0;}
 	else if(fakeHeat0 >= cooldown0/500)fakeHeat0 -= cooldown0/500;
 	else fakeHeat0 = 0;
@@ -296,18 +264,16 @@ void heatCalc()//2ms
 
 //时间中断入口函数
 extern int8_t Control_Update;
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-	if (htim->Instance == TWO_MS_TIM.Instance)//2ms时钟
-	{
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+	if (htim->Instance == TWO_MS_TIM.Instance){//2ms时钟
 		//HAL_NVIC_DisableIRQ(TIM6_DAC_IRQn);
 		#ifdef USE_IMU
 			//imu解算
 			mpu_get_data();
 			imu_ahrs_update();
 			imu_attitude_update();
-			if(gyro_data.FirstEnter == 1) gyro_data.InitCount++;
-			if(gyro_data.InitCount == 1000) {gyro_data.InitFinish = 1;gyro_data.FirstEnter = 0;gyro_data.InitCount = 0;}
+			if(imu.FirstEnter == 1) imu.InitCount++;
+			if(imu.InitCount == 1000) {imu.InitFinish = 1;imu.FirstEnter = 0;imu.InitCount = 0;}
 		#endif
 		//主循环在时间中断中启动
 		controlLoop();
@@ -316,8 +282,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		#ifdef USE_AUTOAIM
 		//自瞄数据解算（6ms）
 		static uint8_t aim_cnt=0;
-		if(++aim_cnt==3)
-		{
+		if(++aim_cnt==3){
 			EnemyINFOProcess();
 			aim_cnt=0;
 		}
