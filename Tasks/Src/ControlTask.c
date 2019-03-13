@@ -174,17 +174,18 @@ void ChassisTwist(void)
 		}break;
 		case CHASSIS_TWIST_ANGLE_LIMIT:
 		{
-			//if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-			if(fabs((GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-				
-			{ChassisTwistGapAngle = -CHASSIS_TWIST_ANGLE_LIMIT;}break;
-		}
+			encoder=(GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f;
+			NORMALIZE_ANGLE180(encoder);
+			if(fabs(encoder - ChassisTwistGapAngle)<3)
+				ChassisTwistGapAngle = -CHASSIS_TWIST_ANGLE_LIMIT;
+		}break;
 		case -CHASSIS_TWIST_ANGLE_LIMIT:
 		{
-			//if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-			if(fabs((GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-			{ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;}break;
-		}
+			encoder=(GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f;
+			NORMALIZE_ANGLE180(encoder);
+			if(fabs(encoder - ChassisTwistGapAngle)<3)
+				ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;
+		}break;
 	}
 }
 

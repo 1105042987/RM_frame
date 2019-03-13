@@ -136,13 +136,13 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 						can1[i]->RxMsgC6x0.angle		 = CanRxGetU16(Can1RxMsg, 0);
 						can1[i]->RxMsgC6x0.rotateSpeed   = CanRxGetU16(Can1RxMsg, 1);
 						can1[i]->RxMsgC6x0.moment		 = CanRxGetU16(Can1RxMsg, 2);
-					}
+					}break;
 					case ESC_6623:
 					{
 						can1[i]->RxMsg6623.angle		 = CanRxGetU16(Can1RxMsg, 0);
 						can1[i]->RxMsg6623.realIntensity = CanRxGetU16(Can1RxMsg, 1);
 						can1[i]->RxMsg6623.giveIntensity = CanRxGetU16(Can1RxMsg, 2);
-					}
+					}break;
 				}
 			}
 			
@@ -184,13 +184,13 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 						can2[i]->RxMsgC6x0.angle		 = CanRxGetU16(Can2RxMsg, 0);
 						can2[i]->RxMsgC6x0.rotateSpeed   = CanRxGetU16(Can2RxMsg, 1);
 						can2[i]->RxMsgC6x0.moment		 = CanRxGetU16(Can2RxMsg, 2);
-					}
+					}break;
 					case ESC_6623:
 					{
 						can2[i]->RxMsg6623.angle		 = CanRxGetU16(Can2RxMsg, 0);
 						can2[i]->RxMsg6623.realIntensity = CanRxGetU16(Can2RxMsg, 1);
 						can2[i]->RxMsg6623.giveIntensity = CanRxGetU16(Can2RxMsg, 2);
-					}
+					}break;
 				}
 			}
 		}
