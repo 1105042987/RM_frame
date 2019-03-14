@@ -42,8 +42,8 @@ void FunctionTaskInit()
 //限位与同步
 void Limit_and_Synchronization()
 {
-	MINMAX(GMP.Target,-30,20);//limit
-	MINMAX(GMY.Target,-30,30);//limit
+	MINMAX(GMP.Target,-35,20);//limit
+	//MINMAX(GMY.Target,-30,30);//limit
 	//CMR.Target =  -CML.Target;
 }
 //******************
@@ -59,13 +59,14 @@ void RemoteControlProcess(Remote *rc)
 	channelrcol = (rc->ch1 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	channellrow = (rc->ch2 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
-	
+
+	ChassisSpeedRef.left_right_ref =- channelrrow * RC_CHASSIS_SPEED_REF*0.5;
 	sendData[0].data[0]=(int16_t)WorkState;
+	sendData[0].data[1]=channellrow;
+	sendData[0].data[2]=channellcol;
+	sendData[0].data[3]=(int16_t)(fakeHeat0*20);
 	if(WorkState == NORMAL_STATE){//手动模式
-		ChassisSpeedRef.left_right_ref = -channelrrow * RC_CHASSIS_SPEED_REF;
-		sendData[0].data[1]=channellrow;
-		sendData[0].data[2]=channellcol;
-		sendData[0].data[3]=(int16_t)(fakeHeat0*20);
+
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){//自动模式
 		
@@ -91,27 +92,23 @@ void RemoteControlProcess()
 	channellrow = receiveData[0].data[1];//leftRight
 	channellcol = receiveData[0].data[2];//upDown
 	fakeHeat0=receiveData[0].data[3]/(float)(20.0);
-	
 	GMY.Target+=channellrow * RC_GIMBAL_SPEED_REF*0.1f;
 	GMP.Target+=channellcol * RC_GIMBAL_SPEED_REF*0.1f;
-	if(WorkState == NORMAL_STATE)
-	{	
-//		GMY.Target+=channellrow * RC_GIMBAL_SPEED_REF*0.1f;
-//		GMP.Target+=channellcol * RC_GIMBAL_SPEED_REF*0.1f;
+	if(WorkState == NORMAL_STATE){
 		FRICL.Target =0;
 		FRICR.Target =0;
-		
+		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_RESET);
 	}
-	if(WorkState == ADDITIONAL_STATE_ONE)
-	{
-		FRICL.Target =1000;
-		FRICR.Target =-1000;
+	if(WorkState == ADDITIONAL_STATE_ONE){
+		FRICL.Target =2000;
+		FRICR.Target =-2000;
 		//AutoAimGMCTRL();
+		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
 	}
-	if(WorkState == ADDITIONAL_STATE_TWO)
-	{
-		FRICL.Target =1000;
-		FRICR.Target =-1000;
+	if(WorkState == ADDITIONAL_STATE_TWO){
+		FRICL.Target =2000;
+		FRICR.Target =-2000;
+		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
 	}
 	Limit_and_Synchronization();
 }
@@ -119,24 +116,20 @@ void RemoteControlProcess()
 //**************************
 //遥控器**测试**模式功能编写
 //**************************
-void RemoteTestProcess(Remote *rc)
-{
+void RemoteTestProcess(Remote *rc){
 	if(WorkState <= 0) return;
 	//max=660
 	channelrrow = (rc->ch0 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	channelrcol = (rc->ch1 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	channellrow = (rc->ch2 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
-	if(WorkState == NORMAL_STATE)
-	{	
+	if(WorkState == NORMAL_STATE){	
 		CML.Target = channelrcol*2;
 	}
-	if(WorkState == ADDITIONAL_STATE_ONE)
-	{
+	if(WorkState == ADDITIONAL_STATE_ONE){
 		
 	}
-	if(WorkState == ADDITIONAL_STATE_TWO)
-	{
+	if(WorkState == ADDITIONAL_STATE_TWO){
 		
 	}
 	Limit_and_Synchronization();
@@ -146,8 +139,7 @@ void RemoteTestProcess(Remote *rc)
 //****************
 uint16_t KM_FORWORD_BACK_SPEED 	= NORMAL_FORWARD_BACK_SPEED;
 uint16_t KM_LEFT_RIGHT_SPEED  	= NORMAL_LEFT_RIGHT_SPEED;
-void MouseKeyControlProcess(Mouse *mouse, Key *key)
-{	
+void MouseKeyControlProcess(Mouse *mouse, Key *key){	
 	if(WorkState <= 0) return;
 	mouse->last_press_l=mouse->last_press_l*mouse->press_l+mouse->press_l;
 	mouse->last_press_r=mouse->last_press_r*mouse->press_r+mouse->press_r;
@@ -161,16 +153,13 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		ChassisSpeedRef.rotate_ref = -mouse->x * RC_ROTATE_SPEED_REF;
 //	#endif
 	
-	if(mouse->last_press_l==1)//左短按
-	{
+	if(mouse->last_press_l==1){//左短按
 		
 	}
-	if(mouse->last_press_l>50)//左长按
-	{
+	if(mouse->last_press_l>50){//左长按
 		
 	}
-	if(mouse->last_press_r==1)//右短按
-	{
+	if(mouse->last_press_r==1){//右短按
 		
 	}
 	if(mouse->last_press_r>50)//右长按

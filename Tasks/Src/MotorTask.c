@@ -40,7 +40,7 @@ MotorINFO GMP  =  Gimbal6020_MOTORINFO_Init(1.0,&ControlGM6020,1200,-1900,20,
 MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(1.0,&ControlGMY,2700,400,20,
 								fw_PID_INIT_EASY(0.32, 0.02, 0.2, 10),
 								fw_PID_INIT_EASY(3000, 500, 200, 15000));
-
+								
 MotorINFO STIR = AngleBased_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1200.0),
 								fw_PID_INIT_EASY(30, 0.0, 0.0,	 15000.0));
@@ -50,13 +50,9 @@ MotorINFO CML = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
 MotorINFO CMR = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1500.0),
 								fw_PID_INIT_EASY(40, 0.0, 5.0,	 15000.0));
-								
+
 MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMP,&GMY,0,0};
-//MotorINFO* can1[8]={0,0,0,0,0,0,0,0};
 MotorINFO* can2[8]={&CML,&CMR,0,0,&STIR,0,0,0};
-//MotorINFO* can2[8]={0,0,0,0,&STIR,0,0,0};
-
-
 
 void ControlNM(MotorINFO* id){
 	if(id==0) return;
@@ -229,7 +225,7 @@ void ControlGMP(MotorINFO* id){
 	ControlGM(id,imu.pit,imu.wy,'P');
 }
 void ControlGMY(MotorINFO* id){
-	ControlGM(id,imu.yaw,-imu.wz,'Y');
+	ControlGM(id,imu.yaw,imu.wy,'Y');
 }
 //#endif
 
