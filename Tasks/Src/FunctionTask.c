@@ -93,9 +93,10 @@ void RemoteControlProcess()
 		laserOff();
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
-		FRICL.Target =5000;
-		FRICR.Target =-5000;
-		//AutoAimGMCTRL();
+		//FRICL.Target =5000;
+		//FRICR.Target =-5000;
+		aim_mode=1;
+		AutoAimGMCTRL();
 		laserOn();
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
