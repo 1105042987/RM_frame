@@ -18,6 +18,8 @@ uint32_t disfl=0,disfr=0,disbl=0,disbr=0,disdf=0,disdb=0;
 uint32_t AutoClimb_ComeToTop=0;
 uint8_t signal1=0;
 uint8_t signal2=0;
+
+uint32_t AutoClimb_Oneclimb=0;
 //ÉÏ 10000 8000
 //disfl>2000 disfr>2000
 //µç»ú-8000 -6000
@@ -28,8 +30,8 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 	CM1.RealAngle=0;
 	CM2.RealAngle=0;
 	CM1.TargetAngle=ChassisSpeedRef.forward_back_ref*5;
-	CM2.TargetAngle=ChassisSpeedRef.forward_back_ref*5;
-	if(flag) ChassisSpeedRef.forward_back_ref/=5;
+	CM2.TargetAngle=-ChassisSpeedRef.forward_back_ref*5;
+	if(flag) ChassisSpeedRef.forward_back_ref/=4;
 	if(NMCDL.RealAngle<-950 )
 	{//small chassis
 		signal1=0;
@@ -43,6 +45,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 							NMCDL.TargetAngle = UD_TOP;
 						  NMCDR.TargetAngle = UD_TOP;
 						signal2=1;
+						
 					}	
 				}
 		}
@@ -64,7 +67,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 			default:break;
 		}
 	}
-	else if(NMCDL.RealAngle>-230 )
+	else if(NMCDL.RealAngle>-230)
 	{// chassis
 		signal2=0;
 		if(flag==1)
@@ -122,12 +125,12 @@ void ComeToTop()
 {
 	if(AutoClimb_ComeToTop==1)
 	{
-		if(NMCDL.RxMsgC6x0.moment<10000||NMCDR.RxMsgC6x0.moment<8000)
+		if(NMCDL.RxMsgC6x0.moment<8000||NMCDR.RxMsgC6x0.moment<6000)
 		{	
 			NMCDL.TargetAngle+=5;
 		  NMCDR.TargetAngle+=5;
 		}
-		if(NMCDL.RxMsgC6x0.moment>10000&&NMCDR.RxMsgC6x0.moment>8000)
+		if(NMCDL.RxMsgC6x0.moment>8000&&NMCDR.RxMsgC6x0.moment>6000)
 		{
 			AutoClimb_ComeToTop=0;
 			NMCDL.RealAngle=0;

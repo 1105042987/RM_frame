@@ -16,8 +16,8 @@
 
 #define CLAWOUT   HAL_GPIO_WritePin(GPIOH,1<<2,1)//爪子弹出
 #define CLAWIN    HAL_GPIO_WritePin(GPIOH,1<<2,0)//爪子进入
-#define CLAWTIGHT HAL_GPIO_WritePin(GPIOI,1<<3,1)//爪子抓紧
-#define CLAWLOOSE HAL_GPIO_WritePin(GPIOI,1<<3,0)//爪子松开
+#define CLAWTIGHT HAL_GPIO_WritePin(GPIOH,1<<5,1)//爪子抓紧
+#define CLAWLOOSE HAL_GPIO_WritePin(GPIOH,1<<5,0)//爪子松开
 #define LAUNCH    HAL_GPIO_WritePin(GPIOH,1<<4,1)//弹射起飞
 #define LAND      HAL_GPIO_WritePin(GPIOH,1<<4,0)//弹射机构归位
 
@@ -33,7 +33,8 @@ extern uint16_t Claw_TruePosition[5];
 extern int32_t Claw_UpAngle;
 extern uint32_t Claw_TakeThisBox;
 extern uint32_t Claw_SelfInspecting;
-extern uint32_t Claw_FindingNextBox;
+extern uint32_t Claw_FindingNextBox_Lower;
+extern uint32_t Claw_FindingNextBox_Upper;
 //存储红外传感器的数值
 extern uint32_t ADC_value[160];
 extern uint32_t ADC2_value[10];
@@ -78,6 +79,7 @@ void AutoGet_Upper();
 void Claw_GetSpecifiedBox();
 void Claw_SelfInspect();
 void Claw_GoToNextBox_lower();
+void Claw_GoToNextBox_upper();
 void Claw_Up();
 void AutoGet_SwitchState();
 #endif /*__ AUTOGETTASK_H */

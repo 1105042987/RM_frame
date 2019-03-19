@@ -11,6 +11,7 @@
   */
 #include "includes.h"
 
+#define qudan
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
@@ -23,14 +24,14 @@ int16_t channellrow = 0;
 int16_t channellcol = 0;
 int16_t testIntensity = 0;
 
-int setzerol=0;
-int setzeror=0;
-int lefttight=0;
-int righttight=0;
-int teeet=0;
+uint32_t setzerol=0;
+uint32_t setzeror=0;
+uint32_t lefttight=0;
+uint32_t righttight=0;
+
 extern uint32_t AutoClimb_ComeToTop;
 
-int openthegay=0;
+uint32_t openthegay=0;
 
 
 //初始化
@@ -53,27 +54,34 @@ void OptionalFunction()
 	Cap_Control();
 	PowerLimitation();
 }
+void protect()
+{
+	if(SL.RxMsgC6x0.moment>3000)
+	SL.TargetAngle-=20;
+	if(SR.RxMsgC6x0.moment<-3000)
+	SR.TargetAngle+=20;
+}
 void setzero()
 {
 	if(setzerol==0)
 	{	
-	  if(NMUDL.RxMsgC6x0.moment<3000)
-			NMUDL.TargetAngle+=10;
+	  if(SL.RxMsgC6x0.moment>-3000)
+			SL.TargetAngle-=10;
 		else
 		{
-			NMUDL.RealAngle=0;
-			NMUDL.TargetAngle=0;
+			SL.RealAngle=0;
+			SL.TargetAngle=0;
 			setzerol=1;
 		}
 	}
 	if(setzeror==0)
 	{	
-	  if(NMUDR.RxMsgC6x0.moment>-3000)
-			NMUDR.TargetAngle-=10;
+	  if(SR.RxMsgC6x0.moment<3000)
+			SR.TargetAngle+=10;
 		else
 		{
-			NMUDR.RealAngle=0;
-			NMUDR.TargetAngle=0;
+			SR.RealAngle=0;
+			SR.TargetAngle=0;
 			setzeror=1;
 		}
 	}
@@ -108,15 +116,15 @@ void RemoteControlProcess(Remote *rc)
 		
 		
 		//手动挡控制爪子
-		if(channellcol>500)
+		/*if(channellcol>500)
 		CLAWOUT;//左纵向是爪子的向前弹出
 		if(channellcol<-500)                                  //          *********测试时暂时关闭*************
 		CLAWIN;
 		
 		UM1.TargetAngle+=channellrow*0.001;
-		UM2.TargetAngle-=channellrow*0.001;//左横向是爪子的上下移动
+		UM2.TargetAngle-=channellrow*0.001;//左横向是爪子的上下移动*/
 		
-   /* if(NMCDL.RxMsgC6x0.moment>-12000&&NMCDR.RxMsgC6x0.moment>-14000&&channellcol<0)
+    if(NMCDL.RxMsgC6x0.moment>-12000&&NMCDR.RxMsgC6x0.moment>-14000&&channellcol<0)
 		{
 		NMCDL.TargetAngle+=channellcol*0.06;
 		NMCDR.TargetAngle+=channellcol*0.06;
@@ -127,14 +135,13 @@ void RemoteControlProcess(Remote *rc)
 		NMCDR.TargetAngle+=channellcol*0.06;
 		}
 		
-		CM1.TargetAngle+=channellrow*0.01;
-		CM2.TargetAngle+=channellrow*-0.01;
-		*/
+		CM1.TargetAngle+=channellrow*0.02;
+		CM2.TargetAngle+=channellrow*-0.02;
 		
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
-
+   #ifdef qudan
 		//手动挡
 		if(channellcol>200){       //UP  左纵向是整个机构的上下
 			NMUDL.TargetAngle -= channellcol * 0.05;
@@ -144,9 +151,9 @@ void RemoteControlProcess(Remote *rc)
 			NMUDR.TargetAngle -= channellcol * 0.05;
 		}
 	  if(channelrrow>500)
-		{CLAWTIGHT;teeet=1;}//右横向是抓紧的开关
+		{CLAWTIGHT;}//右横向是抓紧的开关
 			if(channelrrow<-500)
-			{		CLAWLOOSE;teeet=2;}
+			{		CLAWLOOSE;}
 			
 			if(channelrcol>500)
 				LAUNCH;//右纵向是弹药箱弹出的开关
@@ -154,13 +161,17 @@ void RemoteControlProcess(Remote *rc)
 				LAND;
 
 			UFM.TargetAngle-=channellrow*0.01;//左横向是水平电机   向左远离（角度++）向右靠近（角度--）
-     
-			/*if(channelrrow>500)
+  #else
+	    
+			if(channellcol>500)
 				AutoClimb_ComeToTop=1;
-			if(channelrrow<-500)
+			if(channellcol<-500)
 				AutoClimb_ComeToTop=0;
-			
-			ComeToTop();*/
+			ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
+		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
+		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
+			ComeToTop();
+	#endif
 			
 }
 	if(WorkState == ADDITIONAL_STATE_TWO)
@@ -192,50 +203,68 @@ void RemoteControlProcess(Remote *rc)
 			
 			
 			AutoGet_SwitchState();*/
-			/*ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
+			
+		/*	ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		  ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
+			ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
 			Chassis_Choose(1,1);*/
-			if(channelrrow>500)
+			
+			
+			
+			/*if(channelrrow>500)
 			 openthegay=1;
 			if(channelrrow<-500)
 				openthegay=0;
 			
 			if(openthegay==1)
+			{
 				__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_2,600);
+				//__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_3,600);
+			}
 			else
-				__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_2,1800);
+			{
+				__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_2,2000);
+				//__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_3,2200);
+			}*/
 			//测试救援用 平常关闭   左++ 右--
-	/*	ChassisSpeedRef.forward_back_ref = -channelrcol * RC_CHASSIS_SPEED_REF;
-		ChassisSpeedRef.left_right_ref   = -channelrrow * RC_CHASSIS_SPEED_REF/2;
+		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
+		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
 			setzero();
+			protect();
 			if(channellcol>500)
 			{
-				NMUDL.TargetAngle=-80;
-				NMUDR.TargetAngle=80;
+				SL.TargetAngle=240;
+				SR.TargetAngle=-240;
 				lefttight=0;
 				righttight=0;
+				auto_counter=1000;
+			}
+			if(channellcol<-500)
+			{
+				setzerol=0;
+				setzeror=0;
 			}
 			
 			
-			if(leftstate==1)
+			if((leftstate==1)&&auto_counter==0)
 				lefttight=1;
 			if(lefttight==1)
 			{
-				if(NMUDL.RxMsgC6x0.moment<6000)
-					NMUDL.TargetAngle+=10;
-				if(NMUDL.RxMsgC6x0.moment>8000)
-					NMUDL.TargetAngle-=5;
+				if(SL.RxMsgC6x0.moment>-3000)
+					SL.TargetAngle-=20;
+				if(SL.RxMsgC6x0.moment<-5000)
+					SL.TargetAngle+=10;
 			}
-			if(rightstate==1)
+			if(rightstate==1&&auto_counter==0)
 				righttight=1;
 			if(righttight==1)
 			{
-				if(NMUDR.RxMsgC6x0.moment>-6000)
-					NMUDR.TargetAngle-=10;
-				if(NMUDR.RxMsgC6x0.moment<-8000)
-					NMUDR.TargetAngle+=5;
-			}*/
+				if(SR.RxMsgC6x0.moment<3000)
+					SR.TargetAngle+=20;
+				if(SR.RxMsgC6x0.moment>5000)
+					SR.TargetAngle-=10;
+			}
 	}
 	Limit_and_Synchronization();
 }
@@ -309,7 +338,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		}break;
 		case SHIFT:				//quick
 		{
-			
+			if(key->v & KEY_Q)
+			{
+				Claw_FindingNextBox_Upper=1;
+			}
 		}break;
 		case NO_CHANGE:			//normal
 		{//CM Movement Process
@@ -344,18 +376,22 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_Q)
 			{
-				Claw_FindingNextBox=1;
+				Claw_FindingNextBox_Lower=1;
 			}
 			else if(key->v & KEY_E)
 			{
-				Claw_FindingNextBox=0;
+				Claw_FindingNextBox_Lower=0;
+				Claw_FindingNextBox_Upper=0;
 				Sensor_Ready[0]=0;
 			}
 			
 		}
 		Claw_GetSpecifiedBox();
 		Claw_SelfInspect();
+		if(Claw_FindingNextBox_Lower==1)
 		Claw_GoToNextBox_lower();
+		if(Claw_FindingNextBox_Upper==1)
+		Claw_GoToNextBox_upper();	
 		Claw_Up();
 		Box_Land();
 		AutoGet_SwitchState();

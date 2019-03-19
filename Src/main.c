@@ -164,10 +164,9 @@ int main(void)
 	#endif
 	__HAL_UART_ENABLE_IT(&UPPER_UART, UART_IT_IDLE);
 	//打开四个24V电源
-	HAL_GPIO_WritePin(GPIOI,1<<5,0);
+	
 	//HAL_GPIO_WritePin(GPIOH,1<<2,0);//爪子的向前弹�?
 	//HAL_GPIO_WritePin(GPIOH,1<<4,1);//弹射装置1是放�? 0是弹�?
-	//HAL_GPIO_WritePin(GPIOI,1<<5,1);//爪子抓紧与松�?
 	//�?启红外传感器，并把数据存在ADC_value�?
   HAL_ADC_Start_DMA(&hadc1,ADC_value,160);
   //HAL_ADC_Start_DMA(&hadc2,ADC2_value,10);
