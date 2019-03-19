@@ -13,7 +13,7 @@
 
 uint8_t rc_data[18];
 RC_Ctl_t RC_CtrlData;
-InputMode_e inputmode = REMOTE_INPUT; 
+InputMode_e inputmode = REMOTE_Control; 
 FunctionMode_e functionmode = UPPER_POS;
 
 RemoteSwitch_t g_switch1;
@@ -85,8 +85,8 @@ void RemoteDataProcess(uint8_t *pData){
 	RC_CtrlData.key.v = ((int16_t)pData[14]) | ((int16_t)pData[15] << 8);
 
 	//输入状态设置
-	if(RC_CtrlData.rc.s2 == 1) inputmode = REMOTE_INPUT;
-	else if(RC_CtrlData.rc.s2 == 3) inputmode = KEY_MOUSE_INPUT; 
+	if(RC_CtrlData.rc.s2 == 1) inputmode = REMOTE_Control;
+	else if(RC_CtrlData.rc.s2 == 3) inputmode = SELF_Control; 
 	else inputmode = STOP; 
 	
 	//功能状态设置
@@ -115,17 +115,14 @@ void RemoteDataProcess(uint8_t *pData){
 	}
 	//数据处理方式选择
 	switch(inputmode){
-		case REMOTE_INPUT:{
+		case REMOTE_Control:{
 			if(WorkState > 0){
-				if(remote_test_mode==0) 
-					RemoteControlProcess(&(RC_CtrlData.rc));
-				else
-					RemoteTestProcess(&(RC_CtrlData.rc));
+				RemoteControlProcess(&(RC_CtrlData.rc));
 			}
 		}break;
-		case KEY_MOUSE_INPUT:{
-			if(WorkState > 0){	
-			//	MouseKeyControlProcess(&RC_CtrlData.mouse,&RC_CtrlData.key);
+		case SELF_Control:{
+			if(WorkState > 0){
+				RemoteControlProcess2(&(RC_CtrlData.rc));
 			}
 		}break;
 		case STOP:{

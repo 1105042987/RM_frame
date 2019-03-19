@@ -1,8 +1,7 @@
 /**
   ******************************************************************************
-  * @file           : main.h
-  * @brief          : Header for main.c file.
-  *                   This file contains the common defines of the application.
+  * File Name          : main.hpp
+  * Description        : This file contains the common defines of the application
   ******************************************************************************
   ** This notice applies to any and all portions of this file
   * that are not between comment pairs USER CODE BEGIN and
@@ -36,13 +35,12 @@
   *
   ******************************************************************************
   */
-
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#ifndef __MAIN_H
+#define __MAIN_H
+  /* Includes ------------------------------------------------------------------*/
 
 /* Includes ------------------------------------------------------------------*/
-
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -51,10 +49,10 @@
 
 #define LASER_Pin GPIO_PIN_13
 #define LASER_GPIO_Port GPIOG
-#define Cap_In_Pin GPIO_PIN_4
-#define Cap_In_GPIO_Port GPIOE
-#define Cap_Out_Pin GPIO_PIN_5
-#define Cap_Out_GPIO_Port GPIOE
+#define leftSensor_Pin GPIO_PIN_4
+#define leftSensor_GPIO_Port GPIOE
+#define rightSensor_Pin GPIO_PIN_5
+#define rightSensor_GPIO_Port GPIOE
 #define LED8_Pin GPIO_PIN_8
 #define LED8_GPIO_Port GPIOG
 #define LED7_Pin GPIO_PIN_7
@@ -103,6 +101,13 @@ void _Error_Handler(char *, int);
 }
 #endif
 
-#endif /* __MAIN_H__ */
+/**
+  * @}
+  */ 
 
+/**
+  * @}
+*/ 
+
+#endif /* __MAIN_H */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

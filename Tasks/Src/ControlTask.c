@@ -18,11 +18,6 @@ uint16_t counter = 0;
 double rotate_speed = 0;
 uint8_t startUp = 0;
 
-#ifdef USE_CHASSIS_FOLLOW
-uint8_t ChassisTwistState = 0;
-int ChassisTwistGapAngle = 0;
-#endif
-
 MusicNote SuperMario[] = {
 	#if GUARD == 'U'
 		{H3, 100}, {0, 50},
@@ -33,7 +28,6 @@ MusicNote SuperMario[] = {
 	#endif
 };
 
-PID_Regulator_t CMRotatePID = CHASSIS_MOTOR_ROTATE_PID_DEFAULT; 
 extern int32_t auto_counter;
 
 uint8_t playMusicSuperMario(void){
@@ -116,7 +110,6 @@ void WorkStateFSM(void){
 				isCan12FirstRx == 1 && isCan21FirstRx == 1 && isCan22FirstRx == 1){
 			//开机2秒后且gyro初始化完成且所有can电机上电完成后进入正常模式
 				if(playMusicSuperMario()){
-					CMRotatePID.Reset(&CMRotatePID);
 					if(inputmode == STOP) WorkState = STOP_STATE;
 					else WorkState = NORMAL_STATE;
 					prepare_time = 0;
@@ -129,31 +122,24 @@ void WorkStateFSM(void){
 			if(normal_time<10000)normal_time++;
 			if(normal_time>=10)startUp = 1;
 			if (inputmode == STOP) WorkState = STOP_STATE;
-			if (inputmode == REMOTE_INPUT){
 				if(functionmode == MIDDLE_POS) WorkState = ADDITIONAL_STATE_ONE;
 				if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
-			}
 		}break;
 		case ADDITIONAL_STATE_ONE:		//附加模式一
 		{
 			if (inputmode == STOP) WorkState = STOP_STATE;
-			if (inputmode == REMOTE_INPUT){
 				if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
 				if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
-			}
 		}break;
 		case ADDITIONAL_STATE_TWO:		//附加模式二
 		{
 			if (inputmode == STOP) WorkState = STOP_STATE;
-			if (inputmode == REMOTE_INPUT)
-			{
 				if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
 				if(functionmode == MIDDLE_POS) WorkState = ADDITIONAL_STATE_ONE;
-			}
 		}break;
 		case STOP_STATE:{				//紧急停止
 			sendAllData(1);
-			if (inputmode == REMOTE_INPUT || inputmode == KEY_MOUSE_INPUT){
+			if (inputmode == REMOTE_Control || inputmode == SELF_Control){
 				WorkState = PREPARE_STATE;
 				FunctionTaskInit();
 			}
@@ -168,67 +154,10 @@ void WorkStateFSM(void){
 		#endif
 	}
 }
-#ifdef USE_CHASSIS_FOLLOW
-extern MotorINFO* GimbalMotorGroup[2];
-void ChassisTwist(void){
-	switch (ChassisTwistGapAngle){
-		case 0:{
-			ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;
-		}break;
-		case CHASSIS_TWIST_ANGLE_LIMIT:{
-			//if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-			if(fabs((GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-				
-			{ChassisTwistGapAngle = -CHASSIS_TWIST_ANGLE_LIMIT;}break;
-		}
-		case -CHASSIS_TWIST_ANGLE_LIMIT:{
-			//if(abs((GMY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-			if(fabs((GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle)<3)
-			{ChassisTwistGapAngle = CHASSIS_TWIST_ANGLE_LIMIT;}break;
-		}
-	}
-}
 
-void ChassisDeTwist(void)
-{
-	ChassisTwistGapAngle = 0;
-}
-#endif
-void ControlRotate(void){	
-	#ifdef USE_CHASSIS_FOLLOW
-		//ChassisSpeedRef.rotate_ref=(GMY.RxMsg6623.angle - `GM_YAW_ZERO) * 360 / 8192.0f - ChassisTwistGapAngle;
-		ChassisSpeedRef.rotate_ref=(GimbalMotorGroup[1]->RxMsg6623.angle - GimbalMotorGroup[1]->Zero) * 360 / 8192.0f - ChassisTwistGapAngle;
-		NORMALIZE_ANGLE180(ChassisSpeedRef.rotate_ref);
-	#endif
-	CMRotatePID.ref = 0;
-	CMRotatePID.fdb = ChassisSpeedRef.rotate_ref;
-	CMRotatePID.Calc(&CMRotatePID);
-	#ifdef USE_CHASSIS_FOLLOW
-		if(ChassisTwistState) MINMAX(CMRotatePID.output,-10,10);
-	#endif
-	rotate_speed = CMRotatePID.output * 13 + ChassisSpeedRef.forward_back_ref * 0.01 + ChassisSpeedRef.left_right_ref * 0.01;
-}
-extern MotorINFO* ChassisMotorGroup[4];
 void Chassis_Data_Decoding(){
-	ControlRotate();
-	
-	#ifdef USE_CHASSIS_FOLLOW
-		if(ChassisTwistGapAngle!=0){
-			float gap = (GimbalMotorGroup[1]->Zero-GimbalMotorGroup[1]->RxMsg6623.angle) * 6.28 / 8192.0f;
-			int16_t fb = ChassisSpeedRef.forward_back_ref;
-			int16_t rl = ChassisSpeedRef.left_right_ref;
-			ChassisSpeedRef.forward_back_ref = cos(gap)*fb-sin(gap)*rl;
-			ChassisSpeedRef.left_right_ref = sin(gap)*fb+cos(gap)*rl;
-		}
-	#endif
-
 	CML.Target += ChassisSpeedRef.left_right_ref * 0.008;
 	CMR.Target = CML.Target;
-	
-	//CMFL.Target = ( ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
-	//CMFR.Target = (-ChassisSpeedRef.forward_back_ref + ChassisSpeedRef.left_right_ref + rotate_speed)*12;
-	//CMBL.Target = ( ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
-	//CMBR.Target = (-ChassisSpeedRef.forward_back_ref - ChassisSpeedRef.left_right_ref + rotate_speed)*12;
 }
 //主控制循环
 #ifdef USE_POWER_LIMIT
@@ -244,9 +173,7 @@ void controlLoop()
 		
 		for(int i=0;i<8;i++) if(can1[i]!=0) (can1[i]->Handle)(can1[i]);
 		for(int i=0;i<8;i++) if(can2[i]!=0) (can2[i]->Handle)(can2[i]);
-		#ifdef USE_SUPER_CAP
-			Cap_Run();
-		#endif
+
 		#ifdef USE_POWER_LIMIT
 			PowerLimitation();
 		//for(int i=0;i<4;i++) if(ChassisMotorGroup[i]!=0)ChassisMotorGroup[i]->Intensity*=rate;

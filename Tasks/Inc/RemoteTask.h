@@ -59,8 +59,8 @@ typedef __packed struct
 
 typedef enum
 {
-	REMOTE_INPUT = 1,
-	KEY_MOUSE_INPUT = 3,
+	REMOTE_Control = 1,
+	SELF_Control = 3,
 	STOP = 2,
 }InputMode_e;
 
@@ -70,8 +70,6 @@ typedef enum
 	MIDDLE_POS = 2,
 	LOWER_POS = 3,
 }FunctionMode_e;
-
-
 
 typedef __packed struct
 {
@@ -103,10 +101,10 @@ void RemoteDataProcess(uint8_t *pData);
 void InitRemoteControl(void);
 #ifdef SLAVE_MODE
 void RemoteControlProcess(void);
+void RemoteControlProcess2(void);
 #else
 void RemoteControlProcess(Remote *rc);
+void RemoteControlProcess2(Remote *rc);
 #endif
-void RemoteTestProcess(Remote *rc);
-void MouseKeyControlProcess(Mouse *mouse, Key *key);
 
 #endif /*__ REMOTETASK_H */
