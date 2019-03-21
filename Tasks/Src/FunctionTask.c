@@ -11,7 +11,7 @@
   */
 #include "includes.h"
 
-#define qudan
+//#define qudan
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
@@ -30,6 +30,7 @@ uint32_t lefttight=0;
 uint32_t righttight=0;
 
 extern uint32_t AutoClimb_ComeToTop;
+extern uint32_t AutoClimb_AlreadyTop;
 
 uint32_t openthegay=0;
 
@@ -162,15 +163,11 @@ void RemoteControlProcess(Remote *rc)
 
 			UFM.TargetAngle-=channellrow*0.01;//左横向是水平电机   向左远离（角度++）向右靠近（角度--）
   #else
-	    
-			if(channellcol>500)
-				AutoClimb_ComeToTop=1;
-			if(channellcol<-500)
-				AutoClimb_ComeToTop=0;
+	     
 			ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
-			ComeToTop();
+			
 	#endif
 			
 }
@@ -203,11 +200,13 @@ void RemoteControlProcess(Remote *rc)
 			
 			
 			AutoGet_SwitchState();*/
-			
-		/*	ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
+			 if(AutoClimb_AlreadyTop==0)
+				AutoClimb_ComeToTop=1;
+			 ComeToTop();
+			ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		  ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 			ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
-			Chassis_Choose(1,1);*/
+			Chassis_Choose(1,1);
 			
 			
 			
@@ -227,7 +226,7 @@ void RemoteControlProcess(Remote *rc)
 				//__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_3,2200);
 			}*/
 			//测试救援用 平常关闭   左++ 右--
-		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
+		/*ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
 			setzero();
@@ -264,7 +263,7 @@ void RemoteControlProcess(Remote *rc)
 					SR.TargetAngle+=20;
 				if(SR.RxMsgC6x0.moment>5000)
 					SR.TargetAngle-=10;
-			}
+			}*/
 	}
 	Limit_and_Synchronization();
 }

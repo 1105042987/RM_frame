@@ -16,6 +16,7 @@ extern int8_t Test_UD_Direction;
 uint32_t adfl=0,adfr=0,adbl=0,adbr=0,addf=0,addb=0;
 uint32_t disfl=0,disfr=0,disbl=0,disbr=0,disdf=0,disdb=0;
 uint32_t AutoClimb_ComeToTop=0;
+uint32_t AutoClimb_AlreadyTop=0;
 uint8_t signal1=0;
 uint8_t signal2=0;
 
@@ -132,9 +133,14 @@ void ComeToTop()
 		}
 		if(NMCDL.RxMsgC6x0.moment>8000&&NMCDR.RxMsgC6x0.moment>6000)
 		{
+			AutoClimb_AlreadyTop=1;
 			AutoClimb_ComeToTop=0;
 			NMCDL.RealAngle=0;
 			NMCDR.RealAngle=0;
 		}
+		if(NMCDL.RxMsgC6x0.moment>9000)
+			NMCDL.TargetAngle-=5;
+		if(NMCDR.RxMsgC6x0.moment>9000)
+			NMCDR.TargetAngle-=5;
 	}
 }
