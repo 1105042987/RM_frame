@@ -12,6 +12,7 @@
 #include "includes.h"
 
 //#define qudan
+#define shangdao
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
@@ -24,6 +25,10 @@ int16_t channellrow = 0;
 int16_t channellcol = 0;
 int16_t testIntensity = 0;
 
+uint32_t counting=0;
+int32_t doorcount=0;
+uint32_t firsttime=0;
+uint32_t setdoorzero=0;
 uint32_t setzerol=0;
 uint32_t setzeror=0;
 uint32_t lefttight=0;
@@ -55,7 +60,32 @@ void OptionalFunction()
 	Cap_Control();
 	PowerLimitation();
 }
-void protect()
+void SetDoorZero()
+{
+	if(setdoorzero==0)
+	{
+	if(DOOR.RxMsgC6x0.moment<2000)
+	{
+		counting=0;
+		DOOR.TargetAngle+=10;
+	}
+	if(DOOR.RxMsgC6x0.moment>=2000)
+	{
+	  counting=1;
+	}
+	if(doorcount>=1000)
+	{
+		DOOR.RealAngle=0;
+		DOOR.TargetAngle=0;
+		setdoorzero=1;
+	}
+  }
+	if(DOOR.RxMsgC6x0.moment>4000)
+		DOOR.TargetAngle-=5;
+	if(DOOR.RxMsgC6x0.moment<-4000)
+		DOOR.TargetAngle+=5;
+}
+/*void protect()
 {
 	if(SL.RxMsgC6x0.moment>3000)
 	SL.TargetAngle-=20;
@@ -86,7 +116,7 @@ void setzero()
 			setzeror=1;
 		}
 	}
-}
+}*/
 void Limit_and_Synchronization()
 {
 	//demo
@@ -109,23 +139,28 @@ void RemoteControlProcess(Remote *rc)
 	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	if(WorkState == NORMAL_STATE)
 	{	
-		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
-		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
-		//ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
-		Sensor_a=adgl;
-		Sensor_b=adgr;
 		
-		
-		//手动挡控制爪子
-		/*if(channellcol>500)
+		#ifdef qudan
+		SetDoorZero();
+		if(channellrow>500)
+			DOOR.TargetAngle=0;
+		if(channellrow<-500)
+			DOOR.TargetAngle=-155;
+		UM1.TargetAngle+=channelrrow*0.001;
+		UM2.TargetAngle-=channelrrow*0.001;//右横向是爪子的上下移动
+			
+		if(channellcol>500)
 		CLAWOUT;//左纵向是爪子的向前弹出
-		if(channellcol<-500)                                  //          *********测试时暂时关闭*************
+		if(channellcol<-500)                                  
 		CLAWIN;
+	
+	
 		
-		UM1.TargetAngle+=channellrow*0.001;
-		UM2.TargetAngle-=channellrow*0.001;//左横向是爪子的上下移动*/
+	
+		#else
 		
-    if(NMCDL.RxMsgC6x0.moment>-12000&&NMCDR.RxMsgC6x0.moment>-14000&&channellcol<0)
+		
+   if(NMCDL.RxMsgC6x0.moment>-12000&&NMCDR.RxMsgC6x0.moment>-14000&&channellcol<0)
 		{
 		NMCDL.TargetAngle+=channellcol*0.06;
 		NMCDR.TargetAngle+=channellcol*0.06;
@@ -135,9 +170,9 @@ void RemoteControlProcess(Remote *rc)
 		NMCDL.TargetAngle+=channellcol*0.06;
 		NMCDR.TargetAngle+=channellcol*0.06;
 		}
-		
 		CM1.TargetAngle+=channellrow*0.02;
 		CM2.TargetAngle+=channellrow*-0.02;
+		#endif
 		
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
@@ -200,13 +235,16 @@ void RemoteControlProcess(Remote *rc)
 			
 			
 			AutoGet_SwitchState();*/
-			 if(AutoClimb_AlreadyTop==0)
+     		
+		if(AutoClimb_AlreadyTop==0)
 				AutoClimb_ComeToTop=1;
 			 ComeToTop();
 			ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		  ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 			ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
-			Chassis_Choose(1,1);
+		#ifdef shangdao	
+		Chassis_Choose(1,1);  
+		#endif
 			
 			
 			
@@ -328,10 +366,12 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			
 			if(key->v & KEY_Z)
 			{
+				if(Claw_SelfInspecting==2)
 				AutoGet_Start=1;
 			}
 			if(key->v & KEY_X)
 			{
+				if(Claw_SelfInspecting==2)
 				AutoGet_Start=2;
 			}
 		}break;
@@ -351,22 +391,27 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_C)
 			{
+				if(Claw_SelfInspecting==2)
 				Claw_TakeThisBox=1;
 			}
 			else if(key->v & KEY_V)
 			{
+				if(Claw_SelfInspecting==2)
 				Claw_TakeThisBox=2;
 			}
 			else if(key->v & KEY_B)
 			{
+				if(Claw_SelfInspecting==2)
 				Claw_TakeThisBox=3;
 			}
 			else if(key->v & KEY_F)
 			{
+				if(Claw_SelfInspecting==2)
 				Claw_TakeThisBox=4;
 			}
 			else if(key->v & KEY_G)
 			{
+				if(Claw_SelfInspecting==2)
 				Claw_TakeThisBox=5;
 			}
 			else if(key->v & KEY_Z)

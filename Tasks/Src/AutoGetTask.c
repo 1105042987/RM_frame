@@ -20,7 +20,7 @@
 #define LOWERCRITICIAL 2000      //µºÏÂÁÙ½çÖµ
 #define UPPERCRITICIAL 800 //´ı²âÊÔ
 
-#define UPLEVEL 480    //Ì§ÉıÊ±µÄºÏÊÊ¸ß¶È
+#define UPLEVEL 432    //Ì§ÉıÊ±µÄºÏÊÊ¸ß¶È ±ØĞë±»4Õû³ı
 #define UPPROTECT 400  //Ì§ÉıµÄÁÙ½ç±£»¤Öµ
 
 #define OUTANGLE 180  //×¥Ïä×ÓµÄ½Ç¶ÈÖµ
@@ -109,8 +109,8 @@ void RefreshADC()
 		FLAG_SETr(distance_couple.frontr);
 		FLAG_SET(distance_couple.frontl);
 		FLAG_SET(distance_couple.backb);
-		FLAG_SET(distance_couple.backr);
-		FLAG_SET(distance_couple.backl);
+		FLAG_SETb(distance_couple.backr);
+		FLAG_SETb(distance_couple.backl);
 		FLAG_SET(distance_couple.left);
 		FLAG_SET(distance_couple.right);
 		
@@ -282,6 +282,7 @@ void Box_Fire()//µ¯ÉäÒ»¸öÏä×ÓµÄÍêÕûÁ÷³Ì
 void AutoGet_Stop_And_Clear()//×´Ì¬ÇåÁã ×¦×Ó×ª»Ø ºáÒÆµç»úÍ£×ª£¨ÓÃÓÚÒì³£×´¿ö´¦ÀíºÍÒ»´ÎÈ¡µ¯½áÊø£©
 {
 	CLAWLOOSE;
+	CLAWIN;
 	AutoGet_Start=0;
 	AutoGet_TotalStep=1;
 	AutoGet_Alreadywaited=0;
@@ -291,7 +292,6 @@ void AutoGet_Stop_And_Clear()//×´Ì¬ÇåÁã ×¦×Ó×ª»Ø ºáÒÆµç»úÍ£×ª£¨ÓÃÓÚÒì³£×´¿ö´¦Àíº
 	Claw_AlreadyTight=0;
 	
 	Claw_TakeThisBox=0;
-	Claw_SelfInspecting=0;
 	Claw_FindingNextBox_Lower=0;
 	Claw_FindingNextBox_Upper=0;
 	Claw_UpToPosition=0;
@@ -440,7 +440,7 @@ void Claw_SelfInspect()//×¦×ÓºáÒÆ×Ô¶¯¶ÔÎ»Áãµã
 	{
 		UFM.RealAngle=0;
 		UFM.TargetAngle=0;
-		Claw_SelfInspecting=0;
+		Claw_SelfInspecting=2;
 		Claw_UpToPosition=0;
 	}
 }

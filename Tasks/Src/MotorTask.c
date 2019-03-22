@@ -89,10 +89,10 @@ MotorINFO CM1 = Normal_MOTORINFO_Init(36.0,&ControlNM,
 MotorINFO CM2 = Normal_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
 								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
-MotorINFO SL = Normal_MOTORINFO_Init(36.0,&ControlNM,
+MotorINFO YTP = Normal_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
 								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));	
-MotorINFO SR = Normal_MOTORINFO_Init(36.0,&ControlNM,
+MotorINFO YTY = Normal_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
 								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));	
 MotorINFO DOOR = Normal_MOTORINFO_Init(36.0,&ControlNM,
@@ -104,7 +104,7 @@ MotorINFO DOOR = Normal_MOTORINFO_Init(36.0,&ControlNM,
 //MotorINFO* can2[8]={&CMFL,&CMFR,&CMBL,&CMBR,&NMUDL,&NMUDR,0,0};
 
 MotorINFO* can1[8]={&CMFL,&CMFR,&CMBL,&CMBR,&NMUDL,&NMUDR,&NMCDL,&NMCDR};
-MotorINFO* can2[8]={&CM1,&CM2,&UM1,&UM2,&SL,&SR,&UFM,&DOOR};
+MotorINFO* can2[8]={&CM1,&CM2,&UM1,&UM2,&YTP,&YTY,&UFM,&DOOR};
 int16_t someIntensity;
 uint16_t someEncoder;
 double someRealAngle;

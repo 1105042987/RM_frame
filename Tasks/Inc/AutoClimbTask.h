@@ -17,6 +17,7 @@
 #define GETHIGHT 400
 #define CHANGE_POINT 2000
 #define CHANGE_POINTr 1700
+#define CHANGE_POINTb 1200
 //1v/5v 	27cm
 
 #define UD_TOP			0
@@ -24,6 +25,7 @@
 //-1010
 #define FLAG_SET(target) if(target.val_ref<CHANGE_POINT) target.flag = 0; else target.flag = 1;
 #define FLAG_SETr(target) if(target.val_ref<CHANGE_POINTr) target.flag = 0; else target.flag = 1;
+#define FLAG_SETb(target) if(target.val_ref<CHANGE_POINTb) target.flag = 0; else target.flag = 1;
 
 typedef __packed struct
 {

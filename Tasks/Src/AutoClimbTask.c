@@ -126,21 +126,22 @@ void ComeToTop()
 {
 	if(AutoClimb_ComeToTop==1)
 	{
-		if(NMCDL.RxMsgC6x0.moment<8000||NMCDR.RxMsgC6x0.moment<6000)
+		if(NMCDL.RxMsgC6x0.moment<5000||NMCDR.RxMsgC6x0.moment<5000)
 		{	
 			NMCDL.TargetAngle+=5;
 		  NMCDR.TargetAngle+=5;
 		}
-		if(NMCDL.RxMsgC6x0.moment>8000&&NMCDR.RxMsgC6x0.moment>6000)
+		if(NMCDL.RxMsgC6x0.moment>5000&&NMCDR.RxMsgC6x0.moment>5000)
 		{
 			AutoClimb_AlreadyTop=1;
 			AutoClimb_ComeToTop=0;
 			NMCDL.RealAngle=0;
 			NMCDR.RealAngle=0;
 		}
+	}
 		if(NMCDL.RxMsgC6x0.moment>9000)
 			NMCDL.TargetAngle-=5;
 		if(NMCDR.RxMsgC6x0.moment>9000)
 			NMCDR.TargetAngle-=5;
-	}
+	
 }
