@@ -327,7 +327,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	MINMAX(mouse->y, -150, 150); 
 	
 	#ifdef USE_CHASSIS_FOLLOW
-	ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT;
+	ChassisSpeedRef.rotate_ref = -mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT;
 	YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT;
 	#else
 	ChassisSpeedRef.rotate_ref = mouse->x * RC_ROTATE_SPEED_REF;
