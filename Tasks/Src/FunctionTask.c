@@ -14,6 +14,8 @@
 //#define qudan
 #define shangdao
 KeyboardMode_e KeyboardMode = NO_CHANGE;
+MouseMode_e MouseLMode = NO_CLICK;
+MouseMode_e MouseRMode = NO_CLICK;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
 ChassisSpeed_Ref_t ChassisSpeedRef; 
@@ -38,6 +40,8 @@ extern uint32_t AutoClimb_ComeToTop;
 extern uint32_t AutoClimb_AlreadyTop;
 
 uint32_t openthegay=0;
+
+uint32_t FrontBackInspect=0;
 
 
 //初始化
@@ -309,6 +313,7 @@ void RemoteControlProcess(Remote *rc)
 
 uint16_t KM_FORWORD_BACK_SPEED 	= NORMAL_FORWARD_BACK_SPEED;
 uint16_t KM_LEFT_RIGHT_SPEED  	= NORMAL_LEFT_RIGHT_SPEED;
+void MouseModeFSM(Mouse *mouse);
 void KeyboardModeFSM(Key *key);
 
 //****************
@@ -320,21 +325,77 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	
 	MINMAX(mouse->x, -150, 150); 
 	MINMAX(mouse->y, -150, 150); 
+	
+	#ifdef USE_CHASSIS_FOLLOW
+	YTY.TargetAngle += mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT;
+	YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT;
+	#else
+	ChassisSpeedRef.rotate_ref = mouse->x * RC_ROTATE_SPEED_REF;
+	#endif
+	
+	
+	MouseModeFSM(mouse);
+	
+	switch(MouseRMode)
+	{
+		case SHORT_CLICK:
+		{
+		
+		}break;
+		case LONG_CLICK:
+		{
+			
+		}break;
+		default: break;
+	}
+	
+	switch (MouseLMode)
+	{
+		case SHORT_CLICK:
+		{
+			
+		}break;
+		case LONG_CLICK:
+		{
+			
+		}
+		default: break;
+	}
 
 	KeyboardModeFSM(key);//下面是移动的控制 在写命令时不要用wasd键
 		if(key->v & KEY_W)  		//key: w
+		{
+			if (FrontBackInspect%2==0)
 				ChassisSpeedRef.forward_back_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+			if (FrontBackInspect%2==1)
+				ChassisSpeedRef.forward_back_ref =  -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+		}
 			else if(key->v & KEY_S) 	//key: s
+			{
+				if(FrontBackInspect%2==0)
 				ChassisSpeedRef.forward_back_ref = -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+				else
+						ChassisSpeedRef.forward_back_ref = KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+			}
 			else
 			{
 				ChassisSpeedRef.forward_back_ref = 0;
 				FBSpeedRamp.ResetCounter(&FBSpeedRamp);
 			}
 			if(key->v & KEY_D)  		//key: d
+			{	
+			if(FrontBackInspect%2==0)
 				ChassisSpeedRef.left_right_ref =  KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+			else
+				ChassisSpeedRef.left_right_ref =  -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+			}
 			else if(key->v & KEY_A) 	//key: a
+			{	
+			if(FrontBackInspect%2==0)
 				ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+			else
+				ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+			}
 			else
 			{
 				ChassisSpeedRef.left_right_ref = 0;
@@ -363,6 +424,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			 CLAWOUT;
 			if(key->v & KEY_E)
 			 CLAWIN;
+			
 			
 			if(key->v & KEY_Z)
 			{
@@ -428,6 +490,15 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				Claw_FindingNextBox_Upper=0;
 				Sensor_Ready[0]=0;
 			}
+//			if(key->v & KEY_R)
+//			{
+//				
+//				if(FrontBackInspect%2==0)
+//					YTY.TargetAngle = 180;
+//				else
+//					YTY.TargetAngle = 0;
+//				FrontBackInspect++;
+//			}
 			
 		}
 		Claw_GetSpecifiedBox();
@@ -469,4 +540,89 @@ void KeyboardModeFSM(Key *key)
 		KM_LEFT_RIGHT_SPEED = NORMAL_LEFT_RIGHT_SPEED;
 		KeyboardMode=NO_CHANGE;
 	}	
+}
+
+void MouseModeFSM(Mouse *mouse)
+{
+	static uint8_t counterl = 0;
+	static uint8_t counterr = 0;
+	switch (MouseLMode)
+	{
+		case SHORT_CLICK:
+		{
+			counterl++;
+			if(mouse->press_l == 0)
+			{
+				MouseLMode = NO_CLICK;
+				counterl = 0;
+			}
+			else if(counterl>=50)
+			{
+				MouseLMode = LONG_CLICK;
+				counterl = 0;
+			}
+			else
+			{
+				MouseLMode = SHORT_CLICK;
+			}
+		}break;
+		case LONG_CLICK:
+		{
+			if(mouse->press_l==0)
+			{
+				MouseLMode = NO_CLICK;
+			}
+			else
+			{
+				MouseLMode = LONG_CLICK;
+			}
+		}break;
+		case NO_CLICK:
+		{
+			if(mouse->press_l)
+			{
+				MouseLMode = SHORT_CLICK;
+			}
+		}break;
+	}
+	
+	switch (MouseRMode)
+	{
+		case SHORT_CLICK:
+		{
+			counterr++;
+			if(mouse->press_r == 0)
+			{
+				MouseRMode = NO_CLICK;
+				counterr = 0;
+			}
+			else if(counterr>=50)
+			{
+				MouseRMode = LONG_CLICK;
+				counterr = 0;
+			}
+			else
+			{
+				MouseRMode = SHORT_CLICK;
+			}
+		}break;
+		case LONG_CLICK:
+		{
+			if(mouse->press_r==0)
+			{
+				MouseRMode = NO_CLICK;
+			}
+			else
+			{
+				MouseRMode = LONG_CLICK;
+			}
+		}break;
+		case NO_CLICK:
+		{
+			if(mouse->press_r)
+			{
+				MouseRMode = SHORT_CLICK;
+			}
+		}break;
+	}
 }
