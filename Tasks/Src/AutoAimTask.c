@@ -16,7 +16,7 @@
 #ifndef DEBUG_MODE
 #ifdef	USE_AUTOAIM
 
-#define USE_AUTOAIM_ANGLE
+//#define USE_AUTOAIM_ANGLE
 
 //*****************************************ÉùÃ÷±äÁ¿******************************************//
 
