@@ -11,8 +11,8 @@
   */
 #include "includes.h"
 
-//#define qudan
-#define shangdao
+#define qudan
+//#define shangdao
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 MouseMode_e MouseLMode = NO_CLICK;
 MouseMode_e MouseRMode = NO_CLICK;
@@ -27,6 +27,7 @@ int16_t channellrow = 0;
 int16_t channellcol = 0;
 int16_t testIntensity = 0;
 
+uint32_t relookcount=0;
 uint32_t counting=0;
 int32_t doorcount=0;
 uint32_t firsttime=0;
@@ -38,7 +39,7 @@ uint32_t righttight=0;
 
 extern uint32_t AutoClimb_ComeToTop;
 extern uint32_t AutoClimb_AlreadyTop;
-
+extern uint32_t AutoClimbing;
 uint32_t openthegay=0;
 
 uint32_t FrontBackInspect=0;
@@ -63,6 +64,15 @@ void OptionalFunction()
 {
 	Cap_Control();
 	PowerLimitation();
+}
+
+void relook()
+{
+				relookcount++;
+				if(relookcount%2==1)
+					YTY.TargetAngle=-120;
+				if(relookcount%2==0)
+					YTY.TargetAngle=0;
 }
 void SetDoorZero()
 {
@@ -240,8 +250,7 @@ void RemoteControlProcess(Remote *rc)
 			
 			AutoGet_SwitchState();*/
      		
-		if(AutoClimb_AlreadyTop==0)
-				AutoClimb_ComeToTop=1;
+		
 			 ComeToTop();
 			ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		  ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
@@ -327,8 +336,15 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	MINMAX(mouse->y, -150, 150); 
 	
 	#ifdef USE_CHASSIS_FOLLOW
+<<<<<<< HEAD
+	if(AutoClimbing==0)
+	ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-15;
+	YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
+	//YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
+=======
 	ChassisSpeedRef.rotate_ref = -mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT;
 	YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT;
+>>>>>>> 6bd197520eb7b612def17e1acf1dad256b65afb9
 	#else
 	ChassisSpeedRef.rotate_ref = mouse->x * RC_ROTATE_SPEED_REF;
 	#endif
@@ -344,7 +360,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		}break;
 		case LONG_CLICK:
 		{
-			
+			ChassisSpeedRef.rotate_ref = 0;
+			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
 		}break;
 		default: break;
 	}
@@ -417,8 +434,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			if(key->v & KEY_V)
 			{
-				Claw_UpToPosition=0;
-				Claw_UpAngle=0;
+				NMUDL.TargetAngle=0;
+				NMUDR.TargetAngle=0;
 			}
 			if(key->v & KEY_Q)
 			 CLAWOUT;
@@ -442,6 +459,14 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			if(key->v & KEY_Q)
 			{
 				Claw_FindingNextBox_Upper=1;
+			}
+			else if(key->v & KEY_C)
+			{
+				AutoClimbing=1;
+			}
+			else if(key->v & KEY_V)
+			{
+				AutoClimbing=0;
 			}
 		}break;
 		case NO_CHANGE:			//normal
@@ -490,6 +515,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				Claw_FindingNextBox_Upper=0;
 				Sensor_Ready[0]=0;
 			}
+			OnePush(key->v & KEY_R,relook());
 //			if(key->v & KEY_R)
 //			{
 //				
@@ -510,6 +536,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		Claw_Up();
 		Box_Land();
 		AutoGet_SwitchState();
+		AutoClimb_SwitchState();
+		ComeToTop();
 	}
 	Limit_and_Synchronization();
 }

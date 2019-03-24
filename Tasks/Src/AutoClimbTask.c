@@ -21,6 +21,7 @@ uint8_t signal1=0;
 uint8_t signal2=0;
 
 uint32_t AutoClimb_Oneclimb=0;
+uint32_t AutoClimbing=0;
 //ÉÏ 10000 8000
 //disfl>2000 disfr>2000
 //µç»ú-8000 -6000
@@ -124,6 +125,8 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 
 void ComeToTop()
 {
+	if(AutoClimb_AlreadyTop==0)
+				AutoClimb_ComeToTop=1;
 	if(AutoClimb_ComeToTop==1)
 	{
 		if(NMCDL.RxMsgC6x0.moment<5000||NMCDR.RxMsgC6x0.moment<5000)
@@ -144,4 +147,10 @@ void ComeToTop()
 		if(NMCDR.RxMsgC6x0.moment>9000)
 			NMCDR.TargetAngle-=5;
 	
+}
+
+void AutoClimb_SwitchState()
+{
+	if(AutoClimbing==1)
+		Chassis_Choose(1,1);
 }

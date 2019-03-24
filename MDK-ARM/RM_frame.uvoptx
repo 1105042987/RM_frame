@@ -707,6 +707,11 @@
           <WinNumber>2</WinNumber>
           <ItemText>setdoorzero</ItemText>
         </Ww>
+        <Ww>
+          <count>72</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>YTY,0x0A</ItemText>
+        </Ww>
       </WatchWindow2>
       <Tracepoint>
         <THDelay>0</THDelay>
@@ -1054,7 +1059,7 @@
       <GroupNumber>2</GroupNumber>
       <FileNumber>24</FileNumber>
       <FileType>1</FileType>
-      <tvExp>1</tvExp>
+      <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Tasks\Src\MotorTask.c</PathWithFileName>
@@ -1210,7 +1215,7 @@
       <GroupNumber>2</GroupNumber>
       <FileNumber>37</FileNumber>
       <FileType>1</FileType>
-      <tvExp>0</tvExp>
+      <tvExp>1</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Tasks\Src\AutoClimbTask.c</PathWithFileName>
