@@ -38,7 +38,7 @@ MotorINFO GMP  =  Gimbal6020_MOTORINFO_Init(1.0,&ControlGM6020,1200,-1900,20,
 //								fw_PID_INIT_EASY(0.5, 0.01, 0.2, 1000),
 //								fw_PID_INIT_EASY(1500, 80, 0,	 15000));
 MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(1.0,&ControlGMY,2700,400,20,
-								fw_PID_INIT_EASY(0.32, 0.02, 0.2, 10),
+								fw_PID_INIT_EASY(0.8, 0.02, 0.2, 10),
 								fw_PID_INIT_EASY(3000, 500, 200, 15000));
 								
 MotorINFO STIR = AngleBased_MOTORINFO_Init(36.0,&ControlNM,
@@ -180,7 +180,7 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
 		
 		if(id->FirstEnter==1) {
 			id->lastRead = ThisAngle;
-			id->Real = EncoderAngle;
+		//	id->Real = EncoderAngle;
 			id->FirstEnter = 0;
 			return;
 		}

@@ -16,7 +16,7 @@
 #ifndef DEBUG_MODE
 #ifdef	USE_AUTOAIM
 
-//#define USE_AUTOAIM_ANGLE
+#define USE_AUTOAIM_ANGLE
 
 //*****************************************声明变量******************************************//
 
@@ -111,7 +111,7 @@ void EnemyINFOProcess()
 	#ifndef USE_AUTOAIM_ANGLE
 	//坐标转换
 	enemy_gun.x=enemy_scope.x+scope_gun.x;
-	enemy_gun.x=enemy_scope.y+scope_gun.y;
+	enemy_gun.y=enemy_scope.y+scope_gun.y;
 	enemy_gun.z=enemy_scope.z+scope_gun.z;
 	
 	//角度计算（计算消耗内存较多，不能放在2ms以下的时间中断内执行）
@@ -122,12 +122,12 @@ void EnemyINFOProcess()
 	//追踪
 	if(((aim.yaw>0 && aim_rcd.yaw>0) || (aim.yaw<0 && aim_rcd.yaw<0)))
 	{
-		track_cnt++;
-		MINMAX(track_cnt,0,100);
+		track_cnt--;
+		MINMAX(track_cnt,0,60);
 	}
 	else
 	{
-		track_cnt=0;
+		track_cnt=60;
 	}
 }
 
@@ -136,28 +136,63 @@ void EnemyINFOProcess()
 
 //**************************普通模式自瞄控制函数****************************//
 
+//void AutoAimNormal()
+//{
+//	MINMAX(aim.yaw,-6.0f,6.0f);
+//	MINMAX(aim.pitch,-2.0f,2.0f);
+//	if(find_enemy)
+//	{
+////		if(aim_cnt<1)
+////		{
+//			GMY.Target+=(aim.yaw+aim_rcd.yaw)/10;
+//			//GMY.TargetAngle+=(aim.yaw+aim_rcd.yaw)/5*(0.5f+0.012f*track_cnt);
+//			GMP.Target+=(aim.pitch+aim_rcd.pitch)/10;
+////			aim_cnt++;
+////		}
+////		else
+////		{
+//			find_enemy=0;
+////			aim_cnt=0;
+//			aim_rcd.yaw=aim.yaw;
+//			aim_rcd.pitch=aim.pitch;
+////		}
+//	}
+//}
+double ky=3, kp=6;
 void AutoAimNormal()
 {
-	MINMAX(aim.yaw,-3.0f,3.0f);
-	MINMAX(aim.pitch,-2.0f,2.0f);
+	MINMAX(aim.yaw,-15.0f,15.0f);
+	MINMAX(aim.pitch,-10.0f,10.0f);
+//  cps[0] = GMY.TargetAngle;
+//  cps[1] = GMY.RealAngle;
+//  cps[2] = aim.yaw; 
+//  HAL_UART_Transmit_IT(&huart7, (uint8_t*)cps, sizeof(cps));
 	if(find_enemy)
 	{
-		if(aim_cnt<1)
-		{
-			GMY.Target+=(aim.yaw+aim_rcd.yaw)/8;
-			//GMY.TargetAngle+=(aim.yaw+aim_rcd.yaw)/5*(0.5f+0.012f*track_cnt);
-			GMP.Target+=(aim.pitch+aim_rcd.pitch)/8;
-			aim_cnt++;
-		}
-		else
-		{
+//		if(aim_cnt<1)
+//		{
+//			GMY.TargetAngle+=(aim.yaw)/5*(0.5f+0.012f*track_cnt);
+//			GMP.TargetAngle-=(aim.pitch)/6;
+      
+      GMY.Target+=(aim.yaw)/ky;
+			GMP.Target+=(aim.pitch)/kp;
+//      if(((aim.yaw>0)?(aim.yaw):(-aim.yaw)) < sp){
+//        GMY.TargetAngle+=(aim.yaw)/ksy*(0.5f+kk*track_cnt);
+//      }else{
+//        GMY.TargetAngle+=(aim.yaw)/ky*(0.5f+kk*track_cnt);
+//      }
+//			GMP.TargetAngle+=(aim.pitch+aim_rcd.pitch)/kp;
+      
+//			aim_cnt++;
+//		}
+//		else
+//		{
 			find_enemy=0;
-			aim_cnt=0;
-			aim_rcd.yaw=aim.yaw;
-			aim_rcd.pitch=aim.pitch;
+//			aim_cnt=0;
+//			aim_rcd.yaw=aim.yaw;
+//			aim_rcd.pitch=aim.pitch;
 		}
 	}
-}
 
 //**************************************************************************//
 

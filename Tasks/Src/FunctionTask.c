@@ -58,13 +58,13 @@ void RemoteControlProcess(Remote *rc)
 	sendData[0].data[2]=channellcol;
 	sendData[0].data[3]=(int16_t)(fakeHeat0*20);
 	if(WorkState == NORMAL_STATE){//手动模式
-
+STIR.Target=STIR.Real;
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){//自动模式
 		
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
-		if(abs(STIR.RxMsgC6x0.moment)<10000){STIR.Target-= 10 + channelrcol/100;}
+		if(abs(STIR.RxMsgC6x0.moment)<11000){STIR.Target-= 10 + channelrcol/100;}
 		else{STIR.Real=0;STIR.Target=16;}
 	}
 	OnePush(FUNC__RED_RAY_M__READ(),{
@@ -93,8 +93,8 @@ void RemoteControlProcess()
 		laserOff();
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
-		//FRICL.Target =5000;
-		//FRICR.Target =-5000;
+		FRICL.Target =5000;
+		FRICR.Target =-5000;
 		aim_mode=1;
 		AutoAimGMCTRL();
 		laserOn();
