@@ -277,24 +277,24 @@ void RemoteControlProcess(Remote *rc)
 				//__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_3,2200);
 			}*/
 			//²âÊÔ¾ÈÔ®ÓÃ Æ½³£¹Ø±Õ   ×ó++ ÓÒ--
-		/*ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
-		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
-		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
-			setzero();
-			protect();
-			if(channellcol>500)
-			{
-				SL.TargetAngle=240;
-				SR.TargetAngle=-240;
-				lefttight=0;
-				righttight=0;
-				auto_counter=1000;
-			}
-			if(channellcol<-500)
-			{
-				setzerol=0;
-				setzeror=0;
-			}
+//		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
+//		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
+//		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
+//			setzero();
+//			protect();
+//			if(channellcol>500)
+//			{
+//				SL.TargetAngle=240;
+//				SR.TargetAngle=-240;
+//				lefttight=0;
+//				righttight=0;
+//				auto_counter=1000;
+//			}
+//			if(channellcol<-500)
+//			{
+//				setzerol=0;
+//				setzeror=0;
+//			}
 			
 			
 			if((leftstate==1)&&auto_counter==0)
@@ -314,7 +314,7 @@ void RemoteControlProcess(Remote *rc)
 					SR.TargetAngle+=20;
 				if(SR.RxMsgC6x0.moment>5000)
 					SR.TargetAngle-=10;
-			}*/
+			}
 	}
 	Limit_and_Synchronization();
 }
@@ -336,15 +336,15 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	MINMAX(mouse->y, -150, 150); 
 	
 	#ifdef USE_CHASSIS_FOLLOW
-<<<<<<< HEAD
+
 	if(AutoClimbing==0)
 	ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-15;
 	YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
 	//YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
-=======
+
 	ChassisSpeedRef.rotate_ref = -mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT;
 	YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT;
->>>>>>> 6bd197520eb7b612def17e1acf1dad256b65afb9
+
 	#else
 	ChassisSpeedRef.rotate_ref = mouse->x * RC_ROTATE_SPEED_REF;
 	#endif
