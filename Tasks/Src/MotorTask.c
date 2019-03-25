@@ -168,38 +168,27 @@ void ControlGMY6020(MotorINFO* id){
 		id->s_count++;
 	}		
 }
-void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
-{
+void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type){
 	if(id==0) return;
-	if(id->s_count == 1)
-	{
+	if(id->s_count == 1){
 		static uint8_t Reseted = 0;
 		float EncoderAngle = -(id->Zero - id->RxMsgC6x0.angle) * 360 / 8192.0f / id->ReductionRate;
 		NORMALIZE_ANGLE180(EncoderAngle);
 		int8_t 	dir;
 	  dir=1;
-	
-		
-		if(id->FirstEnter==1) {
+		if(id->FirstEnter==1){
 			id->lastRead = ThisAngle;
-			id->Real = EncoderAngle;
+			id->Real = ThisAngle;//EncoderAngle;
 			id->FirstEnter = 0;
 			return;
 		}
-		
-		if(ThisAngle <= id->lastRead)
-		{
-			if((id->lastRead-ThisAngle) > 180)
-				 id->Real += (ThisAngle + 360 - id->lastRead);
-			else
-				 id->Real -= (id->lastRead - ThisAngle);
+		if(ThisAngle <= id->lastRead){
+			if((id->lastRead-ThisAngle)>180) {id->Real += (ThisAngle + 360 - id->lastRead);}
+			else{id->Real-=(id->lastRead - ThisAngle);}
 		}
-		else
-		{
-			if((ThisAngle-id->lastRead) > 180)
-				 id->Real -= (id->lastRead + 360 - ThisAngle)*dir;
-			else
-				 id->Real += (ThisAngle - id->lastRead)*dir;
+		else{
+			if((ThisAngle-id->lastRead)>180) {id->Real -= (id->lastRead + 360 - ThisAngle)*dir;}
+			else{id->Real += (ThisAngle - id->lastRead)*dir;}
 		}
 		if(fabs(id->Real-id->Target)<5) Reseted = 1;
 		id->lastRead = ThisAngle ;
@@ -211,15 +200,12 @@ void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
 		
 		if(type=='P')
 			id->Intensity = id->Compensation + PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
-		else{
+		else
 			id->Intensity = id->Compensation + PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
-		}  
 		MINMAX(id->Intensity,-id->speedPID.outputMax,id->speedPID.outputMax);
-		
 		//id->s_count = 0;
 	}
-	else
-	{
+	else{
 		id->s_count++;
 	}		
 }
@@ -285,8 +271,7 @@ void setCAN11(){
 		#endif
 	}
 }
-void setCAN12()
-{
+void setCAN12(){
 	CanTxMsgTypeDef pData;
 	hcan1.pTxMsg = &pData;
 	
@@ -307,8 +292,7 @@ void setCAN12()
 		}
 	}
 
-	if(can1_update == 1 && can1_type == 2)
-	{
+	if(can1_update == 1 && can1_type == 2){
 		HAL_NVIC_DisableIRQ(CAN1_RX0_IRQn);
 		HAL_NVIC_DisableIRQ(CAN2_RX0_IRQn);
 		HAL_NVIC_DisableIRQ(USART1_IRQn);
@@ -318,8 +302,7 @@ void setCAN12()
 		#ifdef DEBUG_MODE
 			HAL_NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
 		#endif
-		if(HAL_CAN_Transmit_IT(&hcan1) != HAL_OK)
-		{
+		if(HAL_CAN_Transmit_IT(&hcan1) != HAL_OK){
 			Error_Handler();
 		}
 		can1_update = 0;
@@ -342,8 +325,7 @@ void setCAN12()
 		#endif
   }
 }
-void setCAN21()
-{
+void setCAN21(){
 	CanTxMsgTypeDef pData;
 	hcan2.pTxMsg = &pData;
 	
@@ -364,8 +346,7 @@ void setCAN21()
 		}
 	}
 
-	if(can2_update == 1 && can2_type == 1)
-	{
+	if(can2_update == 1 && can2_type == 1){
 		HAL_NVIC_DisableIRQ(CAN1_RX0_IRQn);
 		HAL_NVIC_DisableIRQ(CAN2_RX0_IRQn);
 		HAL_NVIC_DisableIRQ(USART1_IRQn);
@@ -375,8 +356,7 @@ void setCAN21()
 		#ifdef DEBUG_MODE
 			HAL_NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
 		#endif
-		if(HAL_CAN_Transmit_IT(&hcan2) != HAL_OK)
-		{
+		if(HAL_CAN_Transmit_IT(&hcan2) != HAL_OK){
 			Error_Handler();
 		}
 		can2_update = 0;
@@ -398,8 +378,7 @@ void setCAN21()
 		#endif
   }
 }
-void setCAN22()
-{
+void setCAN22(){
 	CanTxMsgTypeDef pData;
 	hcan2.pTxMsg = &pData;
 	
@@ -410,18 +389,17 @@ void setCAN22()
 	hcan2.pTxMsg->DLC = 0x08;
 	
 	for(int i=0;i<4;i++){
-		if(can2[i+4]==0) {
+		if(can2[i+4]==0){
 			hcan2.pTxMsg->Data[i*2]   = 0;
 			hcan2.pTxMsg->Data[i*2+1] = 0;
 		}
-		else {
+		else{
 			hcan2.pTxMsg->Data[i*2]   = (uint8_t)(can2[i+4]->Intensity >> 8);
 			hcan2.pTxMsg->Data[i*2+1] = (uint8_t)can2[i+4]->Intensity;
 		}
 	}
 
-	if(can2_update == 1 && can2_type == 2)
-	{
+	if(can2_update == 1 && can2_type == 2){
 		HAL_NVIC_DisableIRQ(CAN1_RX0_IRQn);
 		HAL_NVIC_DisableIRQ(CAN2_RX0_IRQn);
 		HAL_NVIC_DisableIRQ(USART1_IRQn);
@@ -431,8 +409,7 @@ void setCAN22()
 		#ifdef DEBUG_MODE
 			HAL_NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
 		#endif
-		if(HAL_CAN_Transmit_IT(&hcan2) != HAL_OK)
-		{
+		if(HAL_CAN_Transmit_IT(&hcan2) != HAL_OK){
 			Error_Handler();
 		}
 		can2_update = 0;
@@ -455,8 +432,7 @@ void setCAN22()
   }
 }
 
-void InitMotor(MotorINFO *id)
-{
+void InitMotor(MotorINFO *id){
 	if(id==0) return;
 	id->FirstEnter=1;
 	id->lastRead=0;
@@ -467,33 +443,26 @@ void InitMotor(MotorINFO *id)
 	id->Intensity=0;
 }
 
-void Motor_ID_Setting()
-{
-	for(int i=0;i<4;i++)
-	{
-		if(can1[i]!=0) 
-		{
+void Motor_ID_Setting(){
+	for(int i=0;i<4;i++){
+		if(can1[i]!=0){
 			can1[i]->CAN_TYPE=&hcan1;
 			can1[i]->RXID = 0x201+i;
 			can1[i]->TXID = 0x200;
 		}
-		if(can2[i]!=0) 
-		{
+		if(can2[i]!=0){
 			can2[i]->CAN_TYPE=&hcan2;
 			can2[i]->RXID = 0x201+i;
 			can2[i]->TXID = 0x200;
 		}
 	}
-	for(int i=4;i<8;i++)
-	{
-		if(can1[i]!=0) 
-		{
+	for(int i=4;i<8;i++){
+		if(can1[i]!=0){
 			can1[i]->CAN_TYPE=&hcan1;
 			can1[i]->RXID = 0x201+i;
 			can1[i]->TXID = 0x1ff;
 		}
-		if(can2[i]!=0) 
-		{
+		if(can2[i]!=0){
 			can2[i]->CAN_TYPE=&hcan2;
 			can2[i]->RXID = 0x201+i;
 			can2[i]->TXID = 0x1ff;

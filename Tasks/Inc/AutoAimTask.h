@@ -73,7 +73,7 @@ void CANTxINFO(void);
 void EnemyINFOProcess(void);
 void AutoAimNormal(void);
 void AutoAimBuff(void);
-void AutoAimGMCTRL(void);
+void AutoAimCTRL(void);
 void UpperStateFSM(void);
 
 #endif /*USE_AUTOAIM*/

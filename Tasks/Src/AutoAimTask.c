@@ -31,9 +31,6 @@ int16_t current_yaw=0,current_pitch=0;												//当前云台角度
 int16_t receive_cnt=0,receive_rcd=0;													//检测上位机信号帧数
 int8_t track_cnt=0;																						//追踪变量
 
-//********************************************************************************************//
-
-
 //********************************自瞄初始化********************************//
 
 void InitAutoAim(){
@@ -47,14 +44,11 @@ void InitAutoAim(){
 	
 	//角度变量初始化（不需要修改）
 	aim.yaw=0;				aim.pitch=0;
-	adjust.yaw=0.0f;			adjust.pitch=-0.3f;
+	adjust.yaw=0.0f;			adjust.pitch=0.0f;//-0.3f;
 	
 	//设置坐标初始值（根据不同安装情况调整这3个参数）
 	scope_gun.x=0;		scope_gun.y=-10;		scope_gun.z=0;
 }
-
-//**************************************************************************//
-
 
 //*******************************UART回调函数********************************//
 
@@ -74,7 +68,7 @@ void AutoAimUartRxCpltCallback(){
 	}
 	#else
 	if(RX_ENEMY_START=='s'&&RX_ENEMY_END=='e'){
-		aim.yaw=-(float)( (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)>0x7fff) ? (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)-0xffff) : (RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2 )*k_angle;
+		aim.yaw=(float)( (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)>0x7fff) ? (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)-0xffff) : (RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2 )*k_angle;
 		aim.pitch=(float)( (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)>0x7fff) ? (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)-0xffff) : (RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2 )*k_angle;
 		aim.yaw-=adjust.yaw;
 		aim.pitch+=adjust.pitch;
@@ -88,7 +82,6 @@ void AutoAimUartRxCpltCallback(){
 	
 	HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t *)&Enemy_INFO,8);
 }
-
 //****************************************坐标角度转换函数*************************************//
 
 //在时间中断中分频后调用该函数
@@ -114,11 +107,7 @@ void EnemyINFOProcess(){
 	}
 }
 
-//*********************************************************************************************//
-
-
 //**************************普通模式自瞄控制函数****************************//
-
 void AutoAimNormal(){
 	MINMAX(aim.yaw,-6.0f,6.0f);
 	MINMAX(aim.pitch,-2.0f,2.0f);
@@ -136,9 +125,6 @@ void AutoAimNormal(){
 		}
 	}
 }
-
-//**************************************************************************//
-
 
 //**************************打符模式自瞄控制函数****************************//
 
@@ -182,11 +168,7 @@ void AutoAimBuff(){
 	}
 }
 
-//**************************************************************************//
-
-
 //***************************上位机工作模式切换*****************************//
-
 void UpperStateFSM(){
 	if(upper_mode != aim_mode && upper_mode != 0){
 		Tx_INFO[0] = 'c';
@@ -197,14 +179,9 @@ void UpperStateFSM(){
 		upper_mode = aim_mode;
 	}
 }
-
-//**************************************************************************//
-
-
 //***********************************自瞄控制*******************************//
-
-void AutoAimGMCTRL(){
-	UpperStateFSM();
+void AutoAimCTRL(){
+	//UpperStateFSM();
 	switch(aim_mode){
 		case 1:{//自瞄
 			AutoAimNormal();
@@ -216,7 +193,6 @@ void AutoAimGMCTRL(){
 		}
 		default: break;
 	}
-	
 	/************检测帧数*************/
 	if(receive_cnt == 0)
 		auto_counter_fps = 1000;
@@ -227,10 +203,6 @@ void AutoAimGMCTRL(){
 	}
 	/*********************************/
 }
-
-//**************************************************************************//
-
-
 #endif /*USE_AUTOAIM*/
 #endif /*DEBUG_MODE*/
 

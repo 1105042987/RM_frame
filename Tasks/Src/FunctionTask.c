@@ -92,10 +92,10 @@ void RemoteControlProcess(){
 		laserOff();
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
-		FRICL.Target =5000;
-		FRICR.Target =-5000;
+//		FRICL.Target =2000;
+//		FRICR.Target =-2000;
 		aim_mode=1;
-		AutoAimGMCTRL();
+		AutoAimCTRL();
 		laserOn();
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
@@ -198,9 +198,9 @@ void selfControlProcess(){
 		laserOff();
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
-		FRICL.Target =2000;
-		FRICR.Target =-2000;
-		AutoAimGMCTRL();
+//		FRICL.Target =2000;
+//		FRICR.Target =-2000;
+		AutoAimCTRL();
 		laserOn();
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
