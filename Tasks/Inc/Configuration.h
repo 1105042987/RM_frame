@@ -17,7 +17,7 @@
 #define GUARD		'D'
 
 #if GUARD == 'U'
-	//#define USE_POWER_LIMIT 	20
+	#define USE_POWER_LIMIT 	20
 	#define CAN21
 	#define CAN22
 	#define CAN13 	1
@@ -55,6 +55,5 @@
 #define FUNC__RED_RAY_M__READ()	HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_5)
 #define FUNC__RED_RAY_L__READ()	HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_5)
 #define FUNC__RED_RAY_R__READ()	HAL_GPIO_ReadPin(GPIOF,GPIO_PIN_10)
-  
-  
+
 #endif

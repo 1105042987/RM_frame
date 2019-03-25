@@ -31,30 +31,25 @@ uint8_t flag = 1;
 //fw_PID_Regulator_t PowerLimitationPID = POWER_LIMITATION_PID_DEFAULT;
 int16_t PowerBufferMax = 80;
 
-float PowerLimitation()
-{
+float PowerLimitation(){
 	static float windows = 1.0;
 	static float rate = 0.1;
 	Power_Pool += (PowerHeatData.chassisPower-POW_M)*0.1f;
 	if(Power_Pool<0) Power_Pool=0;
-	if(Power_Pool>150) {
+	if(Power_Pool>150){
 		windows -=0.01f;
 		rate/=2;
 	}
 	if (JUDGE_State == OFFLINE) return windows;
-	else 
-	{
-		if(PowerHeatData.chassisPower > POW_M) 
-		{	
+	else{
+		if(PowerHeatData.chassisPower > POW_M){	
 			if(Power_Pool>Power_Pool_History_Max) Power_Pool_History_Max = Power_Pool;
 			rate = rate*0.95f>rate-0.02f?rate*0.95f:rate-0.02f;
 		}
-		else if(PowerHeatData.chassisPower < POW_M * COARSE)
-		{
+		else if(PowerHeatData.chassisPower < POW_M * COARSE){
 			rate+=0.04f;
 		}
-		else if(PowerHeatData.chassisPower < POW_M * FINE)
-		{
+		else if(PowerHeatData.chassisPower < POW_M * FINE){
 			rate+=0.01f;
 		}
 	}

@@ -122,7 +122,7 @@ void RemoteDataProcess(uint8_t *pData){
 		}break;
 		case SELF_Control:{
 			if(WorkState > 0){
-				RemoteControlProcess2(&(RC_CtrlData.rc));
+				selfControlProcess(&(RC_CtrlData.rc));
 			}
 		}break;
 		case STOP:{

@@ -14,61 +14,60 @@
 
 #include "includes.h"
 
-typedef __packed struct
-{
-uint16_t stageRemianTime;
-uint8_t gameProgress;
-uint8_t robotLevel;
-uint16_t remainHP;
-uint16_t maxHP;
+typedef __packed struct{
+	uint16_t stageRemianTime;
+	uint8_t gameProgress;
+	uint8_t robotLevel;
+	uint16_t remainHP;
+	uint16_t maxHP;
 }extGameRobotState_t;
-typedef __packed struct
-{
-uint8_t armorType : 4;
-uint8_t hurtType : 4;
+
+typedef __packed struct{
+	uint8_t armorType : 4;
+	uint8_t hurtType : 4;
 }extRobotHurt_t;
-typedef __packed struct
-{
-uint8_t bulletType;
-uint8_t bulletFreq;
-float bulletSpeed;
+
+typedef __packed struct{
+	uint8_t bulletType;
+	uint8_t bulletFreq;
+	float bulletSpeed;
 }extShootData_t;
-typedef __packed struct
-{
-float chassisVolt;
-float chassisCurrent;
-float chassisPower;
-float chassisPowerBuffer;
-uint16_t shooterHeat0;
-uint16_t shooterHeat1;
+
+typedef __packed struct{
+	float chassisVolt;
+	float chassisCurrent;
+	float chassisPower;
+	float chassisPowerBuffer;
+	uint16_t shooterHeat0;
+	uint16_t shooterHeat1;
 }extPowerHeatData_t;
-typedef __packed struct
-{
-uint8_t cardType;
-uint8_t cardIdx;
+
+typedef __packed struct{
+	uint8_t cardType;
+	uint8_t cardIdx;
 }extRfidDetect_t;
-typedef __packed struct
-{
-uint8_t winner;
+
+typedef __packed struct{
+	uint8_t winner;
 }extGameResult_t;
-typedef __packed struct
-{
-uint8_t buffType;
-uint8_t buffAddition;
+
+typedef __packed struct{
+	uint8_t buffType;
+	uint8_t buffAddition;
 } extGetBuff_t;
-typedef __packed struct
-{
-float x;
-float y;
-float z;
-float yaw;
+
+typedef __packed struct{
+	float x;
+	float y;
+	float z;
+	float yaw;
 }extGameRobotPos_t;
-typedef __packed struct
-{
-float data1;
-float data2;
-float data3;
-uint8_t mask;
+
+typedef __packed struct{
+	float data1;
+	float data2;
+	float data3;
+	uint8_t mask;
 }extShowData_t;
 
 

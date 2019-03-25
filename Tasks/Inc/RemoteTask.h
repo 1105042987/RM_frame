@@ -101,10 +101,10 @@ void RemoteDataProcess(uint8_t *pData);
 void InitRemoteControl(void);
 #ifdef SLAVE_MODE
 void RemoteControlProcess(void);
-void RemoteControlProcess2(void);
+void selfControlProcess(void);
 #else
 void RemoteControlProcess(Remote *rc);
-void RemoteControlProcess2(Remote *rc);
+void selfControlProcess(Remote *rc);
 #endif
 
 #endif /*__ REMOTETASK_H */

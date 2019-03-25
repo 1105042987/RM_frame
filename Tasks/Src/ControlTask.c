@@ -121,25 +121,25 @@ void WorkStateFSM(void){
 		{
 			if(normal_time<10000)normal_time++;
 			if(normal_time>=10)startUp = 1;
-			if (inputmode == STOP) WorkState = STOP_STATE;
-				if(functionmode == MIDDLE_POS) WorkState = ADDITIONAL_STATE_ONE;
-				if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
+			if(inputmode == STOP) WorkState = STOP_STATE;
+			if(functionmode == MIDDLE_POS) WorkState = ADDITIONAL_STATE_ONE;
+			if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
 		}break;
 		case ADDITIONAL_STATE_ONE:		//附加模式一
 		{
-			if (inputmode == STOP) WorkState = STOP_STATE;
-				if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
-				if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
+			if(inputmode == STOP) WorkState = STOP_STATE;
+			if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
+			if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
 		}break;
 		case ADDITIONAL_STATE_TWO:		//附加模式二
 		{
-			if (inputmode == STOP) WorkState = STOP_STATE;
-				if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
-				if(functionmode == MIDDLE_POS) WorkState = ADDITIONAL_STATE_ONE;
+			if(inputmode == STOP) WorkState = STOP_STATE;
+			if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
+			if(functionmode == MIDDLE_POS) WorkState = ADDITIONAL_STATE_ONE;
 		}break;
 		case STOP_STATE:{				//紧急停止
 			sendAllData(1);
-			if (inputmode == REMOTE_Control || inputmode == SELF_Control){
+			if(inputmode == REMOTE_Control || inputmode == SELF_Control){
 				WorkState = PREPARE_STATE;
 				FunctionTaskInit();
 			}
@@ -182,13 +182,16 @@ void controlLoop()
 		sendAllData(0);
 	}
 }
-
+//哨兵：每秒冷却160，2ms为160/500=0.32
 void heatCalc(){//2ms
-	if(syncCnt0 > 35 && JUDGE_State == ONLINE){fakeHeat0 = realHeat0;}
-	else if(fakeHeat0 >= cooldown0/500)fakeHeat0 -= cooldown0/500;
-	else fakeHeat0 = 0;
+	fakeHeat0-=0.32;
+	if(fakeHeat0<0){fakeHeat0=0;}
 }
-
+//void heatCalc(){//2ms
+//	if(syncCnt0 > 35 && JUDGE_State == ONLINE){fakeHeat0 = realHeat0;}
+//	else if(fakeHeat0 >= cooldown0/500)fakeHeat0 -= cooldown0/500;
+//	else fakeHeat0 = 0;
+//}
 //时间中断入口函数
 extern int8_t Control_Update;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){

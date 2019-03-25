@@ -28,33 +28,33 @@
 #define LOW_FORWARD_BACK_SPEED 			200
 #define LOW_LEFT_RIGHT_SPEED   			200/2
 
-#define OnePush(button,execution)\
-{\
+#define onePush(button,execution){\
 	static uint8_t cache;\
 	static uint8_t cnt=0;\
-	if(cache != (button)){\
-		cache = (button);\
-		cnt = 0;\
-	}\
-	else if(cnt == 5){\
-		if(cache) execution;\
-		cnt=11;\
-	}\
+	if(cache != (button)){cache = (button);cnt = 0;}\
+	else if(cnt == 5){if(cache) execution;cnt=11;}\
 	else if(cnt < 5) cnt++;\
 }
-
-#define Delay(TIM,execution)\
-{\
+#define onePushShtSpd(button,execution){\
+	static uint8_t cache;\
+	static uint8_t cnt=0;\
+	if(cache!=(button)){cache=(button);cnt=0;}\
+	else if(cnt==5){if(cache)execution;cnt=11;}\
+	else if(cnt<5)cnt++;\
+}
+#define onePushDir(button,execution){\
+	static uint8_t cache;\
+	static uint8_t cnt=0;\
+	if(cache != (button)){cache = (button);cnt = 0;}\
+	else if(cnt == 5){if(cache) execution;cnt=11;}\
+	else if(cnt < 5) cnt++;\
+}
+#define Delay(TIM,execution){\
 	static uint16_t time=TIM;\
-	if(!time--)\
-	{\
-		time = TIM;\
-		execution;\
-	}\
+	if(!time--){time = TIM;execution;}\
 }
 
-typedef __packed struct
-{
+typedef __packed struct{
     int16_t forward_back_ref;
     int16_t left_right_ref;
     int16_t rotate_ref;

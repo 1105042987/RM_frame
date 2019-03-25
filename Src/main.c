@@ -166,7 +166,7 @@ int main(void)
 	
 	//看门狗
 	MX_IWDG_Init();							//Cube配置完记得注释掉上面自动生成的看门狗初始化函数
-		
+	HAL_GPIO_WritePin(GPIOG, 0xff, GPIO_PIN_SET);//close all LED
   /* USER CODE END 2 */
 
   /* Infinite loop */

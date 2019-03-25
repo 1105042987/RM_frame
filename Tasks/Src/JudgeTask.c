@@ -28,47 +28,37 @@ uint8_t buffer[80] = {0};
 uint8_t buffercnt = 0;
 uint16_t cmdID;
 
-void judgeUartRxCpltCallback(void)
-{
+void judgeUartRxCpltCallback(void){
 //	fw_printfln("judge receive");
-		if(receiving) 
-		{
+		if(receiving){
 			if(buffercnt >40)buffercnt = 4;
 			buffer[buffercnt] = tmp_judge;
 			buffercnt++;
 			
-			if(buffercnt == 5)
-			{
-				if (myVerify_CRC8_Check_Sum(buffer, 5)==0) 
-				{
+			if(buffercnt == 5){
+				if (myVerify_CRC8_Check_Sum(buffer, 5)==0){
 					receiving = 0;
 					buffercnt = 0;
 				}
 			}
 			if(buffercnt == 7) cmdID = (0x0000 | buffer[5]) | (buffer[6] << 8);
 			
-			if(buffercnt == 29 && cmdID == 0x0004)
-			{
-				if (myVerify_CRC16_Check_Sum(buffer, 29)) 
-				{
+			if(buffercnt == 29 && cmdID == 0x0004){
+				if (myVerify_CRC16_Check_Sum(buffer, 29)){
 					Judge_Refresh_Power();
 				}
 				receiving = 0;
 				buffercnt = 0;
 			}
-			if(buffercnt == 17 && cmdID == 0x0001)
-			{
-				if (myVerify_CRC16_Check_Sum(buffer, 17)) 
-				{
+			if(buffercnt == 17 && cmdID == 0x0001){
+				if (myVerify_CRC16_Check_Sum(buffer, 17)){
 					Judge_Refresh_State();
 				}
 				receiving = 0;
 				buffercnt = 0;
 			}
-			if(buffercnt == 15 && cmdID == 0x0003)
-			{
-				if (myVerify_CRC16_Check_Sum(buffer, 15)) 
-				{
+			if(buffercnt == 15 && cmdID == 0x0003){
+				if (myVerify_CRC16_Check_Sum(buffer, 15)){
 					Judge_Refresh_Shoot();
 				}
 				receiving = 0;
@@ -76,64 +66,51 @@ void judgeUartRxCpltCallback(void)
 			}
 
 		
-			if(buffercnt == 25 && cmdID == 0x0008)
-			{
-				if (myVerify_CRC16_Check_Sum(buffer, 25)) 
-				{
+			if(buffercnt == 25 && cmdID == 0x0008){
+				if (myVerify_CRC16_Check_Sum(buffer, 25)){
 					Judge_Refresh_Position();
 				}
 				receiving = 0;
 				buffercnt = 0;
 			}
-			if(buffercnt == 10 && cmdID == 0x0002)
-			{
-				if (myVerify_CRC16_Check_Sum(buffer, 10)) 
-				{
+			if(buffercnt == 10 && cmdID == 0x0002){
+				if (myVerify_CRC16_Check_Sum(buffer, 10)){
 					Judge_Refresh_Hit();
 				}
 				receiving = 0;
 				buffercnt = 0;
 			}
-			if(buffercnt == 11 && cmdID == 0x0005)
-			{
-				if (myVerify_CRC16_Check_Sum(buffer, 11)) 
-				{
+			if(buffercnt == 11 && cmdID == 0x0005){
+				if (myVerify_CRC16_Check_Sum(buffer, 11)){
 					Judge_Refresh_Interact();
 				}
 				receiving = 0;
 				buffercnt = 0;
 			}
-			if(buffercnt == 10 && cmdID == 0x0006)
-			{
-				if (myVerify_CRC16_Check_Sum(buffer, 10)) 
-				{
+			if(buffercnt == 10 && cmdID == 0x0006){
+				if (myVerify_CRC16_Check_Sum(buffer, 10)){
 					Judge_Refresh_Result();
 				}
 				receiving = 0;
 				buffercnt = 0;
 			}
-			if(buffercnt == 11 && cmdID == 0x0007)
-			{
-				if (myVerify_CRC16_Check_Sum(buffer, 11)) 
-				{
+			if(buffercnt == 11 && cmdID == 0x0007){
+				if (myVerify_CRC16_Check_Sum(buffer, 11)){
 					Judge_Refresh_Buff();
 				}
 				receiving = 0;
 				buffercnt = 0;
 			}
 		}	
-		else 
-		{
-			if(tmp_judge == 0xA5)
-			{
+		else{
+			if(tmp_judge == 0xA5){
 				receiving = 1;
 				buffercnt = 0;
 				buffer[0] = tmp_judge;
 				buffercnt++;
 			}
 		}
-		if(HAL_UART_Receive_DMA(&JUDGE_UART, &tmp_judge, 1) != HAL_OK)
-		{
+		if(HAL_UART_Receive_DMA(&JUDGE_UART, &tmp_judge, 1) != HAL_OK){
 			Error_Handler();
 	  }
 }
@@ -185,7 +162,7 @@ void Judge_Refresh_Power()
 	for(int i = 0; i<2; i++){
 		bs[i] = (unsigned char)buffer[i+25];
 	}
-
+	fakeHeat0=PowerHeatData.shooterHeat0;//@yyp
 	remainHeat0 = maxHeat0 - PowerHeatData.shooterHeat0;
 	remainHeat1 = maxHeat1 - PowerHeatData.shooterHeat1;
 	JUDGE_Received = 1;
@@ -220,26 +197,27 @@ void Judge_Refresh_State()
 	JUDGE_Received = 1;
 }
 
-void Judge_Refresh_Shoot()
-{
+void Judge_Refresh_Shoot(){
 	unsigned char * bsd;
-	if(buffer[7]==1)
-	{
+	if(buffer[7]==1){
 		bsd = (unsigned char*)&ShootData0.bulletSpeed;
 		shoot0Cnt++;
 	}
-	else if(buffer[7]==2)
-	{
+	else if(buffer[7]==2){
 		bsd = (unsigned char*)&ShootData1.bulletSpeed;
 		shoot1Cnt++;
 	}
 	else return;
 	
+	ShootData0.bulletFreq=buffer[8];//@yyp
+	
 	char cs[4] = {buffer[9],buffer[10],buffer[11],buffer[12]};
 	for(int i = 0; i<4; i++){
 		bsd[i] = (unsigned char)cs[i];
 	}
-	
+	if(buffer[7]==1){//@yyp
+		fakeHeat0+=ShootData0.bulletSpeed;
+	}
 	JUDGE_Received = 1;
 }
 

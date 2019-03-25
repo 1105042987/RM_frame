@@ -16,7 +16,7 @@
 #ifndef DEBUG_MODE
 #ifdef	USE_AUTOAIM
 
-//#define USE_AUTOAIM_ANGLE
+#define USE_AUTOAIM_ANGLE
 
 //*****************************************声明变量******************************************//
 
@@ -36,14 +36,11 @@ int8_t track_cnt=0;																						//追踪变量
 
 //********************************自瞄初始化********************************//
 
-void InitAutoAim()
-{
+void InitAutoAim(){
 	//开启AUTO_AIM_UART的DMA接收
-	if(HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t *)&Enemy_INFO,8)!= HAL_OK)
-	{
+	if(HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t *)&Enemy_INFO,8)!= HAL_OK){
 		Error_Handler();
 	}
-
 	//坐标变量初始化（不需要修改）
 	enemy_scope.x=0;	enemy_scope.y=0;	enemy_scope.z=200;
 	enemy_gun.x=0;		enemy_gun.y=0;		enemy_gun.z=200;
@@ -61,8 +58,7 @@ void InitAutoAim()
 
 //*******************************UART回调函数********************************//
 
-void AutoAimUartRxCpltCallback()
-{
+void AutoAimUartRxCpltCallback(){
 	#ifndef USE_AUTOAIM_ANGLE
 	//串口数据解码
 	if(RX_ENEMY_START=='s'&&RX_ENEMY_END=='e')
@@ -77,8 +73,7 @@ void AutoAimUartRxCpltCallback()
 		receive_cnt++;
 	}
 	#else
-	if(RX_ENEMY_START=='s'&&RX_ENEMY_END=='e')
-	{
+	if(RX_ENEMY_START=='s'&&RX_ENEMY_END=='e'){
 		aim.yaw=-(float)( (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)>0x7fff) ? (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)-0xffff) : (RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2 )*k_angle;
 		aim.pitch=(float)( (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)>0x7fff) ? (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)-0xffff) : (RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2 )*k_angle;
 		aim.yaw-=adjust.yaw;
@@ -93,21 +88,11 @@ void AutoAimUartRxCpltCallback()
 	
 	HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t *)&Enemy_INFO,8);
 }
-//***************************************************************************//
-
-
-//*************************************CAN线主控板间通信*************************************//
-
-//用于英雄双云台
-
-//*******************************************************************************************//
-
 
 //****************************************坐标角度转换函数*************************************//
 
 //在时间中断中分频后调用该函数
-void EnemyINFOProcess()
-{
+void EnemyINFOProcess(){
 	#ifndef USE_AUTOAIM_ANGLE
 	//坐标转换
 	enemy_gun.x=enemy_scope.x+scope_gun.x;
@@ -120,13 +105,11 @@ void EnemyINFOProcess()
 	#endif
 	
 	//追踪
-	if(((aim.yaw>0 && aim_rcd.yaw>0) || (aim.yaw<0 && aim_rcd.yaw<0)))
-	{
+	if(((aim.yaw>0 && aim_rcd.yaw>0) || (aim.yaw<0 && aim_rcd.yaw<0))){
 		track_cnt++;
 		MINMAX(track_cnt,0,100);
 	}
-	else
-	{
+	else{
 		track_cnt=0;
 	}
 }
@@ -136,21 +119,16 @@ void EnemyINFOProcess()
 
 //**************************普通模式自瞄控制函数****************************//
 
-void AutoAimNormal()
-{
-	MINMAX(aim.yaw,-3.0f,3.0f);
+void AutoAimNormal(){
+	MINMAX(aim.yaw,-6.0f,6.0f);
 	MINMAX(aim.pitch,-2.0f,2.0f);
-	if(find_enemy)
-	{
-		if(aim_cnt<1)
-		{
+	if(find_enemy){
+		if(aim_cnt<1){
 			GMY.Target+=(aim.yaw+aim_rcd.yaw)/8;
 			//GMY.TargetAngle+=(aim.yaw+aim_rcd.yaw)/5*(0.5f+0.012f*track_cnt);
 			GMP.Target+=(aim.pitch+aim_rcd.pitch)/8;
 			aim_cnt++;
-		}
-		else
-		{
+		}else{
 			find_enemy=0;
 			aim_cnt=0;
 			aim_rcd.yaw=aim.yaw;
@@ -164,49 +142,40 @@ void AutoAimNormal()
 
 //**************************打符模式自瞄控制函数****************************//
 
-void AutoAimBuff()
-{
-	if(find_enemy)
-	{
+void AutoAimBuff(){
+	if(find_enemy){
 		//云台转向目标方向
-		if(aim_cnt==0)
-		{
+		if(aim_cnt==0){
 			aim_rcd.yaw=aim.pitch;
 			GMY.Target+=aim_rcd.yaw/20;
 			GMP.Target+=aim_rcd.pitch/20;
 			aim_cnt++;
 		}
-		else if(aim_cnt>=1 && aim_cnt<20)
-		{
+		else if(aim_cnt>=1 && aim_cnt<20){
 			GMY.Target+=aim_rcd.yaw/20;
 			GMP.Target+=aim_rcd.pitch/20;
 			aim_cnt++;
 		}
 		//等待云台稳定
-		else if(aim_cnt>=20 && aim_cnt<30)
-		{
+		else if(aim_cnt>=20 && aim_cnt<30){
 			aim_cnt++;
 		}
 		//发射
-		else if(aim_cnt==30)
-		{
+		else if(aim_cnt==30){
 			//ShootOneBullet();
 			aim_cnt++;
 		}
 		//等待云台稳定
-		else if(aim_cnt>30 && aim_cnt<50)
-		{
+		else if(aim_cnt>30 && aim_cnt<50){
 			aim_cnt++;
 		}
 		//重新指向中心
-		else if(aim_cnt>=50 && aim_cnt<70)
-		{
+		else if(aim_cnt>=50 && aim_cnt<70){
 			GMY.Target-=aim_rcd.yaw/20;
 			GMP.Target-=aim_rcd.pitch/20;
 			aim_cnt++;
 		}
-		else
-		{
+		else{
 			aim_cnt=0;
 			find_enemy=0;
 		}
@@ -218,10 +187,8 @@ void AutoAimBuff()
 
 //***************************上位机工作模式切换*****************************//
 
-void UpperStateFSM()
-{
-	if(upper_mode != aim_mode && upper_mode != 0)
-	{
+void UpperStateFSM(){
+	if(upper_mode != aim_mode && upper_mode != 0){
 		Tx_INFO[0] = 'c';
 		Tx_INFO[1] = aim_mode;
 		Tx_INFO[2] = 'e';
@@ -236,18 +203,14 @@ void UpperStateFSM()
 
 //***********************************自瞄控制*******************************//
 
-void AutoAimGMCTRL()
-{
+void AutoAimGMCTRL(){
 	UpperStateFSM();
-	switch(aim_mode)
-	{
-		case 1: 														//自瞄
-		{
+	switch(aim_mode){
+		case 1:{//自瞄
 			AutoAimNormal();
 			break;
 		}
-		case 2:															//打符
-		{
+		case 2:{//打符
 			AutoAimBuff();
 			break;
 		}
@@ -257,8 +220,7 @@ void AutoAimGMCTRL()
 	/************检测帧数*************/
 	if(receive_cnt == 0)
 		auto_counter_fps = 1000;
-	if(auto_counter_fps == 0)
-	{
+	if(auto_counter_fps == 0)	{
 		receive_rcd = receive_cnt;
 		receive_cnt = 0;
 		auto_counter_fps = 1000;

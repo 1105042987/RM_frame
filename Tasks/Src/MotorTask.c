@@ -41,9 +41,11 @@ MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(1.0,&ControlGMY,2700,400,20,
 								fw_PID_INIT_EASY(0.32, 0.02, 0.2, 10),
 								fw_PID_INIT_EASY(3000, 500, 200, 15000));
 								
-MotorINFO STIR = AngleBased_MOTORINFO_Init(36.0,&ControlNM,
-								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1200.0),
-								fw_PID_INIT_EASY(30, 0.0, 0.0,	 15000.0));
+MotorINFO STIRp = AngleBased_MOTORINFO_Init(36.0,&ControlNM,
+								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 2000.0),
+								fw_PID_INIT_EASY(40, 1, 0.0,	 15000.0));
+								
+MotorINFO STIRv = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
 MotorINFO CML = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1200.0),
 								fw_PID_INIT_EASY(40, 0.0, 5.0,	 15000.0));
@@ -52,11 +54,11 @@ MotorINFO CMR = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT_EASY(40, 0.0, 5.0,	 15000.0));
 
 MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMP,&GMY,0,0};
-MotorINFO* can2[8]={&CML,&CMR,0,0,&STIR,0,0,0};
+MotorINFO* can2[8]={&CML,&CMR,0,0,&STIRv,0,0,0};
 
 void ControlNM(MotorINFO* id){
 	if(id==0) return;
-	if(id->s_count == 1){		
+	if(id->s_count == 0){		
 		uint16_t 	ThisAngle;	
 		double 		ThisSpeed;	
 		ThisAngle = id->RxMsgC6x0.angle;				//Œ¥¥¶¿ÌΩ«∂»

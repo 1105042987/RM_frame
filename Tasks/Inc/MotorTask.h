@@ -111,7 +111,7 @@ typedef struct MotorINFO
 }
 
 
-extern MotorINFO CML,CMR,GMY,GMP,FRICL,FRICR,STIR,GATE;
+extern MotorINFO CML,CMR,GMY,GMP,FRICL,FRICR,STIRp,STIRv,GATE;
 extern MotorINFO *can1[8],*can2[8];
 void InitMotor(MotorINFO *id);
 void Motor_ID_Setting(void);
