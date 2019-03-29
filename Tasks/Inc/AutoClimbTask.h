@@ -64,6 +64,5 @@ typedef enum
 void Chassis_Choose(uint8_t flag,uint8_t ensure);
 void RefreshAnologRead(void);
 void ComeToTop(void);
-void AutoClimb_SwitchState(void);
 
 #endif //__AUTO_CLIMB_TASK_H
