@@ -17,7 +17,8 @@
 #define GETHIGHT 400
 #define CHANGE_POINT 2000
 #define CHANGE_POINTr 1700
-#define CHANGE_POINTb 1200
+#define CHANGE_POINTbl 1500
+#define CHANGE_POINTbr 1100
 //1v/5v 	27cm
 
 #define UD_TOP			0
@@ -25,7 +26,8 @@
 //-1010
 #define FLAG_SET(target) if(target.val_ref<CHANGE_POINT) target.flag = 0; else target.flag = 1;
 #define FLAG_SETr(target) if(target.val_ref<CHANGE_POINTr) target.flag = 0; else target.flag = 1;
-#define FLAG_SETb(target) if(target.val_ref<CHANGE_POINTb) target.flag = 0; else target.flag = 1;
+#define FLAG_SETbl(target) if(target.val_ref<CHANGE_POINTbl) target.flag = 0; else target.flag = 1;
+#define FLAG_SETbr(target) if(target.val_ref<CHANGE_POINTbr) target.flag = 0; else target.flag = 1;
 
 typedef __packed struct
 {
@@ -64,5 +66,6 @@ typedef enum
 void Chassis_Choose(uint8_t flag,uint8_t ensure);
 void RefreshAnologRead(void);
 void ComeToTop(void);
+void AutoClimb_SwitchState(void);
 
 #endif //__AUTO_CLIMB_TASK_H

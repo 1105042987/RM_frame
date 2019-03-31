@@ -36,6 +36,7 @@ uint32_t Claw_AlreadyRollOut=0;
 uint32_t Claw_AlreadyWaited=0;
 uint32_t Claw_AlreadyTight=0;
 uint32_t Claw_UpToPosition=0;
+uint32_t Claw_DownToPosition=0;
 uint16_t Claw_TruePosition[5] = {0, 820, 1600, 400, 1200};
 int32_t  Claw_UpAngle=0;
 uint32_t Claw_TakeThisBox=0;
@@ -109,8 +110,8 @@ void RefreshADC()
 		FLAG_SETr(distance_couple.frontr);
 		FLAG_SET(distance_couple.frontl);
 		FLAG_SET(distance_couple.backb);
-		FLAG_SETb(distance_couple.backr);
-		FLAG_SETb(distance_couple.backl);
+		FLAG_SETbr(distance_couple.backr);
+		FLAG_SETbl(distance_couple.backl);
 		FLAG_SET(distance_couple.left);
 		FLAG_SET(distance_couple.right);
 		
@@ -486,8 +487,27 @@ void Claw_Up()//整个机构的抬升，抬升完后爪子自动对位
 				auto_counter=1;
 			}
 			if(Claw_UpToPosition==1&&hasReach(&NMUDL,10)&&NMUDL.RealAngle<-UPPROTECT)
-				Claw_SelfInspecting=1;
+			{Claw_SelfInspecting=1;}
+			if(Claw_UpToPosition==1&&NMUDL.RealAngle<=(-UPLEVEL+5)&&NMUDR.RealAngle<=(-UPLEVEL+5))
+			{Claw_UpToPosition=0;
+			}
 }
+
+void Claw_Down()
+{
+	 if(Claw_DownToPosition==1&&auto_counter==0)
+	 {
+		 Claw_UpAngle-=4;
+		 NMUDL.TargetAngle=-Claw_UpAngle;
+		 NMUDR.TargetAngle=-Claw_UpAngle;
+		 auto_counter=1;
+	 }
+	 if(Claw_DownToPosition==1&&NMUDL.RealAngle>=-5&&NMUDR.RealAngle>=-5)
+	 {
+		 Claw_DownToPosition=0;
+	 }
+}
+
 void AutoGet_SwitchState()//执行哪种取弹模式 岛下/岛上
 {
 	if(AutoGet_Start==1)

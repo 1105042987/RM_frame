@@ -145,7 +145,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>ST-LINKIII-KEIL_SWO</Key>
-          <Name>-U303030303030303030303031 -O8398 -SF1800 -C0 -A0 -I0 -HNlocalhost -HP7184 -P2 -N00("ARM CoreSight SW-DP") -D00(2BA01477) -L00(0) -TO18 -TC10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO15 -FD20000000 -FC1000 -FN1 -FF0STM32F4xx_2048.FLM -FS08000000 -FL0200000 -FP0($$Device:STM32F427IIHx$CMSIS\Flash\STM32F4xx_2048.FLM)</Name>
+          <Name>-U303030303030303030303031 -O8398 -SF1800 -C0 -A0 -I0 -HNlocalhost -HP7184 -P1 -N00("ARM CoreSight SW-DP") -D00(2BA01477) -L00(0) -TO18 -TC10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO15 -FD20000000 -FC1000 -FN1 -FF0STM32F4xx_2048.FLM -FS08000000 -FL0200000 -FP0($$Device:STM32F427IIHx$CMSIS\Flash\STM32F4xx_2048.FLM)</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -158,554 +158,69 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>WorkState</ItemText>
+          <ItemText>UFMcount</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>prepare_time</ItemText>
+          <ItemText>i2,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>inputmode</ItemText>
+          <ItemText>nowstep,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>rc_update</ItemText>
+          <ItemText>teeet,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>rc_cnt</ItemText>
+          <ItemText>adbl,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>channelrcol</ItemText>
+          <ItemText>adbr,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>GMP</ItemText>
+          <ItemText>disbl,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>1</WinNumber>
-          <ItemText>GMY</ItemText>
+          <ItemText>disbr,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
           <WinNumber>1</WinNumber>
-          <ItemText>GMP.RxMsg6623.angle,0x0A</ItemText>
+          <ItemText>disfl,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
           <WinNumber>1</WinNumber>
-          <ItemText>GMP.RxMsgC6x0.angle,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>10</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>GMP.RealAngle</ItemText>
-        </Ww>
-        <Ww>
-          <count>11</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>GMY.RxMsg6623.angle,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>12</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>GMY.RxMsgC6x0.angle,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>13</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>GMY.RealAngle</ItemText>
-        </Ww>
-        <Ww>
-          <count>14</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>GMP.Intensity,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>15</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>GMY.Intensity,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>16</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>GMP.RxMsgC6x0.RotateSpeed,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>17</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>testIntensity,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>18</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>gyroZAngle</ItemText>
-        </Ww>
-        <Ww>
-          <count>19</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>gyroYAngle</ItemText>
-        </Ww>
-        <Ww>
-          <count>20</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>gyroBuffercnt,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>21</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>buffercnt</ItemText>
-        </Ww>
-        <Ww>
-          <count>22</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>JUDGE_State</ItemText>
-        </Ww>
-        <Ww>
-          <count>23</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>ChassisSpeedRef.rotate_ref</ItemText>
-        </Ww>
-        <Ww>
-          <count>24</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>CMRotatePID.fdb</ItemText>
-        </Ww>
-        <Ww>
-          <count>25</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>\\RM_frame\../Tasks/Src/MotorTask.c\UM1.Intensity,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>26</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>channelrrow</ItemText>
-        </Ww>
-        <Ww>
-          <count>27</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>UM1.TargetAngle</ItemText>
-        </Ww>
-        <Ww>
-          <count>28</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>UFM.TargetAngle</ItemText>
-        </Ww>
-        <Ww>
-          <count>29</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>someEncoder,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>30</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>someIntensity,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>31</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>UFM</ItemText>
-        </Ww>
-        <Ww>
-          <count>32</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>UFMcount</ItemText>
-        </Ww>
-        <Ww>
-          <count>33</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>i2,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>34</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>nowstep,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>35</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>teeet,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>36</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>CMFL,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>37</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>CM1</ItemText>
+          <ItemText>disfr,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>
           <count>0</count>
           <WinNumber>2</WinNumber>
-          <ItemText>NMUDL.TargetAngle</ItemText>
+          <ItemText>teeet,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>2</WinNumber>
-          <ItemText>NMUDR.TargetAngle</ItemText>
+          <ItemText>teet,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>2</WinNumber>
-          <ItemText>NMUDL.RotateSpeed,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>3</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>NMUDR.RotateSpeed,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>4</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>NMUDL.RxMsgC6x0.angle,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>5</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>NMUDL.RxMsgC6x0.moment,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>6</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>NMUDR.RxMsgC6x0.angle,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>7</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>NMUDR.RxMsgC6x0.moment,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>8</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>NMUDL.RxMsgC6x0.RotateSpeed,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>9</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>NMUDR.RxMsgC6x0.RotateSpeed,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>10</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>NMUDL.RxMsgC6x0.moment,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>11</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>channellrow,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>12</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>UM1,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>13</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>UM2,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>14</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>NMUDR.RealAngle</ItemText>
-        </Ww>
-        <Ww>
-          <count>15</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>NMUDL.RealAngle</ItemText>
-        </Ww>
-        <Ww>
-          <count>16</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>ADC_value[100],0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>17</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>ADC2_value[100],0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>18</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>ADC2_value,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>19</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>ADC_value,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>20</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>ADC_value,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>21</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>channelrcol,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>22</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>UFM.TargetAngle</ItemText>
-        </Ww>
-        <Ww>
-          <count>23</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>UFM.RxMsgC6x0.moment,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>24</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>UFM</ItemText>
-        </Ww>
-        <Ww>
-          <count>25</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>UFM.RxMsgC6x0.moment,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>26</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>UFM.RealAngle</ItemText>
-        </Ww>
-        <Ww>
-          <count>27</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>UFM.TargetAngle</ItemText>
-        </Ww>
-        <Ww>
-          <count>28</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>auto_counter,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>29</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>cnt_clk,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>30</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>UM1.TargetAngle</ItemText>
-        </Ww>
-        <Ww>
-          <count>31</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>UM2.TargetAngle</ItemText>
-        </Ww>
-        <Ww>
-          <count>32</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>auto_wait,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>33</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>-Claw_UpAngle,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>34</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>Claw_UpAngle,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>35</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>auto_counter,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>36</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>CM1</ItemText>
-        </Ww>
-        <Ww>
-          <count>37</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>NMCDL</ItemText>
-        </Ww>
-        <Ww>
-          <count>38</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>CMBR,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>39</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>CMBR.Intensity,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>40</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>ADC_value[i]</ItemText>
-        </Ww>
-        <Ww>
-          <count>41</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>ADC_value,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>42</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>adfl,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>43</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>disfl,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>44</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>disbr,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>45</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>disbl,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>46</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>disfr,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>47</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>NMCDL,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>48</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>NMCDR,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>49</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>NMCDL.RxMsgC6x0.moment,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>50</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>NMCDR.RxMsgC6x0.moment,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>51</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>disdf,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>52</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>disdb,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>53</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>AutoClimb_ComeToTop,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>54</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>channelrrow,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>55</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>disdb,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>56</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>disdf,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>57</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>distance_couple.move_flags,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>58</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>signal2,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>59</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>signal1,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>60</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>NMCDL.TargetAngle,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>61</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>NMCDL.RealAngle</ItemText>
-        </Ww>
-        <Ww>
-          <count>62</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>channelrrow</ItemText>
-        </Ww>
-        <Ww>
-          <count>63</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>disgl,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>64</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>disgr,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>65</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>AutoGet_TotalStep,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>66</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>Claw_AlreadyRollOut,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>67</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>Claw_AlreadyTight,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>68</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>teeet,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>69</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>teet,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>70</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>DOOR,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>71</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>setdoorzero</ItemText>
+          <ItemText>disfr</ItemText>
         </Ww>
       </WatchWindow2>
       <Tracepoint>
@@ -1054,7 +569,7 @@
       <GroupNumber>2</GroupNumber>
       <FileNumber>24</FileNumber>
       <FileType>1</FileType>
-      <tvExp>1</tvExp>
+      <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Tasks\Src\MotorTask.c</PathWithFileName>
@@ -1210,7 +725,7 @@
       <GroupNumber>2</GroupNumber>
       <FileNumber>37</FileNumber>
       <FileType>1</FileType>
-      <tvExp>0</tvExp>
+      <tvExp>1</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Tasks\Src\AutoClimbTask.c</PathWithFileName>

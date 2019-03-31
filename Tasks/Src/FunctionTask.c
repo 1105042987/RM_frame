@@ -12,6 +12,7 @@
 #include "includes.h"
 
 //#define qudan
+#define jiuyuan
 #define shangdao
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 MouseMode_e MouseLMode = NO_CLICK;
@@ -27,6 +28,7 @@ int16_t channellrow = 0;
 int16_t channellcol = 0;
 int16_t testIntensity = 0;
 
+uint32_t dooropen=0;
 uint32_t counting=0;
 int32_t doorcount=0;
 uint32_t firsttime=0;
@@ -36,8 +38,12 @@ uint32_t setzeror=0;
 uint32_t lefttight=0;
 uint32_t righttight=0;
 
+uint32_t saving_count=0;
+uint32_t saving=2;
+uint32_t saveing_flag=0;
 extern uint32_t AutoClimb_ComeToTop;
 extern uint32_t AutoClimb_AlreadyTop;
+extern uint32_t AutoClimbing;
 
 uint32_t openthegay=0;
 
@@ -89,38 +95,46 @@ void SetDoorZero()
 	if(DOOR.RxMsgC6x0.moment<-4000)
 		DOOR.TargetAngle+=5;
 }
-/*void protect()
+
+void Door_SwitchState()
 {
-	if(SL.RxMsgC6x0.moment>3000)
-	SL.TargetAngle-=20;
-	if(SR.RxMsgC6x0.moment<-3000)
-	SR.TargetAngle+=20;
+	if(dooropen==1)
+		DOOR.TargetAngle=-180;
+	else if(dooropen==0)
+		DOOR.TargetAngle=0;
 }
-void setzero()
+void InitialSave()
 {
-	if(setzerol==0)
-	{	
-	  if(SL.RxMsgC6x0.moment>-3000)
-			SL.TargetAngle-=10;
-		else
-		{
-			SL.RealAngle=0;
-			SL.TargetAngle=0;
-			setzerol=1;
-		}
-	}
-	if(setzeror==0)
-	{	
-	  if(SR.RxMsgC6x0.moment<3000)
-			SR.TargetAngle+=10;
-		else
-		{
-			SR.RealAngle=0;
-			SR.TargetAngle=0;
-			setzeror=1;
-		}
-	}
-}*/
+	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,0);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,0);
+}
+
+void Saving()
+{
+	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,1);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,0);
+}
+
+void EndSaving()
+{
+	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,1);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,1);
+}
+
+void SavingTest()
+{
+	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,0);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,1);
+}
+	
+
+void Saving_SwitchState()
+{
+	if(saving==0)
+		EndSaving();
+	else if(saving==1)
+		Saving();
+}
 void Limit_and_Synchronization()
 {
 	//demo
@@ -163,7 +177,6 @@ void RemoteControlProcess(Remote *rc)
 	
 		#else
 		
-		
    if(NMCDL.RxMsgC6x0.moment>-12000&&NMCDR.RxMsgC6x0.moment>-14000&&channellcol<0)
 		{
 		NMCDL.TargetAngle+=channellcol*0.06;
@@ -203,7 +216,7 @@ void RemoteControlProcess(Remote *rc)
 			UFM.TargetAngle-=channellrow*0.01;//×óºáÏòÊÇË®Æ½µç»ú   Ïò×óÔ¶Àë£¨½Ç¶È++£©ÏòÓÒ¿¿½ü£¨½Ç¶È--£©
   #else
 	     
-			ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
+		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
 			
@@ -239,6 +252,20 @@ void RemoteControlProcess(Remote *rc)
 			
 			
 			AutoGet_SwitchState();*/
+			
+		//¾ÈÔ®
+		#ifdef jiuyuan
+			InitialSave();
+			
+			if(channellcol>500)
+				saveing_flag=2;
+			if(saveing_flag==2)
+				EndSaving();
+			if(channellcol<-500)
+				saveing_flag=1;
+			if(saveing_flag==1)
+				Saving();
+		#endif
      		
 		if(AutoClimb_AlreadyTop==0)
 				AutoClimb_ComeToTop=1;
@@ -247,7 +274,7 @@ void RemoteControlProcess(Remote *rc)
 		  ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 			ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
 		#ifdef shangdao	
-		Chassis_Choose(1,1);  
+	//	Chassis_Choose(1,1);  
 		#endif
 			
 			
@@ -288,24 +315,24 @@ void RemoteControlProcess(Remote *rc)
 //			}
 			
 			
-			if((leftstate==1)&&auto_counter==0)
-				lefttight=1;
-			if(lefttight==1)
-			{
-				if(SL.RxMsgC6x0.moment>-3000)
-					SL.TargetAngle-=20;
-				if(SL.RxMsgC6x0.moment<-5000)
-					SL.TargetAngle+=10;
-			}
-			if(rightstate==1&&auto_counter==0)
-				righttight=1;
-			if(righttight==1)
-			{
-				if(SR.RxMsgC6x0.moment<3000)
-					SR.TargetAngle+=20;
-				if(SR.RxMsgC6x0.moment>5000)
-					SR.TargetAngle-=10;
-			}
+//			if((leftstate==1)&&auto_counter==0)
+//				lefttight=1;
+//			if(lefttight==1)
+//			{
+//				if(SL.RxMsgC6x0.moment>-3000)
+//					SL.TargetAngle-=20;
+//				if(SL.RxMsgC6x0.moment<-5000)
+//					SL.TargetAngle+=10;
+//			}
+//			if(rightstate==1&&auto_counter==0)
+//				righttight=1;
+//			if(righttight==1)
+//			{
+//				if(SR.RxMsgC6x0.moment<3000)
+//					SR.TargetAngle+=20;
+//				if(SR.RxMsgC6x0.moment>5000)
+//					SR.TargetAngle-=10;
+//			}
 	}
 	Limit_and_Synchronization();
 }
@@ -327,20 +354,11 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	MINMAX(mouse->y, -150, 150); 
 	
 	#ifdef USE_CHASSIS_FOLLOW
-<<<<<<< HEAD
 
-	if(AutoClimbing==0)
+  if(AutoClimbing==0)
 	ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-15;
 	YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
-	//YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
 
-	ChassisSpeedRef.rotate_ref = -mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT;
-	YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT;
-
-=======
-	ChassisSpeedRef.rotate_ref = -mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT;
-	YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT;
->>>>>>> parent of 6ca29dd... ç»†èŠ‚æ“ä½œæ”¹åŠ¨å’Œä¸Šå²›åœ°ç›˜ä¿æŠ¤
 	#else
 	ChassisSpeedRef.rotate_ref = mouse->x * RC_ROTATE_SPEED_REF;
 	#endif
@@ -352,11 +370,12 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	{
 		case SHORT_CLICK:
 		{
-		
+		  ChassisSpeedRef.rotate_ref = 0;
 		}break;
 		case LONG_CLICK:
 		{
-			
+			ChassisSpeedRef.rotate_ref = 0;
+			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
 		}break;
 		default: break;
 	}
@@ -429,8 +448,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			if(key->v & KEY_V)
 			{
-				Claw_UpToPosition=0;
-				Claw_UpAngle=0;
+				Claw_DownToPosition=0;
 			}
 			if(key->v & KEY_Q)
 			 CLAWOUT;
@@ -454,6 +472,22 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			if(key->v & KEY_Q)
 			{
 				Claw_FindingNextBox_Upper=1;
+			}
+			else if(key->v & KEY_C)
+			{
+				AutoClimbing=1;
+			}
+			else if(key->v &KEY_V)
+			{
+				AutoClimbing=0;
+			}
+			else if(key->v &KEY_R)
+			{
+				saving=0;
+			}
+			else if(key->v &KEY_F)
+			{
+				dooropen=0;
 			}
 		}break;
 		case NO_CHANGE:			//normal
@@ -480,8 +514,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_F)
 			{
-				if(Claw_SelfInspecting==2)
-				Claw_TakeThisBox=4;
+				dooropen=1;
 			}
 			else if(key->v & KEY_G)
 			{
@@ -502,17 +535,16 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				Claw_FindingNextBox_Upper=0;
 				Sensor_Ready[0]=0;
 			}
-//			if(key->v & KEY_R)
-//			{
-//				
-//				if(FrontBackInspect%2==0)
-//					YTY.TargetAngle = 180;
-//				else
-//					YTY.TargetAngle = 0;
-//				FrontBackInspect++;
-//			}
+			else if(key->v & KEY_R)
+			{
+				saving=1;
+			}
+			
 			
 		}
+		SetDoorZero();
+		Door_SwitchState();
+		ComeToTop();
 		Claw_GetSpecifiedBox();
 		Claw_SelfInspect();
 		if(Claw_FindingNextBox_Lower==1)
@@ -522,6 +554,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		Claw_Up();
 		Box_Land();
 		AutoGet_SwitchState();
+		AutoClimb_SwitchState();
+		Saving_SwitchState();
 	}
 	Limit_and_Synchronization();
 }

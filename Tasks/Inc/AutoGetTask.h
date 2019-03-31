@@ -29,6 +29,7 @@ extern uint32_t Claw_AlreadyRollOut;
 extern uint32_t Claw_AlreadyWaited;
 extern uint32_t Claw_AlreadyTight;
 extern uint32_t Claw_UpToPosition;
+extern uint32_t Claw_DownToPosition;
 extern uint16_t Claw_TruePosition[5];
 extern int32_t Claw_UpAngle;
 extern uint32_t Claw_TakeThisBox;

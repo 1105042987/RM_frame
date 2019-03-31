@@ -20,6 +20,7 @@ uint32_t AutoClimb_AlreadyTop=0;
 uint8_t signal1=0;
 uint8_t signal2=0;
 
+uint32_t AutoClimbing=0;
 uint32_t AutoClimb_Oneclimb=0;
 //ÉÏ 10000 8000
 //disfl>2000 disfr>2000
@@ -40,6 +41,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 		{
 			if (ChassisSpeedRef.forward_back_ref < 0) {
 					ChassisSpeedRef.forward_back_ref=0;
+				  ChassisSpeedRef.rotate_ref=0;
 					CM1.TargetAngle=0;
 					CM2.TargetAngle=0;
 					if(signal2==0){
@@ -56,6 +58,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 			case 15:
 				if(ChassisSpeedRef.forward_back_ref > 0){
 					ChassisSpeedRef.forward_back_ref=0;
+					ChassisSpeedRef.rotate_ref=0;
 					CM1.TargetAngle=0;
 					CM2.TargetAngle=0;
 					if(signal2==0){
@@ -91,6 +94,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 							break;
 						case 0:
 							ChassisSpeedRef.forward_back_ref=0;
+						  ChassisSpeedRef.rotate_ref=0;
 							if(signal1==0 && ensure==1)
 							{
 									NMCDL.TargetAngle = UD_BOTTOM;
@@ -105,6 +109,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 					ChassisSpeedRef.forward_back_ref/=2;
 					CM1.TargetAngle=0;
 					CM2.TargetAngle=0;
+					ChassisSpeedRef.rotate_ref=0;
 					if(signal1==0 && ensure==1){
 							NMCDL.TargetAngle = UD_BOTTOM;
 						  NMCDR.TargetAngle = UD_BOTTOM;
@@ -124,12 +129,17 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 
 void ComeToTop()
 {
+	if(AutoClimb_AlreadyTop==0)
+		AutoClimb_ComeToTop=1;
 	if(AutoClimb_ComeToTop==1)
 	{
-		if(NMCDL.RxMsgC6x0.moment<5000||NMCDR.RxMsgC6x0.moment<5000)
+		if(NMCDL.RxMsgC6x0.moment<5000)
 		{	
-			NMCDL.TargetAngle+=5;
-		  NMCDR.TargetAngle+=5;
+			NMCDL.TargetAngle+=2;
+		}
+		if(NMCDR.RxMsgC6x0.moment<5000)
+		{
+			NMCDR.TargetAngle+=2;
 		}
 		if(NMCDL.RxMsgC6x0.moment>5000&&NMCDR.RxMsgC6x0.moment>5000)
 		{
@@ -139,9 +149,15 @@ void ComeToTop()
 			NMCDR.RealAngle=0;
 		}
 	}
-		if(NMCDL.RxMsgC6x0.moment>9000)
-			NMCDL.TargetAngle-=5;
-		if(NMCDR.RxMsgC6x0.moment>9000)
+		if(NMCDL.RxMsgC6x0.moment>7000)//±£»¤
+			NMCDL.TargetAngle-=10;
+		if(NMCDR.RxMsgC6x0.moment>7000)
 			NMCDR.TargetAngle-=5;
 	
+}
+
+void AutoClimb_SwitchState()
+{
+	if(AutoClimbing==1)
+		Chassis_Choose(1,1);
 }

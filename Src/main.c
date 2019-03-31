@@ -65,7 +65,6 @@ uint32_t ADC2_value[10];
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 
-
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
@@ -174,7 +173,8 @@ int main(void)
   //HAL_ADC_Start_DMA(&hadc2,ADC2_value,10);
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_3);
-
+	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,0);
+	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_4,0);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -264,7 +264,6 @@ void _Error_Handler(char * file, int line)
   }
   /* USER CODE END Error_Handler_Debug */ 
 }
-
 
 #ifdef USE_FULL_ASSERT
 
