@@ -97,35 +97,35 @@ void RefreshADC()
 	disgr=adgr;
 	
 	distance_couple.frontl.val_ref	= adfl;
-		distance_couple.frontr.val_ref	= adfr;
-		distance_couple.frontf.val_ref	= addf;
-		distance_couple.backl.val_ref	= adbl;
-		distance_couple.backr.val_ref	= adbr;
-		distance_couple.backb.val_ref	= addb;
-		distance_couple.left.val_ref	= adgl;
-		distance_couple.right.val_ref	= adgr;
+	distance_couple.frontr.val_ref	= adfr;
+	distance_couple.frontf.val_ref	= addf;
+	distance_couple.backl.val_ref	= adbl;
+	distance_couple.backr.val_ref	= adbr;
+	distance_couple.backb.val_ref	= addb;
+	distance_couple.left.val_ref	= adgl;
+	distance_couple.right.val_ref	= adgr;
 		
 		
-		FLAG_SET(distance_couple.frontf);
-		FLAG_SETr(distance_couple.frontr);
-		FLAG_SET(distance_couple.frontl);
-		FLAG_SET(distance_couple.backb);
-		FLAG_SETbr(distance_couple.backr);
-		FLAG_SETbl(distance_couple.backl);
-		FLAG_SET(distance_couple.left);
-		FLAG_SET(distance_couple.right);
-		
-		distance_couple.move_flags = 0;
-		distance_couple.move_flags = ((distance_couple.left.flag)								*512) +
-									 ((distance_couple.right.flag) 								*256) +
-									 ((distance_couple.frontl.flag) 							*128) +
-									 ((distance_couple.frontr.flag) 							* 64) +
-									 ((distance_couple.backl.flag) 								* 32) +
-									 ((distance_couple.backr.flag) 								* 16) +
-									 ((distance_couple.frontr.flag&distance_couple.frontl.flag) *  8) +
-									 ((distance_couple.frontf.flag) 							*  4) +
-									 ((distance_couple.backb.flag)								*  2) +
-									 ((distance_couple.backr.flag&distance_couple.backl.flag)	*  1);
+	FLAG_SET(distance_couple.frontf);
+	FLAG_SETr(distance_couple.frontr);
+	FLAG_SET(distance_couple.frontl);
+	FLAG_SET(distance_couple.backb);
+	FLAG_SETbr(distance_couple.backr);
+	FLAG_SETbl(distance_couple.backl);
+	FLAG_SET(distance_couple.left);
+	FLAG_SET(distance_couple.right);
+	
+	distance_couple.move_flags = 0;
+	distance_couple.move_flags = ((distance_couple.left.flag)								*512) +
+								 ((distance_couple.right.flag) 								*256) +
+								 ((distance_couple.frontl.flag) 							*128) +
+								 ((distance_couple.frontr.flag) 							* 64) +
+								 ((distance_couple.backl.flag) 								* 32) +
+								 ((distance_couple.backr.flag) 								* 16) +
+								 ((distance_couple.frontr.flag&distance_couple.frontl.flag) *  8) +
+								 ((distance_couple.frontf.flag) 							*  4) +
+								 ((distance_couple.backb.flag)								*  2) +
+								 ((distance_couple.backr.flag&distance_couple.backl.flag)	*  1);
 		//低八位：低四位 基础判定，高四位 精细判定（转向）
 		//高八位：低四位 抓取判定
 }
