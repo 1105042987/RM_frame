@@ -83,4 +83,5 @@ void Claw_GoToNextBox_lower();
 void Claw_GoToNextBox_upper();
 void Claw_Up();
 void AutoGet_SwitchState();
+void ClawUpDown_SwitchState();
 #endif /*__ AUTOGETTASK_H */

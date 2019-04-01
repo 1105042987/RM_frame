@@ -274,7 +274,7 @@ void RemoteControlProcess(Remote *rc)
 		  ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 			ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
 		#ifdef shangdao	
-	//	Chassis_Choose(1,1);  
+		Chassis_Choose(1,1);  
 		#endif
 			
 			
@@ -448,7 +448,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			if(key->v & KEY_V)
 			{
-				Claw_DownToPosition=0;
+				Claw_DownToPosition=1;
 			}
 			if(key->v & KEY_Q)
 			 CLAWOUT;
@@ -548,13 +548,14 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		Claw_GetSpecifiedBox();
 		Claw_SelfInspect();
 		if(Claw_FindingNextBox_Lower==1)
-		Claw_GoToNextBox_lower();
+			Claw_GoToNextBox_lower();
 		if(Claw_FindingNextBox_Upper==1)
-		Claw_GoToNextBox_upper();	
-		Claw_Up();
+			Claw_GoToNextBox_upper();	
+		//Claw_Up();
 		Box_Land();
 		AutoGet_SwitchState();
 		AutoClimb_SwitchState();
+		ClawUpDown_SwitchState();
 		Saving_SwitchState();
 	}
 	Limit_and_Synchronization();

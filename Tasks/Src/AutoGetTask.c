@@ -20,7 +20,7 @@
 #define LOWERCRITICIAL 2000      //岛下临界值
 #define UPPERCRITICIAL 800 //待测试
 
-#define UPLEVEL 432    //抬升时的合适高度 必须被4整除
+#define UPLEVEL 440    //抬升时的合适高度 必须被4整除
 #define UPPROTECT 400  //抬升的临界保护值
 
 #define OUTANGLE 180  //抓箱子的角度值
@@ -514,5 +514,19 @@ void AutoGet_SwitchState()//执行哪种取弹模式 岛下/岛上
 		AutoGet_Lower();
 	if(AutoGet_Start==2)
 		AutoGet_Upper();
+}
+
+void ClawUpDown_SwitchState()
+{
+	if(Claw_DownToPosition==1)
+	{
+		Claw_Down();
+		Claw_UpToPosition = 0;
+	}
+	else if(Claw_UpToPosition==1)
+	{
+		Claw_Up();
+		Claw_DownToPosition = 0;
+	}
 }
 
