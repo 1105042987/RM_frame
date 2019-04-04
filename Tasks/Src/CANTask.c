@@ -114,6 +114,7 @@ void InitCanReception(){
 }
  
 //CAN接收中断入口函数
+extern int can13Dog;
 void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 	uint8_t flag = 0;
 	if(hcan == &hcan1)	//CAN1数据
@@ -149,9 +150,10 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 				for(int i=0;i<4;i++) receiveData[flag].data[i] = CanRxGetU16(Can1RxMsg, i);
 				if(flag==maxSendSize-1) Control_Update=1;
 				flag = 1;
+				can13Dog=10;
 			}
 		}
-		#endif
+		#endif //CAN3
 		if(flag==0) Error_Handler();
 		if(HAL_CAN_Receive_IT(&hcan1, CAN_FIFO0) != HAL_OK){
 			isRcan1Started = 0;

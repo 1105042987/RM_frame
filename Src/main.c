@@ -69,7 +69,7 @@ void SystemClock_Config(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-
+int can13Dog=1000;//@yyp
 /* USER CODE END 0 */
 
 int main(void)
@@ -165,7 +165,7 @@ int main(void)
 	HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&ADC_Value,160);
 	
 	//看门狗
-	MX_IWDG_Init();							//Cube配置完记得注释掉上面自动生成的看门狗初始化函数
+	MX_IWDG_Init();	//Cube配置完记得注释掉上面自动生成的看门狗初始化函数
 	HAL_GPIO_WritePin(GPIOG, 0xff, GPIO_PIN_SET);//close all LED
   /* USER CODE END 2 */
 

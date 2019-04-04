@@ -49,7 +49,8 @@
 typedef struct GMAngle_t
 {
 	float yaw;
-	float pitch;
+	float pit;
+	float dis;//distance
 }GMAngle_t;
 
 typedef struct Coordinate_t
@@ -59,7 +60,17 @@ typedef struct Coordinate_t
 	float z;
 }Coordinate_t;
 
-extern uint8_t aim_mode;
+typedef struct targetMotion_t
+{
+	float yaw;
+	float pit;
+	float dis;
+	float wx;
+	float wy;
+	float wz;
+}targetMotion_t;
+
+extern uint8_t aimMode;
 extern uint8_t find_enemy;
 extern uint16_t auto_counter_fps;
 extern GMAngle_t adjust;
@@ -75,6 +86,8 @@ void AutoAimNormal(void);
 void AutoAimBuff(void);
 void AutoAimCTRL(void);
 void UpperStateFSM(void);
+void autoAimPredict(void);
+void autoAimYYP(void);
 
 #endif /*USE_AUTOAIM*/
 #endif /*DEBUG_MODE*/

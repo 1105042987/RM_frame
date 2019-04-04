@@ -34,7 +34,7 @@ void FunctionTaskInit(){
 //限位与同步
 void limtSync(){
 	MINMAX(GMP.Target,-35,20);//limit
-	//MINMAX(GMY.Target,-30,30);//limit
+	MINMAX(GMY.Target,-150+GMY.Zero,150+GMY.Zero);//limit
 	//CMR.Target =  -CML.Target;
 }
 //******************
@@ -48,8 +48,8 @@ void RemoteControlProcess(Remote *rc){
 	//max=660
 	channelrrow = (rc->ch0 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET);//leftRight
 	channelrcol = (rc->ch1 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET);//upDown
-	channellrow = (rc->ch2 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
-	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
+	channellrow = (rc->ch2 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET);
+	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET);
 
 	ChassisSpeedRef.left_right_ref =- channelrrow * RC_CHASSIS_SPEED_REF*0.5f;
 	sendData[0].data[0]=(int16_t)WorkState;
@@ -63,10 +63,11 @@ void RemoteControlProcess(Remote *rc){
 		STIRv.Target=0;
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
-		if(STIRv.RxMsgC6x0.moment<-9000){jam=5;}
-		//TargetSpeed = shootFrq*45/360*36*60 = shootFrq*270
-		if(jam<0){STIRv.Target=-270*20-channelrcol/660*270*10;}
-		else{STIRv.Target=2160;jam--;}
+		if(STIRv.RxMsgC6x0.moment>9500){jam=5;}
+		///TargetSpeed = shootFrq*45/360*36*60 = shootFrq*270
+		if(jam<0){STIRv.Target=270*20+channelrcol/660*270*10;}
+		else{STIRv.Target=-2160;jam--;}
+		
 		
 //		if(abs(STIRp.RxMsgC6x0.moment)<9000){STIRp.Target-= 15+ channelrcol/66;}
 //		else{STIRp.Real=0;STIRp.Target=60;}
@@ -84,23 +85,27 @@ void RemoteControlProcess(){
 	channellrow = receiveData[0].data[1];//leftRight
 	channellcol = receiveData[0].data[2];//upDown
 	fakeHeat0=receiveData[0].data[3]/(float)(20.0);
-	GMY.Target+=channellrow * 0.0006f;
-	GMP.Target+=channellcol * 0.0006f;
+	GMY.Target+=channellrow * 0.001f;
+	GMP.Target+=channellcol * 0.001f;
 	if(WorkState == NORMAL_STATE){
-		FRICL.Target =0;
-		FRICR.Target =0;
-		laserOff();
+		STIRv.Target=0;
+		FRICL.Target=0;
+		FRICR.Target=0;
+		laserOn();
+		aimMode=1;
+		AutoAimCTRL();
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
-//		FRICL.Target =2000;
-//		FRICR.Target =-2000;
-		aim_mode=1;
+		STIRv.Target=0;
+//		FRICL.Target =-2000;
+//		FRICR.Target =2000;
+		aimMode=2;
 		AutoAimCTRL();
 		laserOn();
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
-		FRICL.Target =5000;
-		FRICR.Target =-5000;
+		FRICL.Target =-2000;
+		FRICR.Target =2000;
 		laserOn();
 	}
 	limtSync();
@@ -140,7 +145,7 @@ void selfControlProcess(Remote *rc){
 		else if(fakeHeat0>440 && shootFrq>5){shootFrq--;}
 		else if(fakeHeat0>400 && shootFrq>9){shootFrq-=0.1;}
 		else{shootFrq=10;}
-		if(STIRv.RxMsgC6x0.moment<-9000){jam=5;}
+		if(STIRv.RxMsgC6x0.moment<-9500){jam=5;}
 		//TargetSpeed = shootFrq*45/360*36*60 = shootFrq*270
 		if(jam<0){STIRv.Target=-shootFrq*270;}
 		else{STIRv.Target=2000;jam--;}
@@ -182,12 +187,13 @@ void selfControlProcess(Remote *rc){
 #endif
 #if GUARD == 'D'
 //下平台代码
+
 void selfControlProcess(){
 	if(WorkState <= 0) return;
 	//max=660
 	channelrrow = 0;
 	channelrcol = 0;
-	channellrow = receiveData[0].data[1];//leftRight
+	channellrow = receiveData[0].data[1]+2;//leftRight
 	channellcol = receiveData[0].data[2];//upDown
 	fakeHeat0=receiveData[0].data[3]/(float)(20.0);
 	GMY.Target+=channellrow * 0.0006f;
@@ -198,14 +204,14 @@ void selfControlProcess(){
 		laserOff();
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
-//		FRICL.Target =2000;
-//		FRICR.Target =-2000;
+//		FRICL.Target =-2000;
+//		FRICR.Target =2000;
 		AutoAimCTRL();
 		laserOn();
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
-		FRICL.Target =2000;
-		FRICR.Target =-2000;
+		FRICL.Target =-2000;
+		FRICR.Target =2000;
 		laserOn();
 	}
 	limtSync();

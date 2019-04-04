@@ -105,8 +105,8 @@ void WorkStateFSM(void){
 	switch (WorkState){
 		case PREPARE_STATE:{			//准备模式
 			normal_time = 0;
-			if(prepare_time < 0xff && imu.InitFinish == 1) prepare_time++;	
-			if(prepare_time == 0xff && imu.InitFinish == 1 && isCan11FirstRx == 1 && 
+			if(prepare_time < 0x1ff && imu.InitFinish == 1) prepare_time++;	
+			if(prepare_time == 0x1ff && imu.InitFinish == 1 && isCan11FirstRx == 1 && 
 				isCan12FirstRx == 1 && isCan21FirstRx == 1 && isCan22FirstRx == 1){
 			//开机2秒后且gyro初始化完成且所有can电机上电完成后进入正常模式
 				if(playMusicSuperMario()){
@@ -211,10 +211,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		
 		#ifdef USE_AUTOAIM
 		//自瞄数据解算（6ms）
-		static uint8_t aim_cnt=0;
-		if(++aim_cnt==3){
+		static uint8_t aimCnt=0;
+		if(++aimCnt==3){
 			EnemyINFOProcess();
-			aim_cnt=0;
+			aimCnt=0;
 		}
 		#endif
 		
@@ -233,7 +233,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			{
 				if(WorkState==STOP_STATE&&receiveData[0].data[0]>0) WorkState = PREPARE_STATE;
 				else WorkState = (WorkState_e)receiveData[0].data[0];
-				RemoteControlProcess();
+				if(inputmode==REMOTE_Control)
+					RemoteControlProcess();
+				else
+					selfControlProcess();
 			}
 		}
 		#else

@@ -56,8 +56,12 @@ void GetRemoteSwitchAction(RemoteSwitch_t *sw, uint8_t val){
 
 
 //遥控器数据解算
+extern int can13Dog;
 void RemoteDataProcess(uint8_t *pData){
-	HAL_IWDG_Refresh(&hiwdg);
+	if(can13Dog){//@yyp
+		HAL_IWDG_Refresh(&hiwdg);
+		can13Dog--;
+	}
 	if(pData == NULL){
 			return;
 	}

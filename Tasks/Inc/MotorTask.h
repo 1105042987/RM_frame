@@ -14,11 +14,6 @@
 
 #include "includes.h"
 
-//Î´²âÊÔ
-#define GM_PITCH_GRAVITY_COMPENSATION -1900
-#define GM_PITCH_ZERO 	1200
-#define GM_YAW_ZERO 	2700
-
 #define CHASSIS_SPEED_ATTENUATION   (1.30f)
 #define NORMALIZE_ANGLE180(angle) angle = ((angle) > 180) ? ((angle) - 360) : (((angle) < -180) ? (angle) + 360 : angle)
 #define CHASSIS_MOTOR_ROTATE_PID_DEFAULT \
