@@ -47,6 +47,8 @@ uint8_t leftClawZero = 0;
 uint8_t rightClawZero = 0;
 uint8_t leftClawTight = 0;
 uint8_t rightClawTight = 0;
+uint8_t loosing = 0;
+uint8_t loosed = 0;
 uint8_t readL,readR;
 
 extern uint32_t AutoClimb_ComeToTop;
@@ -156,79 +158,91 @@ void RescueLoop()
 	checkright=rightClaw;
 	if(!leftClawZero)
 	{
-		if(SL.RxMsgC6x0.moment > -2000)
-		{SL.TargetAngle -= 1;SLflag=0;}
+		if(SL.RxMsgC6x0.moment < 3000)
+		{SL.TargetAngle += 1;SLflag=0;}
 		else
 		{
-			SLflag=1;
+			SLflag = 1;
 		}
 		if(SLcnt>=800)
 		{
-			SL.RealAngle = 0;
+			SL.RealAngle = 130;
 			SL.TargetAngle = 120;
 			leftClawZero = 1;
+			SLflag = 0;
+			SLcnt = 0;
+			leftClawTight = 0;
 		}
 	}
 	if(!rightClawZero)
 	{	
-		if(SR.RxMsgC6x0.moment <2000)
-		{SR.TargetAngle += 1;SRflag=0;}
+		if(SR.RxMsgC6x0.moment > -3000)
+		{SR.TargetAngle -= 1;SRflag=0;}
 		else
 		{
-			SRflag=1;
+			SRflag = 1;
 		}
 		if(SRcnt>=800)
 		{
-			SR.RealAngle = 0;
+			SR.RealAngle = -130;
 			SR.TargetAngle = -120;
 			rightClawZero = 1;
+			SRflag = 0;
+			SRcnt = 0;
+			rightClawTight = 0;
 		}
 	}
-	if(leftClawZero==1&&rightClawZero==1)
+	if(leftClawZero && rightClawZero)
 	{
-	if(masterHigh==1&&masterLow==0)//Rescue
-	{
-		if(leftClaw == 1)
+		if(masterHigh==1&&masterLow==0)//Rescue
+		{
+			loosed = 1;
+			if(leftClaw == 1 && !leftClawTight)
+			{
+				SL.TargetAngle = 0;
+				leftClawTight = 1;
+			}
+			if(rightClaw == 1 && !rightClawTight)
+			{
+				SR.TargetAngle = 0;
+				rightClawTight = 1;
+			}
+		}
+		{
+			if(leftClawTight == 1)
+			{
+				if(SL.RxMsgC6x0.moment < -3000&&SL.TargetAngle<=30)
+					SL.TargetAngle += 1;
+				else if(SL.RxMsgC6x0.moment >- 3000)
+					SL.TargetAngle -= 1;
+			}
+			if(rightClawTight == 1)
+			{
+				if(SR.RxMsgC6x0.moment < 3000)
+					SR.TargetAngle += 1;
+				else if(SR.RxMsgC6x0.moment > 3000&&SL.TargetAngle>-30)
+					SR.TargetAngle -= 1;
+			}
+		}
+		
+		if(masterHigh==1 && masterLow==1)//loose
+		{
+			loosing = 1;
+		}
+		else loosing = 0;
+		if(loosing && loosed)
+		{
+			loosed = 0;
+			leftClawZero = 0;
+			rightClawZero = 0;
+		}
+		
+		if(masterHigh==0 && masterLow==1)//tight
 		{
 			SL.TargetAngle = 0;
-			leftClawTight = 1;
-		}
-		if(rightClaw == 1)
-		{
 			SR.TargetAngle = 0;
-			rightClawTight = 1;
 		}
 	}
-	{
-		if(leftClawTight == 1)
-		{
-			if(SL.RxMsgC6x0.moment < -3000&&SL.RealAngle<=5)
-				SL.TargetAngle += 1;
-			else if(SL.RxMsgC6x0.moment >- 3000)
-				SL.TargetAngle -= 1;
-		}
-		if(rightClawTight == 1)
-		{
-			if(SR.RxMsgC6x0.moment < 3000)
-				SR.TargetAngle += 1;
-			else if(SR.RxMsgC6x0.moment > 3000&&SL.RealAngle>-5)
-				SR.TargetAngle -= 1;
-		}
-	}
-	
-	if(masterHigh==1 && masterLow==1)//loose
-	{
-		SL.TargetAngle = 120;
-		SR.TargetAngle = -120;
-		leftClawTight = 0;
-		rightClawTight = 0;
-	}
-	if(masterHigh==0 && masterLow==1)//tight
-	{
-		SL.TargetAngle = 0;
-		SR.TargetAngle = 0;
-	}
-}
 }
 
 void Limit_and_Synchronization()

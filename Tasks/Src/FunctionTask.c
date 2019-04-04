@@ -274,7 +274,7 @@ void RemoteControlProcess(Remote *rc)
 		  ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 			ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
 		#ifdef shangdao	
-		Chassis_Choose(1,1);  
+			//Chassis_Choose(1,1);  
 		#endif
 			
 			

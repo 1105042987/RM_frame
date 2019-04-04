@@ -17,8 +17,8 @@
 #define GETHIGHT 400
 #define CHANGE_POINT 2000
 #define CHANGE_POINTr 1700
-#define CHANGE_POINTbl 1500
-#define CHANGE_POINTbr 1100
+#define CHANGE_POINTbl 1900//1500
+#define CHANGE_POINTbr 1500//1100
 //1v/5v 	27cm
 
 #define UD_TOP			0

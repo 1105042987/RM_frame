@@ -291,6 +291,7 @@ void AutoGet_Stop_And_Clear()//×´Ì¬ÇåÁã ×¦×Ó×ª»Ø ºáÒÆµç»úÍ£×ª£¨ÓÃÓÚÒì³£×´¿ö´¦Àíº
   UM2.TargetAngle=INANGLE;
 	Claw_AlreadyRollOut=0;
 	Claw_AlreadyTight=0;
+	Claw_SelfInspecting=0;
 	
 	Claw_TakeThisBox=0;
 	Claw_FindingNextBox_Lower=0;

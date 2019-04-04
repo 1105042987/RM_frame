@@ -115,6 +115,8 @@ MotorINFO* can2[8]={0,0,0,0,0,0,0,0};
 int16_t someIntensity;
 uint16_t someEncoder;
 double someRealAngle;
+extern uint8_t leftClawTight;
+extern uint8_t rightClawTight;
 void ControlNM(MotorINFO* id)
 {
 	if(id==0) return;
@@ -138,7 +140,8 @@ void ControlNM(MotorINFO* id)
 			else//正常
 				id->RealAngle = id->RealAngle + (ThisAngle - id->lastRead) * 360 / 8192.0 / id->ReductionRate;
 		}
-		ThisSpeed = id->RxMsgC6x0.RotateSpeed * 6 / id->ReductionRate;		//单位：度每秒
+		if(leftClawTight || rightClawTight)ThisSpeed = id->RxMsgC6x0.RotateSpeed / id->ReductionRate;		//单位：度每秒
+		else ThisSpeed = id->RxMsgC6x0.RotateSpeed * 6 / id->ReductionRate;
 		
 		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->TargetAngle,id->RealAngle,ThisSpeed);
 		

@@ -89,6 +89,7 @@ void WorkStateFSM(void)
 			{
 				WorkState = PREPARE_STATE;
 				FunctionTaskInit();
+				HAL_GPIO_WritePin(GPIOH,1<<3,0);
 			}
 		}break;
 	}
