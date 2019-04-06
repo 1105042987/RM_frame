@@ -98,10 +98,10 @@ void SetDoorZero()
 
 void Door_SwitchState()
 {
-	if(dooropen==1)
+	if(dooropen==1&&setdoorzero==1)
 		DOOR.TargetAngle=-180;
-	else if(dooropen==0)
-		DOOR.TargetAngle=0;
+	else if(dooropen==0&&setdoorzero==1)
+		DOOR.TargetAngle=10;
 }
 void InitialSave()
 {
@@ -139,7 +139,7 @@ void Limit_and_Synchronization()
 {
 	//demo
 	//MINMAX(NMUDL.TargetAngle,-700,700);//limit
-	NMCDL.TargetAngle = NMCDR.TargetAngle;//sychronization
+//	NMCDL.TargetAngle = NMCDR.TargetAngle;//sychronization
 	UM1.TargetAngle=-UM2.TargetAngle;
 	
 	//demo end
@@ -274,7 +274,7 @@ void RemoteControlProcess(Remote *rc)
 		  ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 			ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
 		#ifdef shangdao	
-			//Chassis_Choose(1,1);  
+			Chassis_Choose(1,1);  
 		#endif
 			
 			
@@ -357,7 +357,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 
   if(AutoClimbing==0)
 	ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-15;
-	YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
+//	YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
 
 	#else
 	ChassisSpeedRef.rotate_ref = mouse->x * RC_ROTATE_SPEED_REF;
@@ -547,11 +547,13 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		ComeToTop();
 		Claw_GetSpecifiedBox();
 		Claw_SelfInspect();
+		Claw_AutoIn();
 		if(Claw_FindingNextBox_Lower==1)
 			Claw_GoToNextBox_lower();
 		if(Claw_FindingNextBox_Upper==1)
 			Claw_GoToNextBox_upper();	
 		//Claw_Up();
+		Claw_Protect();
 		Box_Land();
 		AutoGet_SwitchState();
 		AutoClimb_SwitchState();

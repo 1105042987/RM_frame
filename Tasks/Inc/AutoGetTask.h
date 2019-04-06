@@ -17,7 +17,7 @@
 #define CLAWOUT   HAL_GPIO_WritePin(GPIOH,1<<2,1)//爪子弹出
 #define CLAWIN    HAL_GPIO_WritePin(GPIOH,1<<2,0)//爪子进入
 #define CLAWTIGHT HAL_GPIO_WritePin(GPIOH,1<<5,1)//爪子抓紧
-#define CLAWLOOSE HAL_GPIO_WritePin(GPIOH,1<<5,0)//爪子松开
+#define CLAWLOOSE HAL_GPIO_WritePin(GPIOH,1<<5,0)//爪子松开  //左中右 弹箱 前后 抓紧  4 2 5
 #define LAUNCH    HAL_GPIO_WritePin(GPIOH,1<<4,1)//弹射起飞
 #define LAND      HAL_GPIO_WritePin(GPIOH,1<<4,0)//弹射机构归位
 
@@ -84,4 +84,6 @@ void Claw_GoToNextBox_upper();
 void Claw_Up();
 void AutoGet_SwitchState();
 void ClawUpDown_SwitchState();
+void Claw_Protect();
+void Claw_AutoIn();
 #endif /*__ AUTOGETTASK_H */

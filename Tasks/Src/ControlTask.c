@@ -26,6 +26,10 @@ extern int32_t auto_lock; //锁定底盘
 extern int32_t cnt_clk;    //登岛时间中断常量
 extern int32_t doorcount;
 extern uint32_t counting;
+extern uint32_t claw_warning;
+extern uint32_t warning_cnt;
+extern uint32_t Claw_Zero_Counting;
+extern uint32_t Claw_Zero_Count;
 
 void playMusicSuperMario(void){
 	HAL_TIM_PWM_Start(&BUZZER_TIM, TIM_CHANNEL_1);
@@ -174,6 +178,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(auto_waiter>0)auto_waiter--;
 		if(counting==1) doorcount++;
 		if(counting==0) doorcount=0;
+		if(claw_warning==1) warning_cnt++;
+		if(claw_warning==0) warning_cnt=0;
+		if(Claw_Zero_Counting==1) Claw_Zero_Count++;
+		if(Claw_Zero_Counting==0) Claw_Zero_Count=0;
 		
 		if (rc_update)
 		{

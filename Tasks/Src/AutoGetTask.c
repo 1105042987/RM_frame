@@ -37,12 +37,16 @@ uint32_t Claw_AlreadyWaited=0;
 uint32_t Claw_AlreadyTight=0;
 uint32_t Claw_UpToPosition=0;
 uint32_t Claw_DownToPosition=0;
-uint16_t Claw_TruePosition[5] = {0, 820, 1600, 400, 1200};
+uint16_t Claw_TruePosition[5] = {0, 820, 1600, 400, 1100};
 int32_t  Claw_UpAngle=0;
 uint32_t Claw_TakeThisBox=0;
 uint32_t Claw_SelfInspecting=0;
+uint32_t Claw_FirstSelfInspect=0;
 uint32_t Claw_FindingNextBox_Lower=0;
 uint32_t Claw_FindingNextBox_Upper=0;
+uint32_t Claw_SetZero=0;
+uint32_t Claw_Zero_Counting=0;
+uint32_t Claw_Zero_Count=0;
 //´æ´¢ºìÍâ´«¸ÐÆ÷µÄÊýÖµ
 extern uint32_t ADC_value[160];
 extern uint32_t ADC2_value[10];
@@ -61,6 +65,8 @@ int32_t auto_counter=0;		//ÓÃÓÚ×¼È·ÑÓÊ±µÄÍê³ÉÄ³ÊÂ¼þ
 int32_t auto_waiter=0;
 int32_t cnt_clk;
 int32_t auto_wait=0;
+uint32_t warning_cnt=0;
+uint32_t claw_warning=0;
 int16_t cnt = 0;
 uint32_t ifset=-5;//ÓÃÓÚ×Ô¼ì
 
@@ -291,13 +297,11 @@ void AutoGet_Stop_And_Clear()//×´Ì¬ÇåÁã ×¦×Ó×ª»Ø ºáÒÆµç»úÍ£×ª£¨ÓÃÓÚÒì³£×´¿ö´¦Àíº
   UM2.TargetAngle=INANGLE;
 	Claw_AlreadyRollOut=0;
 	Claw_AlreadyTight=0;
-	Claw_SelfInspecting=0;
 	
 	Claw_TakeThisBox=0;
 	Claw_FindingNextBox_Lower=0;
 	Claw_FindingNextBox_Upper=0;
 	Claw_UpToPosition=0;
-	Claw_UpAngle=0;
 	Sensor_Ready[0]=0;
 }
 void Box_ThrowForward()//ÏòÇ°ÈÓ³öÏä×Ó
@@ -327,11 +331,11 @@ void AutoGet_Lower()//×Ô¶¯È¡µ¯£¨µºÏÂÎå¸öµ¯£©
 		case 6:{Claw_GoTo(3);break;}
 		case 7:{Box_Fire();     break;}
 		case 8:{Claw_GetaBox();  break;}
-		case 9:{Claw_GoTo(4);break;}
+		case 9:{Claw_GoTo(5);break;}
 		case 10:{Box_Fire();    break;}
 		case 11:{CLAWOUT;AutoGet_TotalStep++;auto_counter=500;break;}  
 		case 12:{Claw_GetaBox(); break;}
-		case 13:{Claw_GoTo(5);break;}
+		case 13:{Claw_GoTo(4);break;}
 		case 14:{Box_Fire();    break;}
 		case 15:{Claw_GetaBox(); break;}
 		case 16:{Claw_GoTo(1);break;}
@@ -436,15 +440,23 @@ void Claw_GetSpecifiedBox()//¼üÊó¿ØÖÆÈ¡ÈÎÒâÎ»ÖÃµ¯
 }
 void Claw_SelfInspect()//×¦×ÓºáÒÆ×Ô¶¯¶ÔÎ»Áãµã
 {
-	if(UFM.RxMsgC6x0.moment>-4000&&NMUDL.RealAngle<-UPPROTECT&&Claw_SelfInspecting==1)
+	if(Claw_FirstSelfInspect==0)
+	{
+		Claw_SelfInspecting=1;
+		Claw_FirstSelfInspect=1;
+	}
+	if(Claw_SetZero==1)
+	{
+	if(UFM.RxMsgC6x0.moment>-4000&&Claw_SelfInspecting==1)
 		UFM.TargetAngle-=8;
 	if(UFM.RxMsgC6x0.moment<-4000&&Claw_SelfInspecting==1)
 	{
 		UFM.RealAngle=0;
-		UFM.TargetAngle=0;
+		UFM.TargetAngle=FOURTHBOX;
 		Claw_SelfInspecting=2;
 		Claw_UpToPosition=0;
 	}
+  }
 }
 void Claw_GoToNextBox_lower()//ºìÍâ´«¸ÐÆ÷¿ØÖÆ×¦×Óµ½´ïÏÂÒ»¸öÏä×Ó´¦
 {
@@ -531,3 +543,45 @@ void ClawUpDown_SwitchState()
 	}
 }
 
+void Claw_Protect()
+{
+	if(UFM.RxMsgC6x0.moment>10000||UFM.RxMsgC6x0.moment<-10000)
+		claw_warning=1;
+	if(UFM.RxMsgC6x0.moment>-10000&&UFM.RxMsgC6x0.moment<10000)
+		claw_warning=0;
+	
+	if(warning_cnt>1000)
+	{
+		UFM.TargetAngle=UFM.RealAngle;
+		if(UFM.RxMsgC6x0.moment>10000)
+			UFM.TargetAngle-=20;
+		else if(UFM.RxMsgC6x0.moment<-10000)
+			UFM.TargetAngle+=20;
+		
+	}
+}
+
+void Claw_AutoIn()
+{
+	if(Claw_SetZero==0)
+	{
+		if(UM1.RxMsgC6x0.moment<4000||UM2.RxMsgC6x0.moment>-4000)
+		{
+			Claw_Zero_Counting=0;
+	    UM1.TargetAngle+=3;
+	    UM2.TargetAngle-=3;
+		}
+		if(UM1.RxMsgC6x0.moment>4000&&UM2.RxMsgC6x0.moment<-4000)
+		{
+			Claw_Zero_Counting=1;
+		}
+		if(Claw_Zero_Count>=1000)
+		{
+			UM1.RealAngle=0;
+			UM1.TargetAngle=0;
+			UM2.RealAngle=0;
+			UM2.TargetAngle=0;
+			Claw_SetZero=1;
+		}
+	}
+}
