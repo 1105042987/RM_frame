@@ -211,7 +211,7 @@ void RescueLoop()
 		{
 			if(leftClawTight == 1)
 			{
-				if(SL.RxMsgC6x0.moment < -3000&&SL.TargetAngle<=30)
+				if(SL.RxMsgC6x0.moment < -3000&&SL.TargetAngle<=10)
 					SL.TargetAngle += 1;
 				else if(SL.RxMsgC6x0.moment >- 3000)
 					SL.TargetAngle -= 1;
@@ -220,7 +220,7 @@ void RescueLoop()
 			{
 				if(SR.RxMsgC6x0.moment < 3000)
 					SR.TargetAngle += 1;
-				else if(SR.RxMsgC6x0.moment > 3000&&SL.TargetAngle>-30)
+				else if(SR.RxMsgC6x0.moment > 3000&&SL.TargetAngle>-10)
 					SR.TargetAngle -= 1;
 			}
 		}
@@ -239,6 +239,7 @@ void RescueLoop()
 		
 		if(masterHigh==0 && masterLow==1)//tight
 		{
+			loosed=1;
 			SL.TargetAngle = 0;
 			SR.TargetAngle = 0;
 		}

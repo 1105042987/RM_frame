@@ -103,7 +103,7 @@
         <bEvRecOn>1</bEvRecOn>
         <bSchkAxf>0</bSchkAxf>
         <bTchkAxf>0</bTchkAxf>
-        <nTsel>11</nTsel>
+        <nTsel>6</nTsel>
         <sDll></sDll>
         <sDllPa></sDllPa>
         <sDlgDll></sDlgDll>
@@ -145,7 +145,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>ST-LINKIII-KEIL_SWO</Key>
-          <Name>-U303030303030303030303031 -I0 -O8398 -S1 -C0 -A0 -N00("ARM CoreSight SW-DP") -D00(2BA01477) -L00(0) -TO18 -TC10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO15 -FD20000000 -FC1000 -FN1 -FF0STM32F4xx_2048.FLM -FS08000000 -FL0200000 -FP0($$Device:STM32F427IIHx$CMSIS\Flash\STM32F4xx_2048.FLM)</Name>
+          <Name>-U303030303030303030303031 -O8398 -SF1800 -C0 -A0 -I0 -HNlocalhost -HP7184 -P1 -N00("ARM CoreSight SW-DP") -D00(2BA01477) -L00(0) -TO18 -TC10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO15 -FD20000000 -FC1000 -FN1 -FF0STM32F4xx_2048.FLM -FS08000000 -FL0200000 -FP0($$Device:STM32F427IIHx$CMSIS\Flash\STM32F4xx_2048.FLM)</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -393,32 +393,32 @@
         <Ww>
           <count>47</count>
           <WinNumber>1</WinNumber>
-          <ItemText>readL</ItemText>
+          <ItemText>readL,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>48</count>
           <WinNumber>1</WinNumber>
-          <ItemText>readR</ItemText>
+          <ItemText>readR,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>49</count>
           <WinNumber>1</WinNumber>
-          <ItemText>SR</ItemText>
+          <ItemText>SR,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>50</count>
           <WinNumber>1</WinNumber>
-          <ItemText>SL</ItemText>
+          <ItemText>SL,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>51</count>
           <WinNumber>1</WinNumber>
-          <ItemText>leftClawTight</ItemText>
+          <ItemText>leftClawTight,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>52</count>
           <WinNumber>1</WinNumber>
-          <ItemText>rightClawTight</ItemText>
+          <ItemText>rightClawTight,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
