@@ -20,11 +20,11 @@
 #define LOWERCRITICIAL 2000      //岛下临界值
 #define UPPERCRITICIAL 800 //待测试
 
-#define UPLEVEL 440    //抬升时的合适高度 必须被4整除
+#define UPLEVEL 432    //抬升时的合适高度 必须被4整除
 #define UPPROTECT 400  //抬升的临界保护值
 
-#define OUTANGLE 180  //抓箱子的角度值
-#define INANGLE  30   //带着箱子回来的角度值
+#define OUTANGLE 190  //抓箱子的角度值
+#define INANGLE  50   //带着箱子回来的角度值
 
 #define THROWANGLE 180 //扔掉箱子时在这个角度松爪子
 
@@ -141,6 +141,31 @@ uint8_t hasReach(MotorINFO* id, double distance)//用于判断电机是否到位
 	if(fabs(id->RealAngle - id->TargetAngle) < distance)return 1;
 	else return 0;
 }
+
+uint8_t canMovePositive(MotorINFO* id, int16_t stuckMoment)
+{
+	if(id->RxMsgC6x0.moment < stuckMoment)return 1;
+	else return 0;
+}
+
+uint8_t canMoveNegetive(MotorINFO* id, int16_t stuckMoment)
+{
+	if(id->RxMsgC6x0.moment > stuckMoment)return 1;
+	else return 0;
+}
+
+uint8_t stuckPositive(MotorINFO* id)
+{
+	if(id->warningDir == 1 && id->warningCount > 1000)return 1;
+	else return 0;
+}
+
+uint8_t stuckNegetive(MotorINFO* id)
+{
+	if(id->warningDir == -1 && id->warningCount > 1000)return 1;
+	else return 0;
+}
+
 void Sensor_Read_Lower()//用于检测红外传感器是否检测到两个空隙
 {
 	if(Sensor_Tmp[0]<LOWERCRITICIAL&&adgl<LOWERCRITICIAL)
@@ -576,6 +601,26 @@ void Claw_AutoIn()
 			Claw_Zero_Counting=1;
 		}
 		if(Claw_Zero_Count>=1000)
+		{
+			UM1.RealAngle=0;
+			UM1.TargetAngle=0;
+			UM2.RealAngle=0;
+			UM2.TargetAngle=0;
+			Claw_SetZero=1;
+		}
+	}
+}
+
+void Claw_AutoInTest()
+{
+	if(Claw_SetZero==0)
+	{
+		if(canMovePositive(&UM1,4000)||canMoveNegetive(&UM2,-4000))
+		{
+	    UM1.TargetAngle+=3;
+	    UM2.TargetAngle-=3;
+		}
+		if(stuckPositive(&UM1) && stuckNegetive(&UM2))
 		{
 			UM1.RealAngle=0;
 			UM1.TargetAngle=0;

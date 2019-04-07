@@ -62,6 +62,8 @@ extern uint32_t ifset;//用于自检
 
 
 uint8_t hasReach(MotorINFO* id, double distance);//用于判断电机是否到位
+uint8_t canMovePositive(MotorINFO* id, int16_t stuckMoment);
+uint8_t canMoveNegetive(MotorINFO* id, int16_t stuckMoment);
 void RefreshADC();     //刷新红外传感器数值
 void Sensor_Read_Lower();//用于检测红外传感器是否检测到两个空隙
 void Claw_Rollout();//爪子转出与转回
@@ -86,4 +88,5 @@ void AutoGet_SwitchState();
 void ClawUpDown_SwitchState();
 void Claw_Protect();
 void Claw_AutoIn();
+void Claw_AutoInTest();
 #endif /*__ AUTOGETTASK_H */

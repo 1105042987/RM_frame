@@ -80,27 +80,30 @@ typedef struct MotorINFO
 	fw_PID_Regulator_t 	speedPID;
 	PID_Regulator_t		offical_speedPID;
 	int16_t				Intensity;
+	uint16_t			warningCount;
+	int16_t				warningMoment;
+	int8_t				warningDir;
 }MotorINFO;
 
-#define Normal_MOTORINFO_Init(rdc,func,ppid,spid)\
+#define Normal_MOTORINFO_Init(rdc,func,ppid,spid,wMoment)\
 {\
 	ESC_C6x0,0,0,0,rdc,\
 	{0,0,0},{0,0,0},0,0,1,0,0,func,\
-	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0 \
+	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0,0,wMoment,0 \
 }
 
 #define Chassis_MOTORINFO_Init(func,spid)\
 {\
 	ESC_C6x0,0,0,0,1,\
 	{0,0,0},{0,0,0},0,0,1,0,0,func,\
-	FW_PID_DEFAULT,FW_PID_DEFAULT,spid,0 \
+	FW_PID_DEFAULT,FW_PID_DEFAULT,spid,0,0,0,0 \
 }
 
 #define Gimbal_MOTORINFO_Init(rdc,func,ppid,spid)\
 {\
 	ESC_6623,0,0,0,rdc,\
 	{0,0,0},{0,0,0},0,0,1,0,0,func,\
-	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0 \
+	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0,0,0,0 \
 }
 
 

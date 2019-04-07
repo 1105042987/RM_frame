@@ -140,6 +140,7 @@ void controlLoop()
 		for(int i=0;i<8;i++) if(can1[i]!=0) (can1[i]->Handle)(can1[i]);
 		for(int i=0;i<8;i++) if(can2[i]!=0) (can2[i]->Handle)(can2[i]);
 		
+		
 		OptionalFunction();
 		
 		#ifdef CAN11
@@ -154,6 +155,42 @@ void controlLoop()
 		#ifdef CAN22
 		setCAN22();
 		#endif
+	}
+}
+
+void checkStuck()
+{
+	for(int i=0;i<8;i++)
+	{
+		if(can1[i]!=0 && can1[i]->warningMoment!=0 && can1[i]->warningCount<5000 && can1[i]->RxMsgC6x0.moment > can1[i]->warningMoment) 
+		{
+			if(can1[i]->warningDir == 1)can1[i]->warningCount++;
+			else can1[i]->warningCount = 0;
+			can1[i]->warningDir = 1;
+		}
+		else if(can1[i]!=0 && can1[i]->warningMoment!=0 && can1[i]->warningCount<5000 && can1[i]->RxMsgC6x0.moment < -can1[i]->warningMoment) 
+		{
+			if(can1[i]->warningDir == -1)can1[i]->warningCount++;
+			else can1[i]->warningCount = 0;
+			can1[i]->warningDir = -1;
+		}
+		else can1[i]->warningCount = 0;
+	}
+	for(int i=0;i<8;i++)
+	{
+		if(can2[i]!=0 && can2[i]->warningMoment!=0 && can2[i]->warningCount<5000 && can2[i]->RxMsgC6x0.moment > can2[i]->warningMoment) 
+		{
+			if(can2[i]->warningDir == 1)can2[i]->warningCount++;
+			else can2[i]->warningCount = 0;
+			can2[i]->warningDir = 1;
+		}
+		else if(can2[i]!=0 && can2[i]->warningMoment!=0 && can2[i]->warningCount<5000 && can2[i]->RxMsgC6x0.moment < -can2[i]->warningMoment) 
+		{
+			if(can2[i]->warningDir == -1)can2[i]->warningCount++;
+			else can2[i]->warningCount = 0;
+			can2[i]->warningDir = -1;
+		}
+		else can2[i]->warningCount = 0;
 	}
 }
 
@@ -182,6 +219,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(claw_warning==0) warning_cnt=0;
 		if(Claw_Zero_Counting==1) Claw_Zero_Count++;
 		if(Claw_Zero_Counting==0) Claw_Zero_Count=0;
+		checkStuck();
 		
 		if (rc_update)
 		{

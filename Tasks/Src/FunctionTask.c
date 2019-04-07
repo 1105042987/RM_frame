@@ -44,6 +44,7 @@ uint32_t saveing_flag=0;
 extern uint32_t AutoClimb_ComeToTop;
 extern uint32_t AutoClimb_AlreadyTop;
 extern uint32_t AutoClimbing;
+extern uint32_t Claw_SetZero;
 
 uint32_t openthegay=0;
 
@@ -524,6 +525,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			else if(key->v & KEY_Z)
 			{
 				Claw_SelfInspecting=1;
+				Claw_SetZero=0;
 			}
 			else if(key->v & KEY_Q)
 			{
@@ -547,7 +549,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		ComeToTop();
 		Claw_GetSpecifiedBox();
 		Claw_SelfInspect();
-		Claw_AutoIn();
+		Claw_AutoInTest();
 		if(Claw_FindingNextBox_Lower==1)
 			Claw_GoToNextBox_lower();
 		if(Claw_FindingNextBox_Upper==1)
