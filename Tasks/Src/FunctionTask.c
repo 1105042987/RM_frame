@@ -10,8 +10,8 @@
   ******************************************************************************
   */
 #include "includes.h"
-#define getLeftSr()		!HAL_GPIO_ReadPin(GPIOE,leftSensor_Pin) //红外检测到为低电平，故取非运算。Sr缩写Sensor
-#define getRightSr()	!HAL_GPIO_ReadPin(GPIOE,rightSensor_Pin) 
+#define getLeftSr()		!HAL_GPIO_ReadPin(GPIOE,leftSensor_Pin)// //红外检测到为低电平，故取非运算。Sr缩写Sensor
+#define getRightSr()	!HAL_GPIO_ReadPin(GPIOE,rightSensor_Pin) //
 #define onLed(x) 	HAL_GPIO_WritePin(GPIOG,1<<x, GPIO_PIN_RESET)
 #define offLed(x) 	HAL_GPIO_WritePin(GPIOG,1<<x, GPIO_PIN_SET)
 void initCM(void);
@@ -34,7 +34,7 @@ void FunctionTaskInit(){
 //限位与同步
 void limtSync(){
 	MINMAX(GMP.Target,-35,20);//limit
-	MINMAX(GMY.Target,-150+GMY.Zero,150+GMY.Zero);//limit
+	MINMAX(GMY.Target,-150+GMY.encoderLastAngle,150+GMY.encoderLastAngle);//limit
 	//CMR.Target =  -CML.Target;
 }
 //******************
@@ -42,7 +42,7 @@ void limtSync(){
 //******************
 #if GUARD == 'U'
 //上平台代码
-int jam=-1;
+int jam=-1,ignoreJam=0;
 void RemoteControlProcess(Remote *rc){
 	if(WorkState <= 0) return;
 	//max=660
@@ -57,17 +57,30 @@ void RemoteControlProcess(Remote *rc){
 	sendData[0].data[2]=channellcol;
 	sendData[0].data[3]=(int16_t)(fakeHeat0*20);//
 	if(WorkState == NORMAL_STATE){
+		STIRp.Real=0;
+		STIRp.Target=0;
 		STIRv.Target=0;
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
+		STIRp.Real=0;
+		STIRp.Target=0;
 		STIRv.Target=0;
+		ignoreJam=6;
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
-		if(STIRv.RxMsgC6x0.moment>9500){jam=5;}
-		///TargetSpeed = shootFrq*45/360*36*60 = shootFrq*270
-		if(jam<0){STIRv.Target=270*20+channelrcol/660*270*10;}
-		else{STIRv.Target=-2160;jam--;}
+		STIRp.Target+=(10+channelrcol/66)*0.63;
+//		if(STIRp.RxMsgC6x0.moment>9500){
+//			STIRp.Real=0;
+//			STIRp.Target=-30;
+//		}
+//		///TargetAngle = shootFrq*45/1000*14=shootFrq*0.63
+//		else{STIRp.Target+=(shootFrq+channelrcol/66)*0.63;}
 		
+//		if(STIRv.RxMsgC6x0.moment>9500&&ignoreJam==0){jam=5;}
+//		///TargetSpeed = shootFrq*45/360*36*60 = shootFrq*270
+//		if(jam<0){STIRv.Target=270*20+channelrcol/660*270*10;}
+//		else{STIRv.Target=-2160;jam--;}
+//		if(ignoreJam){ignoreJam--;};
 		
 //		if(abs(STIRp.RxMsgC6x0.moment)<9000){STIRp.Target-= 15+ channelrcol/66;}
 //		else{STIRp.Real=0;STIRp.Target=60;}
@@ -85,23 +98,23 @@ void RemoteControlProcess(){
 	channellrow = receiveData[0].data[1];//leftRight
 	channellcol = receiveData[0].data[2];//upDown
 	fakeHeat0=receiveData[0].data[3]/(float)(20.0);
-	GMY.Target+=channellrow * 0.001f;
-	GMP.Target+=channellcol * 0.001f;
+	GMY.Target+=channellrow*0.001f;
+	GMP.Target+=channellcol*0.001f;
 	if(WorkState == NORMAL_STATE){
 		STIRv.Target=0;
 		FRICL.Target=0;
 		FRICR.Target=0;
 		laserOn();
 		aimMode=1;
-		AutoAimCTRL();
+		autoAimCtrl();
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
 		STIRv.Target=0;
-//		FRICL.Target =-2000;
-//		FRICR.Target =2000;
-		aimMode=2;
-		AutoAimCTRL();
+		FRICL.Target =-2000;
+		FRICR.Target =2000;
 		laserOn();
+		aimMode=2;
+		autoAimCtrl();
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
 		FRICL.Target =-2000;
@@ -135,7 +148,17 @@ void selfControlProcess(Remote *rc){
 
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
-
+		if(getLeftSr() && getRightSr()){dir=0;initCM();}
+		else if(getRightSr() || fabs(CML.Real)>36000 || abs(CML.RxMsgC6x0.moment)>10000){//换向保护：红外触发、底盘超程、底盘超载
+			dir=1; 
+			onePushDir(dir,initCM(););
+		}
+		else if(getLeftSr()  || fabs(CML.Real)>36000 || abs(CML.RxMsgC6x0.moment)>10000){
+			dir=-1;
+			onePushDir(dir,initCM(););
+		}
+		speedRef+=0.05;
+		ChassisSpeedRef.left_right_ref =(30*sin(speedRef)+100)*dir;
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
 		if(fakeHeat0<100){shootFrq=40;}
@@ -145,10 +168,10 @@ void selfControlProcess(Remote *rc){
 		else if(fakeHeat0>440 && shootFrq>5){shootFrq--;}
 		else if(fakeHeat0>400 && shootFrq>9){shootFrq-=0.1;}
 		else{shootFrq=10;}
-		if(STIRv.RxMsgC6x0.moment<-9500){jam=5;}
+		if(STIRv.RxMsgC6x0.moment>9500){jam=5;}
 		//TargetSpeed = shootFrq*45/360*36*60 = shootFrq*270
-		if(jam<0){STIRv.Target=-shootFrq*270;}
-		else{STIRv.Target=2000;jam--;}
+		if(jam<0){STIRv.Target=shootFrq*270;}
+		else{STIRv.Target=-2000;jam--;}
 		
 		
 //		
@@ -196,18 +219,21 @@ void selfControlProcess(){
 	channellrow = receiveData[0].data[1]+2;//leftRight
 	channellcol = receiveData[0].data[2];//upDown
 	fakeHeat0=receiveData[0].data[3]/(float)(20.0);
-	GMY.Target+=channellrow * 0.0006f;
-	GMP.Target+=channellcol * 0.0006f;
+	GMY.Target+=channellrow*0.001f;
+	GMP.Target+=channellcol*0.001f;
 	if(WorkState == NORMAL_STATE){
-		FRICL.Target =0;
-		FRICR.Target =0;
+		STIRv.Target=0;
+		FRICL.Target=0;
+		FRICR.Target=0;
 		laserOff();
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
-//		FRICL.Target =-2000;
-//		FRICR.Target =2000;
-		AutoAimCTRL();
+		STIRv.Target=0;
+		FRICL.Target =-2000;
+		FRICR.Target =2000;
 		laserOn();
+		aimMode=1;
+//		autoAimCtrl();
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
 		FRICL.Target =-2000;
@@ -224,3 +250,9 @@ void initCM(){
 	CMR.Target=0;
 }
 
+void cruise(){
+}
+void trace(){
+}
+void dodge(){
+}

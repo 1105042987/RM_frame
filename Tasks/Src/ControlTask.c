@@ -18,13 +18,14 @@ uint16_t counter = 0;
 double rotate_speed = 0;
 uint8_t startUp = 0;
 
-MusicNote SuperMario[] = {
+MusicNote SuperMario[]={
 	#if GUARD == 'U'
 		{H3, 100}, {0, 50},
 		{H3, 100}, {0, 50}
 	#else
-		{H3, 100}, {0, 50}, 
-		{H1, 250}, {0, 50}
+		{H1, 100}, {0, 50}, 
+		{H1, 100}, {0, 50}, 
+		{H3, 200}, {0, 50}
 	#endif
 };
 
@@ -34,8 +35,7 @@ uint8_t playMusicSuperMario(void){
 	static int16_t cnt=0;
 	if(auto_counter <= 0){
 		if(cnt==0) HAL_TIM_PWM_Start(&BUZZER_TIM, TIM_CHANNEL_1);
-		if(cnt < sizeof(SuperMario) / sizeof(MusicNote))
-		{	
+		if(cnt < sizeof(SuperMario) / sizeof(MusicNote)){	
 			uint16_t note = SuperMario[cnt].note;
 			uint16_t time = SuperMario[cnt].time;
 			if(note == 0){
@@ -56,8 +56,7 @@ uint8_t playMusicSuperMario(void){
 	}
 	return 0;
 }
-void sendAllData(uint8_t isStop)
-{
+void sendAllData(uint8_t isStop){
 	if(isStop) for(int i=0;i<8;i++) {InitMotor(can1[i]);InitMotor(can2[i]);}
 	#ifdef CAN11
 		setCAN11();
@@ -131,8 +130,7 @@ void WorkStateFSM(void){
 			if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
 			if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
 		}break;
-		case ADDITIONAL_STATE_TWO:		//附加模式二
-		{
+		case ADDITIONAL_STATE_TWO:{		//附加模式二
 			if(inputmode == STOP) WorkState = STOP_STATE;
 			if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
 			if(functionmode == MIDDLE_POS) WorkState = ADDITIONAL_STATE_ONE;
@@ -163,8 +161,7 @@ void Chassis_Data_Decoding(){
 #ifdef USE_POWER_LIMIT
 float rate=1.0f;
 #endif
-void controlLoop()
-{
+void controlLoop(){
 	getJudgeState();
 	WorkStateFSM();
 	
@@ -220,17 +217,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		
 		//HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
 	}
-	else if (htim->Instance == ONE_MS_TIM.Instance)//ims时钟
-	{
+	else if (htim->Instance == ONE_MS_TIM.Instance){//ims时钟
 		rc_cnt++;
 		if(auto_counter > 0) auto_counter--;
 		#ifdef SLAVE_MODE
-		if(Control_Update==1)
-		{
+		if(Control_Update==1){
 			HAL_IWDG_Refresh(&hiwdg);
 			Control_Update=0;
-			if(WorkState!=PREPARE_STATE)
-			{
+			if(WorkState!=PREPARE_STATE){
 				if(WorkState==STOP_STATE&&receiveData[0].data[0]>0) WorkState = PREPARE_STATE;
 				else WorkState = (WorkState_e)receiveData[0].data[0];
 				if(inputmode==REMOTE_Control)
@@ -240,16 +234,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			}
 		}
 		#else
-		if (rx_free == 1 && tx_free == 1)
-		{
-			if( (rc_cnt <= 17) && (rc_first_frame == 1))
-			{
+		if (rx_free == 1 && tx_free == 1){
+			if( (rc_cnt <= 17) && (rc_first_frame == 1)){
 				RemoteDataProcess(rc_data);				//遥控器数据解算
 				HAL_UART_AbortReceive(&RC_UART);
 				rx_free = 0;
 				while(HAL_UART_Receive_DMA(&RC_UART, rc_data, 18)!= HAL_OK);
-				if (counter == 10) 
-				{
+				if (counter == 10){
 					tx_free = 0;
 					Send_User_Data(); 
 					counter = 0;
@@ -257,10 +248,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				else counter++;				
 				rc_cnt = 0;
 			}
-			else
-			{
-				if(rc_first_frame == 0) 
-				{
+			else{
+				if(rc_first_frame == 0){
 					WorkState = PREPARE_STATE;
 					HAL_UART_AbortReceive(&RC_UART);
 					while(HAL_UART_Receive_DMA(&RC_UART, rc_data, 18)!= HAL_OK);
@@ -273,8 +262,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		#endif
 		
 	}
-	else if (htim->Instance == htim10.Instance)  //10ms
-	{
+	else if (htim->Instance == htim10.Instance){  //10ms
 		
 	}
 }

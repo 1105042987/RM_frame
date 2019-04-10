@@ -25,19 +25,19 @@ MotorINFO FRICL = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_D
 MotorINFO FRICR = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
 
 
-MotorINFO GMP  =  Gimbal6020_MOTORINFO_Init(1.0,&ControlGMP,7900,800,20,
+MotorINFO GMP  =  Gimbal6020_MOTORINFO_Init(1.0,&ControlGMP,7900,1100,20,
 								fw_PID_INIT_EASY(90, 2, 20, 5000),
 								fw_PID_INIT_EASY(15, 2, 2,	 15000));
 
-MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(1.0,&ControlGMY,0,400,20,
+MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(1.0,&ControlGMY,3300,400,20,
 //								fw_PID_INIT_EASY(0.6, 0.02, 0.2, 10),
 								fw_PID_INIT_EASY(0.4, 0.02, 2, 10),
 								fw_PID_INIT_EASY(3000, 500, 200, 20000));
 								
 
 //MotorINFO GMY  =  Gimbal6020_MOTORINFO_Init(1.0,&ControlGMYEncoder,10,0,20,
-//								fw_PID_INIT_EASY(30, 2, 10, 5000),
-//								fw_PID_INIT_EASY(50, 2, 10,	20000));
+//								fw_PID_INIT_EASY(50, 2, 20, 5000),
+//								fw_PID_INIT_EASY(40, 2, 20,	20000));
 								
 MotorINFO STIRp = AngleBased_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 2000.0),
@@ -55,37 +55,30 @@ MotorINFO CMR = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
 //MotorINFO* can2[8]={&CML,&CMR,0,0,0,0,0,0};
 
 MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMP,&GMY,0,0};
-MotorINFO* can2[8]={&CML,&CMR,0,0,&STIRv,0,0,0};
+MotorINFO* can2[8]={&CML,&CMR,0,0,&STIRp,0,0,0};
 
 void ControlNM(MotorINFO* id){
 	if(id==0) return;
-	if(id->s_count == 0){		
-		uint16_t 	ThisAngle;	
-		double 		ThisSpeed;	
-		ThisAngle = id->RxMsgC6x0.angle;				//未处理角度
-		if(id->FirstEnter==1) {id->lastRead = ThisAngle;id->FirstEnter = 0;return;}
-		if(ThisAngle<=id->lastRead){
-			if((id->lastRead-ThisAngle)>4000)//编码器上溢
-				id->Real = id->Real + (ThisAngle+8192-id->lastRead) *360/8192.0/ id->ReductionRate;
-			else//正常
-				id->Real = id->Real - (id->lastRead - ThisAngle) *360/8192.0/ id->ReductionRate;
+	if(id->s_count == 0){
+		double 		ThisSpeed;
+		id->encoderAngle = (id->RxMsgC6x0.angle - id->Zero) *360/8192.0f;
+		NORMALIZE_ANGLE180(id->encoderAngle);
+		if(id->FirstEnter==1){
+			id->lastRead = id->encoderAngle;
+			id->Real=id->encoderAngle;
+			id->Target=id->Real;
+			id->FirstEnter = 0;
+			return;
 		}
-		else{
-			if((ThisAngle-id->lastRead)>4000)//编码器下溢
-				id->Real = id->Real - (id->lastRead+8192-ThisAngle) *360 / 8192.0 / id->ReductionRate;
-			else//正常
-				id->Real = id->Real + (ThisAngle - id->lastRead) *360/8192.0/ id->ReductionRate;
-		}
+		float tmp=id->encoderAngle - id->lastRead;
+		id->Real+= (tmp<180?(tmp>-180?tmp:tmp+360):tmp-360)/ id->ReductionRate;//处理编码器溢出
 		ThisSpeed = id->RxMsgC6x0.rotateSpeed * 6 / id->ReductionRate;		//单位：度每秒
-		
 		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
 		
 		id->s_count = 0;
-		id->lastRead = ThisAngle;
+		id->lastRead = id->encoderAngle;
 	}
-	else{
-		id->s_count++;
-	}		
+	else{id->s_count++;}		
 }
 void ControlCM(MotorINFO* id){
 	//Target 代作为目标速度
@@ -97,119 +90,73 @@ void ControlCM(MotorINFO* id){
 }
 void ControlGMP(MotorINFO* id){
 	if(id==0) return;
-	if(id->s_count == 1){		
-		uint16_t 	ThisAngle;	
-		double 		ThisSpeed;	
-		ThisAngle = id->RxMsgC6x0.angle;				//未处理角度
-		
+	if(id->s_count == 1){
+		double 		ThisSpeed;
+		id->encoderAngle = (id->RxMsgC6x0.angle - id->Zero) *360/8192.0f;
+		NORMALIZE_ANGLE180(id->encoderAngle);
 		if(id->FirstEnter==1){
-			float EncoderAngle = (id->RxMsgC6x0.angle - id->Zero) *360/8192.0f/ id->ReductionRate;
-			NORMALIZE_ANGLE180(EncoderAngle);
-			id->lastRead = ThisAngle;
-			id->Real=EncoderAngle;
+			id->lastRead = id->encoderAngle;
+			id->Real=id->encoderAngle;
 			id->Target=id->Real;
 			id->FirstEnter = 0;
 			return;
 		}
-		if(ThisAngle<=id->lastRead){
-			if((id->lastRead-ThisAngle)>4000)//编码器上溢
-				id->Real = id->Real + (ThisAngle+8192-id->lastRead) *360/8192.0/ id->ReductionRate;
-			else//正常
-				id->Real = id->Real - (id->lastRead - ThisAngle) *360/8192.0/ id->ReductionRate;
-		}
-		else{
-			if((ThisAngle-id->lastRead)>4000)//编码器下溢
-				id->Real = id->Real - (id->lastRead+8192-ThisAngle) *360 / 8192.0 / id->ReductionRate;
-			else//正常
-				id->Real = id->Real + (ThisAngle - id->lastRead) *360/8192.0/ id->ReductionRate;
-		}
+		float tmp=id->encoderAngle - id->lastRead;
+		id->Real+= (tmp<180?(tmp>-180?tmp:tmp+360):tmp-360)/ id->ReductionRate;//处理编码器溢出
+		
 		ThisSpeed = id->RxMsgC6x0.rotateSpeed * 6 / id->ReductionRate;		//单位：度每秒
 		
 		id->Intensity = id->Compensation +PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
 		
 		id->s_count = 0;
-		id->lastRead = ThisAngle;
+		id->lastRead = id->encoderAngle;
 	}
-	else{
-		id->s_count++;
-	}		
+	else{id->s_count++;}		
 }
 
 void ControlGMYEncoder(MotorINFO* id){
 	if(id==0) return;
-	if(id->s_count == 1){		
-		uint16_t 	ThisAngle;	
+	if(id->s_count == 1){
 		double 		ThisSpeed;	
-		ThisAngle = id->RxMsgC6x0.angle;				//未处理角度
-
+		id->encoderAngle = (id->RxMsgC6x0.angle - id->Zero) *360/8192.0f;
+		NORMALIZE_ANGLE180(id->encoderAngle);
 		if(id->FirstEnter==1){
-			float EncoderAngle = (id->RxMsgC6x0.angle - id->Zero) * 360 / 8192.0f / id->ReductionRate;
-			NORMALIZE_ANGLE180(EncoderAngle);
-			id->lastRead = ThisAngle;
-			id->Real=EncoderAngle;
+			id->lastRead = id->encoderAngle;
+			id->Real=id->encoderAngle;
 			id->Target=id->Real;
 			id->FirstEnter = 0;
 			return;
 		}
-		if(ThisAngle<=id->lastRead){
-			if((id->lastRead-ThisAngle)>4000)//编码器上溢
-				id->Real = id->Real + (ThisAngle+8192-id->lastRead) *360/8192.0/ id->ReductionRate;
-			else//正常
-				id->Real = id->Real - (id->lastRead - ThisAngle) *360/8192.0/ id->ReductionRate;
-		}
-		else{
-			if((ThisAngle-id->lastRead)>4000)//编码器下溢
-				id->Real = id->Real - (id->lastRead+8192-ThisAngle) *360/8192.0/ id->ReductionRate;
-			else//正常
-				id->Real = id->Real + (ThisAngle - id->lastRead) *360/8192.0/ id->ReductionRate;
-		}
-		ThisSpeed = id->RxMsgC6x0.rotateSpeed * 6 / id->ReductionRate;		//单位：度每秒
+		float tmp=id->encoderAngle - id->lastRead;
+		id->Real+= (tmp<180?(tmp>-180?tmp:tmp+360):tmp-360)/ id->ReductionRate;//处理编码器溢出
 		
+		ThisSpeed = id->RxMsgC6x0.rotateSpeed * 6 / id->ReductionRate;//单位：度每秒
 		id->Intensity = id->Compensation +PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
-		
 		id->s_count = 0;
-		id->lastRead = ThisAngle;
+		id->lastRead = id->encoderAngle;
 	}
-	else{
-		id->s_count++;
-	}		
+	else{id->s_count++;}		
 }
 
 void ControlGMY(MotorINFO* id){
 	if(id==0) return;
 	if(id->s_count == 1){
-		static uint8_t Reseted = 0;
 		float ThisAngle=imu.yaw;
 		float ThisSpeed=imu.wz;
-		float EncoderAngle = (id->RxMsgC6x0.angle - id->Zero) *360/8192.0f/ id->ReductionRate;//在autoAimTask 的 autoAimPredict()要用，所以放在下一个if的外面
-		NORMALIZE_ANGLE180(EncoderAngle);
+		id->encoderAngle = (id->RxMsgC6x0.angle - id->Zero) *360/8192.0f;//在autoAimTask 的 autoAimPredict()要用，所以放在下一个if的外面
+		NORMALIZE_ANGLE180(id->encoderAngle);
 		if(id->FirstEnter==1){
 			id->lastRead=ThisAngle;
 			id->Real=ThisAngle;//EncoderAngle;
 			id->Target=id->Real;
-			id->Zero= id->Target-EncoderAngle;
+			id->encoderLastAngle= id->Real-id->encoderAngle;//借此参数表示imu与encoder的差值
 			id->FirstEnter = 0;
 			return;
 		}
-//		float tmp=ThisAngle - id->lastRead;
-//		id->Real+= tmp<180?(tmp>-180?tmp:tmp+360):tmp-360;//处理编码器溢出
-		
-		if(ThisAngle <= id->lastRead){
-			if((id->lastRead-ThisAngle)>180) {id->Real += (ThisAngle + 360 - id->lastRead);}
-			else{id->Real-=(id->lastRead - ThisAngle);}
-		}
-		else{
-			if((ThisAngle-id->lastRead)>180) {id->Real -= (id->lastRead + 360 - ThisAngle);}
-			else{id->Real += (ThisAngle - id->lastRead);}
-		}
-		
-		if(fabs(id->Real-id->Target)<5) Reseted = 1;
+		float tmp=ThisAngle - id->lastRead;
+		id->Real+= (tmp<180?(tmp>-180?tmp:tmp+360):tmp-360)/ id->ReductionRate;//处理编码器溢出
 		id->lastRead = ThisAngle ;
-
 		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);//+id->Compensation;
-		if(id->positionPID.errorCurr > 0.4){id->Intensity += id->Compensation;}
-		else if(id->positionPID.errorCurr < -0.4){id->Intensity -= id->Compensation;}
-		
 		//id->s_count = 0;
 	}
 	else{

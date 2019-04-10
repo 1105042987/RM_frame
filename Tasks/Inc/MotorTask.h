@@ -29,7 +29,7 @@
 #define CHASSIS_MOTOR_SPEED_PID_DEFAULT \
 {\
 	0,0,{0,0},\
-	12.0f,0.17f,8.0f,\
+	13.0f,0.17f,8.0f,\
 	0,0,0,\
 	10000,10000,10000,\
 	0,7000,0,0,0,\
@@ -37,7 +37,7 @@
 }
 
 #define FW_PID_DEFAULT \
-{ \
+{\
 	0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ,\
 	0, 0, 0, 0.0, 0.0, 0.0, \
 	0, 0, 0, 0.0, 0, \
@@ -45,14 +45,12 @@
 	&fw_PID_Calc, &fw_PID_Reset \
 }
 
-typedef enum
-{
+typedef enum{
 	ESC_C6x0=0,
 	ESC_6623=1
 }ESCtype_e;
 
-typedef struct MotorINFO
-{
+typedef struct MotorINFO{
 	ESCtype_e			ESCtype;
 	CAN_HandleTypeDef* 	CAN_TYPE;
 	uint16_t 			TXID;
@@ -78,27 +76,27 @@ typedef struct MotorINFO
 	float				encoderLastAngle;
 }MotorINFO;
 
-#define AngleBased_MOTORINFO_Init(rdc,func,ppid,spid)\
+#define AngleBased_MOTORINFO_Init(rdc,func,ppid,spid) \
 {\
 	ESC_C6x0,0,0,0,rdc,\
 	{0,0,0},{0,0,0},0,0,1,0,0,0,func,\
 	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0,0,0,0,0,0 \
 }
 
-#define SpeedBased_MOTORINFO_Init(func,spid)\
+#define SpeedBased_MOTORINFO_Init(func,spid) \
 {\
 	ESC_C6x0,0,0,0,1,\
 	{0,0,0},{0,0,0},0,0,1,0,0,0,func,\
 	FW_PID_DEFAULT,FW_PID_DEFAULT,spid,0,0,0,0,0,0 \
 }
 
-#define Gimbal_MOTORINFO_Init(rdc,func,zero,compensation,maxrange,ppid,spid)\
+#define Gimbal_MOTORINFO_Init(rdc,func,zero,compensation,maxrange,ppid,spid) \
 {\
 	ESC_6623,0,0,0,rdc,\
 	{0,0,0},{0,0,0},0,0,1,0,0,0,func,\
 	ppid,spid,CHASSIS_MOTOR_SPEED_PID_DEFAULT,0,zero,compensation,maxrange,0,0 \
 }
-#define Gimbal6020_MOTORINFO_Init(rdc,func,zero,compensation,maxrange,ppid,spid)\
+#define Gimbal6020_MOTORINFO_Init(rdc,func,zero,compensation,maxrange,ppid,spid) \
 {\
 	ESC_C6x0,0,0,0,rdc,\
 	{0,0,0},{0,0,0},0,0,1,0,0,0,func,\
@@ -115,7 +113,6 @@ void setCAN11(void);
 void setCAN12(void);
 void setCAN21(void);
 void setCAN22(void);
-
 
 
 #endif /*__ CANMOTOR_H */
