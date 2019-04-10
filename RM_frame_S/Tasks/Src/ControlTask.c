@@ -31,6 +31,10 @@ extern uint32_t SLflag;
 extern uint32_t SRflag;
 extern int32_t doorcount;
 extern uint32_t counting;
+extern int32_t left_warning;
+extern int32_t right_warning;
+extern int32_t left_warning_count;
+extern int32_t right_warning_count;
 uint8_t startUp=0;
 
 void playMusicSuperMario(void){
@@ -184,6 +188,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(SLflag==0) SLcnt=0;
 		if(SRflag==1) SRcnt++;
 		if(SRflag==0) SRcnt=0;
+		if(left_warning==1) left_warning_count++;
+		if(left_warning==0) left_warning_count=0;
+		if(right_warning==1) right_warning_count++;
+		if(right_warning==0) right_warning_count=0;
 		
 		if (rc_update)
 		{

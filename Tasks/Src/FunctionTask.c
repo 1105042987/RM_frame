@@ -447,25 +447,35 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 				Claw_UpToPosition=1;
 			}
-			if(key->v & KEY_V)
+			else if(key->v & KEY_V)
 			{
 				Claw_DownToPosition=1;
 			}
-			if(key->v & KEY_Q)
-			 CLAWOUT;
-			if(key->v & KEY_E)
-			 CLAWIN;
-			
-			
-			if(key->v & KEY_Z)
+			else if(key->v & KEY_Q)
 			{
-				if(Claw_SelfInspecting==2)
+				if(NMUDL.RealAngle<=-(UPLEVEL-30))
+				CLAWOUT;
+			}
+			else if(key->v & KEY_E)
+			{ 
+				if(NMUDL.RealAngle<=-(UPLEVEL-30))
+			  CLAWIN;
+			}
+			
+			
+			else if(key->v & KEY_Z)
+			{
+				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
 				AutoGet_Start=1;
 			}
-			if(key->v & KEY_X)
+			else if(key->v & KEY_X)
 			{
-				if(Claw_SelfInspecting==2)
+				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
 				AutoGet_Start=2;
+			}
+			else if(key->v & KEY_F)
+			{
+				dooropen=1;
 			}
 		}break;
 		case SHIFT:				//quick
@@ -500,26 +510,27 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_C)
 			{
-				if(Claw_SelfInspecting==2)
+				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
 				Claw_TakeThisBox=1;
 			}
 			else if(key->v & KEY_V)
 			{
-				if(Claw_SelfInspecting==2)
+				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
 				Claw_TakeThisBox=2;
 			}
 			else if(key->v & KEY_B)
 			{
-				if(Claw_SelfInspecting==2)
+				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
 				Claw_TakeThisBox=3;
 			}
 			else if(key->v & KEY_F)
 			{
-				dooropen=1;
+				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
+				Claw_TakeThisBox=4;
 			}
 			else if(key->v & KEY_G)
 			{
-				if(Claw_SelfInspecting==2)
+				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
 				Claw_TakeThisBox=5;
 			}
 			else if(key->v & KEY_Z)
@@ -529,6 +540,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_Q)
 			{
+				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
 				Claw_FindingNextBox_Lower=1;
 			}
 			else if(key->v & KEY_E)

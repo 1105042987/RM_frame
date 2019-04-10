@@ -33,7 +33,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 	CM2.RealAngle=0;
 	CM1.TargetAngle=ChassisSpeedRef.forward_back_ref*5;
 	CM2.TargetAngle=-ChassisSpeedRef.forward_back_ref*5;
-	if(flag) ChassisSpeedRef.forward_back_ref/=4;
+	if(flag) ChassisSpeedRef.forward_back_ref/=5;
 	if(NMCDL.RealAngle<-950 )
 	{//small chassis
 		signal1=0;

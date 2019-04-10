@@ -43,6 +43,12 @@ uint32_t SRflag=0;
 uint32_t checkleft=0;
 uint32_t checkright=0;
 
+uint32_t left_warning=0;
+uint32_t right_warning=0;
+int32_t  left_warning_state=0;
+int32_t  right_warning_state=0;
+uint32_t left_warning_count=0;
+uint32_t right_warning_count=0;
 uint8_t leftClawZero = 0;
 uint8_t rightClawZero = 0;
 uint8_t leftClawTight = 0;
@@ -211,16 +217,16 @@ void RescueLoop()
 		{
 			if(leftClawTight == 1)
 			{
-				if(SL.RxMsgC6x0.moment < -3000&&SL.TargetAngle<=10)
+				if(SL.RxMsgC6x0.moment < -3000&&SL.TargetAngle<=5)
 					SL.TargetAngle += 1;
-				else if(SL.RxMsgC6x0.moment >- 3000)
+				else if(SL.RxMsgC6x0.moment >=- 3000)
 					SL.TargetAngle -= 1;
 			}
 			if(rightClawTight == 1)
 			{
 				if(SR.RxMsgC6x0.moment < 3000)
 					SR.TargetAngle += 1;
-				else if(SR.RxMsgC6x0.moment > 3000&&SL.TargetAngle>-10)
+				else if(SR.RxMsgC6x0.moment >= 3000&&SL.TargetAngle>-5)
 					SR.TargetAngle -= 1;
 			}
 		}
@@ -243,6 +249,52 @@ void RescueLoop()
 			SL.TargetAngle = 0;
 			SR.TargetAngle = 0;
 		}
+	}
+	
+	//±£»¤
+	if(SL.RxMsgC6x0.moment>=3500||SL.RxMsgC6x0.moment<=-3500)
+	{
+		left_warning=1;
+		if(SL.RxMsgC6x0.moment>=3500)
+			left_warning_state=1;
+		if(SL.RxMsgC6x0.moment<=-3500)
+			left_warning_state=-1;
+	}
+	if(left_warning_count>800)
+	{
+		SL.TargetAngle=SL.RealAngle;
+		if(left_warning_state==1)
+			SL.TargetAngle-=10;
+		if(left_warning_state==-1)
+			SL.TargetAngle+=10;
+	}
+	if(SL.RxMsgC6x0.moment>-3500&&SL.RxMsgC6x0.moment<3500)
+	{
+		left_warning=0;
+		left_warning_state=0;
+	}
+	
+	
+	if(SR.RxMsgC6x0.moment>=3500||SR.RxMsgC6x0.moment<=-3500)
+	{
+		right_warning=1;
+		if(SR.RxMsgC6x0.moment>=3500)
+			right_warning_state=1;
+		if(SR.RxMsgC6x0.moment<=-3500)
+			right_warning_state=-1;
+	}
+	if(right_warning_count>800)
+	{
+		SR.TargetAngle=SR.RealAngle;
+		if(right_warning_state==1)
+			SR.TargetAngle-=10;
+		if(right_warning_state==-1)
+			SR.TargetAngle+=10;
+	}
+	if(SR.RxMsgC6x0.moment>-3500&&SR.RxMsgC6x0.moment<3500)
+	{
+		right_warning=0;
+		right_warning_state=0;
 	}
 }
 

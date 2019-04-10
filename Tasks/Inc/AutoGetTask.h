@@ -21,6 +21,7 @@
 #define LAUNCH    HAL_GPIO_WritePin(GPIOH,1<<4,1)//弹射起飞
 #define LAND      HAL_GPIO_WritePin(GPIOH,1<<4,0)//弹射机构归位
 
+#define UPLEVEL 432
 
 extern uint32_t AutoGet_Start;  
 extern uint32_t AutoGet_TotalStep;

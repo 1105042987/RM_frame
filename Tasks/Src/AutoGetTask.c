@@ -11,16 +11,16 @@
   */
 	#include "includes.h"
 	
-#define FIRSTBOX 0
+#define FIRSTBOX 20
 #define SECONDBOX 820
 #define THIRDBOX 1600             //这五个是箱子位置
 #define FOURTHBOX 400
-#define FIFTHBOX 1200
+#define FIFTHBOX 1150
 
 #define LOWERCRITICIAL 2000      //岛下临界值
 #define UPPERCRITICIAL 800 //待测试
 
-#define UPLEVEL 432    //抬升时的合适高度 必须被4整除
+//#define UPLEVEL 432    //抬升时的合适高度 必须被4整除
 #define UPPROTECT 400  //抬升的临界保护值
 
 #define OUTANGLE 190  //抓箱子的角度值
@@ -506,7 +506,7 @@ void Claw_GoToNextBox_upper()//红外传感器控制爪子到达下一个箱子处
 	Sensor_Read_Upper();
 	if(Sensor_Ready[0]!=2)
 	{
-		ChassisSpeedRef.forward_back_ref = 50 * RC_CHASSIS_SPEED_REF;
+		ChassisSpeedRef.forward_back_ref = 150 * RC_CHASSIS_SPEED_REF;
 	}
 	if(Sensor_Ready[0]==2)
 	{
@@ -524,8 +524,8 @@ void Claw_Up()//整个机构的抬升，抬升完后爪子自动对位
 				NMUDR.TargetAngle=-Claw_UpAngle;
 				auto_counter=1;
 			}
-			if(Claw_UpToPosition==1&&hasReach(&NMUDL,10)&&NMUDL.RealAngle<-UPPROTECT)
-			{Claw_SelfInspecting=1;}
+			//if(Claw_UpToPosition==1&&hasReach(&NMUDL,10)&&NMUDL.RealAngle<-UPPROTECT)
+			//{Claw_SelfInspecting=1;}
 			if(Claw_UpToPosition==1&&NMUDL.RealAngle<=(-UPLEVEL+5)&&NMUDR.RealAngle<=(-UPLEVEL+5))
 			{Claw_UpToPosition=0;
 			}
