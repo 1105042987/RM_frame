@@ -30,6 +30,9 @@ extern uint32_t claw_warning;
 extern uint32_t warning_cnt;
 extern uint32_t Claw_Zero_Counting;
 extern uint32_t Claw_Zero_Count;
+extern uint32_t AutoGet_TotalStep;
+uint32_t AutoGet_LastStep = 1;
+uint32_t AutoGetCnt = 0;
 
 void playMusicSuperMario(void){
 	HAL_TIM_PWM_Start(&BUZZER_TIM, TIM_CHANNEL_1);
@@ -194,6 +197,24 @@ void checkStuck()
 	}
 }
 
+void checkAutoGet()
+{
+	if(AutoGet_TotalStep > 1)
+	{
+		if(AutoGet_LastStep == AutoGet_TotalStep)
+		{
+			AutoGetCnt++;
+		}
+		else AutoGetCnt = 0;
+		if(AutoGetCnt > 2000)
+		{
+			AutoGet_Stop_And_Clear();
+			AutoGetCnt = 0;
+		}
+		AutoGet_LastStep = AutoGet_TotalStep;
+	}
+}
+
 //时间中断入口函数
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -220,6 +241,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(Claw_Zero_Counting==1) Claw_Zero_Count++;
 		if(Claw_Zero_Counting==0) Claw_Zero_Count=0;
 		checkStuck();
+		checkAutoGet();
 		
 		if (rc_update)
 		{

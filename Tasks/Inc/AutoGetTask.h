@@ -79,6 +79,7 @@ void Box_Fire();
 void AutoGet_Stop_And_Clear();
 void Box_ThrowForward();
 void AutoGet_Lower();
+void AutoGet_LowerANDThrow();
 void AutoGet_Upper();
 void Claw_GetSpecifiedBox();
 void Claw_SelfInspect();

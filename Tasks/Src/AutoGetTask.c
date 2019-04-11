@@ -369,6 +369,31 @@ void AutoGet_Lower()//自动取弹（岛下五个弹）
 		default:{AutoGet_Stop_And_Clear();}
 	}
 }
+void AutoGet_LowerANDThrow()//自动取弹（岛下五个弹）
+{
+	switch(AutoGet_TotalStep)
+	{
+		case 1:{Claw_GoTo(1);break;}
+		case 2:{Claw_GetaBox();  break;}
+		case 3:{Claw_GoTo(2);break;}
+		case 4:{Box_ThrowForward();     break;}
+		case 5:{Claw_GetaBox();  break;}
+		case 6:{Claw_GoTo(3);break;}
+		case 7:{Box_ThrowForward();     break;}
+		case 8:{Claw_GetaBox();  break;}
+		case 9:{Claw_GoTo(5);break;}
+		case 10:{Box_ThrowForward();    break;}
+		case 11:{CLAWOUT;AutoGet_TotalStep++;auto_counter=500;break;}  
+		case 12:{Claw_GetaBox(); break;}
+		case 13:{Claw_GoTo(4);break;}
+		case 14:{Box_ThrowForward();    break;}
+		case 15:{Claw_GetaBox(); break;}
+		case 16:{Claw_GoTo(1);break;}
+		case 17:{Box_ThrowForward();    break;}
+		case 18:{CLAWIN;AutoGet_TotalStep++;break;}
+		default:{AutoGet_Stop_And_Clear();}
+	}
+}
 void AutoGet_Upper()//自动取弹（岛上三个弹）
 {
 	switch(AutoGet_TotalStep)
@@ -398,7 +423,7 @@ void Claw_GetSpecifiedBox()//键鼠控制取任意位置弹
 		case 1:{
 			switch(AutoGet_TotalStep)
 			{
-				case 1:{Claw_GoTo(1);break;}
+				case 1:{CLAWIN;Claw_GoTo(1);break;}
 				case 2:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
@@ -411,7 +436,7 @@ void Claw_GetSpecifiedBox()//键鼠控制取任意位置弹
 		case 2:{
 			switch(AutoGet_TotalStep)
 			{
-				case 1:{Claw_GoTo(2);break;}
+				case 1:{CLAWIN;Claw_GoTo(2);break;}
 				case 2:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
@@ -424,7 +449,7 @@ void Claw_GetSpecifiedBox()//键鼠控制取任意位置弹
 		case 3:{
 			switch(AutoGet_TotalStep)
 			{
-				case 1:{Claw_GoTo(3);break;}
+				case 1:{CLAWIN;Claw_GoTo(3);break;}
 				case 2:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
@@ -437,26 +462,26 @@ void Claw_GetSpecifiedBox()//键鼠控制取任意位置弹
 		case 4:{
 			switch(AutoGet_TotalStep)
 			{
-				case 1:{Claw_GoTo(4);break;}
+				case 1:{CLAWOUT;Claw_GoTo(4);break;}
 				case 2:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
 					{auto_waiter=2000;AutoGet_Alreadywaited=1;}  
 					  break;}
-				case 3:{Box_Fire();     break;}
+				case 3:{Box_Fire();CLAWIN;     break;}
 				default:{AutoGet_Stop_And_Clear();   break;}
 			}
 		}break;
 		case 5:{
 			switch(AutoGet_TotalStep)
 			{
-				case 1:{Claw_GoTo(5);break;}
+				case 1:{CLAWOUT;Claw_GoTo(5);break;}
 				case 2:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
 					{auto_waiter=2000;AutoGet_Alreadywaited=1;}  
 					  break;}
-				case 3:{Box_Fire();     break;}
+				case 3:{Box_Fire();CLAWIN;     break;}
 				default:{AutoGet_Stop_And_Clear();   break;}
 			}
 		}break;
@@ -470,7 +495,7 @@ void Claw_SelfInspect()//爪子横移自动对位零点
 		Claw_SelfInspecting=1;
 		Claw_FirstSelfInspect=1;
 	}
-	if(Claw_SetZero==1)
+	//if(Claw_SetZero==1)
 	{
 	if(UFM.RxMsgC6x0.moment>-4000&&Claw_SelfInspecting==1)
 		UFM.TargetAngle-=8;
@@ -552,6 +577,8 @@ void AutoGet_SwitchState()//执行哪种取弹模式 岛下/岛上
 		AutoGet_Lower();
 	if(AutoGet_Start==2)
 		AutoGet_Upper();
+	if(AutoGet_Start==3)
+		AutoGet_LowerANDThrow();
 }
 
 void ClawUpDown_SwitchState()

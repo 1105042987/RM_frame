@@ -190,6 +190,10 @@ void RemoteControlProcess(Remote *rc)
 		}
 		CM1.TargetAngle+=channellrow*0.02;
 		CM2.TargetAngle+=channellrow*-0.02;
+		
+		UFM.TargetAngle-=channelrcol*0.01;
+		UM1.TargetAngle+=channelrrow*0.001;
+		UM2.TargetAngle-=channelrrow*0.001;//右横向是爪子的上下移动
 		#endif
 		
 	}
@@ -358,7 +362,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 
   if(AutoClimbing==0)
 	ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-15;
-//	YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
+	YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
 
 	#else
 	ChassisSpeedRef.rotate_ref = mouse->x * RC_ROTATE_SPEED_REF;
@@ -372,6 +376,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		case SHORT_CLICK:
 		{
 		  ChassisSpeedRef.rotate_ref = 0;
+			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
 		}break;
 		case LONG_CLICK:
 		{
@@ -472,6 +477,11 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
 				AutoGet_Start=2;
+			}
+			else if(key->v & KEY_B)
+			{
+				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
+				AutoGet_Start=3;
 			}
 			else if(key->v & KEY_F)
 			{
