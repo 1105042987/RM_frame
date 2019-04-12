@@ -24,6 +24,10 @@ extern int32_t auto_counter;//自动取弹时间中断常量
 extern int32_t auto_wait;   //限位器等待
 extern int32_t auto_lock; //锁定底盘
 extern int32_t cnt_clk;    //登岛时间中断常量
+extern uint32_t ctrl_locker;
+extern uint32_t shift_locker;
+extern uint32_t ctrl_cnt;
+extern uint32_t shift_cnt;
 extern int32_t doorcount;
 extern uint32_t counting;
 extern uint32_t claw_warning;
@@ -240,6 +244,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(claw_warning==0) warning_cnt=0;
 		if(Claw_Zero_Counting==1) Claw_Zero_Count++;
 		if(Claw_Zero_Counting==0) Claw_Zero_Count=0;
+		if(ctrl_locker==1) ctrl_cnt=300;
+		if(ctrl_locker==0&&ctrl_cnt>0) ctrl_cnt--;
+		if(shift_locker==1) shift_cnt=300;
+		if(shift_locker==0&&shift_cnt>0) shift_cnt--;
 		checkStuck();
 		checkAutoGet();
 		

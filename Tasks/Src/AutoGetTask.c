@@ -11,11 +11,11 @@
   */
 	#include "includes.h"
 	
-#define FIRSTBOX 20
+#define FIRSTBOX 80
 #define SECONDBOX 820
-#define THIRDBOX 1600             //这五个是箱子位置
+#define THIRDBOX 1550             //这五个是箱子位置
 #define FOURTHBOX 400
-#define FIFTHBOX 1150
+#define FIFTHBOX 1120
 
 #define LOWERCRITICIAL 2000      //岛下临界值
 #define UPPERCRITICIAL 800 //待测试
@@ -334,7 +334,7 @@ void Box_ThrowForward()//向前扔出箱子
 	if(auto_counter==0&&auto_waiter==0){
 	UM1.TargetAngle=-OUTANGLE;
 	UM2.TargetAngle=OUTANGLE;
-	if(fabs(UM1.RealAngle+90)<=10||fabs(UM2.RealAngle+(-90))<=10)
+	if(fabs(UM1.RealAngle+75)<=10||fabs(UM2.RealAngle+(-75))<=10)
 	{
 		CLAWLOOSE;
 	}
@@ -363,7 +363,7 @@ void AutoGet_Lower()//自动取弹（岛下五个弹）
 		case 13:{Claw_GoTo(4);break;}
 		case 14:{Box_Fire();    break;}
 		case 15:{Claw_GetaBox(); break;}
-		case 16:{Claw_GoTo(1);break;}
+		case 16:{auto_counter=300;AutoGet_TotalStep++;break;}
 		case 17:{Box_Fire();    break;}
 		case 18:{CLAWIN;AutoGet_TotalStep++;break;}
 		default:{AutoGet_Stop_And_Clear();}
@@ -388,7 +388,7 @@ void AutoGet_LowerANDThrow()//自动取弹（岛下五个弹）
 		case 13:{Claw_GoTo(4);break;}
 		case 14:{Box_ThrowForward();    break;}
 		case 15:{Claw_GetaBox(); break;}
-		case 16:{Claw_GoTo(1);break;}
+		case 16:{auto_counter=300;AutoGet_TotalStep++;break;}
 		case 17:{Box_ThrowForward();    break;}
 		case 18:{CLAWIN;AutoGet_TotalStep++;break;}
 		default:{AutoGet_Stop_And_Clear();}
@@ -408,7 +408,7 @@ void AutoGet_Upper()//自动取弹（岛上三个弹）
 		case 7:{Claw_GoTo(3);break;}
 		case 8:{Box_ThrowForward();     break;}
 		case 9:{Claw_GetaBox();  break;}
-		case 10:{Claw_GoTo(1);break;}
+		case 10:{Claw_GoTo(4);break;}
 		case 11:{Box_ThrowForward();    break;}
 		case 12:{UM1.TargetAngle=0;UM2.TargetAngle=0;AutoGet_TotalStep++;break;}
 		case 13:{CLAWIN;auto_counter=500;
@@ -423,65 +423,70 @@ void Claw_GetSpecifiedBox()//键鼠控制取任意位置弹
 		case 1:{
 			switch(AutoGet_TotalStep)
 			{
-				case 1:{CLAWIN;Claw_GoTo(1);break;}
-				case 2:{
+				case 1:{CLAWIN;auto_counter=500;AutoGet_TotalStep++;break;}
+				case 2:{Claw_GoTo(1);break;}
+				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
 					{auto_waiter=2000;AutoGet_Alreadywaited=1;}  
 					  break;}
-				case 3:{Box_Fire();     break;}
+				case 4:{Box_Fire();     break;}
 				default:{AutoGet_Stop_And_Clear();   break;}
 			}
 		}break;
 		case 2:{
 			switch(AutoGet_TotalStep)
 			{
-				case 1:{CLAWIN;Claw_GoTo(2);break;}
-				case 2:{
+				case 1:{CLAWIN;auto_counter=500;AutoGet_TotalStep++;break;}
+				case 2:{Claw_GoTo(2);break;}
+				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
 					{auto_waiter=2000;AutoGet_Alreadywaited=1;}  
 					  break;}
-				case 3:{Box_Fire();     break;}
+				case 4:{Box_Fire();     break;}
 				default:{AutoGet_Stop_And_Clear();   break;}
 			}
 		}break;
 		case 3:{
 			switch(AutoGet_TotalStep)
 			{
-				case 1:{CLAWIN;Claw_GoTo(3);break;}
-				case 2:{
+				case 1:{CLAWIN;auto_counter=500;AutoGet_TotalStep++;break;}
+				case 2:{Claw_GoTo(3);break;}
+				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
 					{auto_waiter=2000;AutoGet_Alreadywaited=1;}  
 					  break;}
-				case 3:{Box_Fire();     break;}
+				case 4:{Box_Fire();     break;}
 				default:{AutoGet_Stop_And_Clear();   break;}
 			}
 		}break;
 		case 4:{
 			switch(AutoGet_TotalStep)
 			{
-				case 1:{CLAWOUT;Claw_GoTo(4);break;}
-				case 2:{
+				case 1:{CLAWOUT;auto_counter=500;AutoGet_TotalStep++;break;}
+				case 2:{Claw_GoTo(4);break;}
+				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
 					{auto_waiter=2000;AutoGet_Alreadywaited=1;}  
 					  break;}
-				case 3:{Box_Fire();CLAWIN;     break;}
+				case 4:{Box_Fire();CLAWIN;     break;}
 				default:{AutoGet_Stop_And_Clear();   break;}
 			}
 		}break;
 		case 5:{
 			switch(AutoGet_TotalStep)
 			{
-				case 1:{CLAWOUT;Claw_GoTo(5);break;}
-				case 2:{
+				case 1:{CLAWOUT;auto_counter=500;AutoGet_TotalStep++;break;}
+				case 2:{Claw_GoTo(5);break;}
+				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
 					{auto_waiter=2000;AutoGet_Alreadywaited=1;}  
 					  break;}
-				case 3:{Box_Fire();CLAWIN;     break;}
+				case 4:{Box_Fire();CLAWIN;     break;}
 				default:{AutoGet_Stop_And_Clear();   break;}
 			}
 		}break;
@@ -495,7 +500,7 @@ void Claw_SelfInspect()//爪子横移自动对位零点
 		Claw_SelfInspecting=1;
 		Claw_FirstSelfInspect=1;
 	}
-	//if(Claw_SetZero==1)
+	if(Claw_SetZero==1)
 	{
 	if(UFM.RxMsgC6x0.moment>-4000&&Claw_SelfInspecting==1)
 		UFM.TargetAngle-=8;
@@ -544,7 +549,7 @@ void Claw_Up()//整个机构的抬升，抬升完后爪子自动对位
 {
 			if(Claw_UpToPosition==1&&Claw_UpAngle<=UPLEVEL&&auto_counter==0)//-480
 			{
-				Claw_UpAngle+=4;
+				Claw_UpAngle+=12;
 				NMUDL.TargetAngle=-Claw_UpAngle;
 				NMUDR.TargetAngle=-Claw_UpAngle;
 				auto_counter=1;
@@ -552,7 +557,9 @@ void Claw_Up()//整个机构的抬升，抬升完后爪子自动对位
 			//if(Claw_UpToPosition==1&&hasReach(&NMUDL,10)&&NMUDL.RealAngle<-UPPROTECT)
 			//{Claw_SelfInspecting=1;}
 			if(Claw_UpToPosition==1&&NMUDL.RealAngle<=(-UPLEVEL+5)&&NMUDR.RealAngle<=(-UPLEVEL+5))
-			{Claw_UpToPosition=0;
+			{
+				Claw_UpToPosition=0;
+				Claw_GoTo(1);
 			}
 }
 
@@ -560,7 +567,7 @@ void Claw_Down()
 {
 	 if(Claw_DownToPosition==1&&auto_counter==0)
 	 {
-		 Claw_UpAngle-=4;
+		 Claw_UpAngle-=12;
 		 NMUDL.TargetAngle=-Claw_UpAngle;
 		 NMUDR.TargetAngle=-Claw_UpAngle;
 		 auto_counter=1;

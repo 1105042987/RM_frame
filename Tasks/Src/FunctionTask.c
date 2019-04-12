@@ -38,6 +38,10 @@ uint32_t setzeror=0;
 uint32_t lefttight=0;
 uint32_t righttight=0;
 
+uint32_t ctrl_locker=0;
+uint32_t shift_locker=0;
+uint32_t ctrl_cnt=0;
+uint32_t shift_cnt=0;
 uint32_t saving_count=0;
 uint32_t saving=2;
 uint32_t saveing_flag=0;
@@ -443,11 +447,21 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	{
 		case SHIFT_CTRL:		//State control
 		{
-			
+			if(key->v & KEY_F)
+			{
+				NMCDL.TargetAngle = UD_BOTTOM;
+				NMCDR.TargetAngle = UD_BOTTOM;
+			}
+			else if(key->v & KEY_G)
+			{
+				NMCDL.TargetAngle = UD_TOP;
+				NMCDR.TargetAngle = UD_TOP;
+			}
 			break;
 		}
 		case CTRL:				//slow
 		{
+			ctrl_locker=1;
 			if(key->v & KEY_C&&Claw_UpToPosition==0)
 			{
 				Claw_UpToPosition=1;
@@ -490,6 +504,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		}break;
 		case SHIFT:				//quick
 		{
+			shift_locker=1;
 			if(key->v & KEY_Q)
 			{
 				Claw_FindingNextBox_Upper=1;
@@ -513,7 +528,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		}break;
 		case NO_CHANGE:			//normal
 		{//CM Movement Process
-		
+		ctrl_locker=0;
+		shift_locker=0;
+			if(ctrl_cnt==0&&shift_cnt==0)
+		{
 			if(key->v & KEY_X)
 			{ 
 				AutoGet_Stop_And_Clear();
@@ -563,7 +581,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 				saving=1;
 			}
-			
+		}
 			
 		}
 		SetDoorZero();
