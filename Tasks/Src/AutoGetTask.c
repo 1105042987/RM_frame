@@ -358,7 +358,7 @@ void AutoGet_Lower()//自动取弹（岛下五个弹）
 		case 8:{Claw_GetaBox();  break;}
 		case 9:{Claw_GoTo(5);break;}
 		case 10:{Box_Fire();    break;}
-		case 11:{CLAWOUT;AutoGet_TotalStep++;auto_counter=500;break;}  
+		case 11:{CLAWOUT;AutoGet_TotalStep++;auto_counter=800;break;}  
 		case 12:{Claw_GetaBox(); break;}
 		case 13:{Claw_GoTo(4);break;}
 		case 14:{Box_Fire();    break;}
