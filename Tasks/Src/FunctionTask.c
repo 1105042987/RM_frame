@@ -12,8 +12,9 @@
 #include "includes.h"
 
 //#define qudan
-#define jiuyuan
-#define shangdao
+//#define jiuyuan
+//#define shangdao
+Engineer_State_e EngineerState = GET_STATE;
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 MouseMode_e MouseLMode = NO_CLICK;
 MouseMode_e MouseRMode = NO_CLICK;
@@ -49,6 +50,8 @@ extern uint32_t AutoClimb_ComeToTop;
 extern uint32_t AutoClimb_AlreadyTop;
 extern uint32_t AutoClimbing;
 extern uint32_t Claw_SetZero;
+extern uint8_t AlreadyClimbed;
+extern uint8_t AlreadyDowned;
 
 uint32_t openthegay=0;
 
@@ -162,13 +165,16 @@ void RemoteControlProcess(Remote *rc)
 	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
 	if(WorkState == NORMAL_STATE)
 	{	
-		
-		#ifdef qudan
-		SetDoorZero();
-		if(channellrow>500)
-			DOOR.TargetAngle=0;
-		if(channellrow<-500)
-			DOOR.TargetAngle=-155;
+		ComeToTop();
+		if(EngineerState==GET_STATE)                               //取弹模式
+	{
+		SetDoorZero();//右纵向是开关舱门	
+		Door_SwitchState();
+		if(channelrcol<-500)
+			dooropen=1;
+		if(channelrcol>500)
+			dooropen=0;
+			
 		UM1.TargetAngle+=channelrrow*0.001;
 		UM2.TargetAngle-=channelrrow*0.001;//右横向是爪子的上下移动
 			
@@ -176,12 +182,10 @@ void RemoteControlProcess(Remote *rc)
 		CLAWOUT;//左纵向是爪子的向前弹出
 		if(channellcol<-500)                                  
 		CLAWIN;
+	}
 	
-	
-		
-	
-		#else
-		
+	else if(EngineerState==CLIMB_STATE)
+	{
    if(NMCDL.RxMsgC6x0.moment>-12000&&NMCDR.RxMsgC6x0.moment>-14000&&channellcol<0)
 		{
 		NMCDL.TargetAngle+=channellcol*0.06;
@@ -195,15 +199,14 @@ void RemoteControlProcess(Remote *rc)
 		CM1.TargetAngle+=channellrow*0.02;
 		CM2.TargetAngle+=channellrow*-0.02;
 		
-		UFM.TargetAngle-=channelrcol*0.01;
-		UM1.TargetAngle+=channelrrow*0.001;
-		UM2.TargetAngle-=channelrrow*0.001;//右横向是爪子的上下移动
-		#endif
+	}
 		
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
-   #ifdef qudan
+		ComeToTop();
+   if(EngineerState==GET_STATE)
+	 {
 		//手动挡
 		if(channellcol>200){       //UP  左纵向是整个机构的上下
 			NMUDL.TargetAngle -= channellcol * 0.05;
@@ -223,13 +226,14 @@ void RemoteControlProcess(Remote *rc)
 				LAND;
 
 			UFM.TargetAngle-=channellrow*0.01;//左横向是水平电机   向左远离（角度++）向右靠近（角度--）
-  #else
-	     
+	  }
+	  else if(EngineerState==CLIMB_STATE)
+		{
 		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
+		}
 			
-	#endif
 			
 }
 	if(WorkState == ADDITIONAL_STATE_TWO)
@@ -243,105 +247,21 @@ void RemoteControlProcess(Remote *rc)
 			//比较健康的moment是3000    靠近电机-3000 远离电机3000 
 			//NMUDL840 NMUDR-840
 			//红外2000 3000
-			/*if(channelrcol>500&&Claw_UpToPosition==0)//一键抬升整个机构
-			{
-				Claw_UpToPosition=1;
-			}
-			else if(channelrcol<-500)
-			{
-				Claw_UpToPosition=0;
-				Claw_UpAngle=0;
-			}
-		  Claw_Up();
-			
-			if(channellrow>500&&AutoGet_Start==0)//启动自动取弹程序
-				AutoGet_Start=1;
-			if(channellrow<-500)//中途停止（用于故障处理）
-			  AutoGet_Stop_And_Clear();
-			
-			
-			AutoGet_SwitchState();*/
-			
-		//救援
-		#ifdef jiuyuan
-			InitialSave();
-			
-			if(channellcol>500)
-				saveing_flag=2;
-			if(saveing_flag==2)
-				EndSaving();
-			if(channellcol<-500)
-				saveing_flag=1;
-			if(saveing_flag==1)
-				Saving();
-		#endif
-     		
-		if(AutoClimb_AlreadyTop==0)
-				AutoClimb_ComeToTop=1;
-			 ComeToTop();
 			ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		  ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 			ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
-		#ifdef shangdao	
-			Chassis_Choose(1,1);  
-		#endif
+			if(channellcol>500)     //左下救援，上松爪子
+				saving=0;
+			if(channellcol<-500)
+				saving=1;
+ 	      Saving_SwitchState();
 			
 			
-			
-			/*if(channelrrow>500)
-			 openthegay=1;
-			if(channelrrow<-500)
-				openthegay=0;
-			
-			if(openthegay==1)
+			ComeToTop();
+			if(EngineerState==CLIMB_STATE)
 			{
-				__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_2,600);
-				//__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_3,600);
-			}
-			else
-			{
-				__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_2,2000);
-				//__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_3,2200);
-			}*/
-			//测试救援用 平常关闭   左++ 右--
-//		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
-//		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
-//		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
-//			setzero();
-//			protect();
-//			if(channellcol>500)
-//			{
-//				SL.TargetAngle=240;
-//				SR.TargetAngle=-240;
-//				lefttight=0;
-//				righttight=0;
-//				auto_counter=1000;
-//			}
-//			if(channellcol<-500)
-//			{
-//				setzerol=0;
-//				setzeror=0;
-//			}
-			
-			
-//			if((leftstate==1)&&auto_counter==0)
-//				lefttight=1;
-//			if(lefttight==1)
-//			{
-//				if(SL.RxMsgC6x0.moment>-3000)
-//					SL.TargetAngle-=20;
-//				if(SL.RxMsgC6x0.moment<-5000)
-//					SL.TargetAngle+=10;
-//			}
-//			if(rightstate==1&&auto_counter==0)
-//				righttight=1;
-//			if(righttight==1)
-//			{
-//				if(SR.RxMsgC6x0.moment<3000)
-//					SR.TargetAngle+=20;
-//				if(SR.RxMsgC6x0.moment>5000)
-//					SR.TargetAngle-=10;
-//			}
+			Chassis_Choose(1,1);
+      }				
 	}
 	Limit_and_Synchronization();
 }
@@ -366,7 +286,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 
   if(AutoClimbing==0)
 	ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-15;
+	if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
 	YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
+	if(YTP.RxMsgC6x0.moment>-1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
+		YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
 
 	#else
 	ChassisSpeedRef.rotate_ref = mouse->x * RC_ROTATE_SPEED_REF;
@@ -380,11 +303,13 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		case SHORT_CLICK:
 		{
 		  ChassisSpeedRef.rotate_ref = 0;
+			if(YTY.TargetAngle<90&&YTY.TargetAngle>-180)
 			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
 		}break;
 		case LONG_CLICK:
 		{
 			ChassisSpeedRef.rotate_ref = 0;
+			if(YTY.TargetAngle<90&&YTY.TargetAngle>-180)
 			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
 		}break;
 		default: break;
@@ -451,11 +376,23 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 				NMCDL.TargetAngle = UD_BOTTOM;
 				NMCDR.TargetAngle = UD_BOTTOM;
+				AlreadyClimbed=0;
+				AlreadyDowned=0;
 			}
 			else if(key->v & KEY_G)
 			{
 				NMCDL.TargetAngle = UD_TOP;
 				NMCDR.TargetAngle = UD_TOP;
+				AlreadyClimbed=0;
+				AlreadyDowned=0;
+			}
+			else if(key->v & KEY_Q)
+			{
+				EngineerState=GET_STATE;
+			}
+			else if(key->v & KEY_E)
+			{
+				EngineerState=CLIMB_STATE;
 			}
 			break;
 		}

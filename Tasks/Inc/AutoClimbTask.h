@@ -56,11 +56,8 @@ typedef __packed struct
 
 typedef enum
 {
-	NOAUTO_STATE,
-	START_TEST,
-	LEVEL_SHIFT,
-	ARM_STRETCH,
-	ERROR_HANDLE
+	GET_STATE,
+	CLIMB_STATE
 }Engineer_State_e;
 
 void Chassis_Choose(uint8_t flag,uint8_t ensure);

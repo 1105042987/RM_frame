@@ -11,7 +11,7 @@
   */
 	#include "includes.h"
 	
-#define FIRSTBOX 80
+#define FIRSTBOX 55
 #define SECONDBOX 820
 #define THIRDBOX 1550             //ÕâÎå¸öÊÇÏä×ÓÎ»ÖÃ
 #define FOURTHBOX 400
@@ -318,8 +318,8 @@ void AutoGet_Stop_And_Clear()//×´Ì¬ÇåÁã ×¦×Ó×ª»Ø ºáÒÆµç»úÍ£×ª£¨ÓÃÓÚÒì³£×´¿ö´¦Àíº
 	AutoGet_Start=0;
 	AutoGet_TotalStep=1;
 	AutoGet_Alreadywaited=0;
-	UM1.TargetAngle=-INANGLE;
-  UM2.TargetAngle=INANGLE;
+	UM1.TargetAngle=0;
+  UM2.TargetAngle=0;
 	Claw_AlreadyRollOut=0;
 	Claw_AlreadyTight=0;
 	
@@ -334,7 +334,7 @@ void Box_ThrowForward()//ÏòÇ°ÈÓ³öÏä×Ó
 	if(auto_counter==0&&auto_waiter==0){
 	UM1.TargetAngle=-OUTANGLE;
 	UM2.TargetAngle=OUTANGLE;
-	if(fabs(UM1.RealAngle+75)<=10||fabs(UM2.RealAngle+(-75))<=10)
+	if(fabs(UM1.RealAngle+60)<=10||fabs(UM2.RealAngle+(-60))<=10)
 	{
 		CLAWLOOSE;
 	}
@@ -423,42 +423,48 @@ void Claw_GetSpecifiedBox()//¼üÊó¿ØÖÆÈ¡ÈÎÒâÎ»ÖÃµ¯
 		case 1:{
 			switch(AutoGet_TotalStep)
 			{
-				case 1:{CLAWIN;auto_counter=500;AutoGet_TotalStep++;break;}
+				case 1:{//CLAWIN;auto_counter=500;
+				AutoGet_TotalStep++;break;}
 				case 2:{Claw_GoTo(1);break;}
 				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
 					{auto_waiter=2000;AutoGet_Alreadywaited=1;}  
 					  break;}
-				case 4:{Box_Fire();     break;}
+				case 4:{Box_ThrowForward();     break;}
 				default:{AutoGet_Stop_And_Clear();   break;}
 			}
 		}break;
 		case 2:{
 			switch(AutoGet_TotalStep)
 			{
-				case 1:{CLAWIN;auto_counter=500;AutoGet_TotalStep++;break;}
+				case 1:{
+					//CLAWIN;auto_counter=500;
+				AutoGet_TotalStep++;break;}
 				case 2:{Claw_GoTo(2);break;}
 				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
 					{auto_waiter=2000;AutoGet_Alreadywaited=1;}  
 					  break;}
-				case 4:{Box_Fire();     break;}
+				case 4:{Box_ThrowForward();      break;}
 				default:{AutoGet_Stop_And_Clear();   break;}
 			}
 		}break;
 		case 3:{
 			switch(AutoGet_TotalStep)
 			{
-				case 1:{CLAWIN;auto_counter=500;AutoGet_TotalStep++;break;}
+				case 1:{
+					//CLAWIN;auto_counter=500;
+				AutoGet_TotalStep++;break;
+				       }
 				case 2:{Claw_GoTo(3);break;}
 				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
 					{auto_waiter=2000;AutoGet_Alreadywaited=1;}  
 					  break;}
-				case 4:{Box_Fire();     break;}
+				case 4:{Box_ThrowForward();      break;}
 				default:{AutoGet_Stop_And_Clear();   break;}
 			}
 		}break;
@@ -472,7 +478,7 @@ void Claw_GetSpecifiedBox()//¼üÊó¿ØÖÆÈ¡ÈÎÒâÎ»ÖÃµ¯
 					if(AutoGet_Alreadywaited==0)
 					{auto_waiter=2000;AutoGet_Alreadywaited=1;}  
 					  break;}
-				case 4:{Box_Fire();CLAWIN;     break;}
+				case 4:{Box_ThrowForward(); CLAWIN;     break;}
 				default:{AutoGet_Stop_And_Clear();   break;}
 			}
 		}break;
@@ -486,7 +492,7 @@ void Claw_GetSpecifiedBox()//¼üÊó¿ØÖÆÈ¡ÈÎÒâÎ»ÖÃµ¯
 					if(AutoGet_Alreadywaited==0)
 					{auto_waiter=2000;AutoGet_Alreadywaited=1;}  
 					  break;}
-				case 4:{Box_Fire();CLAWIN;     break;}
+				case 4:{Box_ThrowForward(); CLAWIN;     break;}
 				default:{AutoGet_Stop_And_Clear();   break;}
 			}
 		}break;
@@ -549,7 +555,7 @@ void Claw_Up()//Õû¸ö»ú¹¹µÄÌ§Éı£¬Ì§ÉıÍêºó×¦×Ó×Ô¶¯¶ÔÎ»
 {
 			if(Claw_UpToPosition==1&&Claw_UpAngle<=UPLEVEL&&auto_counter==0)//-480
 			{
-				Claw_UpAngle+=12;
+				Claw_UpAngle+=10;
 				NMUDL.TargetAngle=-Claw_UpAngle;
 				NMUDR.TargetAngle=-Claw_UpAngle;
 				auto_counter=1;
@@ -559,7 +565,7 @@ void Claw_Up()//Õû¸ö»ú¹¹µÄÌ§Éı£¬Ì§ÉıÍêºó×¦×Ó×Ô¶¯¶ÔÎ»
 			if(Claw_UpToPosition==1&&NMUDL.RealAngle<=(-UPLEVEL+5)&&NMUDR.RealAngle<=(-UPLEVEL+5))
 			{
 				Claw_UpToPosition=0;
-				Claw_GoTo(1);
+				UFM.TargetAngle=FIRSTBOX;
 			}
 }
 
@@ -567,14 +573,18 @@ void Claw_Down()
 {
 	 if(Claw_DownToPosition==1&&auto_counter==0)
 	 {
-		 Claw_UpAngle-=12;
+		 Claw_UpAngle-=10;
 		 NMUDL.TargetAngle=-Claw_UpAngle;
 		 NMUDR.TargetAngle=-Claw_UpAngle;
 		 auto_counter=1;
 	 }
-	 if(Claw_DownToPosition==1&&NMUDL.RealAngle>=-5&&NMUDR.RealAngle>=-5)
+	 if(NMUDL.TargetAngle)
+	 if(Claw_DownToPosition==1&&NMUDL.RealAngle>=-15&&NMUDR.RealAngle>=-15)
 	 {
 		 Claw_DownToPosition=0;
+		 NMUDL.TargetAngle=-15;
+		 NMUDR.TargetAngle=-15;
+		 UFM.TargetAngle=FOURTHBOX;
 	 }
 }
 
