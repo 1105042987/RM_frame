@@ -66,6 +66,7 @@ uint32_t Sensor_b;
 
 
 int32_t auto_counter=0;		//用于准确延时的完成某事件
+uint32_t rotate_waiter=0;
 int32_t auto_waiter=0;
 int32_t cnt_clk;
 int32_t auto_wait=0;
@@ -76,6 +77,12 @@ uint32_t ifset=-5;//用于自检
 
 
 extern Engineer_State_e EngineerState;//用于处理车辆模式
+
+uint32_t Yaw_Reset_Flag=0;
+uint32_t Yaw_Reset_Cnt=0;
+uint32_t Yaw_Set_Flag=0;
+uint32_t Yaw_Set_Cnt=0;
+int32_t  imu_start_angle=0;
 
 void RefreshADC()
 {
@@ -679,22 +686,64 @@ void Claw_AutoIn()
 void State_AutoGet()
 {
 	EngineerState=GET_STATE;
-	if(YTY.TargetAngle<90&&YTY.TargetAngle>-180)
-		YTY.TargetAngle = SCREEN_POSITION;
+	YTP.TargetAngle = 60;
+		if(Yaw_Set_Flag==0)
+		{
+			Yaw_Set_Flag=1;
+			Yaw_Set_Cnt=150;
+		}
 	if(Claw_UpToPosition==0)
 		Claw_UpToPosition=1;
 	if(CM_AutoRotate90==0)
 	{
 		CM_AutoRotate90 = 1;
-		imu.target_yaw += 90;
+		imu_start_angle=imu.now_yaw;
+		imu.target_yaw=imu.now_yaw;
 	}
 }
-
-void State_Common()  //TODO:加上一行云台pitch轴也归于中心的代码
+void Rotate_Check()
+{
+	if(CM_AutoRotate90==1&&rotate_waiter==0&&imu.target_yaw<(imu_start_angle+99))
+	{
+		imu.target_yaw += 3;
+		rotate_waiter=1;
+	}
+	if(imu.target_yaw>=(imu_start_angle+99))
+	{
+		CM_AutoRotate90 = 0;
+	}
+}
+void State_Common()  
 {
 	EngineerState=COMMON_STATE;
 	AutoClimbing=0;
-	if(YTY.TargetAngle<90&&YTY.TargetAngle>-180)
-		YTY.TargetAngle = 0;
+		YTP.TargetAngle = 60;
+		if(Yaw_Reset_Flag==0)
+		{
+			Yaw_Reset_Flag=1;
+			Yaw_Reset_Cnt=150;
+		}
+}
+
+void Yaw_Reset_Check()
+{
+	if(Yaw_Reset_Flag==1&&Yaw_Reset_Cnt==0)
+	{
+		YTY.TargetAngle=0;
+		Yaw_Reset_Flag=0;
+	}
+}
+void Yaw_Set_Check()
+{
+	if(Yaw_Set_Flag==1&&Yaw_Set_Cnt==0)
+	{
+		YTY.TargetAngle = SCREEN_POSITION;;
+		Yaw_Set_Flag=0;
+	}
+}
+void Yaw_Check()
+{
+	Yaw_Reset_Check();
+	Yaw_Set_Check();
 }
 

@@ -97,4 +97,6 @@ void Claw_AutoIn();
 void Claw_AutoInTest();
 void State_AutoGet();
 void State_Common();
+void Yaw_Check();
+void Rotate_Check();
 #endif /*__ AUTOGETTASK_H */

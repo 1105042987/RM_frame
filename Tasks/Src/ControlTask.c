@@ -35,6 +35,9 @@ extern uint32_t warning_cnt;
 extern uint32_t Claw_Zero_Counting;
 extern uint32_t Claw_Zero_Count;
 extern uint32_t AutoGet_TotalStep;
+extern uint32_t Yaw_Reset_Cnt;
+extern uint32_t Yaw_Set_Cnt;
+extern uint32_t rotate_waiter;
 uint32_t AutoGet_LastStep = 1;
 uint32_t AutoGetCnt = 0;
 
@@ -112,8 +115,8 @@ void ControlRotate(void)
 //		ChassisSpeedRef.rotate_ref=(YTY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f;
 //		NORMALIZE_ANGLE180(ChassisSpeedRef.rotate_ref);
 //	#endif
-	if(fabs(imu.target_yaw-imu.now_yaw)<1)
-		CM_AutoRotate90 = 0;
+	//if(fabs(imu.target_yaw-imu.now_yaw)<1)
+		//CM_AutoRotate90 = 0;
 	if(CM_AutoRotate90==1)
 	{
 		CMRotatePID.ref = imu.target_yaw;
@@ -251,6 +254,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		rc_cnt++;
 		if(auto_counter > 0) auto_counter--;
+		if(Yaw_Reset_Cnt>0)  Yaw_Reset_Cnt--;
+		if(Yaw_Set_Cnt>0)  Yaw_Set_Cnt--;
+		if(rotate_waiter>0) rotate_waiter--;
 		if(cnt_clk > 0) cnt_clk--;
 		if(auto_wait>0) auto_wait--;
 		if(auto_waiter>0)auto_waiter--;

@@ -307,14 +307,18 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		case SHORT_CLICK:
 		{
 		  ChassisSpeedRef.rotate_ref = 0;
-			if(YTY.TargetAngle<90&&YTY.TargetAngle>-180)
+			if(YTY.TargetAngle<90&&mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-3>0)
 			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
+			if(YTY.TargetAngle>-180&&mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-3<0)
+			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;	
 		}break;
 		case LONG_CLICK:
 		{
 			ChassisSpeedRef.rotate_ref = 0;
-			if(YTY.TargetAngle<90&&YTY.TargetAngle>-180)
+			if(YTY.TargetAngle<90&&mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-3>0)
 			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
+			if(YTY.TargetAngle>-180&&mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-3<0)
+			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;	
 		}break;
 		default: break;
 	}
@@ -568,6 +572,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			else if(key->v & KEY_Z)
 			{
 				Claw_DownToPosition=1;
+				State_Common();
 			}
 			else if(key->v & KEY_Q)
 			{
@@ -609,6 +614,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		AutoClimb_SwitchState();
 		ClawUpDown_SwitchState();
 		Saving_SwitchState();
+		Yaw_Check();
+		Rotate_Check();
 	}
 	Limit_and_Synchronization();
 }

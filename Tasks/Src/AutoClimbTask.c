@@ -82,6 +82,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 						{
 							AlreadyDowned=0;
 							AutoClimb_Level--;
+							State_Common();
 						}
 					}	
 				}
@@ -103,6 +104,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 						{
 							AlreadyClimbed=0;
 							AutoClimb_Level++;
+							State_Common();
 						}
 					}
 				}
