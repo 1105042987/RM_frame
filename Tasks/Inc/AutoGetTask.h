@@ -35,8 +35,10 @@ extern uint16_t Claw_TruePosition[5];
 extern int32_t Claw_UpAngle;
 extern uint32_t Claw_TakeThisBox;
 extern uint32_t Claw_SelfInspecting;
-extern uint32_t Claw_FindingNextBox_Lower;
-extern uint32_t Claw_FindingNextBox_Upper;
+extern uint32_t Claw_FindingNextBox_Lower_Forward;
+extern uint32_t Claw_FindingNextBox_Lower_Backward;
+extern uint32_t Claw_FindingNextBox_Upper_Forward;
+extern uint32_t Claw_FindingNextBox_Upper_Backward;
 extern uint8_t CM_AutoRotate90;
 //存储红外传感器的数值
 extern uint32_t ADC_value[160];
@@ -86,10 +88,13 @@ void Claw_GetSpecifiedBox();
 void Claw_SelfInspect();
 void Claw_GoToNextBox_lower();
 void Claw_GoToNextBox_upper();
+void AutoGet_SensorControl();
 void Claw_Up();
 void AutoGet_SwitchState();
 void ClawUpDown_SwitchState();
 void Claw_Protect();
 void Claw_AutoIn();
 void Claw_AutoInTest();
+void State_AutoGet();
+void State_Common();
 #endif /*__ AUTOGETTASK_H */

@@ -28,6 +28,7 @@
 #define FLAG_SETr(target) if(target.val_ref<CHANGE_POINTr) target.flag = 0; else target.flag = 1;
 #define FLAG_SETbl(target) if(target.val_ref>CHANGE_POINTbl) target.flag = 0; else target.flag = 1;
 #define FLAG_SETbr(target) if(target.val_ref>CHANGE_POINTbr) target.flag = 0; else target.flag = 1;
+#define FLAG_SET_TRICK(target) if(AutoClimbing==0) target.flag = 0; else target.flag = 1;
 
 typedef __packed struct
 {
@@ -62,9 +63,21 @@ typedef enum
 	RESCUE_STATE
 }Engineer_State_e;
 
+typedef enum
+{
+	DEBUG_GET_STATE,
+	DEBUG_CLIMB_STATE,
+}Debug_State_e;
+
+extern uint8_t AlreadyClimbed;
+extern uint8_t AlreadyDowned;
+extern uint32_t AutoClimbing;
+extern uint32_t AutoClimb_Level;
+
 void Chassis_Choose(uint8_t flag,uint8_t ensure);
 void RefreshAnologRead(void);
 void ComeToTop(void);
 void AutoClimb_SwitchState(void);
+void State_AutoClimb(void);
 
 #endif //__AUTO_CLIMB_TASK_H

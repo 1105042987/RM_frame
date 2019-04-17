@@ -11,6 +11,7 @@
   */
 	#include "includes.h"
 extern Distance_Couple_t distance_couple;
+extern Engineer_State_e EngineerState;
 
 extern int8_t Test_UD_Direction;
 uint32_t adfl=0,adfr=0,adbl=0,adbr=0,addf=0,addb=0;
@@ -24,7 +25,7 @@ uint8_t AlreadyClimbed=0;
 uint8_t AlreadyDowned=0;
 
 uint32_t AutoClimbing=0;
-uint32_t AutoClimb_Oneclimb=0;
+uint32_t AutoClimb_Level=0;  //用于指示现在车在第几层
 //上 10000 8000
 //disfl>2000 disfr>2000
 //电机-8000 -6000
@@ -66,7 +67,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 	if(NMCDL.RealAngle<-950 )
 	{//small chassis
 		signal1=0;
-		if((distance_couple.move_flags&0x0006)==0)
+		if((distance_couple.move_flags&0x0006)==0)      //下岛之后抬架子让车落地
 		{
 			if (ChassisSpeedRef.forward_back_ref < 0) {
 					ChassisSpeedRef.forward_back_ref=0;
@@ -78,12 +79,15 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 						  NMCDR.TargetAngle = UD_TOP;
 						signal2=1;
 						if(AlreadyDowned==1)
+						{
 							AlreadyDowned=0;
+							AutoClimb_Level--;
+						}
 					}	
 				}
 		}
 		if(flag==1)
-		switch(distance_couple.move_flags&0x000f)
+		switch(distance_couple.move_flags&0x000f)                //上岛之后抬架子让车完全上岛
 		{
 			case 15:
 				if(ChassisSpeedRef.forward_back_ref > 0){
@@ -96,7 +100,10 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 						  NMCDR.TargetAngle = UD_TOP;
 						signal2=1;
 						if(AlreadyClimbed==1)
+						{
 							AlreadyClimbed=0;
+							AutoClimb_Level++;
+						}
 					}
 				}
 				break;
@@ -109,8 +116,8 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 		if(flag==1)
 		switch(distance_couple.move_flags&0xf)
 		{
-			case 6:
-				if (ChassisSpeedRef.forward_back_ref < 0) {
+			case 6:                                                  //下岛时候降架子把车架住往后走
+				if (ChassisSpeedRef.forward_back_ref < 0) { 
 					//ChassisSpeedRef.forward_back_ref=0;
 					CM1.TargetAngle=0;
 					CM2.TargetAngle=0;
@@ -144,7 +151,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 					}	
 				}
 				break;				
-			case 15:
+			case 15:                                             //上岛时候降架子把车抬起来
 				if(ChassisSpeedRef.forward_back_ref>0){
 					ChassisSpeedRef.forward_back_ref/=2;
 					CM1.TargetAngle=0;
@@ -204,5 +211,9 @@ void AutoClimb_SwitchState()
 		Chassis_Choose(1,1);
 }
 
-
+void State_AutoClimb()
+{
+	EngineerState=CLIMB_STATE;
+	AutoClimbing=1;
+}
 

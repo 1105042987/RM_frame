@@ -20,7 +20,7 @@
 #define LOWERCRITICIAL 2000      //µºÏÂÁÙ½çÖµ
 #define UPPERCRITICIAL 800 //´ý²âÊÔ
 
-//#define UPLEVEL 432    //Ì§ÉýÊ±µÄºÏÊÊ¸ß¶È ±ØÐë±»4Õû³ý
+//#define UPLEVEL 432    //Ì§ÉýÊ±µÄºÏÊÊ¸ß¶È ±ØÐë±»4Õû³ý   ÒÑÐ´µ½.hÀï
 #define UPPROTECT 400  //Ì§ÉýµÄÁÙ½ç±£»¤Öµ
 
 #define OUTANGLE 190  //×¥Ïä×ÓµÄ½Ç¶ÈÖµ
@@ -42,8 +42,10 @@ int32_t  Claw_UpAngle=0;
 uint32_t Claw_TakeThisBox=0;
 uint32_t Claw_SelfInspecting=0;
 uint32_t Claw_FirstSelfInspect=0;
-uint32_t Claw_FindingNextBox_Lower=0;
-uint32_t Claw_FindingNextBox_Upper=0;
+uint32_t Claw_FindingNextBox_Lower_Forward=0;
+uint32_t Claw_FindingNextBox_Lower_Backward=0;
+uint32_t Claw_FindingNextBox_Upper_Forward=0;
+uint32_t Claw_FindingNextBox_Upper_Backward=0;
 uint32_t Claw_SetZero=0;
 uint32_t Claw_Zero_Counting=0;
 uint32_t Claw_Zero_Count=0;
@@ -71,6 +73,9 @@ uint32_t warning_cnt=0;
 uint32_t claw_warning=0;
 int16_t cnt = 0;
 uint32_t ifset=-5;//ÓÃÓÚ×Ô¼ì
+
+
+extern Engineer_State_e EngineerState;//ÓÃÓÚ´¦Àí³µÁ¾Ä£Ê½
 
 void RefreshADC()
 {
@@ -114,12 +119,12 @@ void RefreshADC()
 	distance_couple.right.val_ref	= adgr;
 		
 		
+	FLAG_SET_TRICK(distance_couple.frontl);
+	FLAG_SET_TRICK(distance_couple.frontr);
 	FLAG_SET(distance_couple.frontf);
-	FLAG_SETr(distance_couple.frontr);
-	FLAG_SET(distance_couple.frontl);
-	FLAG_SET(distance_couple.backb);
-	FLAG_SETbr(distance_couple.backr);
 	FLAG_SETbl(distance_couple.backl);
+	FLAG_SETbr(distance_couple.backr);
+	FLAG_SET(distance_couple.backb);
 	FLAG_SET(distance_couple.left);
 	FLAG_SET(distance_couple.right);
 	
@@ -326,8 +331,10 @@ void AutoGet_Stop_And_Clear()//×´Ì¬ÇåÁã ×¦×Ó×ª»Ø ºáÒÆµç»úÍ£×ª£¨ÓÃÓÚÒì³£×´¿ö´¦Àíº
 	Claw_AlreadyTight=0;
 	
 	Claw_TakeThisBox=0;
-	Claw_FindingNextBox_Lower=0;
-	Claw_FindingNextBox_Upper=0;
+	Claw_FindingNextBox_Lower_Forward=0;
+	Claw_FindingNextBox_Upper_Forward=0;
+	Claw_FindingNextBox_Lower_Backward=0;
+	Claw_FindingNextBox_Upper_Backward=0;
 	Claw_UpToPosition=0;
 	Sensor_Ready[0]=0;
 }
@@ -431,7 +438,7 @@ void Claw_GetSpecifiedBox()//¼üÊó¿ØÖÆÈ¡ÈÎÒâÎ»ÖÃµ¯
 				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
-					{auto_waiter=2000;AutoGet_Alreadywaited=1;}  
+					{auto_waiter=1000;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{Box_ThrowForward();     break;}
 				default:{AutoGet_Stop_And_Clear();   break;}
@@ -447,7 +454,7 @@ void Claw_GetSpecifiedBox()//¼üÊó¿ØÖÆÈ¡ÈÎÒâÎ»ÖÃµ¯
 				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
-					{auto_waiter=2000;AutoGet_Alreadywaited=1;}  
+					{auto_waiter=1000;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{Box_ThrowForward();      break;}
 				default:{AutoGet_Stop_And_Clear();   break;}
@@ -464,7 +471,7 @@ void Claw_GetSpecifiedBox()//¼üÊó¿ØÖÆÈ¡ÈÎÒâÎ»ÖÃµ¯
 				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
-					{auto_waiter=2000;AutoGet_Alreadywaited=1;}  
+					{auto_waiter=1000;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{Box_ThrowForward();      break;}
 				default:{AutoGet_Stop_And_Clear();   break;}
@@ -478,7 +485,7 @@ void Claw_GetSpecifiedBox()//¼üÊó¿ØÖÆÈ¡ÈÎÒâÎ»ÖÃµ¯
 				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
-					{auto_waiter=2000;AutoGet_Alreadywaited=1;}  
+					{auto_waiter=1000;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{Box_ThrowForward(); CLAWIN;     break;}
 				default:{AutoGet_Stop_And_Clear();   break;}
@@ -492,7 +499,7 @@ void Claw_GetSpecifiedBox()//¼üÊó¿ØÖÆÈ¡ÈÎÒâÎ»ÖÃµ¯
 				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
-					{auto_waiter=2000;AutoGet_Alreadywaited=1;}  
+					{auto_waiter=1000;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{Box_ThrowForward(); CLAWIN;     break;}
 				default:{AutoGet_Stop_And_Clear();   break;}
@@ -521,53 +528,69 @@ void Claw_SelfInspect()//×¦×ÓºáÒÆ×Ô¶¯¶ÔÎ»Áãµã
 	}
   }
 }
-void Claw_GoToNextBox_lower()//ºìÍâ´«¸ÐÆ÷¿ØÖÆ×¦×Óµ½´ïÏÂÒ»¸öÏä×Ó´¦
+void Claw_GoToNextBox_lower()//ºìÍâ´«¸ÐÆ÷¿ØÖÆ×¦×ÓÏòÇ°µ½´ïÏÂÒ»¸öÏä×Ó´¦
 {
-	if(Claw_FindingNextBox_Lower==1)
+	if(Claw_FindingNextBox_Lower_Forward==1||Claw_FindingNextBox_Lower_Backward==1)
 {
 	Sensor_Read_Lower();
 	if(Sensor_Ready[0]!=2)
 	{
+		if(Claw_FindingNextBox_Lower_Forward==1)
 		ChassisSpeedRef.forward_back_ref = 50 * RC_CHASSIS_SPEED_REF;
+		else if(Claw_FindingNextBox_Lower_Backward==1)
+		ChassisSpeedRef.forward_back_ref = -50 * RC_CHASSIS_SPEED_REF;
 	}
 	if(Sensor_Ready[0]==2)
 	{
 		ChassisSpeedRef.forward_back_ref=0.0f;
-		Claw_FindingNextBox_Lower=0;
+		Claw_FindingNextBox_Lower_Forward=0;
+		Claw_FindingNextBox_Lower_Backward=0;
 	}
 }
 }
 void Claw_GoToNextBox_upper()//ºìÍâ´«¸ÐÆ÷¿ØÖÆ×¦×Óµ½´ïÏÂÒ»¸öÏä×Ó´¦
 {
-	if(Claw_FindingNextBox_Upper==1)
+	if(Claw_FindingNextBox_Upper_Forward==1||Claw_FindingNextBox_Upper_Backward==1)
 {
 	Sensor_Read_Upper();
 	if(Sensor_Ready[0]!=2)
 	{
-		ChassisSpeedRef.forward_back_ref = 150 * RC_CHASSIS_SPEED_REF;
+		if(Claw_FindingNextBox_Upper_Forward==1)
+		ChassisSpeedRef.forward_back_ref = 50 * RC_CHASSIS_SPEED_REF;
+		else if(Claw_FindingNextBox_Upper_Backward==1)
+		ChassisSpeedRef.forward_back_ref = -50 * RC_CHASSIS_SPEED_REF;	
 	}
 	if(Sensor_Ready[0]==2)
 	{
 		ChassisSpeedRef.forward_back_ref=0.0f;
-		Claw_FindingNextBox_Upper=0;
+		Claw_FindingNextBox_Upper_Forward=0;
+		Claw_FindingNextBox_Upper_Backward=0;
 	}
 }
+}
+
+void AutoGet_SensorControl()
+{
+	if(Claw_FindingNextBox_Lower_Forward==1||Claw_FindingNextBox_Lower_Backward==1)
+			Claw_GoToNextBox_lower();
+	if(Claw_FindingNextBox_Upper_Forward==1||Claw_FindingNextBox_Upper_Backward==1)
+			Claw_GoToNextBox_upper();	
 }
 void Claw_Up()//Õû¸ö»ú¹¹µÄÌ§Éý£¬Ì§ÉýÍêºó×¦×Ó×Ô¶¯¶ÔÎ»
 {
 			if(Claw_UpToPosition==1&&Claw_UpAngle<=UPLEVEL&&auto_counter==0)//-480
 			{
+				UFM.TargetAngle=FIRSTBOX;
 				Claw_UpAngle+=10;
 				NMUDL.TargetAngle=-Claw_UpAngle;
 				NMUDR.TargetAngle=-Claw_UpAngle;
 				auto_counter=1;
 			}
-			//if(Claw_UpToPosition==1&&hasReach(&NMUDL,10)&&NMUDL.RealAngle<-UPPROTECT)
-			//{Claw_SelfInspecting=1;}
-			if(Claw_UpToPosition==1&&NMUDL.RealAngle<=(-UPLEVEL+5)&&NMUDR.RealAngle<=(-UPLEVEL+5))
+			if(Claw_UpToPosition==1&&NMUDL.RealAngle<=(-UPLEVEL+20)&&NMUDR.RealAngle<=(-UPLEVEL+20))
 			{
 				Claw_UpToPosition=0;
-				UFM.TargetAngle=FIRSTBOX;
+				NMUDL.TargetAngle=-UPLEVEL;
+				NMUDR.TargetAngle=-UPLEVEL;
 			}
 }
 
@@ -632,32 +655,8 @@ void Claw_Protect()
 	}
 }
 
-void Claw_AutoIn()
-{
-	if(Claw_SetZero==0)
-	{
-		if(UM1.RxMsgC6x0.moment<4000||UM2.RxMsgC6x0.moment>-4000)
-		{
-			Claw_Zero_Counting=0;
-	    UM1.TargetAngle+=3;
-	    UM2.TargetAngle-=3;
-		}
-		if(UM1.RxMsgC6x0.moment>4000&&UM2.RxMsgC6x0.moment<-4000)
-		{
-			Claw_Zero_Counting=1;
-		}
-		if(Claw_Zero_Count>=1000)
-		{
-			UM1.RealAngle=0;
-			UM1.TargetAngle=0;
-			UM2.RealAngle=0;
-			UM2.TargetAngle=0;
-			Claw_SetZero=1;
-		}
-	}
-}
 
-void Claw_AutoInTest()
+void Claw_AutoIn()
 {
 	if(Claw_SetZero==0)
 	{
@@ -675,4 +674,26 @@ void Claw_AutoInTest()
 			Claw_SetZero=1;
 		}
 	}
+}
+
+void State_AutoGet()
+{
+	EngineerState=GET_STATE;
+	if(YTY.TargetAngle<90&&YTY.TargetAngle>-180)
+		YTY.TargetAngle = SCREEN_POSITION;
+	if(Claw_UpToPosition==0)
+		Claw_UpToPosition=1;
+	if(CM_AutoRotate90==0)
+	{
+		CM_AutoRotate90 = 1;
+		imu.target_yaw += 90;
+	}
+}
+
+void State_Common()  //TODO:¼ÓÉÏÒ»ÐÐÔÆÌ¨pitchÖáÒ²¹éÓÚÖÐÐÄµÄ´úÂë
+{
+	EngineerState=COMMON_STATE;
+	AutoClimbing=0;
+	if(YTY.TargetAngle<90&&YTY.TargetAngle>-180)
+		YTY.TargetAngle = 0;
 }
