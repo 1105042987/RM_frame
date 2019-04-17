@@ -54,6 +54,7 @@
 
 #define MK_ROTATE_SPEED_REF 			1.20f
 
+#define SCREEN_POSITION					-89
 
 #define OnePush(button,execution)\
 {\

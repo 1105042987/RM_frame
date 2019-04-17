@@ -56,8 +56,10 @@ typedef __packed struct
 
 typedef enum
 {
+	COMMON_STATE,
 	GET_STATE,
-	CLIMB_STATE
+	CLIMB_STATE,
+	RESCUE_STATE
 }Engineer_State_e;
 
 void Chassis_Choose(uint8_t flag,uint8_t ensure);

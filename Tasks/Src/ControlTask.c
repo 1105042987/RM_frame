@@ -112,8 +112,19 @@ void ControlRotate(void)
 //		ChassisSpeedRef.rotate_ref=(YTY.RxMsg6623.angle - GM_YAW_ZERO) * 360 / 8192.0f;
 //		NORMALIZE_ANGLE180(ChassisSpeedRef.rotate_ref);
 //	#endif
-	CMRotatePID.ref = 0;
-	CMRotatePID.fdb = ChassisSpeedRef.rotate_ref;
+	if(fabs(imu.target_yaw-imu.now_yaw)<1)
+		CM_AutoRotate90 = 0;
+	if(CM_AutoRotate90==1)
+	{
+		CMRotatePID.ref = imu.target_yaw;
+		CMRotatePID.fdb = imu.now_yaw;
+	}
+	else
+	{
+		CMRotatePID.ref = 0;
+		CMRotatePID.fdb = ChassisSpeedRef.rotate_ref;
+	}
+	
 	CMRotatePID.Calc(&CMRotatePID);
 	rotate_speed = CMRotatePID.output * 13 + ChassisSpeedRef.forward_back_ref * 0.01 + ChassisSpeedRef.left_right_ref * 0.01;
 }
@@ -225,7 +236,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if (htim->Instance == htim6.Instance)//2ms时钟`
 	{
 		HAL_NVIC_DisableIRQ(TIM6_DAC_IRQn);
-		
+		//imu解算
+		mpu_get_data();
+		imu_ahrs_update();
+		imu_attitude_update();
+		imu_yaw_normalize();
+		if(CM_AutoRotate90==0) imu.target_yaw = imu.now_yaw;		//平时直接让目标值等于陀螺仪当前值
 		//主循环在时间中断中启动
 		controlLoop();
 		

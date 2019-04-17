@@ -47,6 +47,8 @@ uint32_t Claw_FindingNextBox_Upper=0;
 uint32_t Claw_SetZero=0;
 uint32_t Claw_Zero_Counting=0;
 uint32_t Claw_Zero_Count=0;
+
+uint8_t CM_AutoRotate90=0;				//底盘自动转90度，1——转，0——到位
 //存储红外传感器的数值
 extern uint32_t ADC_value[160];
 extern uint32_t ADC2_value[10];

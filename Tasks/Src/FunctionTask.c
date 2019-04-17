@@ -14,7 +14,7 @@
 //#define qudan
 //#define jiuyuan
 //#define shangdao
-Engineer_State_e EngineerState = GET_STATE;
+Engineer_State_e EngineerState = COMMON_STATE;
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 MouseMode_e MouseLMode = NO_CLICK;
 MouseMode_e MouseRMode = NO_CLICK;
@@ -285,7 +285,13 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	#ifdef USE_CHASSIS_FOLLOW
 
   if(AutoClimbing==0)
-	ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-15;
+  {
+	  if(EngineerState==COMMON_STATE)
+		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-15;
+	  else if(EngineerState==GET_STATE)
+		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*15;
+  }
+	
 	if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
 	YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
 	if(YTP.RxMsgC6x0.moment>-1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
@@ -331,40 +337,86 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	KeyboardModeFSM(key);//下面是移动的控制 在写命令时不要用wasd键
 		if(key->v & KEY_W)  		//key: w
 		{
-			if (FrontBackInspect%2==0)
-				ChassisSpeedRef.forward_back_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
-			if (FrontBackInspect%2==1)
-				ChassisSpeedRef.forward_back_ref =  -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+			if(EngineerState == COMMON_STATE)
+			{
+				if (FrontBackInspect%2==0)
+					ChassisSpeedRef.forward_back_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+				if (FrontBackInspect%2==1)
+					ChassisSpeedRef.forward_back_ref =  -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+			}
+			else if(EngineerState == GET_STATE)
+			{
+				ChassisSpeedRef.left_right_ref =  -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+			}
+			
 		}
 			else if(key->v & KEY_S) 	//key: s
 			{
-				if(FrontBackInspect%2==0)
-				ChassisSpeedRef.forward_back_ref = -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
-				else
+				if(EngineerState == COMMON_STATE)
+				{
+					if(FrontBackInspect%2==0)
+						ChassisSpeedRef.forward_back_ref = -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+					else
 						ChassisSpeedRef.forward_back_ref = KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+				}
+				else if(EngineerState == GET_STATE)
+				{
+					ChassisSpeedRef.left_right_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+				}
+				
 			}
 			else
 			{
-				ChassisSpeedRef.forward_back_ref = 0;
+				if(EngineerState==COMMON_STATE)
+				{
+					ChassisSpeedRef.forward_back_ref = 0;
+				}
+				else if(EngineerState==GET_STATE)
+				{
+					ChassisSpeedRef.left_right_ref = 0;
+				}
 				FBSpeedRamp.ResetCounter(&FBSpeedRamp);
 			}
 			if(key->v & KEY_D)  		//key: d
 			{	
-			if(FrontBackInspect%2==0)
-				ChassisSpeedRef.left_right_ref =  KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
-			else
-				ChassisSpeedRef.left_right_ref =  -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+				if(EngineerState == COMMON_STATE)
+				{
+					if(FrontBackInspect%2==0)
+						ChassisSpeedRef.left_right_ref =  KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+					else
+						ChassisSpeedRef.left_right_ref =  -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+				}
+				else if(EngineerState == GET_STATE)
+				{
+					ChassisSpeedRef.forward_back_ref =  -KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp);
+				}
+			
 			}
 			else if(key->v & KEY_A) 	//key: a
 			{	
-			if(FrontBackInspect%2==0)
-				ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
-			else
-				ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+				if(EngineerState == COMMON_STATE)
+				{
+					if(FrontBackInspect%2==0)
+						ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+					else
+						ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+				}
+				else if(EngineerState == GET_STATE)
+				{
+					ChassisSpeedRef.forward_back_ref =  KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp);
+				}
+			
 			}
 			else
 			{
-				ChassisSpeedRef.left_right_ref = 0;
+				if(EngineerState==COMMON_STATE)
+				{
+					ChassisSpeedRef.left_right_ref = 0;
+				}
+				else if(EngineerState==GET_STATE)
+				{
+					ChassisSpeedRef.forward_back_ref = 0;
+				}
 				LRSpeedRamp.ResetCounter(&LRSpeedRamp);
 			}
 			
@@ -386,13 +438,28 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				AlreadyClimbed=0;
 				AlreadyDowned=0;
 			}
-			else if(key->v & KEY_Q)
+			else if(key->v & KEY_Q)							//取弹模式
 			{
 				EngineerState=GET_STATE;
+				if(YTY.TargetAngle<90&&YTY.TargetAngle>-180)
+					YTY.TargetAngle = SCREEN_POSITION;
+				if(Claw_UpToPosition==0)
+					Claw_UpToPosition=1;
+				if(CM_AutoRotate90==0)
+				{
+					CM_AutoRotate90 = 1;
+					imu.target_yaw += 90;
+				}
 			}
 			else if(key->v & KEY_E)
 			{
 				EngineerState=CLIMB_STATE;
+			}
+			else if(key->v & KEY_W)							//正常模式
+			{
+				EngineerState=COMMON_STATE;
+				if(YTY.TargetAngle<90&&YTY.TargetAngle>-180)
+					YTY.TargetAngle = 0;
 			}
 			break;
 		}

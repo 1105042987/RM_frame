@@ -124,7 +124,7 @@ int main(void)
   MX_TIM7_Init();
   MX_TIM10_Init();
   MX_TIM2_Init();
-  MX_IWDG_Init();
+  //MX_IWDG_Init();
   MX_TIM5_Init();
   MX_USART3_UART_Init();
   MX_UART7_Init();
@@ -139,6 +139,13 @@ int main(void)
 	InitCanReception();
 	InitGyroUart();
 	InitJudgeUart();
+	/*****陀螺仪初始化*****/
+	mpu_device_init();
+	init_quaternion();
+
+	/*****陀螺仪初始化结束*****/
+	
+	MX_IWDG_Init();							//Cube配置完记得注释掉上面自动生成的看门狗初始化函数
 	
 	#ifdef DEBUG_MODE
 	ctrlUartInit();

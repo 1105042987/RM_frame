@@ -37,6 +37,7 @@ extern uint32_t Claw_TakeThisBox;
 extern uint32_t Claw_SelfInspecting;
 extern uint32_t Claw_FindingNextBox_Lower;
 extern uint32_t Claw_FindingNextBox_Upper;
+extern uint8_t CM_AutoRotate90;
 //存储红外传感器的数值
 extern uint32_t ADC_value[160];
 extern uint32_t ADC2_value[10];
