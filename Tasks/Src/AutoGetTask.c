@@ -697,3 +697,4 @@ void State_Common()  //TODO:加上一行云台pitch轴也归于中心的代码
 	if(YTY.TargetAngle<90&&YTY.TargetAngle>-180)
 		YTY.TargetAngle = 0;
 }
+
