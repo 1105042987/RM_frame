@@ -11,11 +11,11 @@
   */
 	#include "includes.h"
 	
-#define FIRSTBOX 55
+#define FIRSTBOX 25
 #define SECONDBOX 820
-#define THIRDBOX 1550             //这五个是箱子位置
+#define THIRDBOX 1615             //这五个是箱子位置
 #define FOURTHBOX 400
-#define FIFTHBOX 1120
+#define FIFTHBOX 1100
 
 #define LOWERCRITICIAL 2000      //岛下临界值
 #define UPPERCRITICIAL 800 //待测试
@@ -63,6 +63,8 @@ uint16_t Sensor_Count[2];
 uint32_t Sensor_Ready[2]={0,0};
 uint32_t Sensor_a;
 uint32_t Sensor_b;
+uint32_t Sensor_LongPush=0;
+uint32_t Sensor_Lock=0;
 
 
 int32_t auto_counter=0;		//用于准确延时的完成某事件
@@ -72,6 +74,7 @@ int32_t cnt_clk;
 int32_t auto_wait=0;
 uint32_t warning_cnt=0;
 uint32_t claw_warning=0;
+uint32_t sensorlock_cnt=0;
 int16_t cnt = 0;
 uint32_t ifset=-5;//用于自检
 
@@ -350,7 +353,7 @@ void Box_ThrowForward()//向前扔出箱子
 	if(auto_counter==0&&auto_waiter==0){
 	UM1.TargetAngle=-OUTANGLE;
 	UM2.TargetAngle=OUTANGLE;
-	if(fabs(UM1.RealAngle+60)<=10||fabs(UM2.RealAngle+(-60))<=10)
+	if(fabs(UM1.RealAngle+65)<=10||fabs(UM2.RealAngle+(-65))<=10)   //变大是晚扔，变小是早扔
 	{
 		CLAWLOOSE;
 	}
@@ -360,31 +363,31 @@ void Box_ThrowForward()//向前扔出箱子
 	}
                      }
 }
-void AutoGet_Lower()//自动取弹（岛下五个弹）
-{
-	switch(AutoGet_TotalStep)
-	{
-		case 1:{Claw_GoTo(1);break;}
-		case 2:{Claw_GetaBox();  break;}
-		case 3:{Claw_GoTo(2);break;}
-		case 4:{Box_Fire();     break;}
-		case 5:{Claw_GetaBox();  break;}
-		case 6:{Claw_GoTo(3);break;}
-		case 7:{Box_Fire();     break;}
-		case 8:{Claw_GetaBox();  break;}
-		case 9:{Claw_GoTo(5);break;}
-		case 10:{Box_Fire();    break;}
-		case 11:{CLAWOUT;AutoGet_TotalStep++;auto_counter=800;break;}  
-		case 12:{Claw_GetaBox(); break;}
-		case 13:{Claw_GoTo(4);break;}
-		case 14:{Box_Fire();    break;}
-		case 15:{Claw_GetaBox(); break;}
-		case 16:{auto_counter=300;AutoGet_TotalStep++;break;}
-		case 17:{Box_Fire();    break;}
-		case 18:{CLAWIN;AutoGet_TotalStep++;break;}
-		default:{AutoGet_Stop_And_Clear();}
-	}
-}
+//void AutoGet_Lower()//自动取弹（岛下五个弹）
+//{
+//	switch(AutoGet_TotalStep)
+//	{
+//		case 1:{Claw_GoTo(1);break;}
+//		case 2:{Claw_GetaBox();  break;}
+//		case 3:{Claw_GoTo(2);break;}
+//		case 4:{Box_Fire();     break;}
+//		case 5:{Claw_GetaBox();  break;}
+//		case 6:{Claw_GoTo(3);break;}
+//		case 7:{Box_Fire();     break;}
+//		case 8:{Claw_GetaBox();  break;}
+//		case 9:{Claw_GoTo(5);break;}
+//		case 10:{Box_Fire();    break;}
+//		case 11:{CLAWOUT;AutoGet_TotalStep++;auto_counter=800;break;}  
+//		case 12:{Claw_GetaBox(); break;}
+//		case 13:{Claw_GoTo(4);break;}
+//		case 14:{Box_Fire();    break;}
+//		case 15:{Claw_GetaBox(); break;}
+//		case 16:{auto_counter=300;AutoGet_TotalStep++;break;}
+//		case 17:{Box_Fire();    break;}
+//		case 18:{CLAWIN;AutoGet_TotalStep++;break;}
+//		default:{AutoGet_Stop_And_Clear();}
+//	}
+//}
 void AutoGet_LowerANDThrow()//自动取弹（岛下五个弹）
 {
 	switch(AutoGet_TotalStep)
@@ -399,7 +402,7 @@ void AutoGet_LowerANDThrow()//自动取弹（岛下五个弹）
 		case 8:{Claw_GetaBox();  break;}
 		case 9:{Claw_GoTo(5);break;}
 		case 10:{Box_ThrowForward();    break;}
-		case 11:{CLAWOUT;AutoGet_TotalStep++;auto_counter=500;break;}  
+		case 11:{CLAWOUT;AutoGet_TotalStep++;auto_counter=800;break;}  
 		case 12:{Claw_GetaBox(); break;}
 		case 13:{Claw_GoTo(4);break;}
 		case 14:{Box_ThrowForward();    break;}
@@ -524,9 +527,9 @@ void Claw_SelfInspect()//爪子横移自动对位零点
 	}
 	if(Claw_SetZero==1)
 	{
-	if(UFM.RxMsgC6x0.moment>-4000&&Claw_SelfInspecting==1)
+	if(UFM.RxMsgC6x0.moment>-5000&&Claw_SelfInspecting==1)
 		UFM.TargetAngle-=8;
-	if(UFM.RxMsgC6x0.moment<-4000&&Claw_SelfInspecting==1)
+	if(UFM.RxMsgC6x0.moment<-5000&&Claw_SelfInspecting==1)
 	{
 		UFM.RealAngle=0;
 		UFM.TargetAngle=FOURTHBOX;
@@ -539,7 +542,12 @@ void Claw_GoToNextBox_lower()//红外传感器控制爪子向前到达下一个箱子处
 {
 	if(Claw_FindingNextBox_Lower_Forward==1||Claw_FindingNextBox_Lower_Backward==1)
 {
+	if(sensorlock_cnt==0)
 	Sensor_Read_Lower();
+	else
+	{
+		Sensor_Ready[0]=0;
+	}
 	if(Sensor_Ready[0]!=2)
 	{
 		if(Claw_FindingNextBox_Lower_Forward==1)
@@ -549,6 +557,7 @@ void Claw_GoToNextBox_lower()//红外传感器控制爪子向前到达下一个箱子处
 	}
 	if(Sensor_Ready[0]==2)
 	{
+		Sensor_Ready[0]=0;
 		ChassisSpeedRef.forward_back_ref=0.0f;
 		Claw_FindingNextBox_Lower_Forward=0;
 		Claw_FindingNextBox_Lower_Backward=0;
@@ -559,7 +568,12 @@ void Claw_GoToNextBox_upper()//红外传感器控制爪子到达下一个箱子处
 {
 	if(Claw_FindingNextBox_Upper_Forward==1||Claw_FindingNextBox_Upper_Backward==1)
 {
+	if(sensorlock_cnt==0)
 	Sensor_Read_Upper();
+	else
+	{
+		Sensor_Ready[0]=0;
+	}
 	if(Sensor_Ready[0]!=2)
 	{
 		if(Claw_FindingNextBox_Upper_Forward==1)
@@ -569,15 +583,23 @@ void Claw_GoToNextBox_upper()//红外传感器控制爪子到达下一个箱子处
 	}
 	if(Sensor_Ready[0]==2)
 	{
+		Sensor_Ready[0]=0;
 		ChassisSpeedRef.forward_back_ref=0.0f;
 		Claw_FindingNextBox_Upper_Forward=0;
 		Claw_FindingNextBox_Upper_Backward=0;
 	}
 }
+
 }
 
+void AutoGet_SensorLock()      //在长按对位键时锁定传感器来实现车的强行移动
+{
+	if(Sensor_Lock==1)
+		sensorlock_cnt=300;
+}
 void AutoGet_SensorControl()
 {
+	AutoGet_SensorLock();
 	if(Claw_FindingNextBox_Lower_Forward==1||Claw_FindingNextBox_Lower_Backward==1)
 			Claw_GoToNextBox_lower();
 	if(Claw_FindingNextBox_Upper_Forward==1||Claw_FindingNextBox_Upper_Backward==1)
@@ -587,7 +609,7 @@ void Claw_Up()//整个机构的抬升，抬升完后爪子自动对位
 {
 			if(Claw_UpToPosition==1&&Claw_UpAngle<=UPLEVEL&&auto_counter==0)//-480
 			{
-				UFM.TargetAngle=FIRSTBOX;
+				UFM.TargetAngle=FOURTHBOX;
 				Claw_UpAngle+=10;
 				NMUDL.TargetAngle=-Claw_UpAngle;
 				NMUDR.TargetAngle=-Claw_UpAngle;
@@ -623,11 +645,10 @@ void Claw_Down()
 void AutoGet_SwitchState()//执行哪种取弹模式 岛下/岛上
 {
 	if(AutoGet_Start==1)
-		AutoGet_Lower();
+		AutoGet_LowerANDThrow();
 	if(AutoGet_Start==2)
 		AutoGet_Upper();
-	if(AutoGet_Start==3)
-		AutoGet_LowerANDThrow();
+		
 }
 
 void ClawUpDown_SwitchState()

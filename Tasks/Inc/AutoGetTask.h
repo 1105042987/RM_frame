@@ -53,6 +53,8 @@ extern uint16_t Sensor_Count[2];
 extern uint32_t Sensor_Ready[2];
 extern uint32_t Sensor_a;
 extern uint32_t Sensor_b;
+extern uint32_t Sensor_LongPush;
+extern uint32_t Sensor_Lock;
 
 
 extern int32_t auto_counter;		//用于准确延时的完成某事件

@@ -38,6 +38,7 @@ extern uint32_t AutoGet_TotalStep;
 extern uint32_t Yaw_Reset_Cnt;
 extern uint32_t Yaw_Set_Cnt;
 extern uint32_t rotate_waiter;
+extern uint32_t sensorlock_cnt;
 uint32_t AutoGet_LastStep = 1;
 uint32_t AutoGetCnt = 0;
 
@@ -270,6 +271,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(ctrl_locker==0&&ctrl_cnt>0) ctrl_cnt--;
 		if(shift_locker==1) shift_cnt=300;
 		if(shift_locker==0&&shift_cnt>0) shift_cnt--;
+		if(sensorlock_cnt>0) sensorlock_cnt--;
 		checkStuck();
 		checkAutoGet();
 		

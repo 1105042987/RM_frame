@@ -339,7 +339,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	KeyboardModeFSM(key);//下面是移动的控制 在写命令时不要用wasd键
 		if(key->v & KEY_W)  		//key: w
 		{
-			if(EngineerState == COMMON_STATE)
+			if(EngineerState == COMMON_STATE||EngineerState == CLIMB_STATE)
 			{
 				if (FrontBackInspect%2==0)
 					ChassisSpeedRef.forward_back_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
@@ -354,7 +354,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		}
 			else if(key->v & KEY_S) 	//key: s
 			{
-				if(EngineerState == COMMON_STATE)
+				if(EngineerState == COMMON_STATE||EngineerState == CLIMB_STATE)
 				{
 					if(FrontBackInspect%2==0)
 						ChassisSpeedRef.forward_back_ref = -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
@@ -369,7 +369,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else
 			{
-				if(EngineerState==COMMON_STATE)
+				if(EngineerState == COMMON_STATE||EngineerState == CLIMB_STATE)
 				{
 					ChassisSpeedRef.forward_back_ref = 0;
 				}
@@ -381,7 +381,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			if(key->v & KEY_D)  		//key: d
 			{	
-				if(EngineerState == COMMON_STATE)
+				if(EngineerState == COMMON_STATE||EngineerState == CLIMB_STATE)
 				{
 					if(FrontBackInspect%2==0)
 						ChassisSpeedRef.left_right_ref =  KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
@@ -396,7 +396,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_A) 	//key: a
 			{	
-				if(EngineerState == COMMON_STATE)
+				if(EngineerState == COMMON_STATE||EngineerState == CLIMB_STATE)
 				{
 					if(FrontBackInspect%2==0)
 						ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
@@ -411,7 +411,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else
 			{
-				if(EngineerState==COMMON_STATE)
+				if(EngineerState == COMMON_STATE||EngineerState == CLIMB_STATE)
 				{
 					ChassisSpeedRef.left_right_ref = 0;
 				}
@@ -440,17 +440,20 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				AlreadyClimbed=0;
 				AlreadyDowned=0;
 			}
-			else if(key->v & KEY_Q)							//取弹模式
+			else if(key->v & KEY_Q)							
 			{
-				
+				AutoClimb_Level=0;
 			}
 			else if(key->v & KEY_E)
 			{
-				EngineerState=CLIMB_STATE;
+				AutoClimb_Level=2;
 			}
-			else if(key->v & KEY_R)							//正常模式
+			else if(key->v & KEY_R)							
 			{
-				
+				YTY.RealAngle=0;
+				YTP.RealAngle=0;
+				YTY.TargetAngle=0;
+				YTY.TargetAngle=0;
 			}
 			break;
 		}
@@ -483,14 +486,13 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			else if(key->v & KEY_Z)
 			{
 				if(EngineerState==GET_STATE)
-				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
+				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==0)
 				AutoGet_Start=1;
+				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==2)
+				AutoGet_Start=2;
 			}
 			else if(key->v & KEY_X)
 			{
-				if(EngineerState==GET_STATE)
-				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
-				AutoGet_Start=2;
 			}
 			else if(key->v & KEY_B)
 			{
@@ -508,6 +510,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			shift_locker=1;
 			if(key->v & KEY_Q)
 			{
+				Claw_SelfInspecting=1;
 				//if(EngineerState==GET_STATE)
 				//Claw_FindingNextBox_Upper_Forward=1;
 			}
@@ -578,25 +581,37 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 				if(EngineerState==GET_STATE)
 				{
+					Sensor_LongPush++;
 				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==0)
 				Claw_FindingNextBox_Lower_Forward=1;
 				else if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==2)
 				Claw_FindingNextBox_Upper_Forward=1;
+				  if(Sensor_LongPush>=50)
+						Sensor_Lock=1;
 			  }
 			}
 			else if(key->v & KEY_E)
 			{
 				if(EngineerState==GET_STATE)
 				{
+					Sensor_LongPush++;
 				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==0)
 				Claw_FindingNextBox_Lower_Backward=1;
 				else if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==2)
 				Claw_FindingNextBox_Upper_Backward=1;
+				if(Sensor_LongPush>=50)
+						Sensor_Lock=1;
 			  }
 			}
 			else if(key->v & KEY_R)
 			{
 				saving=1;
+			}
+			else
+			{
+				Sensor_LongPush=0;
+				if(Sensor_LongPush<50)
+					Sensor_Lock=0;
 			}
 		}
 			
