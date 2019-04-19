@@ -313,7 +313,7 @@
         <Ww>
           <count>31</count>
           <WinNumber>1</WinNumber>
-          <ItemText>YTP</ItemText>
+          <ItemText>YTP,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>32</count>
@@ -324,6 +324,11 @@
           <count>33</count>
           <WinNumber>1</WinNumber>
           <ItemText>Claw_SelfInspecting</ItemText>
+        </Ww>
+        <Ww>
+          <count>34</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>AutoClimb_Level,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>

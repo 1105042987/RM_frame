@@ -35,7 +35,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 {
 	CM1.RealAngle=0;
 	CM2.RealAngle=0;
-	if(ChassisSpeedRef.forward_back_ref>0)
+	if(ChassisSpeedRef.forward_back_ref>=0)
 	{
 	CM1.TargetAngle=ChassisSpeedRef.forward_back_ref*5;
 	CM2.TargetAngle=-ChassisSpeedRef.forward_back_ref*5;
@@ -84,7 +84,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 							AutoClimb_Level--;
 							State_Common();
 						}
-					}	
+					}
 				}
 		}
 		if(flag==1)
@@ -176,6 +176,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 		CM1.TargetAngle=0;
 		CM2.TargetAngle=0;
 	}
+	
 }
 
 void ComeToTop()
@@ -207,10 +208,20 @@ void ComeToTop()
 	
 }
 
+void Speed_Locker()
+{
+	if(!hasReach(&NMUDL,10)||!hasReach(&NMUDR,10))
+	{
+	ChassisSpeedRef.forward_back_ref=0.0;
+	ChassisSpeedRef.rotate_ref=0.0;
+	}
+}
+
 void AutoClimb_SwitchState()
 {
 	if(AutoClimbing==1)
 		Chassis_Choose(1,1);
+	Speed_Locker();
 }
 
 void State_AutoClimb()

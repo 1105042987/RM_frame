@@ -18,7 +18,8 @@
 #define FIFTHBOX 1100
 
 #define LOWERCRITICIAL 2000      //岛下临界值
-#define UPPERCRITICIAL 800 //待测试
+#define UPPERCRITICIAL_LEFT 1000 //待测试 
+#define UPPERCRITICIAL_RIGHT 1000
 
 //#define UPLEVEL 432    //抬升时的合适高度 必须被4整除   已写到.h里
 #define UPPROTECT 400  //抬升的临界保护值
@@ -201,13 +202,13 @@ void Sensor_Read_Lower()//用于检测红外传感器是否检测到两个空隙
 }
 void Sensor_Read_Upper()//用于检测红外传感器是否检测到两个空隙
 {
-	if(Sensor_Tmp[0]<UPPERCRITICIAL&&adgl<UPPERCRITICIAL)
+	if(Sensor_Tmp[0]<UPPERCRITICIAL_LEFT&&adgl<UPPERCRITICIAL_LEFT)
 		Sensor_Count[0]=1;
 	else
 	{Sensor_Tmp[0]=adgl;Sensor_Count[0]=0;}
 	if(Sensor_Count[0]==1&&Sensor_Ready[0]==0)
 		Sensor_Ready[0]=1;
-	if(Sensor_Tmp[1]<UPPERCRITICIAL&&adgr<UPPERCRITICIAL)
+	if(Sensor_Tmp[1]<UPPERCRITICIAL_RIGHT&&adgr<UPPERCRITICIAL_RIGHT)
 		Sensor_Count[1]=1;
 	else
 	{Sensor_Tmp[1]=adgr;Sensor_Count[1]=0;}
