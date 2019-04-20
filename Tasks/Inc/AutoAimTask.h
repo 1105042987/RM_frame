@@ -73,10 +73,8 @@ typedef struct targetMotion_t
 
 extern uint8_t aimMode;
 extern uint8_t findEnemy;
-extern uint16_t auto_counter_fps;
 extern GMAngle_t adjust;
 extern GMAngle_t aim;
-extern GMAngle_t aim_rcd;
 
 void InitAutoAim(void);
 void AutoAimUartRxCpltCallback(void);

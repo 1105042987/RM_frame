@@ -55,12 +55,12 @@ GMAngle_t aim,aimLast;																				//目标角度
 GMAngle_t adjust;																							//校准发射变量
 Coordinate_t enemy_gun,enemyScope,scopeGun;										//坐标
 uint8_t Enemy_INFO[8],Tx_INFO[8];															//接收
-uint8_t findEnemy=0,aimMode=0,upper_mode;										//aimMode用于选择瞄准模式，0为手动瞄准，1为正常自瞄，2为打符，3暂无（吊射？）
+uint8_t findEnemy=0,aimMode=0,upper_mode;											//aimMode用于选择瞄准模式，0为手动瞄准，1为正常自瞄，2为打符，3暂无（吊射？）
 uint16_t aimCnt=0;																						//自瞄分频延时变量
-uint16_t auto_counter_fps = 1000;															//检测帧率
-int16_t receiveCnt=0,receive_rcd=0;							  						//检测上位机信号帧数
+int16_t receiveCnt=0,receiveFps=0;														//检测上位机信号帧数
+extern int16_t receiveCnt,receiveFps;
 int8_t trackCnt=0;																						//追踪变量
-float t=5,k=1;//暂时调试用
+
 //********************************自瞄初始化********************************//
 
 void InitAutoAim(){
@@ -74,7 +74,7 @@ void InitAutoAim(){
 	
 	//角度变量初始化（不需要修改）
 	aim.yaw=0;				aim.pit=0;
-	adjust.yaw=0.0f;			adjust.pit=0.1;
+	adjust.yaw=0;			adjust.pit=-4;
 	
 	//设置坐标初始值（根据不同安装情况调整这3个参数）
 	scopeGun.x=0;		scopeGun.y=-10;		scopeGun.z=0;
@@ -98,12 +98,14 @@ void AutoAimUartRxCpltCallback(){
 	}
 	#else
 	if(RX_ENEMY_START=='s'&&RX_ENEMY_END=='e'){
-		aim.yaw=(float)( (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)>0x7fff) ? (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)-0xffff) : (RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2 )*kAngle;
-		aim.pit=(float)( (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)>0x7fff) ? (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)-0xffff) : (RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2 )*kAngle;
-		aim.yaw-=adjust.yaw;
+		aim.yaw=-(float)( (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)>0x7fff) ? (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)-0xffff) : (RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2 )*kAngle;
+		aim.pit=-(float)( (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)>0x7fff) ? (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)-0xffff) : (RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2 )*kAngle;
+		aim.yaw+=adjust.yaw;
+		aim.yaw*=0.9;
 		aim.pit+=adjust.pit;
-		MINMAX(aim.yaw,-3.0f,3.0f);
-		MINMAX(aim.pit,-3.0f,3.0f);
+		aim.pit*=0.9;
+//		MINMAX(aim.yaw,-3.0f,3.0f);
+//		MINMAX(aim.pit,-3.0f,3.0f);
 		//enemyScope.z=350;
 		findEnemy=1;
 		receiveCnt++;
@@ -142,8 +144,8 @@ int sgn(float x){return x>0?1:(x<0?-1:0);}
 void autoAimNormal(){
 	if(findEnemy){
 		if(aimCnt<1){
-			GMY.Target+=(sgn(aim.yaw)*(aim.yaw*aim.yaw)+aim.yaw)/6;//(aim.yaw+aimLast.yaw)/kk;//8;
-			GMP.Target+=(sgn(aim.pit)*(aim.pit*aim.pit)+aim.pit)/6;//(aim.pitch+aimLast.pitch)/kk;//8;
+			GMY.Target=GMY.Real+aim.yaw*0.9;//(sgn(aim.yaw)*(aim.yaw*aim.yaw)+aim.yaw)*0.4;//(aim.yaw+aimLast.yaw)/kk;//8;
+			GMP.Target=GMP.Real+aim.pit*0.6;//(sgn(aim.pit)*(aim.pit*aim.pit)+aim.pit)*0.3;//(aim.pitch+aimLast.pitch)/kk;//8;
 			aimCnt++;
 		}else{
 			findEnemy=0;
@@ -155,9 +157,9 @@ void autoAimNormal(){
 }
 void AutoAimYYP(){
 	if(findEnemy){
-//		GMY.Target=kalmanCalc(&kFilter,GMY.Real+aim.yaw,0);
-		GMY.Target=GMY.Real+(sgn(aim.yaw)*(aim.yaw*aim.yaw)+aim.yaw)*1.3;
-		GMP.Target=GMP.Real+(sgn(aim.pit)*(aim.pit*aim.pit)+aim.pit)*0.85;
+		GMY.Target=kalmanCalc(&kFilter,GMY.Real+aim.yaw,1);
+//		GMY.Target=GMY.Real+aim.yaw*0.8;//(sgn(aim.yaw)*(aim.yaw*aim.yaw)+aim.yaw)*1.3;
+		GMP.Target=GMP.Real+aim.pit*0.7;//(sgn(aim.pit)*(aim.pit*aim.pit)+aim.pit)*0.85;
 		findEnemy=0;
 	}
 }
@@ -173,33 +175,26 @@ void UpperStateFSM(){
 		upper_mode = aimMode;
 	}
 }
-//***********************************自瞄控制*******************************//
+//*****************************自瞄控制*******************************//
 void autoAimCtrl(){
 	//UpperStateFSM();
 	switch(aimMode){
 		case 1:{//自瞄
-			//autoAimNormal();
-			AutoAimYYP();
+			autoAimNormal();
+//			AutoAimYYP();
 			break;
 		}
 		case 2:{//打符
-			autoAimPredict();
-			//AutoAimYYP();
+//			autoAimPredict();
+			AutoAimYYP();
 			break;
 		}
 		default: break;
 	}
-	/************检测帧数*************/
-	if(receiveCnt == 0)
-		auto_counter_fps = 1000;
-	if(auto_counter_fps == 0)	{
-		receive_rcd = receiveCnt;
-		receiveCnt = 0;
-		auto_counter_fps = 1000;
-	}
-	/*********************************/
 }
-float a=2;
+//*****************************************************************//
+float a=1;
+float t=5,k=0.5;//暂时调试用
 float myWYaw,myWPit,myWYawLast,myWPitLast,myAYaw,myAPit;
 float enYawLast,enPitLast,enWYaw,enWPit,enWYawLast,enWPitLast,enAYaw,enAPit;//差分的敌方角速度，角加速度，
 float enYaw,enPit;
@@ -225,9 +220,8 @@ void autoAimPredict(){//@尹云鹏
 		
 		//float t=aim.z*4; //距离*1000ms/子弹速度18/周期14ms，约为4
 		GMY.Target=GMY.Real+(enYaw+enWYaw*t)*k;
-		
-		GMP.Target=GMP.Real+(sgn(aim.pit)*(aim.pit*aim.pit)+aim.pit)*0.85;
-//		GMP.Target=GMP.Real+(enPit+enWPit*t)*k;
+//		GMP.Target=GMP.Real+aim.pit*0.7;
+		GMP.Target=GMP.Real+(enPit+enWPit*t)*k;
 		
 //		GMY.Target=kalmanCalc(&kFilter,GMYAngle+aim.yaw,1);
 		

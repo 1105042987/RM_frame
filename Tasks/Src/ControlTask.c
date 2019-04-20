@@ -116,16 +116,14 @@ void WorkStateFSM(void){
 			}
 		}break;
 		#ifndef SLAVE_MODE
-		case NORMAL_STATE:				//正常模式
-		{
+		case NORMAL_STATE:{				//正常模式
 			if(normal_time<10000)normal_time++;
 			if(normal_time>=10)startUp = 1;
 			if(inputmode == STOP) WorkState = STOP_STATE;
 			if(functionmode == MIDDLE_POS) WorkState = ADDITIONAL_STATE_ONE;
 			if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
 		}break;
-		case ADDITIONAL_STATE_ONE:		//附加模式一
-		{
+		case ADDITIONAL_STATE_ONE:{		//附加模式一
 			if(inputmode == STOP) WorkState = STOP_STATE;
 			if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
 			if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
@@ -173,7 +171,9 @@ void controlLoop(){
 
 		#ifdef USE_POWER_LIMIT
 			PowerLimitation();
-		//for(int i=0;i<4;i++) if(ChassisMotorGroup[i]!=0)ChassisMotorGroup[i]->Intensity*=rate;
+//			MINMAX(rate,0,1);
+//			CML.Intensity*=rate;
+//			CMR.Intensity*=rate;
 		#endif
 		
 		sendAllData(0);
@@ -181,8 +181,8 @@ void controlLoop(){
 }
 //哨兵：每秒冷却160，2ms为160/500=0.32
 void heatCalc(){//2ms
-	fakeHeat0-=0.32;
-	if(fakeHeat0<0){fakeHeat0=0;}
+	realHeat0-=0.32;
+	if(realHeat0<0){realHeat0=0;}
 }
 //void heatCalc(){//2ms
 //	if(syncCnt0 > 35 && JUDGE_State == ONLINE){fakeHeat0 = realHeat0;}
@@ -191,6 +191,7 @@ void heatCalc(){//2ms
 //}
 //时间中断入口函数
 extern int8_t Control_Update;
+extern int16_t receiveCnt,receiveFps;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	if (htim->Instance == TWO_MS_TIM.Instance){//2ms时钟
 		//HAL_NVIC_DisableIRQ(TIM6_DAC_IRQn);
@@ -226,7 +227,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			Control_Update=0;
 			if(WorkState!=PREPARE_STATE){
 				if(WorkState==STOP_STATE&&receiveData[0].data[0]>0) WorkState = PREPARE_STATE;
-				else WorkState = (WorkState_e)receiveData[0].data[0];
+				else{
+					inputmode = (InputMode_e)(receiveData[0].data[0]>>8);
+					WorkState = (WorkState_e)(receiveData[0].data[0]&0x00ff);
+				}
 				if(inputmode==REMOTE_Control)
 					RemoteControlProcess();
 				else
@@ -264,5 +268,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	}
 	else if (htim->Instance == htim10.Instance){  //10ms
 		
+	#if GUARD == 'D'
+		static int cnt=0;
+		cnt++;
+		if(cnt==100){
+			cnt=0;
+			receiveFps=receiveCnt;
+			receiveCnt=0;
+		}
+	#endif //GUARD == 'D'
 	}
 }

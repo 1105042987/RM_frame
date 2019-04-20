@@ -73,7 +73,7 @@ typedef struct MotorINFO{
 	int16_t				Compensation;
 	int16_t				Maxrange;
 	float				encoderAngle;
-	float				encoderLastAngle;
+	float				imuEncorderDiff;
 }MotorINFO;
 
 #define AngleBased_MOTORINFO_Init(rdc,func,ppid,spid) \

@@ -35,9 +35,9 @@ MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(1.0,&ControlGMY,3300,400,20,
 								fw_PID_INIT_EASY(3000, 500, 200, 20000));
 								
 
-//MotorINFO GMY  =  Gimbal6020_MOTORINFO_Init(1.0,&ControlGMYEncoder,10,0,20,
-//								fw_PID_INIT_EASY(50, 2, 20, 5000),
-//								fw_PID_INIT_EASY(40, 2, 20,	20000));
+//MotorINFO GMY  =  Gimbal6020_MOTORINFO_Init(1.0,&ControlGMYEncoder,0,0,20,
+//								fw_PID_INIT_EASY(28, 2, 5, 5000),
+//								fw_PID_INIT_EASY(90, 5, 5,	20000));
 								
 MotorINFO STIRp = AngleBased_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 2000.0),
@@ -51,11 +51,12 @@ MotorINFO CMR = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1500.0),
 								fw_PID_INIT_EASY(40, 0.0, 5.0,	 15000.0));
 
-//MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&STIRv,0,0,0};
-//MotorINFO* can2[8]={&CML,&CMR,0,0,0,0,0,0};
-
 MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMP,&GMY,0,0};
-MotorINFO* can2[8]={&CML,&CMR,0,0,&STIRp,0,0,0};
+MotorINFO* can2[8]={&CML,&CMR,0,0,&STIRv,0,0,0};
+
+//MotorINFO* can1[8]={0,0,0,0,&STIRp,0,0,0};
+//MotorINFO* can2[8]={0,0,0,0,0,0,0,0};
+
 
 void ControlNM(MotorINFO* id){
 	if(id==0) return;
@@ -149,7 +150,7 @@ void ControlGMY(MotorINFO* id){
 			id->lastRead=ThisAngle;
 			id->Real=ThisAngle;//EncoderAngle;
 			id->Target=id->Real;
-			id->encoderLastAngle= id->Real-id->encoderAngle;//借此参数表示imu与encoder的差值
+			id->imuEncorderDiff= id->Real-id->encoderAngle;//借此参数表示imu与encoder的差值
 			id->FirstEnter = 0;
 			return;
 		}
