@@ -708,6 +708,10 @@ void Claw_AutoIn()
 void State_AutoGet()
 {
 	EngineerState=GET_STATE;
+	//For Debug
+	UM1.TargetAngle=-OUTANGLE/2;
+	UM2.TargetAngle=OUTANGLE/2;
+	///////
 	YTP.TargetAngle = 60;
 		if(Yaw_Set_Flag==0)
 		{
@@ -738,6 +742,8 @@ void Rotate_Check()
 void State_Common()  
 {
 	EngineerState=COMMON_STATE;
+	UM1.TargetAngle=0;
+	UM2.TargetAngle=0;
 	AutoClimbing=0;
 		YTP.TargetAngle = 60;
 		if(Yaw_Reset_Flag==0)

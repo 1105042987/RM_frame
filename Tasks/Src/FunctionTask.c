@@ -327,12 +327,15 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	{
 		case SHORT_CLICK:
 		{
-			YTP.TargetAngle = 60;
-		if(Yaw_Reset_Flag==0)
-		{
-			Yaw_Reset_Flag=1;
-			Yaw_Reset_Cnt=150;
-		}
+			if(EngineerState!=GET_STATE)
+			{
+				YTP.TargetAngle = 60;
+				if(Yaw_Reset_Flag==0)
+				{
+					Yaw_Reset_Flag=1;
+					Yaw_Reset_Cnt=150;
+				}
+			}
 		}break;
 		case LONG_CLICK:
 		{
@@ -353,7 +356,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(EngineerState == GET_STATE)
 			{
-				ChassisSpeedRef.left_right_ref =  -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+				ChassisSpeedRef.left_right_ref =  -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp)/2;
 			}
 			
 		}
@@ -368,7 +371,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				}
 				else if(EngineerState == GET_STATE)
 				{
-					ChassisSpeedRef.left_right_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+					ChassisSpeedRef.left_right_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp)/2;
 				}
 				
 			}
@@ -395,7 +398,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				}
 				else if(EngineerState == GET_STATE)
 				{
-					ChassisSpeedRef.forward_back_ref =  -KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp);
+					ChassisSpeedRef.forward_back_ref =  -KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/2;
 				}
 			
 			}
@@ -410,7 +413,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				}
 				else if(EngineerState == GET_STATE)
 				{
-					ChassisSpeedRef.forward_back_ref =  KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp);
+					ChassisSpeedRef.forward_back_ref =  KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/2;
 				}
 			
 			}
