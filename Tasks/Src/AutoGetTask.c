@@ -15,7 +15,7 @@
 #define SECONDBOX 820
 #define THIRDBOX 1615             //这五个是箱子位置
 #define FOURTHBOX 400
-#define FIFTHBOX 1100
+#define FIFTHBOX 1200
 
 #define LOWERCRITICIAL 2000      //岛下临界值
 #define UPPERCRITICIAL_LEFT 1000 //待测试 
@@ -402,8 +402,8 @@ void AutoGet_LowerANDThrow()//自动取弹（岛下五个弹）
 		case 7:{Box_ThrowForward();     break;}
 		case 8:{Claw_GetaBox();  break;}
 		case 9:{Claw_GoTo(5);break;}
-		case 10:{Box_ThrowForward();    break;}
-		case 11:{CLAWOUT;AutoGet_TotalStep++;auto_counter=800;break;}  
+		case 10:{CLAWOUT;AutoGet_TotalStep++;auto_counter=500;  break;}
+		case 11:{Box_ThrowForward();break;}  
 		case 12:{Claw_GetaBox(); break;}
 		case 13:{Claw_GoTo(4);break;}
 		case 14:{Box_ThrowForward();    break;}

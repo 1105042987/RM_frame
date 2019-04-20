@@ -64,7 +64,10 @@ extern int32_t auto_wait;
 extern int16_t cnt;
 extern uint32_t ifset;//用于自检
 
-
+extern uint32_t Yaw_Reset_Flag;
+extern uint32_t Yaw_Reset_Cnt;
+extern uint32_t Yaw_Set_Flag;
+extern uint32_t Yaw_Set_Cnt;
 
 
 uint8_t hasReach(MotorINFO* id, double distance);//用于判断电机是否到位

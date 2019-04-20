@@ -106,7 +106,7 @@ void Door_SwitchState()
 	if(dooropen==1&&setdoorzero==1)
 		DOOR.TargetAngle=-180;
 	else if(dooropen==0&&setdoorzero==1)
-		DOOR.TargetAngle=10;
+		DOOR.TargetAngle=3;
 }
 void InitialSave()
 {
@@ -327,7 +327,12 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	{
 		case SHORT_CLICK:
 		{
-			
+			YTP.TargetAngle = 60;
+		if(Yaw_Reset_Flag==0)
+		{
+			Yaw_Reset_Flag=1;
+			Yaw_Reset_Cnt=150;
+		}
 		}break;
 		case LONG_CLICK:
 		{
@@ -455,6 +460,14 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				YTY.TargetAngle=0;
 				YTY.TargetAngle=0;
 			}
+			else if(key->v & KEY_V)
+			{
+				DebugState=DEBUG_GET_STATE;
+			}
+      else if(key->v & KEY_B)
+			{
+				DebugState=DEBUG_CLIMB_STATE;
+			}				
 			break;
 		}
 		case CTRL:				//slow
