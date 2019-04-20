@@ -760,3 +760,4 @@ void MouseModeFSM(Mouse *mouse)
 		}break;
 	}
 }
+
