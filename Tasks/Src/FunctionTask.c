@@ -203,8 +203,12 @@ void RemoteControlProcess(Remote *rc)
 	if(WorkState == ADDITIONAL_STATE_ONE)
 	{
 		ComeToTop();
+		//For Debug
+		 NMCDL.TargetAngle = UD_BOTTOM;
+		NMCDR.TargetAngle = UD_BOTTOM;
+		///////////////////
    if(DebugState==DEBUG_GET_STATE)
-	 {
+	 {		 
 		//手动挡
 		if(channellcol>200){       //UP  左纵向是整个机构的上下
 			NMUDL.TargetAngle -= channellcol * 0.05;
@@ -245,6 +249,13 @@ void RemoteControlProcess(Remote *rc)
 			//比较健康的moment是3000    靠近电机-3000 远离电机3000 
 			//NMUDL840 NMUDR-840
 			//红外2000 3000
+		
+		//For Debug
+		 NMCDL.TargetAngle = UD_TOP;
+		NMCDR.TargetAngle = UD_TOP;
+		///////////////////
+		
+		
 			ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
 		  ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 			ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;

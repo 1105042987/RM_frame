@@ -57,8 +57,8 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 	}
 	if(flag)
 	{		
-		if(ChassisSpeedRef.forward_back_ref>0)
-		ChassisSpeedRef.forward_back_ref/=5;
+		//if(ChassisSpeedRef.forward_back_ref>0)
+		//ChassisSpeedRef.forward_back_ref/=5;
 		if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==0)
 		ChassisSpeedRef.forward_back_ref/=10;
     if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==1)
@@ -201,9 +201,9 @@ void ComeToTop()
 			NMCDR.RealAngle=0;
 		}
 	}
-		if(NMCDL.RxMsgC6x0.moment>7000)//保护
+		if(NMCDL.RxMsgC6x0.moment>15000)//保护
 			NMCDL.TargetAngle-=10;
-		if(NMCDR.RxMsgC6x0.moment>7000)
+		if(NMCDR.RxMsgC6x0.moment>15000)
 			NMCDR.TargetAngle-=5;
 	
 }
@@ -221,7 +221,7 @@ void AutoClimb_SwitchState()
 {
 	if(AutoClimbing==1)
 		Chassis_Choose(1,1);
-	Speed_Locker();
+	//Speed_Locker();
 }
 
 void State_AutoClimb()
