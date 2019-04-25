@@ -57,8 +57,8 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 	}
 	if(flag)
 	{		
-		//if(ChassisSpeedRef.forward_back_ref>0)
-		//ChassisSpeedRef.forward_back_ref/=5;
+		if(ChassisSpeedRef.forward_back_ref>0)
+		ChassisSpeedRef.forward_back_ref/=1.5;
 		if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==0)
 		ChassisSpeedRef.forward_back_ref/=10;
     if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==1)
@@ -75,6 +75,8 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 					CM1.TargetAngle=0;
 					CM2.TargetAngle=0;
 					if(signal2==0){
+						NMCDL.positionPID.outputMax = 1080;
+						NMCDR.positionPID.outputMax = 1080;
 							NMCDL.TargetAngle = UD_TOP;
 						  NMCDR.TargetAngle = UD_TOP;
 						signal2=1;
@@ -88,15 +90,17 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 				}
 		}
 		if(flag==1)
-		switch(distance_couple.move_flags&0x000f)                //上岛之后抬架子让车完全上岛
+		switch(distance_couple.move_flags&0x000e)                //上岛之后抬架子让车完全上岛
 		{
-			case 15:
+			case 14:
 				if(ChassisSpeedRef.forward_back_ref > 0){
 					ChassisSpeedRef.forward_back_ref=0;
 					ChassisSpeedRef.rotate_ref=0;
 					CM1.TargetAngle=0;
 					CM2.TargetAngle=0;
 					if(signal2==0){
+						NMCDL.positionPID.outputMax = 1800;
+						NMCDR.positionPID.outputMax = 1800;
 							NMCDL.TargetAngle = UD_TOP;
 						  NMCDR.TargetAngle = UD_TOP;
 						signal2=1;
@@ -144,6 +148,8 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 						  ChassisSpeedRef.rotate_ref=0;
 							if(signal1==0 && ensure==1)
 							{
+								NMCDL.positionPID.outputMax = 1800;
+						NMCDR.positionPID.outputMax = 1800;
 									NMCDL.TargetAngle = UD_BOTTOM;
 								  NMCDR.TargetAngle = UD_BOTTOM;
 								signal1=1;
@@ -160,6 +166,8 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 					CM2.TargetAngle=0;
 					ChassisSpeedRef.rotate_ref=0;
 					if(signal1==0 && ensure==1){
+						NMCDL.positionPID.outputMax = 1800;
+						NMCDR.positionPID.outputMax = 1800;
 							NMCDL.TargetAngle = UD_BOTTOM;
 						  NMCDR.TargetAngle = UD_BOTTOM;
 						signal1=1;
@@ -199,12 +207,14 @@ void ComeToTop()
 			AutoClimb_ComeToTop=0;
 			NMCDL.RealAngle=0;
 			NMCDR.RealAngle=0;
+			NMCDL.TargetAngle=0;
+			NMCDR.TargetAngle=0;
 		}
 	}
 		if(NMCDL.RxMsgC6x0.moment>15000)//保护
 			NMCDL.TargetAngle-=10;
 		if(NMCDR.RxMsgC6x0.moment>15000)
-			NMCDR.TargetAngle-=5;
+			NMCDR.TargetAngle-=10;
 	
 }
 
@@ -221,7 +231,7 @@ void AutoClimb_SwitchState()
 {
 	if(AutoClimbing==1)
 		Chassis_Choose(1,1);
-	//Speed_Locker();
+	Speed_Locker();
 }
 
 void State_AutoClimb()

@@ -204,8 +204,8 @@ void RemoteControlProcess(Remote *rc)
 	{
 		ComeToTop();
 		//For Debug
-		 NMCDL.TargetAngle = UD_BOTTOM;
-		NMCDR.TargetAngle = UD_BOTTOM;
+//		 NMCDL.TargetAngle = UD_BOTTOM;
+//		NMCDR.TargetAngle = UD_BOTTOM;
 		///////////////////
    if(DebugState==DEBUG_GET_STATE)
 	 {		 
@@ -251,8 +251,8 @@ void RemoteControlProcess(Remote *rc)
 			//∫ÏÕ‚2000 3000
 		
 		//For Debug
-		 NMCDL.TargetAngle = UD_TOP;
-		NMCDR.TargetAngle = UD_TOP;
+//		 NMCDL.TargetAngle = UD_TOP;
+//		NMCDR.TargetAngle = UD_TOP;
 		///////////////////
 		
 		

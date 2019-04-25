@@ -301,12 +301,12 @@
         <Ww>
           <count>29</count>
           <WinNumber>1</WinNumber>
-          <ItemText>NMUDL,0x0A</ItemText>
+          <ItemText>NMCDL</ItemText>
         </Ww>
         <Ww>
           <count>30</count>
           <WinNumber>1</WinNumber>
-          <ItemText>NMUDR,0x0A</ItemText>
+          <ItemText>NMCDR</ItemText>
         </Ww>
         <Ww>
           <count>31</count>

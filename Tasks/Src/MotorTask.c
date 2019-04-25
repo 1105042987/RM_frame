@@ -125,14 +125,14 @@ void ControlNM(MotorINFO* id)
 		if(id->FirstEnter==1) {id->lastRead = ThisAngle;id->FirstEnter = 0;return;}
 		if(ThisAngle<=id->lastRead)
 		{
-			if((id->lastRead-ThisAngle)>4000)//±àÂëÆ÷ÉÏÒç
+			if((id->lastRead-ThisAngle)>4096)//±àÂëÆ÷ÉÏÒç
 				id->RealAngle = id->RealAngle + (ThisAngle+8192-id->lastRead) * 360 / 8192.0 / id->ReductionRate;
 			else//Õý³£
 				id->RealAngle = id->RealAngle - (id->lastRead - ThisAngle) * 360 / 8192.0 / id->ReductionRate;
 		}
 		else
 		{
-			if((ThisAngle-id->lastRead)>4000)//±àÂëÆ÷ÏÂÒç
+			if((ThisAngle-id->lastRead)>4096)//±àÂëÆ÷ÏÂÒç
 				id->RealAngle = id->RealAngle - (id->lastRead+8192-ThisAngle) *360 / 8192.0 / id->ReductionRate;
 			else//Õý³£
 				id->RealAngle = id->RealAngle + (ThisAngle - id->lastRead) * 360 / 8192.0 / id->ReductionRate;
