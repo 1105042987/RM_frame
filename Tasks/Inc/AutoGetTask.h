@@ -14,12 +14,12 @@
 #define __AUTOGETTASK_H
 
 
-#define CLAWOUT   HAL_GPIO_WritePin(GPIOH,1<<2,1)//爪子弹出
-#define CLAWIN    HAL_GPIO_WritePin(GPIOH,1<<2,0)//爪子进入
-#define CLAWTIGHT HAL_GPIO_WritePin(GPIOH,1<<5,1)//爪子抓紧
-#define CLAWLOOSE HAL_GPIO_WritePin(GPIOH,1<<5,0)//爪子松开  //左中右 弹箱 前后 抓紧  4 2 5
-#define LAUNCH    HAL_GPIO_WritePin(GPIOH,1<<4,1)//弹射起飞
-#define LAND      HAL_GPIO_WritePin(GPIOH,1<<4,0)//弹射机构归位
+#define CLAWOUT   HAL_GPIO_WritePin(GPIOH,1<<2,GPIO_PIN_SET)//爪子弹出
+#define CLAWIN    HAL_GPIO_WritePin(GPIOH,1<<2,GPIO_PIN_RESET)//爪子进入
+#define CLAWTIGHT HAL_GPIO_WritePin(GPIOH,1<<5,GPIO_PIN_SET)//爪子抓紧
+#define CLAWLOOSE HAL_GPIO_WritePin(GPIOH,1<<5,GPIO_PIN_RESET)//爪子松开  //左中右 弹箱 前后 抓紧  4 2 5
+#define LAUNCH    HAL_GPIO_WritePin(GPIOH,1<<4,GPIO_PIN_SET)//弹射起飞
+#define LAND      HAL_GPIO_WritePin(GPIOH,1<<4,GPIO_PIN_RESET)//弹射机构归位
 
 #define UPLEVEL 440
 
@@ -73,35 +73,36 @@ extern uint32_t Yaw_Set_Cnt;
 uint8_t hasReach(MotorINFO* id, double distance);//用于判断电机是否到位
 uint8_t canMovePositive(MotorINFO* id, int16_t stuckMoment);
 uint8_t canMoveNegetive(MotorINFO* id, int16_t stuckMoment);
-void RefreshADC();     //刷新红外传感器数值
-void Sensor_Read_Lower();//用于检测红外传感器是否检测到两个空隙
-void Claw_Rollout();//爪子转出与转回
-void Claw_Rollin();
-void Claw_Tight();//爪子抓紧与松开
-void Claw_Loose();
-void Box_Launch();//弹药箱弹射装置
-void Box_Land();
+void RefreshADC(void);     //刷新红外传感器数值
+void Sensor_Read_Lower(void);//用于检测红外传感器是否检测到两个空隙
+void Claw_Rollout(void);//爪子转出与转回
+void Claw_Rollin(void);
+void Claw_Tight(void);//爪子抓紧与松开
+void Claw_Loose(void);
+void Box_Launch(void);//弹药箱弹射装置
+void Box_Land(void);
 void Claw_GoTo(int a);//爪子走到第a个箱子的位置
-void Claw_GetaBox();
-void Box_Fire();
-void AutoGet_Stop_And_Clear();
-void Box_ThrowForward();
-void AutoGet_Lower();
-void AutoGet_LowerANDThrow();
-void AutoGet_Upper();
-void Claw_GetSpecifiedBox();
-void Claw_SelfInspect();
-void Claw_GoToNextBox_lower();
-void Claw_GoToNextBox_upper();
-void AutoGet_SensorControl();
-void Claw_Up();
-void AutoGet_SwitchState();
-void ClawUpDown_SwitchState();
-void Claw_Protect();
-void Claw_AutoIn();
-void Claw_AutoInTest();
-void State_AutoGet();
-void State_Common();
-void Yaw_Check();
-void Rotate_Check();
+void Claw_GetaBox(void);
+void Box_Fire(void);
+void AutoGet_Stop_And_Clear(void);
+void Box_ThrowForward(void);
+void AutoGet_Lower(void);
+void AutoGet_LowerANDThrow(void);
+void AutoGet_Upper(void);
+void Claw_GetSpecifiedBox(void);
+void Claw_SelfInspect(void);
+void Claw_GoToNextBox_lower(void);
+void Claw_GoToNextBox_upper(void);
+void AutoGet_SensorControl(void);
+void Claw_Up(void);
+void AutoGet_SwitchState(void);
+void ClawUpDown_SwitchState(void);
+void Claw_Protect(void);
+void Claw_AutoIn(void);
+void Claw_AutoInTest(void);
+void State_AutoGet(void);
+void State_Common(void);
+void Yaw_Check(void);
+void Rotate_Check(void);
+void AutoGet_AutoDown(void);
 #endif /*__ AUTOGETTASK_H */

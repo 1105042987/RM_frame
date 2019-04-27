@@ -33,6 +33,7 @@ Distance_Couple_t distance_couple;
 uint32_t AutoGet_Start=0;  
 uint32_t AutoGet_TotalStep=1;
 uint32_t AutoGet_Alreadywaited=0;
+uint32_t AutoGet_Success=0;
 uint32_t Claw_AlreadyRollOut=0;
 uint32_t Claw_AlreadyWaited=0;
 uint32_t Claw_AlreadyTight=0;
@@ -50,6 +51,8 @@ uint32_t Claw_FindingNextBox_Upper_Backward=0;
 uint32_t Claw_SetZero=0;
 uint32_t Claw_Zero_Counting=0;
 uint32_t Claw_Zero_Count=0;
+uint32_t Claw_SelfInspect_cnt=0;
+
 
 uint8_t CM_AutoRotate90=0;				//底盘自动转90度，1——转，0——到位
 //存储红外传感器的数值
@@ -77,7 +80,6 @@ uint32_t warning_cnt=0;
 uint32_t claw_warning=0;
 uint32_t sensorlock_cnt=0;
 int16_t cnt = 0;
-uint32_t ifset=-5;//用于自检
 
 
 extern Engineer_State_e EngineerState;//用于处理车辆模式
@@ -411,7 +413,7 @@ void AutoGet_LowerANDThrow()//自动取弹（岛下五个弹）
 		case 16:{auto_counter=300;AutoGet_TotalStep++;break;}
 		case 17:{Box_ThrowForward();    break;}
 		case 18:{CLAWIN;AutoGet_TotalStep++;break;}
-		default:{AutoGet_Stop_And_Clear();}
+		default:{AutoGet_Stop_And_Clear();AutoGet_Success=1;break;}
 	}
 }
 void AutoGet_Upper()//自动取弹（岛上三个弹）
@@ -433,7 +435,7 @@ void AutoGet_Upper()//自动取弹（岛上三个弹）
 		case 12:{UM1.TargetAngle=0;UM2.TargetAngle=0;AutoGet_TotalStep++;break;}
 		case 13:{CLAWIN;auto_counter=500;
 		AutoGet_TotalStep++;break;}
-		default:{AutoGet_Stop_And_Clear();break;}
+		default:{AutoGet_Stop_And_Clear();AutoGet_Success=1;break;}
 	}
 }
 void Claw_GetSpecifiedBox()//键鼠控制取任意位置弹
@@ -452,7 +454,7 @@ void Claw_GetSpecifiedBox()//键鼠控制取任意位置弹
 					{auto_waiter=1000;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{Box_ThrowForward();     break;}
-				default:{AutoGet_Stop_And_Clear();   break;}
+				default:{AutoGet_Stop_And_Clear(); AutoGet_Success=1;  break;}
 			}
 		}break;
 		case 2:{
@@ -468,7 +470,7 @@ void Claw_GetSpecifiedBox()//键鼠控制取任意位置弹
 					{auto_waiter=1000;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{Box_ThrowForward();      break;}
-				default:{AutoGet_Stop_And_Clear();   break;}
+				default:{AutoGet_Stop_And_Clear(); AutoGet_Success=1;  break;}
 			}
 		}break;
 		case 3:{
@@ -485,7 +487,7 @@ void Claw_GetSpecifiedBox()//键鼠控制取任意位置弹
 					{auto_waiter=1000;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{Box_ThrowForward();      break;}
-				default:{AutoGet_Stop_And_Clear();   break;}
+				default:{AutoGet_Stop_And_Clear(); AutoGet_Success=1;  break;}
 			}
 		}break;
 		case 4:{
@@ -499,7 +501,7 @@ void Claw_GetSpecifiedBox()//键鼠控制取任意位置弹
 					{auto_waiter=1000;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{Box_ThrowForward(); CLAWIN;     break;}
-				default:{AutoGet_Stop_And_Clear();   break;}
+				default:{AutoGet_Stop_And_Clear();  AutoGet_Success=1; break;}
 			}
 		}break;
 		case 5:{
@@ -513,7 +515,7 @@ void Claw_GetSpecifiedBox()//键鼠控制取任意位置弹
 					{auto_waiter=1000;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{Box_ThrowForward(); CLAWIN;     break;}
-				default:{AutoGet_Stop_And_Clear();   break;}
+				default:{AutoGet_Stop_And_Clear(); AutoGet_Success=1;  break;}
 			}
 		}break;
 		default:break;
@@ -529,13 +531,21 @@ void Claw_SelfInspect()//爪子横移自动对位零点
 	if(Claw_SetZero==1)
 	{
 	if(UFM.RxMsgC6x0.moment>-5000&&Claw_SelfInspecting==1)
+	{
 		UFM.TargetAngle-=8;
+		Claw_SelfInspect_cnt=0;
+	}
 	if(UFM.RxMsgC6x0.moment<-5000&&Claw_SelfInspecting==1)
+	{
+		Claw_SelfInspect_cnt++;
+	}
+	if(Claw_SelfInspect_cnt>50)
 	{
 		UFM.RealAngle=0;
 		UFM.TargetAngle=FOURTHBOX;
 		Claw_SelfInspecting=2;
 		Claw_UpToPosition=0;
+		Claw_SelfInspect_cnt=0;
 	}
   }
 }
@@ -704,7 +714,15 @@ void Claw_AutoIn()
 		}
 	}
 }
-
+void AutoGet_AutoDown()
+{
+	if(((abs(ChassisSpeedRef.forward_back_ref)>=200 * RC_CHASSIS_SPEED_REF)||(abs(ChassisSpeedRef.rotate_ref)>=15* MOUSE_TO_YAW_ANGLE_INC_FACT*15))
+		&&AutoGet_Success==1)
+	{
+		Claw_DownToPosition=1;
+		State_Common();
+	}
+}
 void State_AutoGet()
 {
 	EngineerState=GET_STATE;
@@ -745,6 +763,7 @@ void State_Common()
 	UM1.TargetAngle=0;
 	UM2.TargetAngle=0;
 	AutoClimbing=0;
+	AutoGet_Success=0;
 		YTP.TargetAngle = 60;
 		if(Yaw_Reset_Flag==0)
 		{
@@ -766,6 +785,12 @@ void Yaw_Set_Check()
 	if(Yaw_Set_Flag==1&&Yaw_Set_Cnt==0)
 	{
 		YTY.TargetAngle = SCREEN_POSITION;;
+		Yaw_Set_Flag=0;
+	}
+	
+	if(Yaw_Set_Flag==2&&Yaw_Set_Cnt==0)
+	{
+		YTY.TargetAngle = BACK_POSITION;;
 		Yaw_Set_Flag=0;
 	}
 }

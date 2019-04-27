@@ -110,26 +110,26 @@ void Door_SwitchState()
 }
 void InitialSave()
 {
-	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,0);
-	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,0);
+	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_RESET);
 }
 
 void Saving()
 {
-	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,1);
-	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,0);
+	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_RESET);
 }
 
 void EndSaving()
 {
-	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,1);
-	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,1);
+	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_SET);
 }
 
 void SavingTest()
 {
-	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,0);
-	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,1);
+	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_SET);
 }
 	
 
@@ -338,19 +338,23 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	{
 		case SHORT_CLICK:
 		{
-			if(EngineerState!=GET_STATE)
-			{
 				YTP.TargetAngle = 60;
 				if(Yaw_Reset_Flag==0)
 				{
 					Yaw_Reset_Flag=1;
 					Yaw_Reset_Cnt=150;
 				}
-			}
+				FrontBackInspect=0;
 		}break;
 		case LONG_CLICK:
 		{
-			
+			YTP.TargetAngle = 60;
+		  if(Yaw_Set_Flag==0)
+		  {
+			  Yaw_Set_Flag=2;
+			  Yaw_Set_Cnt=150;
+		  }
+			FrontBackInspect=1;
 		}
 		default: break;
 	}
@@ -491,6 +495,15 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 				if(EngineerState==COMMON_STATE)
 				State_AutoGet();
+				if(EngineerState==GET_STATE)
+				{
+					YTP.TargetAngle = 60;
+		      if(Yaw_Set_Flag==0)
+		      {
+			      Yaw_Set_Flag=1;
+			      Yaw_Set_Cnt=150;
+		      }
+				}
 			}
 			else if(key->v & KEY_V)
 			{
@@ -653,6 +666,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		Claw_Protect();
 		Box_Land();
 		AutoGet_SwitchState();
+		AutoGet_AutoDown();
 		AutoClimb_SwitchState();
 		ClawUpDown_SwitchState();
 		Saving_SwitchState();

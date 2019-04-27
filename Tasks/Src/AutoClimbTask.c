@@ -58,11 +58,11 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 	if(flag)
 	{		
 		if(ChassisSpeedRef.forward_back_ref>0)
-		ChassisSpeedRef.forward_back_ref/=1.5;
+		ChassisSpeedRef.forward_back_ref/=3;
 		if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==0)
 		ChassisSpeedRef.forward_back_ref/=10;
     if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==1)
-		ChassisSpeedRef.forward_back_ref/=20;			
+		ChassisSpeedRef.forward_back_ref/=12;			
 	}
 	if(NMCDL.RealAngle<-950 )
 	{//small chassis
@@ -220,7 +220,7 @@ void ComeToTop()
 
 void Speed_Locker()
 {
-	if(!hasReach(&NMCDL,20)||!hasReach(&NMCDR,20))
+	if(!hasReach(&NMCDL,35)||!hasReach(&NMCDR,35))
 	{
 	ChassisSpeedRef.forward_back_ref=0.0;
 	ChassisSpeedRef.rotate_ref=0.0;
