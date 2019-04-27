@@ -27,7 +27,7 @@ MotorINFO FRICR = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_D
 
 MotorINFO GMP  =  Gimbal6020_MOTORINFO_Init(1.0,&ControlGMP,7900,1100,20,
 								fw_PID_INIT_EASY(90, 2, 20, 5000),
-								fw_PID_INIT_EASY(15, 2, 2,	 15000));
+								fw_PID_INIT_EASY(15, 2, 2,  15000));
 
 MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(1.0,&ControlGMY,3300,400,20,
 //								fw_PID_INIT_EASY(0.6, 0.02, 0.2, 10),
@@ -39,20 +39,27 @@ MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(1.0,&ControlGMY,3300,400,20,
 //								fw_PID_INIT_EASY(28, 2, 5, 5000),
 //								fw_PID_INIT_EASY(90, 5, 5,	20000));
 								
-MotorINFO STIRp = AngleBased_MOTORINFO_Init(36.0,&ControlNM,
-								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 2000.0),
-								fw_PID_INIT_EASY(40, 1, 0.0,	 15000.0));
+//MotorINFO STIRp = AngleBased_MOTORINFO_Init(36.0,&ControlNM,
+//								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 2000.0),
+//								fw_PID_INIT_EASY(40, 1, 0.0,	 15000.0));
 								
 MotorINFO STIRv = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
 MotorINFO CML = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1200.0),
-								fw_PID_INIT_EASY(40, 0.0, 5.0,	 15000.0));
+								fw_PID_INIT_EASY(10, 0, 0, 4000),
+								fw_PID_INIT_EASY(40, 0, 5, 15000));
 MotorINFO CMR = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1500.0),
-								fw_PID_INIT_EASY(40, 0.0, 5.0,	 15000.0));
-
-MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMP,&GMY,0,0};
-MotorINFO* can2[8]={&CML,&CMR,0,0,&STIRv,0,0,0};
+								fw_PID_INIT_EASY(10, 0, 0, 4000),
+								fw_PID_INIT_EASY(40, 0, 5, 15000));
+								
+MotorINFO* can1[8]={&FRICL,&FRICR,&STIRv,0,&GMP,&GMY,0,0};
+MotorINFO* can2[8]={&CML,&CMR,0,0,0,0,0,0};
+//#if GUARD == 'U'
+//	MotorINFO* can1[8]={0,0,0,0,0,0,0,0};
+//	MotorINFO* can2[8]={&CML,&CMR,0,0,0,0,0,0};
+//#else
+//	MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMP,&GMY,0,0};
+//	MotorINFO* can2[8]={0,0,0,0,&STIRv,0,0,0};
+//#endif
 
 //MotorINFO* can1[8]={0,0,0,0,&STIRp,0,0,0};
 //MotorINFO* can2[8]={0,0,0,0,0,0,0,0};

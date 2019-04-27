@@ -14,55 +14,40 @@
 
 #include "includes.h"
 
-//Ò£¿Ø³£Á¿Çø
-#define RC_CHASSIS_SPEED_REF    		0.60f
-#define RC_ROTATE_SPEED_REF 			0.05f
-#define RC_GIMBAL_SPEED_REF				0.006f
-
-#define IGNORE_RANGE 					200
-
-#define NORMAL_FORWARD_BACK_SPEED 		400
-#define NORMAL_LEFT_RIGHT_SPEED  		400/2
-#define HIGH_FORWARD_BACK_SPEED 		700
-#define HIGH_LEFT_RIGHT_SPEED   		700/2
-#define LOW_FORWARD_BACK_SPEED 			200
-#define LOW_LEFT_RIGHT_SPEED   			200/2
-
 #define onePush(button,execution){\
-	static uint8_t cache;\
-	static uint8_t cnt=0;\
-	if(cache != (button)){cache = (button);cnt = 0;}\
-	else if(cnt == 5){if(cache) execution;cnt=11;}\
-	else if(cnt < 5) cnt++;\
+	static int8_t cache=10;\
+	static int8_t cnt=0;\
+	if(cache != (button)){cache = (button);cnt=0;}\
+	else if(cnt < 5){cnt++;}\
+	else if(cnt == 5){execution;cnt=6;}\
 }
 #define onePushShtSpd(button,execution){\
-	static uint8_t cache;\
-	static uint8_t cnt=0;\
-	if(cache!=(button)){cache=(button);cnt=0;}\
-	else if(cnt==5){if(cache)execution;cnt=11;}\
-	else if(cnt<5)cnt++;\
+	static int8_t cache=10;\
+	static int8_t cnt=0;\
+	if(cache != (button)){cache = (button);cnt=0;}\
+	else if(cnt < 5){cnt++;}\
+	else if(cnt == 5){execution;cnt=6;}\
 }
 #define onePushDir(button,execution){\
-	static uint8_t cache;\
-	static uint8_t cnt=0;\
-	if(cache != (button)){cache = (button);cnt = 0;}\
-	else if(cnt == 5){if(cache) execution;cnt=11;}\
-	else if(cnt < 5) cnt++;\
+	static int8_t cache=10;\
+	static int8_t cnt=0;\
+	if(cache != (button)){cache = (button);cnt=0;}\
+	else if(cnt < 5){cnt++;}\
+	else if(cnt == 5){execution;cnt=6;}\
 }
 #define Delay(TIM,execution){\
 	static uint16_t time=TIM;\
 	if(!time--){time = TIM;execution;}\
 }
 
-typedef __packed struct{
-    int16_t forward_back_ref;
-    int16_t left_right_ref;
-    int16_t rotate_ref;
-}ChassisSpeed_Ref_t;
 
-extern ChassisSpeed_Ref_t ChassisSpeedRef; 
 extern int32_t auto_counter;
 
 void FunctionTaskInit(void);
+
+extern int8_t stateFlee;
+extern int8_t stateSway;
+extern int stateCnt;
+extern double chassisAdd;
 
 #endif /*__FUNCTIONTASK_H*/

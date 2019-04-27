@@ -19,7 +19,6 @@
 #if GUARD == 'U'
 	#define USE_POWER_LIMIT 	20
 	#define CAN21
-	#define CAN22
 	#define CAN13 	1
 #else
 	#define SLAVE_MODE
@@ -40,7 +39,7 @@
 #define TEN_MS_TIM				htim10
 #define BUZZER_TIM 				htim12
 
-#define RC_UART 				huart1
+#define RC_UART 					huart1
 #define JUDGE_UART 				huart6
 #define GYRO_UART 				huart7
 #define AUTOAIM_UART 			huart8

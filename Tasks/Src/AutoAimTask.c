@@ -141,6 +141,18 @@ void EnemyINFOProcess(){
 
 //**************************普通模式自瞄控制函数****************************//
 int sgn(float x){return x>0?1:(x<0?-1:0);}
+void autoAim(){
+	if(aimCnt<1){
+		GMY.Target=GMY.Real+aim.yaw*0.9;//(sgn(aim.yaw)*(aim.yaw*aim.yaw)+aim.yaw)*0.4;//(aim.yaw+aimLast.yaw)/kk;//8;
+		GMP.Target=GMP.Real+aim.pit*0.6;//(sgn(aim.pit)*(aim.pit*aim.pit)+aim.pit)*0.3;//(aim.pitch+aimLast.pitch)/kk;//8;
+		aimCnt++;
+	}else{
+		findEnemy=0;
+		aimCnt=0;
+		aimLast.yaw=aim.yaw;
+		aimLast.pit=aim.pit;
+	}
+}
 void autoAimNormal(){
 	if(findEnemy){
 		if(aimCnt<1){
@@ -198,46 +210,46 @@ float t=5,k=0.5;//暂时调试用
 float myWYaw,myWPit,myWYawLast,myWPitLast,myAYaw,myAPit;
 float enYawLast,enPitLast,enWYaw,enWPit,enWYawLast,enWPitLast,enAYaw,enAPit;//差分的敌方角速度，角加速度，
 float enYaw,enPit;
-void autoAimPredict(){//@尹云鹏
-	if(findEnemy){
-		float GMYAngle=GMY.encoderAngle,GMPAngle=GMP.encoderAngle;
-		static float GMYAngleLast,GMPAngleLast;
-//		static float myWYaw,myWPit,myWYawLast,myWPitLast,myAYaw,myAPit;//差分的本身角速度，角加速度，单位：度/周期(遥控器14ms)，所以采用了差分而不是直接读编码器角速度
-//		float enYaw=aim.yaw*a,enPit=aim.pit*3;
-		enYaw=aim.yaw*a;
-//		static float enYawLast,enPitLast,enWYaw,enWPit,enWYawLast,enWPitLast,enAYaw,enAPit;//差分的敌方角速度，角加速度，
-		myWYaw=GMYAngle-GMYAngleLast;
-		myWPit=GMPAngle-GMPAngleLast;
-		myWYaw=myWYaw<180?(myWYaw>-180?myWYaw:myWYaw+360):myWYaw-360;
-		myWPit=myWPit<180?(myWPit>-180?myWPit:myWPit+360):myWPit-360;
-		myAYaw=myWYaw-myWYawLast;
-		myAPit=myWPit-myWPitLast;
-		
-		enWYaw=enYaw-enYawLast+myWYaw;
-//		enWPit=enPit-enPitLast+myWPit;
-		enAYaw=enWYaw-enWYawLast;
-		enAPit=enWPit-enWPitLast;
-		
-		//float t=aim.z*4; //距离*1000ms/子弹速度18/周期14ms，约为4
-		GMY.Target=GMY.Real+(enYaw+enWYaw*t)*k;
-//		GMP.Target=GMP.Real+aim.pit*0.7;
-		GMP.Target=GMP.Real+(enPit+enWPit*t)*k;
-		
-//		GMY.Target=kalmanCalc(&kFilter,GMYAngle+aim.yaw,1);
-		
-		
-		aimLast=aim;
-		GMYAngleLast=GMYAngle;
-		GMPAngleLast=GMPAngle;
-		enYawLast=enYaw;
-		enPitLast=enPit;
-		myWYawLast=myWYaw;
-		myWPitLast=myWPit;
-		enWYawLast=enWYaw;
-		enWPitLast=enWPit;
-		findEnemy=0;
-	}
-}
+//void autoAimPredict(){//@尹云鹏
+//	if(findEnemy){
+//		float GMYAngle=GMY.encoderAngle,GMPAngle=GMP.encoderAngle;
+//		static float GMYAngleLast,GMPAngleLast;
+////		static float myWYaw,myWPit,myWYawLast,myWPitLast,myAYaw,myAPit;//差分的本身角速度，角加速度，单位：度/周期(遥控器14ms)，所以采用了差分而不是直接读编码器角速度
+////		float enYaw=aim.yaw*a,enPit=aim.pit*3;
+//		enYaw=aim.yaw*a;
+////		static float enYawLast,enPitLast,enWYaw,enWPit,enWYawLast,enWPitLast,enAYaw,enAPit;//差分的敌方角速度，角加速度，
+//		myWYaw=GMYAngle-GMYAngleLast;
+//		myWPit=GMPAngle-GMPAngleLast;
+//		myWYaw=myWYaw<180?(myWYaw>-180?myWYaw:myWYaw+360):myWYaw-360;
+//		myWPit=myWPit<180?(myWPit>-180?myWPit:myWPit+360):myWPit-360;
+//		myAYaw=myWYaw-myWYawLast;
+//		myAPit=myWPit-myWPitLast;
+//		
+//		enWYaw=enYaw-enYawLast+myWYaw;
+////		enWPit=enPit-enPitLast+myWPit;
+//		enAYaw=enWYaw-enWYawLast;
+//		enAPit=enWPit-enWPitLast;
+//		
+//		//float t=aim.z*4; //距离*1000ms/子弹速度18/周期14ms，约为4
+//		GMY.Target=GMY.Real+(enYaw+enWYaw*t)*k;
+////		GMP.Target=GMP.Real+aim.pit*0.7;
+//		GMP.Target=GMP.Real+(enPit+enWPit*t)*k;
+//		
+////		GMY.Target=kalmanCalc(&kFilter,GMYAngle+aim.yaw,1);
+//		
+//		
+//		aimLast=aim;
+//		GMYAngleLast=GMYAngle;
+//		GMPAngleLast=GMPAngle;
+//		enYawLast=enYaw;
+//		enPitLast=enPit;
+//		myWYawLast=myWYaw;
+//		myWPitLast=myWPit;
+//		enWYawLast=enWYaw;
+//		enWPitLast=enWPit;
+//		findEnemy=0;
+//	}
+//}
 
 #endif /*USE_AUTOAIM*/
 #endif /*DEBUG_MODE*/

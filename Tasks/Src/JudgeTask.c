@@ -66,6 +66,12 @@ void judgeUartRxCpltCallback(void)
 			}					
 		}
 		
+		if(buffercnt == 10 && cmdID == 0x0206){
+			if (myVerify_CRC16_Check_Sum(buffer, 10)){
+				Referee_Update_hurt();
+			}					
+		}
+		
 		if(buffercnt == 15 && cmdID == 0x0207){
 			if (myVerify_CRC16_Check_Sum(buffer, 15)){
 				Referee_Update_ShootData();
@@ -160,7 +166,7 @@ ext_game_robot_state_t GameRobotState;
 ext_power_heat_data_t PowerHeat;
 ext_buff_musk_t BuffMask;
 ext_shoot_data_t ShootData;
-
+ext_robot_hurt_t hurtData;
 
 void Referee_Update_RobotState(){
 	unsigned char* grs0 = (unsigned char*)&GameRobotState.robot_id;
@@ -257,7 +263,7 @@ void Referee_Update_PowerHeatData(){
 void Referee_Update_BuffMask(){
 	unsigned char * bm = (unsigned char*)&BuffMask.power_rune_buff;
 	for(int i = 0; i<1; i++){
-	bm[i] = (unsigned char)buffer[i+7];
+		bm[i] = (unsigned char)buffer[i+7];
 	}
 	JUDGE_Received = 1;
 }
@@ -278,6 +284,11 @@ void Referee_Update_ShootData(){
 	JUDGE_Received = 1;
 }
 
+void Referee_Update_hurt(){//@yyp
+	uint8_t tmp=buffer[7]&0xf0;
+	if(tmp==0x0 && stateFlee==0 && stateSway==0){stateFlee=1;stateCnt=0;}
+	JUDGE_Received = 1;
+}
 client_custom_data_t custom_data;
 void Referee_Transmit_UserData(){
 	uint8_t buffer[28]={0};

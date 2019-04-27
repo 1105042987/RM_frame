@@ -17,12 +17,10 @@
 #ifdef USE_POWER_LIMIT
 int CMImax=1000;
 void PowerLimitation(){
-	if(JUDGE_State == OFFLINE || PowerHeat.chassis_power<20 || PowerHeat.chassis_power_buffer<100){return;}
-	static float windows = 1.0;
-	static float rate = 0.1;
+	if(JUDGE_State == OFFLINE || PowerHeat.chassis_power<20 || PowerHeat.chassis_power_buffer>100){return;}
 	int sum = abs(CML.Intensity) + abs(CMR.Intensity);
-	if(PowerHeat.chassis_power_buffer<170){
-		float rate=(170-PowerHeat.chassis_power_buffer)/70 + CMImax/(sum+0.0f);
+	if(PowerHeat.chassis_power_buffer>30){
+		float rate=PowerHeat.chassis_power_buffer/120;
 		CML.Intensity*=rate;
 		CMR.Intensity*=rate;
 	}else{

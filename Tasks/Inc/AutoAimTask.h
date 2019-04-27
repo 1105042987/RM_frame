@@ -87,6 +87,7 @@ void autoAimCtrl(void);
 void UpperStateFSM(void);
 void autoAimPredict(void);
 void autoAimYYP(void);
+void autoAim(void);
 
 #endif /*USE_AUTOAIM*/
 #endif /*DEBUG_MODE*/

@@ -192,5 +192,6 @@ void Referee_Update_RobotState(void);
 void Referee_Update_PowerHeatData(void);
 void Referee_Update_BuffMask(void);
 void Referee_Update_ShootData(void);
+void Referee_Update_hurt(void);
 void Referee_Transmit_UserData(void);
 #endif /*__ JUDGETASK_H */
