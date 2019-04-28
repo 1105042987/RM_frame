@@ -110,25 +110,25 @@ void Door_SwitchState()
 }
 void InitialSave()
 {
-	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_12,GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_RESET);
 }
 
 void Saving()
 {
-	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_12,GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_RESET);
 }
 
 void EndSaving()
 {
-	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_12,GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_SET);
 }
 
 void SavingTest()
 {
-	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_12,GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_SET);
 }
 	
@@ -164,15 +164,15 @@ void RemoteControlProcess(Remote *rc)
 	if(WorkState == NORMAL_STATE)
 	{	
 		ComeToTop();
-		if(DebugState==DEBUG_GET_STATE)                               //取弹模式
-	{
+		
 		SetDoorZero();//右纵向是开关舱门	
 		Door_SwitchState();
 		if(channelrcol<-500)
 			dooropen=1;
 		if(channelrcol>500)
 			dooropen=0;
-			
+		if(DebugState==DEBUG_GET_STATE)                               //取弹模式
+	{
 		UM1.TargetAngle+=channelrrow*0.001;
 		UM2.TargetAngle-=channelrrow*0.001;//右横向是爪子的上下移动
 			
@@ -231,8 +231,8 @@ void RemoteControlProcess(Remote *rc)
 	  }
 	  else if(DebugState==DEBUG_CLIMB_STATE)
 		{
-		ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF;
-		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
+		ChassisSpeedRef.forward_back_ref = channelrcol * 2*RC_CHASSIS_SPEED_REF;
+		ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF;
 		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
 		}
 			
@@ -296,9 +296,9 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
   if(AutoClimbing==0)
   {
 	  if(EngineerState==COMMON_STATE)
-		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-15;
+		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-20;
 	  else if(EngineerState==GET_STATE)
-		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*15;
+		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
   }
 	
 	if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
@@ -455,6 +455,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				NMCDR.TargetAngle = UD_BOTTOM;
 				AlreadyClimbed=0;
 				AlreadyDowned=0;
+				State_Common();
 			}
 			else if(key->v & KEY_G)
 			{
@@ -462,6 +463,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				NMCDR.TargetAngle = UD_TOP;
 				AlreadyClimbed=0;
 				AlreadyDowned=0;
+				State_Common();
 			}
 			else if(key->v & KEY_Q)							
 			{
@@ -544,6 +546,12 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 				dooropen=1;
 			}
+			else if(key->v & KEY_G)
+			{
+				if(Claw_UpToPosition==0)
+		      Claw_UpToPosition=1;
+
+			}
 		}break;
 		case SHIFT:				//quick
 		{
@@ -586,7 +594,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 				if(EngineerState==GET_STATE)
 				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
-				Claw_TakeThisBox=1;
+				Claw_TakeThisBox=3;
 			}
 			else if(key->v & KEY_V)
 			{
@@ -598,19 +606,19 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 				if(EngineerState==GET_STATE)
 				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
-				Claw_TakeThisBox=3;
+				Claw_TakeThisBox=1;
 			}
 			else if(key->v & KEY_F)
 			{
 				if(EngineerState==GET_STATE)
 				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
-				Claw_TakeThisBox=4;
+				Claw_TakeThisBox=5;
 			}
 			else if(key->v & KEY_G)
 			{
 				if(EngineerState==GET_STATE)
 				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
-				Claw_TakeThisBox=5;
+				Claw_TakeThisBox=4;
 			}
 			else if(key->v & KEY_Z)
 			{

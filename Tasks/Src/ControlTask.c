@@ -65,7 +65,7 @@ void WorkStateFSM(void)
 				CMRotatePID.Reset(&CMRotatePID);
 				WorkState = NORMAL_STATE;
 				prepare_time = 0;
-				HAL_GPIO_WritePin(GPIOH,1<<3,1);
+				HAL_GPIO_WritePin(GPIOH,1<<3,GPIO_PIN_SET);
 			}
 		}break;
 		case NORMAL_STATE:				//正常模式
@@ -104,7 +104,7 @@ void WorkStateFSM(void)
 			{
 				WorkState = PREPARE_STATE;
 				FunctionTaskInit();
-				HAL_GPIO_WritePin(GPIOH,1<<3,0);
+				HAL_GPIO_WritePin(GPIOH,1<<3,GPIO_PIN_RESET);
 			}
 		}break;
 	}

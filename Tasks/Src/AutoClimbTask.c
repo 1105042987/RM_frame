@@ -220,7 +220,7 @@ void ComeToTop()
 
 void Speed_Locker()
 {
-	if(!hasReach(&NMCDL,35)||!hasReach(&NMCDR,35))
+	if(!hasReach(&NMCDL,40)||!hasReach(&NMCDR,40))
 	{
 	ChassisSpeedRef.forward_back_ref=0.0;
 	ChassisSpeedRef.rotate_ref=0.0;

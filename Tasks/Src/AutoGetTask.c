@@ -451,7 +451,7 @@ void Claw_GetSpecifiedBox()//键鼠控制取任意位置弹
 				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
-					{auto_waiter=1000;AutoGet_Alreadywaited=1;}  
+					{auto_waiter=300;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{Box_ThrowForward();     break;}
 				default:{AutoGet_Stop_And_Clear(); AutoGet_Success=1;  break;}
@@ -467,7 +467,7 @@ void Claw_GetSpecifiedBox()//键鼠控制取任意位置弹
 				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
-					{auto_waiter=1000;AutoGet_Alreadywaited=1;}  
+					{auto_waiter=300;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{Box_ThrowForward();      break;}
 				default:{AutoGet_Stop_And_Clear(); AutoGet_Success=1;  break;}
@@ -484,7 +484,7 @@ void Claw_GetSpecifiedBox()//键鼠控制取任意位置弹
 				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
-					{auto_waiter=1000;AutoGet_Alreadywaited=1;}  
+					{auto_waiter=300;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{Box_ThrowForward();      break;}
 				default:{AutoGet_Stop_And_Clear(); AutoGet_Success=1;  break;}
@@ -498,7 +498,7 @@ void Claw_GetSpecifiedBox()//键鼠控制取任意位置弹
 				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
-					{auto_waiter=1000;AutoGet_Alreadywaited=1;}  
+					{auto_waiter=300;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{Box_ThrowForward(); CLAWIN;     break;}
 				default:{AutoGet_Stop_And_Clear();  AutoGet_Success=1; break;}
@@ -512,7 +512,7 @@ void Claw_GetSpecifiedBox()//键鼠控制取任意位置弹
 				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
-					{auto_waiter=1000;AutoGet_Alreadywaited=1;}  
+					{auto_waiter=300;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{Box_ThrowForward(); CLAWIN;     break;}
 				default:{AutoGet_Stop_And_Clear(); AutoGet_Success=1;  break;}
@@ -539,7 +539,7 @@ void Claw_SelfInspect()//爪子横移自动对位零点
 	{
 		Claw_SelfInspect_cnt++;
 	}
-	if(Claw_SelfInspect_cnt>50)
+	if(Claw_SelfInspect_cnt>20)
 	{
 		UFM.RealAngle=0;
 		UFM.TargetAngle=FOURTHBOX;
@@ -548,6 +548,15 @@ void Claw_SelfInspect()//爪子横移自动对位零点
 		Claw_SelfInspect_cnt=0;
 	}
   }
+	if(Claw_SelfInspecting==2)
+	{
+		switch(AutoGet_TotalStep)
+		{
+			case 1:{Claw_GetaBox();break;}
+			case 2:{Box_Fire();break;}
+			default:{AutoGet_Stop_And_Clear();Claw_SelfInspecting=3;break;}
+		}
+	}
 }
 void Claw_GoToNextBox_lower()//红外传感器控制爪子向前到达下一个箱子处
 {
@@ -616,7 +625,7 @@ void AutoGet_SensorControl()
 	if(Claw_FindingNextBox_Upper_Forward==1||Claw_FindingNextBox_Upper_Backward==1)
 			Claw_GoToNextBox_upper();	
 }
-void Claw_Up()//整个机构的抬升，抬升完后爪子自动对位
+void Claw_Up()//整个机构的抬升
 {
 			if(Claw_UpToPosition==1&&Claw_UpAngle<=UPLEVEL&&auto_counter==0)//-480
 			{
