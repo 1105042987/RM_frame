@@ -22,7 +22,7 @@
 #define LAND      HAL_GPIO_WritePin(GPIOH,1<<4,GPIO_PIN_RESET)//µ¯Éä»ú¹¹¹éÎ»
 
 #define UPLEVEL 440
-
+#define INSPECT_SUCCEED 3
 extern uint32_t AutoGet_Start;  
 extern uint32_t AutoGet_TotalStep;
 extern uint32_t AutoGet_Alreadywaited;

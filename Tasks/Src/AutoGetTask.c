@@ -768,17 +768,21 @@ void Rotate_Check()
 }
 void State_Common()  
 {
-	EngineerState=COMMON_STATE;
+	
 	UM1.TargetAngle=0;
 	UM2.TargetAngle=0;
 	AutoClimbing=0;
 	AutoGet_Success=0;
+	if(EngineerState==GET_STATE)
+	{
 		YTP.TargetAngle = 60;
 		if(Yaw_Reset_Flag==0)
 		{
 			Yaw_Reset_Flag=1;
 			Yaw_Reset_Cnt=150;
 		}
+	}
+		EngineerState=COMMON_STATE;
 }
 
 void Yaw_Reset_Check()

@@ -528,9 +528,9 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			else if(key->v & KEY_Z)
 			{
 				if(EngineerState==GET_STATE)
-				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==0)
+				if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==0)
 				AutoGet_Start=1;
-				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==2)
+				if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==2)
 				AutoGet_Start=2;
 			}
 			else if(key->v & KEY_X)
@@ -539,7 +539,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			else if(key->v & KEY_B)
 			{
 				if(EngineerState==GET_STATE)
-				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
+				if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30))
 				AutoGet_Start=3;
 			}
 			else if(key->v & KEY_F)
@@ -593,31 +593,31 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			else if(key->v & KEY_C)
 			{
 				if(EngineerState==GET_STATE)
-				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
+				if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30))
 				Claw_TakeThisBox=3;
 			}
 			else if(key->v & KEY_V)
 			{
 				if(EngineerState==GET_STATE)
-				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
+				if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30))
 				Claw_TakeThisBox=2;
 			}
 			else if(key->v & KEY_B)
 			{
 				if(EngineerState==GET_STATE)
-				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
+				if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30))
 				Claw_TakeThisBox=1;
 			}
 			else if(key->v & KEY_F)
 			{
 				if(EngineerState==GET_STATE)
-				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
+				if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30))
 				Claw_TakeThisBox=5;
 			}
 			else if(key->v & KEY_G)
 			{
 				if(EngineerState==GET_STATE)
-				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30))
+				if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30))
 				Claw_TakeThisBox=4;
 			}
 			else if(key->v & KEY_Z)
@@ -630,9 +630,9 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				if(EngineerState==GET_STATE)
 				{
 					Sensor_LongPush++;
-				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==0)
+				if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==0)
 				Claw_FindingNextBox_Lower_Forward=1;
-				else if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==2)
+				else if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==2)
 				Claw_FindingNextBox_Upper_Forward=1;
 				  if(Sensor_LongPush>=50)
 						Sensor_Lock=1;
@@ -643,9 +643,9 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				if(EngineerState==GET_STATE)
 				{
 					Sensor_LongPush++;
-				if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==0)
+				if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==0)
 				Claw_FindingNextBox_Lower_Backward=1;
-				else if(Claw_SelfInspecting==2&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==2)
+				else if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==2)
 				Claw_FindingNextBox_Upper_Backward=1;
 				if(Sensor_LongPush>=50)
 						Sensor_Lock=1;
