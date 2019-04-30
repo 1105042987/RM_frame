@@ -18,8 +18,8 @@
 #define FIFTHBOX 1200
 
 #define LOWERCRITICIAL 2000      //µºÏÂÁÙ½çÖµ
-#define UPPERCRITICIAL_LEFT 1000 //´ý²âÊÔ 
-#define UPPERCRITICIAL_RIGHT 1000
+#define UPPERCRITICIAL_LEFT 700 //´ý²âÊÔ 
+#define UPPERCRITICIAL_RIGHT 700
 
 //#define UPLEVEL 432    //Ì§ÉýÊ±µÄºÏÊÊ¸ß¶È ±ØÐë±»4Õû³ý   ÒÑÐ´µ½.hÀï
 #define UPPROTECT 400  //Ì§ÉýµÄÁÙ½ç±£»¤Öµ
@@ -350,6 +350,8 @@ void AutoGet_Stop_And_Clear()//×´Ì¬ÇåÁã ×¦×Ó×ª»Ø ºáÒÆµç»úÍ£×ª£¨ÓÃÓÚÒì³£×´¿ö´¦Àíº
 	Claw_FindingNextBox_Upper_Backward=0;
 	Claw_UpToPosition=0;
 	Sensor_Ready[0]=0;
+	
+	UFM.TargetAngle = FOURTHBOX;
 }
 void Box_ThrowForward()//ÏòÇ°ÈÓ³öÏä×Ó
 { 
@@ -571,9 +573,9 @@ void Claw_GoToNextBox_lower()//ºìÍâ´«¸ÐÆ÷¿ØÖÆ×¦×ÓÏòÇ°µ½´ïÏÂÒ»¸öÏä×Ó´¦
 	if(Sensor_Ready[0]!=2)
 	{
 		if(Claw_FindingNextBox_Lower_Forward==1)
-		ChassisSpeedRef.forward_back_ref = 50 * RC_CHASSIS_SPEED_REF;
+		ChassisSpeedRef.forward_back_ref = 100 * RC_CHASSIS_SPEED_REF;
 		else if(Claw_FindingNextBox_Lower_Backward==1)
-		ChassisSpeedRef.forward_back_ref = -50 * RC_CHASSIS_SPEED_REF;
+		ChassisSpeedRef.forward_back_ref = -100 * RC_CHASSIS_SPEED_REF;
 	}
 	if(Sensor_Ready[0]==2)
 	{
@@ -725,7 +727,9 @@ void Claw_AutoIn()
 }
 void AutoGet_AutoDown()
 {
-	if(((abs(ChassisSpeedRef.forward_back_ref)>=200 * RC_CHASSIS_SPEED_REF)||(abs(ChassisSpeedRef.rotate_ref)>=15* MOUSE_TO_YAW_ANGLE_INC_FACT*15))
+//	if(((abs(ChassisSpeedRef.forward_back_ref)>=200 * RC_CHASSIS_SPEED_REF)||(abs(ChassisSpeedRef.rotate_ref)>=15* MOUSE_TO_YAW_ANGLE_INC_FACT*15))
+//		&&AutoGet_Success==1)
+	if(abs(CMFL.RxMsgC6x0.RotateSpeed)>2500 && abs(CMFR.RxMsgC6x0.RotateSpeed)>2500 && abs(CMBL.RxMsgC6x0.RotateSpeed)>2500 && abs(CMBR.RxMsgC6x0.RotateSpeed)>2500			//to be modified
 		&&AutoGet_Success==1)
 	{
 		Claw_DownToPosition=1;
