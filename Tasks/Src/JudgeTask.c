@@ -237,17 +237,17 @@ void Referee_Update_PowerHeatData(){
 	//电流tbd
 	unsigned char * ph0 = (unsigned char*)&PowerHeat.chassis_power;
 	for(int i = 0; i<4; i++){
-	ph0[i] = (unsigned char)buffer[i+11];
+		ph0[i] = (unsigned char)buffer[i+11];
 	}
 	
 	unsigned char * ph1 = (unsigned char*)&PowerHeat.chassis_power_buffer;
 	for(int i = 0; i<2; i++){
-	ph1[i] = (unsigned char)buffer[i+15];
+		ph1[i] = (unsigned char)buffer[i+15];
 	}
 	
 	unsigned char * ph2 = (unsigned char*)&PowerHeat.shooter_heat0;
 	for(int i = 0; i<2; i++){
-	ph2[i] = (unsigned char)buffer[i+17];
+		ph2[i] = (unsigned char)buffer[i+17];
 	}
 	
 	unsigned char * ph3 = (unsigned char*)&PowerHeat.shooter_heat1;
@@ -286,7 +286,7 @@ void Referee_Update_ShootData(){
 
 void Referee_Update_hurt(){//@yyp
 	uint8_t tmp=buffer[7]&0xf0;
-	if(tmp==0x0 && stateFlee==0 && stateSway==0){stateFlee=1;stateCnt=0;}
+	if(tmp==0x0 && stateFlee==0 && stateSway==0){stateFlee=2;stateCnt=0;}
 	JUDGE_Received = 1;
 }
 client_custom_data_t custom_data;

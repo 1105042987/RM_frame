@@ -47,7 +47,7 @@ void FunctionTaskInit(void);
 
 extern int8_t stateFlee;
 extern int8_t stateSway;
-extern int stateCnt;
+extern int16_t stateCnt;
 extern double chassisAdd;
 
 #endif /*__FUNCTIONTASK_H*/

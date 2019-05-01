@@ -104,7 +104,13 @@ void WorkStateFSM(void){
 	switch (WorkState){
 		case PREPARE_STATE:{			//准备模式
 			normal_time = 0;
-			if(prepare_time < 0x1ff && imu.InitFinish == 1) prepare_time++;	
+			if(prepare_time < 0x1ff && imu.InitFinish == 1) prepare_time++;
+			HAL_GPIO_WritePin(GPIOG, 0xff, GPIO_PIN_SET);//close all LED
+			if(isCan11FirstRx){onLed(1);}
+			if(isCan12FirstRx){onLed(2);}
+			if(isCan21FirstRx){onLed(3);}
+			if(isCan22FirstRx){onLed(4);}
+			
 			if(prepare_time == 0x1ff && imu.InitFinish == 1 && isCan11FirstRx == 1 && 
 				isCan12FirstRx == 1 && isCan21FirstRx == 1 && isCan22FirstRx == 1){
 			//开机2秒后且gyro初始化完成且所有can电机上电完成后进入正常模式
@@ -169,12 +175,8 @@ void controlLoop(){
 		
 		for(int i=0;i<8;i++) if(can1[i]!=0) (can1[i]->Handle)(can1[i]);
 		for(int i=0;i<8;i++) if(can2[i]!=0) (can2[i]->Handle)(can2[i]);
-
 		#ifdef USE_POWER_LIMIT
 			PowerLimitation();
-//			MINMAX(rate,0,1);
-//			CML.Intensity*=rate;
-//			CMR.Intensity*=rate;
 		#endif
 		
 		sendAllData(0);

@@ -74,7 +74,7 @@ void InitAutoAim(){
 	
 	//角度变量初始化（不需要修改）
 	aim.yaw=0;				aim.pit=0;
-	adjust.yaw=0;			adjust.pit=-4;
+	adjust.yaw=0;			adjust.pit=1;
 	
 	//设置坐标初始值（根据不同安装情况调整这3个参数）
 	scopeGun.x=0;		scopeGun.y=-10;		scopeGun.z=0;
@@ -98,7 +98,8 @@ void AutoAimUartRxCpltCallback(){
 	}
 	#else
 	if(RX_ENEMY_START=='s'&&RX_ENEMY_END=='e'){
-		aim.yaw=-(float)( (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)>0x7fff) ? (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)-0xffff) : (RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2 )*kAngle;
+		onLed(6);
+		aim.yaw=(float)( (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)>0x7fff) ? (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)-0xffff) : (RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2 )*kAngle;
 		aim.pit=-(float)( (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)>0x7fff) ? (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)-0xffff) : (RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2 )*kAngle;
 		aim.yaw+=adjust.yaw;
 		aim.yaw*=0.9;
@@ -107,12 +108,12 @@ void AutoAimUartRxCpltCallback(){
 //		MINMAX(aim.yaw,-3.0f,3.0f);
 //		MINMAX(aim.pit,-3.0f,3.0f);
 		//enemyScope.z=350;
-		findEnemy=1;
+		if(GMP.Real+aim.pit<0){findEnemy=1;}
 		receiveCnt++;
 	}
 	#endif
-	
 	HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t *)&Enemy_INFO,8);
+	
 }
 //****************************************坐标角度转换函数*************************************//
 

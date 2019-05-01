@@ -18,16 +18,35 @@
 int CMImax=1000;
 void PowerLimitation(){
 	if(JUDGE_State == OFFLINE || PowerHeat.chassis_power<20 || PowerHeat.chassis_power_buffer>100){return;}
-	int sum = abs(CML.Intensity) + abs(CMR.Intensity);
-	if(PowerHeat.chassis_power_buffer>30){
-		float rate=PowerHeat.chassis_power_buffer/120;
-		CML.Intensity*=rate;
-		CMR.Intensity*=rate;
-	}else{
-		CML.Intensity=CML.Intensity/(sum+0.0f)*CMImax;
-		CMR.Intensity=CMR.Intensity/(sum+0.0f)*CMImax;
+//	int tmp= 1000+100*PowerHeat.chassis_power_buffer;
+//	int sum=abs(CML.Intensity) + abs(CMR.Intensity);
+//	CML.Intensity=CML.Intensity/(sum+0.0f)*tmp;
+//	CMR.Intensity=CMR.Intensity/(sum+0.0f)*tmp;
+	
+	float rate=PowerHeat.chassis_power_buffer/100;
+	CML.Intensity*=rate;
+	CMR.Intensity*=rate;
+	
+	
+	if(PowerHeat.chassis_power_buffer<40){
+		MINMAX(CML.Intensity,-1500,1500);
+		MINMAX(CMR.Intensity,-1500,1500);
 	}
 }
+	
+	
+//	int sum = abs(CML.Intensity) + abs(CMR.Intensity);
+//	if(PowerHeat.chassis_power_buffer>30){
+//		float rate=PowerHeat.chassis_power_buffer/100;
+//		CML.Intensity*=rate;
+//		CMR.Intensity*=rate;
+//	}else{
+//		CML.Intensity=CML.Intensity/(sum+0.0f)*CMImax;
+//		CMR.Intensity=CMR.Intensity/(sum+0.0f)*CMImax;
+//	}
+	
+
+
 //#ifdef USE_POWER_LIMIT
 //#define powM  USE_POWER_LIMIT
 //#if USE_POWER_LIMIT < 50

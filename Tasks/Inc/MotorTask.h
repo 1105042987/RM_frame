@@ -29,6 +29,15 @@
 #define CHASSIS_MOTOR_SPEED_PID_DEFAULT \
 {\
 	0,0,{0,0},\
+	20.0f,0.17f,8.0f,\
+	0,0,0,\
+	10000,10000,10000,\
+	0,7000,0,0,0,\
+	&PID_Calc,&PID_Reset,\
+}
+#define STIRv_PID_DEFAULT \
+{\
+	0,0,{0,0},\
 	13.0f,0.17f,8.0f,\
 	0,0,0,\
 	10000,10000,10000,\

@@ -173,12 +173,12 @@
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>CML</ItemText>
+          <ItemText>CML,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>CMR</ItemText>
+          <ItemText>CMR,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
@@ -214,6 +214,21 @@
           <count>12</count>
           <WinNumber>1</WinNumber>
           <ItemText>aim</ItemText>
+        </Ww>
+        <Ww>
+          <count>13</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>ShootData,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>14</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>oneShootFlag,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>15</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>adjust</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow4>

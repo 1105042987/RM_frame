@@ -153,7 +153,7 @@ uint8_t tx_cnt = 200;
 
 uint8_t  tx_free = 1;
 uint8_t  rx_free = 1;
-
+extern uint8_t test;
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle){
 	if(UartHandle == &RC_UART){
 		rc_update = 1;
@@ -171,7 +171,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle){
 	}
 	else if(UartHandle == &AUTOAIM_UART){
 		#ifdef USE_AUTOAIM
-		AutoAimUartRxCpltCallback();
+			AutoAimUartRxCpltCallback();
 		#endif /*USE_AUTOAIM*/
 	}
 }
