@@ -24,6 +24,9 @@ RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
 ChassisSpeed_Ref_t ChassisSpeedRef; 
 #define leftstate HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_12)
 #define rightstate HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_13)
+#define NORMAL 0
+#define REVERSE 1
+#define GET 2
 int16_t channelrrow = 0;
 int16_t channelrcol = 0;
 int16_t channellrow = 0;
@@ -52,7 +55,7 @@ uint32_t saveing_flag=0;
 
 uint32_t openthegay=0;
 
-uint32_t FrontBackInspect=0;
+uint32_t Direction_Indicator=0;
 
 
 //初始化
@@ -141,6 +144,37 @@ void Saving_SwitchState()
 		Saving();
 }
 
+void Look_Normally()
+{
+	YTP.TargetAngle = 60;
+	if(Yaw_Reset_Flag==0)
+	{
+		Yaw_Reset_Flag=1;
+		Yaw_Reset_Cnt=150;
+	}
+	Direction_Indicator=0;
+}
+void Look_Reversely()
+{
+	YTP.TargetAngle = 60;
+	if(Yaw_Set_Flag==0)
+	{
+		Yaw_Set_Flag=2;
+		Yaw_Set_Cnt=150;
+	}
+   Direction_Indicator=1;
+}
+
+void Look_Screen()
+{
+	Direction_Indicator=2;
+	YTP.TargetAngle = 60;
+	if(Yaw_Set_Flag==0)
+	{
+		Yaw_Set_Flag=1;
+		Yaw_Set_Cnt=150;
+	}
+}
 void Limit_and_Synchronization()
 {
 	//demo
@@ -338,23 +372,11 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	{
 		case SHORT_CLICK:
 		{
-				YTP.TargetAngle = 60;
-				if(Yaw_Reset_Flag==0)
-				{
-					Yaw_Reset_Flag=1;
-					Yaw_Reset_Cnt=150;
-				}
-				FrontBackInspect=0;
+			Look_Normally();
 		}break;
 		case LONG_CLICK:
 		{
-			YTP.TargetAngle = 60;
-		  if(Yaw_Set_Flag==0)
-		  {
-			  Yaw_Set_Flag=2;
-			  Yaw_Set_Cnt=150;
-		  }
-			FrontBackInspect=1;
+			Look_Reversely();
 		}
 		default: break;
 	}
@@ -362,41 +384,29 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	KeyboardModeFSM(key);//下面是移动的控制 在写命令时不要用wasd键
 		if(key->v & KEY_W)  		//key: w
 		{
-			if(EngineerState == COMMON_STATE||EngineerState == CLIMB_STATE)
-			{
-				if (FrontBackInspect%2==0)
+				if (Direction_Indicator==NORMAL)
 					ChassisSpeedRef.forward_back_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
-				if (FrontBackInspect%2==1)
+				if (Direction_Indicator==REVERSE)
 					ChassisSpeedRef.forward_back_ref =  -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
-			}
-			else if(EngineerState == GET_STATE)
-			{
+			  if(Direction_Indicator==GET)
 				ChassisSpeedRef.left_right_ref =  -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp)/2;
-			}
-			
 		}
 			else if(key->v & KEY_S) 	//key: s
 			{
-				if(EngineerState == COMMON_STATE||EngineerState == CLIMB_STATE)
-				{
-					if(FrontBackInspect%2==0)
+					if(Direction_Indicator==NORMAL)
 						ChassisSpeedRef.forward_back_ref = -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
-					else
+					if(Direction_Indicator==REVERSE)
 						ChassisSpeedRef.forward_back_ref = KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
-				}
-				else if(EngineerState == GET_STATE)
-				{
+				  if(Direction_Indicator==GET)
 					ChassisSpeedRef.left_right_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp)/2;
-				}
-				
 			}
 			else
 			{
-				if(EngineerState == COMMON_STATE||EngineerState == CLIMB_STATE)
+				if(Direction_Indicator==NORMAL||Direction_Indicator==REVERSE)
 				{
 					ChassisSpeedRef.forward_back_ref = 0;
 				}
-				else if(EngineerState==GET_STATE)
+				else if(Direction_Indicator==GET)
 				{
 					ChassisSpeedRef.left_right_ref = 0;
 				}
@@ -404,41 +414,29 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			if(key->v & KEY_D)  		//key: d
 			{	
-				if(EngineerState == COMMON_STATE||EngineerState == CLIMB_STATE)
-				{
-					if(FrontBackInspect%2==0)
+					if(Direction_Indicator==NORMAL)
 						ChassisSpeedRef.left_right_ref =  KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
-					else
+					if(Direction_Indicator==REVERSE)
 						ChassisSpeedRef.left_right_ref =  -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
-				}
-				else if(EngineerState == GET_STATE)
-				{
+					if(Direction_Indicator==GET)
 					ChassisSpeedRef.forward_back_ref =  -KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/2;
-				}
-			
 			}
 			else if(key->v & KEY_A) 	//key: a
 			{	
-				if(EngineerState == COMMON_STATE||EngineerState == CLIMB_STATE)
-				{
-					if(FrontBackInspect%2==0)
+					if(Direction_Indicator==NORMAL)
 						ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
-					else
+					if(Direction_Indicator==REVERSE)
 						ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
-				}
-				else if(EngineerState == GET_STATE)
-				{
+			    if(Direction_Indicator==GET)
 					ChassisSpeedRef.forward_back_ref =  KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/2;
-				}
-			
 			}
 			else
 			{
-				if(EngineerState == COMMON_STATE||EngineerState == CLIMB_STATE)
+				if(Direction_Indicator==NORMAL||Direction_Indicator==REVERSE)
 				{
 					ChassisSpeedRef.left_right_ref = 0;
 				}
-				else if(EngineerState==GET_STATE)
+				else if(Direction_Indicator==GET)
 				{
 					ChassisSpeedRef.forward_back_ref = 0;
 				}
@@ -498,29 +496,22 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				if(EngineerState==COMMON_STATE)
 				State_AutoGet();
 				if(EngineerState==GET_STATE)
-				{
-					YTP.TargetAngle = 60;
-		      if(Yaw_Set_Flag==0)
-		      {
-			      Yaw_Set_Flag=1;
-			      Yaw_Set_Cnt=150;
-		      }
-				}
+				Look_Screen();
 			}
 			else if(key->v & KEY_V)
 			{
-				State_Common();
+				//State_Common();
 			}
 			else if(key->v & KEY_Q)
 			{
 				if(EngineerState==GET_STATE)
-				if(NMUDL.RealAngle<=-(UPLEVEL-30))
+				if(CLAW_IS_UP)
 				CLAWOUT;
 			}
 			else if(key->v & KEY_E)
 			{ 
 				if(EngineerState==GET_STATE)
-				if(NMUDL.RealAngle<=-(UPLEVEL-30))
+				if(CLAW_IS_UP)
 			  CLAWIN;
 			}
 			
@@ -529,9 +520,9 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 				if(EngineerState==GET_STATE)
 				{
-					if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==0)
+					if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP&&ON_THE_GROUND)
 						AutoGet_Start=1;
-					if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==2)
+					if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP&&ON_THE_FLOOR)
 						AutoGet_Start=2;
 				}
 				
@@ -542,11 +533,12 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			else if(key->v & KEY_B)
 			{
 				if(EngineerState==GET_STATE)
-				if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30))
+				if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP)
 				AutoGet_Start=3;
 			}
 			else if(key->v & KEY_F)
 			{
+				if((ON_THE_GROUND&&CLAW_IS_UP)||(ON_THE_FLOOR&&CLAW_IS_DOWN))
 				dooropen=1;
 			}
 			else if(key->v & KEY_G)
@@ -562,8 +554,6 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			if(key->v & KEY_Q)
 			{
 				Claw_SelfInspecting=1;
-				//if(EngineerState==GET_STATE)
-				//Claw_FindingNextBox_Upper_Forward=1;
 			}
 			else if(key->v & KEY_C)
 			{
@@ -581,6 +571,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			else if(key->v &KEY_F)
 			{
 				dooropen=0;
+				Claw_DownToPosition=1;
+		    State_Common();
 			}
 		}break;
 		case NO_CHANGE:			//normal
@@ -596,31 +588,31 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			else if(key->v & KEY_C)
 			{
 				if(EngineerState==GET_STATE)
-				if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30))
+				if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP)
 				Claw_TakeThisBox=3;
 			}
 			else if(key->v & KEY_V)
 			{
 				if(EngineerState==GET_STATE)
-				if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30))
+				if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP)
 				Claw_TakeThisBox=2;
 			}
 			else if(key->v & KEY_B)
 			{
 				if(EngineerState==GET_STATE)
-				if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30))
+				if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP)
 				Claw_TakeThisBox=1;
 			}
 			else if(key->v & KEY_F)
 			{
 				if(EngineerState==GET_STATE)
-				if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30))
+				if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP)
 				Claw_TakeThisBox=5;
 			}
 			else if(key->v & KEY_G)
 			{
 				if(EngineerState==GET_STATE)
-				if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30))
+				if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP)
 				Claw_TakeThisBox=4;
 			}
 			else if(key->v & KEY_Z)
@@ -633,9 +625,9 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				if(EngineerState==GET_STATE)
 				{
 					Sensor_LongPush++;
-					if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==0)
+					if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP&ON_THE_GROUND)
 						Claw_FindingNextBox_Lower_Forward=1;
-					else if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==2)
+					else if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP&&ON_THE_FLOOR)
 						Claw_FindingNextBox_Upper_Forward=1;
 					if(Sensor_LongPush>=50)
 						Sensor_Lock=1;
@@ -646,9 +638,9 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				if(EngineerState==GET_STATE)
 				{
 					Sensor_LongPush++;
-				if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==0)
+				if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP&&ON_THE_GROUND)
 				Claw_FindingNextBox_Lower_Backward=1;
-				else if(Claw_SelfInspecting==INSPECT_SUCCEED&&NMUDL.RealAngle<=-(UPLEVEL-30)&&AutoClimb_Level==2)
+				else if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP&&ON_THE_FLOOR)
 				Claw_FindingNextBox_Upper_Backward=1;
 				if(Sensor_LongPush>=50)
 						Sensor_Lock=1;
@@ -675,6 +667,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		Claw_AutoIn();
 		AutoGet_SensorControl();
 		Claw_Protect();
+		Claw_AutoBack();
 		Box_Land();
 		AutoGet_SwitchState();
 		AutoGet_AutoDown();

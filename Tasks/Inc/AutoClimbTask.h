@@ -30,6 +30,8 @@
 #define FLAG_SETbr(target) if(target.val_ref>CHANGE_POINTbr) target.flag = 0; else target.flag = 1;
 #define FLAG_SET_TRICK(target) if((AutoClimbing==1&&ChassisSpeedRef.forward_back_ref>0&&NMCDL.RealAngle>-230)||(AutoClimbing==1&&NMCDL.RealAngle<-950)) target.flag = 1; else target.flag = 0;
 
+#define ON_THE_GROUND AutoClimb_Level==0
+#define ON_THE_FLOOR AutoClimb_Level==2
 typedef __packed struct
 {
 	uint32_t val_ref;

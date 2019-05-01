@@ -21,8 +21,12 @@
 #define LAUNCH    HAL_GPIO_WritePin(GPIOH,1<<4,GPIO_PIN_SET)//弹射起飞
 #define LAND      HAL_GPIO_WritePin(GPIOH,1<<4,GPIO_PIN_RESET)//弹射机构归位
 
+#define CLAW_IS_UP NMUDL.RealAngle<=-(UPLEVEL-30)
+#define CLAW_IS_DOWN NMUDL.RealAngle>=-50
+
 #define UPLEVEL 440
-#define INSPECT_SUCCEED 3
+
+#define CLAW_INSPECT_SUCCEED Claw_SelfInspecting==3
 extern uint32_t AutoGet_Start;  
 extern uint32_t AutoGet_TotalStep;
 extern uint32_t AutoGet_Alreadywaited;
@@ -105,4 +109,5 @@ void State_Common(void);
 void Yaw_Check(void);
 void Rotate_Check(void);
 void AutoGet_AutoDown(void);
+void Claw_AutoBack(void);
 #endif /*__ AUTOGETTASK_H */

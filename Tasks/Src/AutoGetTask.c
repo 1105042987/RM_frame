@@ -18,8 +18,8 @@
 #define FIFTHBOX 1200
 
 #define LOWERCRITICIAL 2000      //µ∫œ¬¡ŸΩÁ÷µ
-#define UPPERCRITICIAL_LEFT 700 //¥˝≤‚ ‘ 
-#define UPPERCRITICIAL_RIGHT 700
+#define UPPERCRITICIAL_LEFT 1000 // µ∫…œ¡ŸΩÁ÷µ
+#define UPPERCRITICIAL_RIGHT 1000
 
 //#define UPLEVEL 432    //Ãß…˝ ±µƒ∫œ  ∏ﬂ∂» ±ÿ–Î±ª4’˚≥˝   “—–¥µΩ.h¿Ô
 #define UPPROTECT 400  //Ãß…˝µƒ¡ŸΩÁ±£ª§÷µ
@@ -80,9 +80,11 @@ uint32_t warning_cnt=0;
 uint32_t claw_warning=0;
 uint32_t sensorlock_cnt=0;
 int16_t cnt = 0;
-
+uint32_t clawback=0;
+uint32_t clawback_cnt=0;
 
 extern Engineer_State_e EngineerState;//”√”⁄¥¶¿Ì≥µ¡æƒ£ Ω
+extern uint32_t Direction_Indicator;
 
 uint32_t Yaw_Reset_Flag=0;
 uint32_t Yaw_Reset_Cnt=0;
@@ -207,13 +209,13 @@ void Sensor_Read_Upper()//”√”⁄ºÏ≤‚∫ÏÕ‚¥´∏–∆˜ «∑ÒºÏ≤‚µΩ¡Ω∏ˆø’œ∂
 	if(Sensor_Tmp[0]<UPPERCRITICIAL_LEFT&&adgl<UPPERCRITICIAL_LEFT)
 		Sensor_Count[0]=1;
 	else
-	{Sensor_Tmp[0]=adgl;Sensor_Count[0]=0;}
+	{Sensor_Tmp[0]=adgl;Sensor_Count[0]=0;Sensor_Ready[0]=0;}
 	if(Sensor_Count[0]==1&&Sensor_Ready[0]==0)
 		Sensor_Ready[0]=1;
 	if(Sensor_Tmp[1]<UPPERCRITICIAL_RIGHT&&adgr<UPPERCRITICIAL_RIGHT)
 		Sensor_Count[1]=1;
 	else
-	{Sensor_Tmp[1]=adgr;Sensor_Count[1]=0;}
+	{Sensor_Tmp[1]=adgr;Sensor_Count[1]=0;Sensor_Ready[0]=0;}
 	if(Sensor_Count[1]==1&&Sensor_Ready[0]==1)
 		Sensor_Ready[0]=2;
 		
@@ -222,10 +224,19 @@ void Claw_Rollout()//◊¶◊”◊™≥ˆ”Î◊™ªÿ
 {
 	if(auto_counter==0&&Claw_AlreadyRollOut==0)
 	{
+		if(CLAW_INSPECT_SUCCEED)
+		{
 		UM1.TargetAngle=-OUTANGLE;
 		UM2.TargetAngle=OUTANGLE;
+		}
+		else
+		{
+		UM1.TargetAngle=-(OUTANGLE*0.5+1);
+		UM2.TargetAngle=OUTANGLE*0.5+1;
+		}
+			
 	}
-	if((hasReach(&UM1, 10) || hasReach(&UM2, 10))&&Claw_AlreadyRollOut==0&&UM1.TargetAngle==-OUTANGLE)
+	if((hasReach(&UM1, 10) || hasReach(&UM2, 10))&&Claw_AlreadyRollOut==0&&((UM1.TargetAngle==-OUTANGLE&&CLAW_INSPECT_SUCCEED)||(UM1.TargetAngle==-(OUTANGLE*0.5+1))))
 	{Claw_AlreadyRollOut=1;}
 }
 
@@ -291,6 +302,7 @@ void Box_Land()
 
 void Claw_GoTo(int a)//◊¶◊”◊ﬂµΩµ⁄a∏ˆœ‰◊”µƒŒª÷√
 {
+	clawback=0;
 	if(auto_counter==0)
 	{
 	switch(a)
@@ -351,7 +363,9 @@ void AutoGet_Stop_And_Clear()//◊¥Ã¨«Â¡„ ◊¶◊”◊™ªÿ ∫·“∆µÁª˙Õ£◊™£®”√”⁄“Ï≥£◊¥øˆ¥¶¿Ì∫
 	Claw_UpToPosition=0;
 	Sensor_Ready[0]=0;
 	
-	UFM.TargetAngle = FOURTHBOX;
+	clawback=1;
+	clawback_cnt=1000;
+	
 }
 void Box_ThrowForward()//œÚ«∞»”≥ˆœ‰◊”
 { 
@@ -440,16 +454,19 @@ void AutoGet_Upper()//◊‘∂Ø»°µØ£®µ∫…œ»˝∏ˆµØ£©
 		default:{AutoGet_Stop_And_Clear();AutoGet_Success=1;break;}
 	}
 }
-void Claw_GetSpecifiedBox()//º¸ Ûøÿ÷∆»°»Œ“‚Œª÷√µØ
+void Claw_Go_and_Get(int position)
 {
-	switch(Claw_TakeThisBox)
-	{
-		case 1:{
-			switch(AutoGet_TotalStep)
+	if(Claw_TakeThisBox!=0)
+	switch(AutoGet_TotalStep)
 			{
-				case 1:{//CLAWIN;auto_counter=500;
-				AutoGet_TotalStep++;break;}
-				case 2:{Claw_GoTo(1);break;}
+				case 1:
+				{
+				  if(ON_THE_GROUND&&position<=3)
+				  {AutoGet_TotalStep++;break;}
+				  if(ON_THE_FLOOR||position>=4)
+				  {CLAWOUT;auto_counter=500;AutoGet_TotalStep++;break;}
+				}
+				case 2:{Claw_GoTo(position);break;}
 				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
@@ -458,70 +475,10 @@ void Claw_GetSpecifiedBox()//º¸ Ûøÿ÷∆»°»Œ“‚Œª÷√µØ
 				case 4:{Box_ThrowForward();     break;}
 				default:{AutoGet_Stop_And_Clear(); AutoGet_Success=1;  break;}
 			}
-		}break;
-		case 2:{
-			switch(AutoGet_TotalStep)
-			{
-				case 1:{
-					//CLAWIN;auto_counter=500;
-				AutoGet_TotalStep++;break;}
-				case 2:{Claw_GoTo(2);break;}
-				case 3:{
-					  Claw_GetaBox(); 
-					if(AutoGet_Alreadywaited==0)
-					{auto_waiter=300;AutoGet_Alreadywaited=1;}  
-					  break;}
-				case 4:{Box_ThrowForward();      break;}
-				default:{AutoGet_Stop_And_Clear(); AutoGet_Success=1;  break;}
-			}
-		}break;
-		case 3:{
-			switch(AutoGet_TotalStep)
-			{
-				case 1:{
-					//CLAWIN;auto_counter=500;
-				AutoGet_TotalStep++;break;
-				       }
-				case 2:{Claw_GoTo(3);break;}
-				case 3:{
-					  Claw_GetaBox(); 
-					if(AutoGet_Alreadywaited==0)
-					{auto_waiter=300;AutoGet_Alreadywaited=1;}  
-					  break;}
-				case 4:{Box_ThrowForward();      break;}
-				default:{AutoGet_Stop_And_Clear(); AutoGet_Success=1;  break;}
-			}
-		}break;
-		case 4:{
-			switch(AutoGet_TotalStep)
-			{
-				case 1:{CLAWOUT;auto_counter=500;AutoGet_TotalStep++;break;}
-				case 2:{Claw_GoTo(4);break;}
-				case 3:{
-					  Claw_GetaBox(); 
-					if(AutoGet_Alreadywaited==0)
-					{auto_waiter=300;AutoGet_Alreadywaited=1;}  
-					  break;}
-				case 4:{Box_ThrowForward(); CLAWIN;     break;}
-				default:{AutoGet_Stop_And_Clear();  AutoGet_Success=1; break;}
-			}
-		}break;
-		case 5:{
-			switch(AutoGet_TotalStep)
-			{
-				case 1:{CLAWOUT;auto_counter=500;AutoGet_TotalStep++;break;}
-				case 2:{Claw_GoTo(5);break;}
-				case 3:{
-					  Claw_GetaBox(); 
-					if(AutoGet_Alreadywaited==0)
-					{auto_waiter=300;AutoGet_Alreadywaited=1;}  
-					  break;}
-				case 4:{Box_ThrowForward(); CLAWIN;     break;}
-				default:{AutoGet_Stop_And_Clear(); AutoGet_Success=1;  break;}
-			}
-		}break;
-		default:break;
-	}
+}
+void Claw_GetSpecifiedBox()//º¸ Ûøÿ÷∆»°»Œ“‚Œª÷√µØ
+{
+  Claw_Go_and_Get(Claw_TakeThisBox);
 }
 void Claw_SelfInspect()//◊¶◊”∫·“∆◊‘∂Ø∂‘Œª¡„µ„
 {
@@ -736,9 +693,18 @@ void AutoGet_AutoDown()
 		State_Common();
 	}
 }
+void Claw_AutoBack()
+{
+	if(clawback==1&&clawback_cnt==0)
+	{
+		clawback=0;
+		UFM.TargetAngle=FOURTHBOX;
+	}
+}
 void State_AutoGet()
 {
 	EngineerState=GET_STATE;
+	Direction_Indicator=2;
 	//For Debug
 	UM1.TargetAngle=-OUTANGLE/2;
 	UM2.TargetAngle=OUTANGLE/2;
@@ -772,13 +738,13 @@ void Rotate_Check()
 }
 void State_Common()  
 {
-	
 	UM1.TargetAngle=0;
 	UM2.TargetAngle=0;
 	AutoClimbing=0;
 	AutoGet_Success=0;
 	if(EngineerState==GET_STATE)
 	{
+		Direction_Indicator=0;
 		YTP.TargetAngle = 60;
 		if(Yaw_Reset_Flag==0)
 		{
