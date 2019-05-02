@@ -41,6 +41,7 @@ extern uint32_t rotate_waiter;
 extern uint32_t sensorlock_cnt;
 extern uint32_t clawback;
 extern uint32_t clawback_cnt;
+extern uint32_t doorshake_cnt;
 uint32_t AutoGet_LastStep = 1;
 uint32_t AutoGetCnt = 0;
 
@@ -276,6 +277,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(sensorlock_cnt>0) sensorlock_cnt--;
 		if(clawback==1&&clawback_cnt>0) clawback_cnt--;
 		if(clawback==0) clawback_cnt=1000;
+		if(doorshake_cnt>0) doorshake_cnt--;
 		checkStuck();
 		checkAutoGet();
 		

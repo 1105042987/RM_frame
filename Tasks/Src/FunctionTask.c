@@ -36,6 +36,8 @@ int16_t testIntensity = 0;
 uint32_t dooropen=0;
 uint32_t counting=0;
 int32_t doorcount=0;
+uint32_t  open_once=0;
+uint32_t doorshake_cnt=0;
 uint32_t firsttime=0;
 uint32_t setdoorzero=0;
 uint32_t setzerol=0;
@@ -82,12 +84,12 @@ void SetDoorZero()
 {
 	if(setdoorzero==0)
 	{
-	if(DOOR.RxMsgC6x0.moment<2000)
+	if(DOOR.RxMsgC6x0.moment<1000)
 	{
 		counting=0;
-		DOOR.TargetAngle+=10;
+		DOOR.TargetAngle+=5;
 	}
-	if(DOOR.RxMsgC6x0.moment>=2000)
+	if(DOOR.RxMsgC6x0.moment>=1000)
 	{
 	  counting=1;
 	}
@@ -98,19 +100,36 @@ void SetDoorZero()
 		setdoorzero=1;
 	}
   }
-	if(DOOR.RxMsgC6x0.moment>4000)
-		DOOR.TargetAngle-=5;
-	if(DOOR.RxMsgC6x0.moment<-4000)
-		DOOR.TargetAngle+=5;
+	if(DOOR.RxMsgC6x0.moment>3000)
+		DOOR.TargetAngle-=10;
+	if(DOOR.RxMsgC6x0.moment<-3000)
+		DOOR.TargetAngle+=10;
 }
-
+void Door_Shake()
+{
+	if(dooropen==1&&setdoorzero==1&&doorshake_cnt==0)
+	{
+		if(DOOR.TargetAngle<-180)
+			DOOR.TargetAngle+=180;
+		else if(DOOR.TargetAngle>=-180)
+			DOOR.TargetAngle-=180;
+		doorshake_cnt=80;
+	}
+}
 void Door_SwitchState()
 {
 	if(dooropen==1&&setdoorzero==1)
-		DOOR.TargetAngle=-180;
+	{
+	DOOR.TargetAngle=-180;
+	if(open_once==0)
+	{doorshake_cnt=500;open_once=1;}
+	}
 	else if(dooropen==0&&setdoorzero==1)
-		DOOR.TargetAngle=3;
+	{DOOR.TargetAngle=-10;open_once=0;}
+	
+	Door_Shake();
 }
+
 void InitialSave()
 {
 	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_RESET);
@@ -327,10 +346,15 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	
 	#ifdef USE_CHASSIS_FOLLOW
 
-  if(AutoClimbing==0)
+  if(AutoClimbing==0||(AutoClimbing==1&&AlreadyDowned==0))
   {
-	  if(EngineerState==COMMON_STATE)
+	  if(EngineerState==COMMON_STATE||EngineerState==CLIMB_STATE)
+		{
+			if(saving==0||saving==2)
 		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-20;
+			else if(saving==1)
+			ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-50;	
+		}
 	  else if(EngineerState==GET_STATE)
 		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
   }
@@ -419,7 +443,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 					if(Direction_Indicator==REVERSE)
 						ChassisSpeedRef.left_right_ref =  -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
 					if(Direction_Indicator==GET)
+					{
+					ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/12;
 					ChassisSpeedRef.forward_back_ref =  -KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/2;
+					}
 			}
 			else if(key->v & KEY_A) 	//key: a
 			{	
@@ -428,7 +455,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 					if(Direction_Indicator==REVERSE)
 						ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
 			    if(Direction_Indicator==GET)
+					{
+					ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/12;
 					ChassisSpeedRef.forward_back_ref =  KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/2;
+					}
 			}
 			else
 			{
@@ -599,14 +629,21 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_F)
 			{
+				if(ON_THE_GROUND)
 				AutoGet_Enqueue(5);
+				else if(ON_THE_FLOOR)
+				AutoGet_Enqueue(6);
 			}
 			else if(key->v & KEY_G)
 			{
+				if(ON_THE_GROUND)
 				AutoGet_Enqueue(4);
+				else if(ON_THE_FLOOR)
+				AutoGet_Enqueue(6);
 			}
 			else if(key->v & KEY_Z)
 			{
+				dooropen=0;
 				Claw_DownToPosition=1;
 				State_Common();
 			}
@@ -622,6 +659,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 					if(Sensor_LongPush>=50)
 						Sensor_Lock=1;
 				}
+				else if(EngineerState==COMMON_STATE&&ON_THE_GROUND)
+				{
+					ChassisSpeedRef.rotate_ref = 150 * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
+				}
 			}
 			else if(key->v & KEY_E)
 			{
@@ -635,6 +676,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				if(Sensor_LongPush>=50)
 						Sensor_Lock=1;
 			  }
+				else if(EngineerState==COMMON_STATE&&ON_THE_GROUND)
+				{
+					ChassisSpeedRef.rotate_ref = -150 * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
+				}
 			}
 			else if(key->v & KEY_R)
 			{

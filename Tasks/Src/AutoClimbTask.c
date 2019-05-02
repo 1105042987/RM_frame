@@ -37,8 +37,8 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 	CM2.RealAngle=0;
 	if(ChassisSpeedRef.forward_back_ref>=0)
 	{
-	CM1.TargetAngle=ChassisSpeedRef.forward_back_ref*5;
-	CM2.TargetAngle=-ChassisSpeedRef.forward_back_ref*5;
+	CM1.TargetAngle=ChassisSpeedRef.forward_back_ref*8;
+	CM2.TargetAngle=-ChassisSpeedRef.forward_back_ref*8;
 	}
 	if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==0)
 	{
@@ -58,9 +58,9 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 	if(flag)
 	{		
 		if(ChassisSpeedRef.forward_back_ref>0)
-		ChassisSpeedRef.forward_back_ref/=3;
+		ChassisSpeedRef.forward_back_ref/=2;
 		if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==0)
-		ChassisSpeedRef.forward_back_ref/=10;
+		ChassisSpeedRef.forward_back_ref/=6;
     if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==1)
 		ChassisSpeedRef.forward_back_ref/=12;			
 	}
@@ -84,7 +84,8 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 						{
 							AlreadyDowned=0;
 							AutoClimb_Level--;
-							State_Common();
+							if(AutoClimb_Level==0)
+								State_Common();
 						}
 					}
 				}

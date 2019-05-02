@@ -16,6 +16,7 @@
 #define THIRDBOX 1615             //这五个是箱子位置
 #define FOURTHBOX 400
 #define FIFTHBOX 1200
+#define SIXTHBOX 1300
 
 #define LOWERCRITICIAL 2000      //岛下临界值
 #define UPPERCRITICIAL_LEFT 1000 // 岛上临界值
@@ -245,8 +246,11 @@ void Claw_Rollin()
 {
 	if(auto_counter==0&&Claw_AlreadyRollOut==1)
 	{
+		if(CLAW_INSPECT_SUCCEED)
+		{
 		UM1.TargetAngle=-INANGLE;
     UM2.TargetAngle=INANGLE;
+		}
 		Claw_AlreadyRollOut=2;
 	}
 	if((hasReach(&UM1, 5) || hasReach(&UM2, 5))&&Claw_AlreadyRollOut==2)
@@ -325,6 +329,10 @@ void Claw_GoTo(int a)//爪子走到第a个箱子的位置
 		           AutoGet_TotalStep++;
 		        break;}
 		case 5:{UFM.TargetAngle=FIFTHBOX;
+		        if(hasReach(&UFM,5))
+		           AutoGet_TotalStep++;
+		        break;}
+		case 6:{UFM.TargetAngle=SIXTHBOX;
 		        if(hasReach(&UFM,5))
 		           AutoGet_TotalStep++;
 		        break;}
@@ -758,6 +766,7 @@ void Rotate_Check()
 }
 void State_Common()  
 {
+	CLAWIN;
 	UM1.TargetAngle=0;
 	UM2.TargetAngle=0;
 	AutoClimbing=0;
