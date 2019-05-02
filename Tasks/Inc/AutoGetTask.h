@@ -37,7 +37,7 @@ extern uint32_t Claw_UpToPosition;
 extern uint32_t Claw_DownToPosition;
 extern uint16_t Claw_TruePosition[5];
 extern int32_t Claw_UpAngle;
-extern uint32_t Claw_TakeThisBox;
+extern int Claw_TakeThisBox;
 extern uint32_t Claw_SelfInspecting;
 extern uint32_t Claw_FindingNextBox_Lower_Forward;
 extern uint32_t Claw_FindingNextBox_Lower_Backward;
@@ -110,4 +110,5 @@ void Yaw_Check(void);
 void Rotate_Check(void);
 void AutoGet_AutoDown(void);
 void Claw_AutoBack(void);
+void AutoGet_Enqueue(int);
 #endif /*__ AUTOGETTASK_H */

@@ -182,6 +182,7 @@ int main(void)
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_3);
 	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_4,GPIO_PIN_RESET);
+	queue_init(&AutoGet_Queue);
   /* USER CODE END 2 */
 
   /* Infinite loop */

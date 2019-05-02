@@ -41,7 +41,7 @@ uint32_t Claw_UpToPosition=0;
 uint32_t Claw_DownToPosition=0;
 uint16_t Claw_TruePosition[5] = {0, 820, 1600, 400, 1100};
 int32_t  Claw_UpAngle=0;
-uint32_t Claw_TakeThisBox=0;
+int Claw_TakeThisBox=0;
 uint32_t Claw_SelfInspecting=0;
 uint32_t Claw_FirstSelfInspect=0;
 uint32_t Claw_FindingNextBox_Lower_Forward=0;
@@ -85,6 +85,7 @@ uint32_t clawback_cnt=0;
 
 extern Engineer_State_e EngineerState;//用于处理车辆模式
 extern uint32_t Direction_Indicator;
+extern uint32_t OnePush_Locker;
 
 uint32_t Yaw_Reset_Flag=0;
 uint32_t Yaw_Reset_Cnt=0;
@@ -476,10 +477,29 @@ void Claw_Go_and_Get(int position)
 				default:{AutoGet_Stop_And_Clear(); AutoGet_Success=1;  break;}
 			}
 }
+void AutoGet_Enqueue(int position)//入队列
+{
+	if(OnePush_Locker==0)
+		{
+		if(EngineerState==GET_STATE)
+		if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP)
+		{
+		queue_push(&AutoGet_Queue,position);
+		}
+		OnePush_Locker++;
+		}
+}
+void AutoGet_Dequeue()
+{
+	if(AutoGet_TotalStep==1&&Claw_TakeThisBox==0&&!queue_empty(&AutoGet_Queue))
+		queue_pop(&AutoGet_Queue,&Claw_TakeThisBox);
+}
 void Claw_GetSpecifiedBox()//键鼠控制取任意位置弹
 {
+	AutoGet_Dequeue();
   Claw_Go_and_Get(Claw_TakeThisBox);
 }
+
 void Claw_SelfInspect()//爪子横移自动对位零点
 {
 	if(Claw_FirstSelfInspect==0)

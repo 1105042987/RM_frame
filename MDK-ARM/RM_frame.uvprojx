@@ -488,6 +488,11 @@
           <GroupName>Tasks</GroupName>
           <Files>
             <File>
+              <FileName>queue.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Tasks\Inc\queue.h</FilePath>
+            </File>
+            <File>
               <FileName>includes.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Inc\includes.h</FilePath>
@@ -576,6 +581,11 @@
               <FileName>bsp_imu.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Tasks\Src\bsp_imu.c</FilePath>
+            </File>
+            <File>
+              <FileName>queue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Tasks\Src\queue.c</FilePath>
             </File>
           </Files>
         </Group>

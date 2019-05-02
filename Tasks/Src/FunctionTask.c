@@ -51,7 +51,7 @@ uint32_t saving_count=0;
 uint32_t saving=2;
 uint32_t saveing_flag=0;
 
-
+uint32_t OnePush_Locker=0;
 
 uint32_t openthegay=0;
 
@@ -587,33 +587,23 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_C)
 			{
-				if(EngineerState==GET_STATE)
-				if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP)
-				Claw_TakeThisBox=3;
+				AutoGet_Enqueue(3);
 			}
 			else if(key->v & KEY_V)
 			{
-				if(EngineerState==GET_STATE)
-				if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP)
-				Claw_TakeThisBox=2;
+				AutoGet_Enqueue(2);
 			}
 			else if(key->v & KEY_B)
 			{
-				if(EngineerState==GET_STATE)
-				if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP)
-				Claw_TakeThisBox=1;
+				AutoGet_Enqueue(1);
 			}
 			else if(key->v & KEY_F)
 			{
-				if(EngineerState==GET_STATE)
-				if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP)
-				Claw_TakeThisBox=5;
+				AutoGet_Enqueue(5);
 			}
 			else if(key->v & KEY_G)
 			{
-				if(EngineerState==GET_STATE)
-				if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP)
-				Claw_TakeThisBox=4;
+				AutoGet_Enqueue(4);
 			}
 			else if(key->v & KEY_Z)
 			{
@@ -652,6 +642,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else
 			{
+				OnePush_Locker=0;
 				Sensor_LongPush=0;
 				if(Sensor_LongPush<50)
 					Sensor_Lock=0;
@@ -722,7 +713,7 @@ void MouseModeFSM(Mouse *mouse)
 				MouseLMode = NO_CLICK;
 				counterl = 0;
 			}
-			else if(counterl>=50)
+			else if(counterl>=20)
 			{
 				MouseLMode = LONG_CLICK;
 				counterl = 0;
@@ -762,7 +753,7 @@ void MouseModeFSM(Mouse *mouse)
 				MouseRMode = NO_CLICK;
 				counterr = 0;
 			}
-			else if(counterr>=50)
+			else if(counterr>=20)
 			{
 				MouseRMode = LONG_CLICK;
 				counterr = 0;
