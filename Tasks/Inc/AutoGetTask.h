@@ -111,4 +111,5 @@ void Rotate_Check(void);
 void AutoGet_AutoDown(void);
 void Claw_AutoBack(void);
 void AutoGet_Enqueue(int);
+void Claw_Wait(void);
 #endif /*__ AUTOGETTASK_H */

@@ -16,7 +16,7 @@
 #define THIRDBOX 1615             //这五个是箱子位置
 #define FOURTHBOX 400
 #define FIFTHBOX 1200
-#define SIXTHBOX 1300
+#define SIXTHBOX 800
 
 #define LOWERCRITICIAL 2000      //岛下临界值
 #define UPPERCRITICIAL_LEFT 1000 // 岛上临界值
@@ -441,6 +441,15 @@ void AutoGet_LowerANDThrow()//自动取弹（岛下五个弹）
 		default:{AutoGet_Stop_And_Clear();AutoGet_Success=1;break;}
 	}
 }
+void Claw_Wait()
+{
+	CLAWOUT;
+	Claw_GoTo(1);
+	UM1.TargetAngle=-(OUTANGLE/2+2);
+	UM2.TargetAngle=(OUTANGLE+2);
+	
+}
+
 void AutoGet_Upper()//自动取弹（岛上三个弹）
 {
 	switch(AutoGet_TotalStep)

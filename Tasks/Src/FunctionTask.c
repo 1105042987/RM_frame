@@ -359,10 +359,13 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
   }
 	
+	if(EngineerState!=COMMON_STATE||saving==1)
+	{
 	if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
 	YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
 	if(YTP.RxMsgC6x0.moment>-1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
-		YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
+	YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
+  }
 
 	#else
 	ChassisSpeedRef.rotate_ref = mouse->x * RC_ROTATE_SPEED_REF;
@@ -521,12 +524,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		case CTRL:				//slow
 		{
 			ctrl_locker=1;
-			if(key->v & KEY_C&&Claw_UpToPosition==0)
+			if(key->v & KEY_C)
 			{
 				if(EngineerState==COMMON_STATE)
-				State_AutoGet();
-				if(EngineerState==GET_STATE)
-				Look_Screen();
+				State_AutoClimb();
 			}
 			else if(key->v & KEY_V)
 			{
@@ -544,38 +545,16 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				if(CLAW_IS_UP)
 			  CLAWIN;
 			}
-			
-			
-			else if(key->v & KEY_Z)
-			{
-				if(EngineerState==GET_STATE)
-				{
-					if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP&&ON_THE_GROUND)
-						AutoGet_Start=1;
-					if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP&&ON_THE_FLOOR)
-						AutoGet_Start=2;
-				}
-				
-			}
-			else if(key->v & KEY_X)
-			{
-			}
 			else if(key->v & KEY_B)
 			{
 				if(EngineerState==GET_STATE)
 				if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP)
 				AutoGet_Start=3;
 			}
-			else if(key->v & KEY_F)
-			{
-				if((ON_THE_GROUND&&CLAW_IS_UP)||(ON_THE_FLOOR&&CLAW_IS_DOWN))
-				dooropen=1;
-			}
 			else if(key->v & KEY_G)
 			{
 				if(Claw_UpToPosition==0)
 		      Claw_UpToPosition=1;
-
 			}
 		}break;
 		case SHIFT:				//quick
@@ -585,10 +564,12 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 				Claw_SelfInspecting=1;
 			}
-			else if(key->v & KEY_C)
+			else if(key->v & KEY_C&&Claw_UpToPosition==0)
 			{
 				if(EngineerState==COMMON_STATE)
-				State_AutoClimb();
+				State_AutoGet();
+				if(EngineerState==GET_STATE)
+				Look_Screen();
 			}
 			else if(key->v &KEY_V)
 			{
@@ -596,13 +577,23 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v &KEY_R)
 			{
-				saving=0;
+				saving=1;
 			}
 			else if(key->v &KEY_F)
 			{
-				dooropen=0;
-				Claw_DownToPosition=1;
-		    State_Common();
+				if((ON_THE_GROUND&&CLAW_IS_UP)||(ON_THE_FLOOR&&CLAW_IS_DOWN))
+				dooropen=1;
+			}
+			else if(key->v& KEY_Z)
+			{
+					if(EngineerState==GET_STATE)
+				{
+					if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP&&ON_THE_GROUND)
+						AutoGet_Start=1;
+					if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP&&ON_THE_FLOOR)
+						AutoGet_Start=2;
+				}
+				
 			}
 		}break;
 		case NO_CHANGE:			//normal
@@ -683,7 +674,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_R)
 			{
-				saving=1;
+				if(EngineerState==COMMON_STATE)
+				saving=0;
+				else if(EngineerState==GET_STATE&&ON_THE_FLOOR)
+				Claw_Wait();
 			}
 			else
 			{

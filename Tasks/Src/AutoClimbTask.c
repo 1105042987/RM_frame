@@ -58,7 +58,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 	if(flag)
 	{		
 		if(ChassisSpeedRef.forward_back_ref>0)
-		ChassisSpeedRef.forward_back_ref/=2;
+		ChassisSpeedRef.forward_back_ref/=3;
 		if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==0)
 		ChassisSpeedRef.forward_back_ref/=6;
     if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==1)
@@ -221,10 +221,18 @@ void ComeToTop()
 
 void Speed_Locker()
 {
-	if(!hasReach(&NMCDL,40)||!hasReach(&NMCDR,40))
+	if(!hasReach(&NMCDL,45)||!hasReach(&NMCDR,45))
 	{
 	ChassisSpeedRef.forward_back_ref=0.0;
 	ChassisSpeedRef.rotate_ref=0.0;
+	}
+	if(AutoClimb_Level!=0&&AutoClimbing==0)
+	{
+		if((disbl>1000||disbr>1000)&&ChassisSpeedRef.forward_back_ref<0)
+		{
+			ChassisSpeedRef.forward_back_ref=0.0;
+	    ChassisSpeedRef.rotate_ref=0.0;
+		}
 	}
 }
 
