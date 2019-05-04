@@ -543,16 +543,6 @@
               <FilePath>..\Tasks\Src\ManifoldTask.c</FilePath>
             </File>
             <File>
-              <FileName>CapControlTask.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Tasks\Src\CapControlTask.c</FilePath>
-            </File>
-            <File>
-              <FileName>PowerLimitationTask.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Tasks\Src\PowerLimitationTask.c</FilePath>
-            </File>
-            <File>
               <FileName>GyroReadTask.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Tasks\Src\GyroReadTask.c</FilePath>

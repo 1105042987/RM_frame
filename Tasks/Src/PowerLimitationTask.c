@@ -43,7 +43,7 @@ void PowerLimitation(void)
 	}
 	
 	//·Â¹ðµç²ßÂÔ
-	else if(PowerHeatData.chassisPowerBuffer-((PowerHeatData.chassisPower-80)>0?(PowerHeatData.chassisPower-80):0)*1.0f < 7.0f)
+	else if(PowerHeat.chassisPowerBuffer-((PowerHeatData.chassisPower-80)>0?(PowerHeatData.chassisPower-80):0)*1.0f < 7.0f)
 	{
 		//CM_current_max = 2730;
 		sum = __fabs(CMFLIntensity) + __fabs(CMFRIntensity) + __fabs(CMBLIntensity) + __fabs(CMBRIntensity);

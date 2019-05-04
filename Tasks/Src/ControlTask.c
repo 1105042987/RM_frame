@@ -230,6 +230,7 @@ void checkAutoGet()
 		else AutoGetCnt = 0;
 		if(AutoGetCnt > 2000)
 		{
+			AutoGet_Error=1;
 			AutoGet_Stop_And_Clear();
 			AutoGetCnt = 0;
 		}
@@ -238,6 +239,7 @@ void checkAutoGet()
 }
 
 //时间中断入口函数
+uint16_t dataSendCnt = 0;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim->Instance == htim6.Instance)//2ms时钟`
@@ -280,6 +282,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(doorshake_cnt>0) doorshake_cnt--;
 		checkStuck();
 		checkAutoGet();
+		
+		dataSendCnt++;
+		if(dataSendCnt >= 120)
+		{
+			Referee_Transmit_UserData();
+			dataSendCnt = 0;
+		}
 		
 		if (rc_update)
 		{

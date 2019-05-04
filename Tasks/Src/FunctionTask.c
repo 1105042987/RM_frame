@@ -77,8 +77,6 @@ void FunctionTaskInit()
 
 void OptionalFunction()
 {
-	Cap_Control();
-	PowerLimitation();
 }
 void SetDoorZero()
 {
@@ -382,7 +380,11 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			if(YTY.TargetAngle<90&&mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-3>0)
 			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
 			if(YTY.TargetAngle>-180&&mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-3<0)
-			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;	
+			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
+      if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
+	    YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
+	    if(YTP.RxMsgC6x0.moment>-1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
+	    YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;			
 		}break;
 		case LONG_CLICK:
 		{
@@ -391,6 +393,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
 			if(YTY.TargetAngle>-180&&mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-3<0)
 			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;	
+			if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
+	    YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
+	    if(YTP.RxMsgC6x0.moment>-1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
+	    YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;	
 		}break;
 		default: break;
 	}
@@ -588,10 +594,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 					if(EngineerState==GET_STATE)
 				{
-					if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP&&ON_THE_GROUND)
-						AutoGet_Start=1;
-					if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP&&ON_THE_FLOOR)
-						AutoGet_Start=2;
+					AutoGet_FillQueue();
 				}
 				
 			}
@@ -699,7 +702,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		Claw_Protect();
 		Claw_AutoBack();
 		Box_Land();
-		AutoGet_SwitchState();
+		//AutoGet_SwitchState();
 		AutoGet_AutoDown();
 		AutoClimb_SwitchState();
 		ClawUpDown_SwitchState();

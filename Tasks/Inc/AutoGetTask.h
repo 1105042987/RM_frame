@@ -30,6 +30,7 @@
 extern uint32_t AutoGet_Start;  
 extern uint32_t AutoGet_TotalStep;
 extern uint32_t AutoGet_Alreadywaited;
+extern uint32_t AutoGet_Error;
 extern uint32_t Claw_AlreadyRollOut;
 extern uint32_t Claw_AlreadyWaited;
 extern uint32_t Claw_AlreadyTight;
@@ -112,4 +113,5 @@ void AutoGet_AutoDown(void);
 void Claw_AutoBack(void);
 void AutoGet_Enqueue(int);
 void Claw_Wait(void);
+void AutoGet_FillQueue(void);
 #endif /*__ AUTOGETTASK_H */

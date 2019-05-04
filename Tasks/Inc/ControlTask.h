@@ -86,5 +86,5 @@ typedef enum
 
 extern WorkState_e WorkState;
 void WorkStateFSM(void);
-
+void playMusicSuperMario(void);
 #endif /*__ CONTROLTASK_H */

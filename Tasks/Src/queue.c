@@ -13,8 +13,12 @@ void queue_init(Queue *p_queue) {
 
 //队列清理函数
 void queue_deinit(Queue *p_queue) {
+	for(int i=0;i<100;i++)
+	{
+		p_queue->arr[i]=0;
+	}
 	p_queue->head = 0;
-	p_queue->head = 0;
+	p_queue->tail = 0;
 }
 
 //计算数字个数
