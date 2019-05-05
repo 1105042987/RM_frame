@@ -12,7 +12,14 @@
 #include "includes.h"
 
 #define CanRxGetU16(canRxMsg, num) (((uint16_t)canRxMsg.Data[num * 2] << 8) | (uint16_t)canRxMsg.Data[num * 2 + 1])
-#define CAN_COMM_BASE_ID 0x300
+// Master id: 0x300;    Slave id: 0x600
+#ifdef SLAVE_MODE
+	#define CAN_COMM_SELF_ID 0x600
+	#define CAN_COMM_OTHER_ID 0x300
+#else
+	#define CAN_COMM_SELF_ID 0x300
+	#define CAN_COMM_OTHER_ID 0x600
+#endif
 uint8_t isRcan1Started = 0, isRcan2Started = 0;
 uint8_t isCan11FirstRx = 0, isCan12FirstRx = 0, isCan21FirstRx = 0, isCan22FirstRx = 0;
 CanRxMsgTypeDef Can1RxMsg,Can2RxMsg;
@@ -143,9 +150,9 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 		}
 		#ifdef CAN3
 		//Ignore the TX message(for motor) of another Main control board
-		if(Can1RxMsg.StdId == 0x200||Can1RxMsg.StdId == 0x1ff) flag=1;
-		else if(Can1RxMsg.StdId >= CAN_COMM_BASE_ID){
-			flag = Can1RxMsg.StdId-CAN_COMM_BASE_ID;
+		if(Can1RxMsg.StdId == 0x200||Can1RxMsg.StdId == 0x1ff||Can2RxMsg.StdId == CAN_COMM_SELF_ID) flag=1;
+		else if(Can1RxMsg.StdId >= CAN_COMM_OTHER_ID){
+			flag = Can1RxMsg.StdId-CAN_COMM_OTHER_ID;
 			if(flag<maxSendSize){
 				for(int i=0;i<4;i++) receiveData[flag].data[i] = CanRxGetU16(Can1RxMsg, i);
 				if(flag==maxSendSize-1) Control_Update=1;
@@ -186,9 +193,9 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 			}
 		}
 		#ifdef CAN3
-		if(Can2RxMsg.StdId == 0x200||Can2RxMsg.StdId == 0x1ff) flag=1;
-		else if(Can2RxMsg.StdId >= CAN_COMM_BASE_ID){
-			flag = Can2RxMsg.StdId-CAN_COMM_BASE_ID;
+		if(Can2RxMsg.StdId == 0x200||Can2RxMsg.StdId == 0x1ff||Can2RxMsg.StdId == CAN_COMM_SELF_ID) flag=1;
+		else if(Can2RxMsg.StdId >= CAN_COMM_OTHER_ID){
+			flag = Can2RxMsg.StdId-CAN_COMM_OTHER_ID;
 			if(flag<maxSendSize){
 				for(int i=0;i<4;i++) receiveData[flag].data[i] = CanRxGetU16(Can2RxMsg, i);
 				if(flag==maxSendSize-1) Control_Update=1;
@@ -260,7 +267,7 @@ void setCANMessage(uint8_t index){
 	CanTxMsgTypeDef pData;
 	hcan_P->pTxMsg = &pData;
 	
-	hcan_P->pTxMsg->StdId = CAN_COMM_BASE_ID+index;
+	hcan_P->pTxMsg->StdId = CAN_COMM_SELF_ID+index;
 	hcan_P->pTxMsg->ExtId = 0;
 	hcan_P->pTxMsg->IDE = CAN_ID_STD;
 	hcan_P->pTxMsg->RTR = CAN_RTR_DATA;
