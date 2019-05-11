@@ -19,8 +19,8 @@
 #define SIXTHBOX 800
 
 #define LOWERCRITICIAL 2000      //岛下临界值
-#define UPPERCRITICIAL_LEFT 1000 // 岛上临界值
-#define UPPERCRITICIAL_RIGHT 1000
+#define UPPERCRITICIAL_LEFT 300 // 岛上临界值
+#define UPPERCRITICIAL_RIGHT 700
 
 //#define UPLEVEL 432    //抬升时的合适高度 必须被4整除   已写到.h里
 #define UPPROTECT 400  //抬升的临界保护值
@@ -36,6 +36,7 @@ uint32_t AutoGet_TotalStep=1;
 uint32_t AutoGet_Alreadywaited=0;
 uint32_t AutoGet_Success=0;
 uint32_t AutoGet_Error=0;
+uint32_t AutoGet_Skill=0;
 uint32_t Claw_AlreadyRollOut=0;
 uint32_t Claw_AlreadyWaited=0;
 uint32_t Claw_AlreadyTight=0;
@@ -88,6 +89,7 @@ uint32_t clawback_cnt=0;
 extern Engineer_State_e EngineerState;//用于处理车辆模式
 extern uint32_t Direction_Indicator;
 extern uint32_t OnePush_Locker;
+extern View_State_e Viewstate;
 
 uint32_t Yaw_Reset_Flag=0;
 uint32_t Yaw_Reset_Cnt=0;
@@ -101,8 +103,8 @@ void RefreshADC()
 	{
 		if(i%8==0)adfl+=ADC_value[i];
 		if(i%8==1)adfr+=ADC_value[i];
-		if(i%8==2)adbl+=ADC_value[i];
-		if(i%8==3)adbr+=ADC_value[i];
+		if(i%8==2)adbr+=ADC_value[i];
+		if(i%8==3)adbl+=ADC_value[i];
 		if(i%8==4)addf+=ADC_value[i];
 		if(i%8==5)addb+=ADC_value[i];
 		if(i%8==6)adgl+=ADC_value[i];
@@ -142,7 +144,7 @@ void RefreshADC()
 	FLAG_SET(distance_couple.frontf);
 	FLAG_SETbl(distance_couple.backl);
 	FLAG_SETbr(distance_couple.backr);
-	FLAG_SET(distance_couple.backb);
+	FLAG_SETdb(distance_couple.backb);
 	FLAG_SET(distance_couple.left);
 	FLAG_SET(distance_couple.right);
 	
@@ -263,6 +265,19 @@ void Claw_Rollin()
 	}
 }
 
+void Claw_Stay()
+{
+	if(auto_counter==0&&Claw_AlreadyRollOut==1)
+	{
+		Claw_AlreadyRollOut=2;
+	}
+	if((hasReach(&UM1, 5) || hasReach(&UM2, 5))&&Claw_AlreadyRollOut==2)
+	{
+		AutoGet_TotalStep++;
+		Claw_AlreadyRollOut=0;
+		Claw_AlreadyTight=0;
+	}
+}
 void Claw_Tight()//爪子抓紧与松开
 {
 	if(Claw_AlreadyRollOut==1&&Claw_AlreadyTight==0)
@@ -346,7 +361,12 @@ void Claw_GetaBox()//取一个箱子的完成流程
 	Claw_Tight();
 	Claw_Rollin();
 }
-
+void Claw_FetchaBox()//很骚的取一个箱子的流程
+{
+	Claw_Rollout();
+	Claw_Tight();
+	Claw_Stay();
+}
 void Box_Fire()//弹射一个箱子的完整流程
 {
 	Claw_Loose();
@@ -483,6 +503,8 @@ void AutoGet_Upper()//自动取弹（岛上三个弹）
 void Claw_Go_and_Get(int position)
 {
 	if(Claw_TakeThisBox!=0)
+{
+	if(AutoGet_Skill==0){
 	switch(AutoGet_TotalStep)
 			{
 				case 1:
@@ -496,11 +518,44 @@ void Claw_Go_and_Get(int position)
 				case 3:{
 					  Claw_GetaBox(); 
 					if(AutoGet_Alreadywaited==0)
-					{auto_waiter=100;AutoGet_Alreadywaited=1;}  
+					{auto_waiter=0;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{Box_ThrowForward();     break;}
 				default:{AutoGet_Stop_And_Clear(); AutoGet_Success=1;  break;}
 			}
+		}
+	if(AutoGet_Skill==1)
+	{
+		switch(AutoGet_TotalStep)
+			{
+				case 1:
+				{
+				  if(ON_THE_FLOOR)
+				  {CLAWOUT;auto_counter=500;AutoGet_TotalStep++;break;}
+					if(ON_THE_GROUND)
+					{AutoGet_Stop_And_Clear();}
+				}
+				case 2:{Claw_GoTo(position);break;}
+				case 3:{
+					  Claw_FetchaBox(); 
+					if(AutoGet_Alreadywaited==0)
+					{auto_waiter=0;AutoGet_Alreadywaited=1;}  
+					  break;}
+				case 4:{CLAWIN;auto_waiter=500;AutoGet_TotalStep++;break;}
+				case 5:{if(auto_waiter==0){CLAWLOOSE;auto_counter=200;AutoGet_TotalStep++;break;}}
+				default:
+				{
+				if(auto_waiter==0&&auto_counter==0)
+				  {
+				  AutoGet_Stop_And_Clear(); 
+				  AutoGet_Success=1;  
+				  AutoGet_Skill=0;
+				  break;
+				  }
+			  }
+	    }
+  }
+}
 }
 void AutoGet_Enqueue(int position)//入队列
 {
@@ -806,6 +861,7 @@ void State_AutoGet()
 			Yaw_Set_Flag=1;
 			Yaw_Set_Cnt=150;
 		}
+		Viewstate=GET_VIEW;
 	if(Claw_UpToPosition==0)
 		Claw_UpToPosition=1;
 	if(CM_AutoRotate90==0)
@@ -841,10 +897,11 @@ void State_Common()
 		if(Yaw_Reset_Flag==0)
 		{
 			Yaw_Reset_Flag=1;
-			Yaw_Reset_Cnt=150;
+			Yaw_Reset_Cnt=300;
 		}
 	}
 		EngineerState=COMMON_STATE;
+	  Viewstate=NORMAL_VIEW;
 }
 
 void Yaw_Reset_Check()

@@ -17,6 +17,7 @@
 Engineer_State_e EngineerState = COMMON_STATE;
 Debug_State_e DebugState = DEBUG_GET_STATE;
 KeyboardMode_e KeyboardMode = NO_CHANGE;
+View_State_e Viewstate = NORMAL_VIEW;
 MouseMode_e MouseLMode = NO_CLICK;
 MouseMode_e MouseRMode = NO_CLICK;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//Ð±ÆÂº¯Êý
@@ -163,6 +164,8 @@ void Saving_SwitchState()
 
 void Look_Normally()
 {
+	if(!(Viewstate==REVERSE_VIEW&&AutoClimbing==1))
+	{
 	YTP.TargetAngle = 60;
 	if(Yaw_Reset_Flag==0)
 	{
@@ -170,6 +173,8 @@ void Look_Normally()
 		Yaw_Reset_Cnt=150;
 	}
 	Direction_Indicator=0;
+	Viewstate=NORMAL_VIEW;
+  }
 }
 void Look_Reversely()
 {
@@ -180,6 +185,7 @@ void Look_Reversely()
 		Yaw_Set_Cnt=150;
 	}
    Direction_Indicator=1;
+	Viewstate=REVERSE_VIEW;
 }
 
 void Look_Screen()
@@ -351,7 +357,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			if(saving==0||saving==2)
 		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-20;
 			else if(saving==1)
-			ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-50;	
+			ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-150;	
 		}
 	  else if(EngineerState==GET_STATE)
 		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
@@ -376,6 +382,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	{
 		case SHORT_CLICK:
 		{
+			if(ON_THE_FLOOR&&EngineerState==GET_STATE)
+			{
+				AutoGet_Skill=1;
+			}
 		  ChassisSpeedRef.rotate_ref = 0;
 			if(YTY.TargetAngle<90&&mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-3>0)
 			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;

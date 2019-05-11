@@ -19,15 +19,17 @@
 #define CHANGE_POINTr 1500
 #define CHANGE_POINTbl 1900//1500
 #define CHANGE_POINTbr 1500//1100
+#define CHANGE_POINTdb 1000//1100
 //1v/5v 	27cm
 
 #define UD_TOP			0
-#define UD_BOTTOM		-1000
+#define UD_BOTTOM		-1030
 //-1010
 #define FLAG_SET(target) if(target.val_ref<CHANGE_POINT) target.flag = 0; else target.flag = 1;
 #define FLAG_SETr(target) if(target.val_ref<CHANGE_POINTr) target.flag = 0; else target.flag = 1;
 #define FLAG_SETbl(target) if(target.val_ref>CHANGE_POINTbl) target.flag = 0; else target.flag = 1;
 #define FLAG_SETbr(target) if(target.val_ref>CHANGE_POINTbr) target.flag = 0; else target.flag = 1;
+#define FLAG_SETdb(target) if(target.val_ref<CHANGE_POINTdb) target.flag = 0; else target.flag = 1;
 #define FLAG_SET_TRICK(target) if((AutoClimbing==1&&ChassisSpeedRef.forward_back_ref>0&&NMCDL.RealAngle>-230)||(AutoClimbing==1&&NMCDL.RealAngle<-950)) target.flag = 1; else target.flag = 0;
 
 #define ON_THE_GROUND AutoClimb_Level==0
@@ -65,6 +67,12 @@ typedef enum
 	RESCUE_STATE
 }Engineer_State_e;
 
+typedef enum
+{
+	NORMAL_VIEW,
+	REVERSE_VIEW,
+	GET_VIEW
+}View_State_e;
 typedef enum
 {
 	DEBUG_GET_STATE,
