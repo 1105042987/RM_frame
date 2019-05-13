@@ -19,7 +19,7 @@
 #define CHANGE_POINTr 1500
 #define CHANGE_POINTbl 1900//1500
 #define CHANGE_POINTbr 1500//1100
-#define CHANGE_POINTdb 1000//1100
+#define CHANGE_POINTdb 1500//1100
 //1v/5v 	27cm
 
 #define UD_TOP			0

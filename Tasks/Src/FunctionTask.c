@@ -357,13 +357,13 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			if(saving==0||saving==2)
 		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-20;
 			else if(saving==1)
-			ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-150;	
+			ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-175;	
 		}
 	  else if(EngineerState==GET_STATE)
 		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
   }
 	
-	if(EngineerState!=COMMON_STATE||saving==1)
+	if((EngineerState!=COMMON_STATE||saving==1)||ON_THE_FLOOR)
 	{
 	if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
 	YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
@@ -571,6 +571,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 				if(Claw_UpToPosition==0)
 		      Claw_UpToPosition=1;
+			}
+			else if(key->v & KEY_F)
+			{
+				dooropen=0;
 			}
 		}break;
 		case SHIFT:				//quick

@@ -548,6 +548,7 @@ void Claw_Go_and_Get(int position)
 				if(auto_waiter==0&&auto_counter==0)
 				  {
 				  AutoGet_Stop_And_Clear(); 
+					UFM.TargetAngle=SECONDBOX;
 				  AutoGet_Success=1;  
 				  AutoGet_Skill=0;
 				  break;
