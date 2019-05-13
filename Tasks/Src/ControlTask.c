@@ -158,19 +158,18 @@ void WorkStateFSM(void){
 }
 
 void Chassis_Data_Decoding(){
-	CML.Target += chassisAdd*0.002;
+	CML.Target += ChassisAdd*0.002;
 	CMR.Target = CML.Target;
 }
 //主控制循环
 #ifdef USE_POWER_LIMIT
-float rate=1.0f;
 #endif
 void controlLoop(){
 	getJudgeState();
 	WorkStateFSM();
 	
 	if(WorkState > 0){// && WorkState != STOP_STATE)
-		CML.Target += chassisAdd*0.002;
+		CML.Target += ChassisAdd*0.002;
 		CMR.Target = CML.Target;
 		
 		for(int i=0;i<8;i++) if(can1[i]!=0) (can1[i]->Handle)(can1[i]);

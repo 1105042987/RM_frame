@@ -10,122 +10,128 @@
   ******************************************************************************
   */
 #include "includes.h"
-#define getLeftSr()		!HAL_GPIO_ReadPin(GPIOE,leftSensor_Pin)// //红外检测到为低电平，故取非运算。Sr缩写Sensor
-#define getRightSr()	!HAL_GPIO_ReadPin(GPIOE,rightSensor_Pin) //
+float ShootFrq=20;
+float SwayRef;
 
-float shootFrq=20;
-double chassisAdd;
-extern float fakeHeat0;
-
-static float swayRef;
-int8_t stateSway=0;
-int8_t stateFlee=0;
-int stateCnt=1;
-int8_t oneShootFlag=0;
-int8_t noEnemyCnt=1;
-
-
-void initCM(double angle){
-	CML.Real=angle;
-	CML.Target=angle;
-	CMR.Real=angle;
-	CMR.Target=angle;
-}
 void remv(){
-	stateFlee=0;
-	stateSway=0;
-	stateCnt=0;
+	StateFlee=0;
+	StateSway=0;
+	StateCnt=0;
 	CML.Target=CML.Real;
 	CMR.Target=CMR.Real;
-	CML.positionPID.outputMax=4000;
-	CMR.positionPID.outputMax=4000;
 }
 void routing(){
 	static int dir=1;
-	static float speedRef;
-	if(getRightSr() || fabs(CML.Real)>10000){//换向：红外触发、底盘超程
-		dir=1; 
-		onePushDir(dir,initCM(-8800););
-	}
-	else if(getLeftSr() || fabs(CML.Real)>10000){
+	if(getLeftSr() || CMA.Real>-10){//换向：红外触发、底盘超程
 		dir=-1;
-		onePushDir(dir,initCM(0););
+		CMA.Real=-20;
 	}
-	//speedRef+=0.05f;
-	if(PowerHeat.chassis_power_buffer>100){chassisAdd =600*dir;}//(30*sin(speedRef)+100)*dir;
-	else{chassisAdd =450*dir;}
+	else if(getRightSr() || CMA.Real<-480){
+		dir=1; 
+	}
+	if(PowerHeat.chassis_power_buffer>100){ChassisAdd =600*dir;}
+	else{ChassisAdd =450*dir;}
 }
+void routing2(){
+	static int dir=-1;
+	if(getLeftSr() || CMA.Real>-70){//换向
+		dir=-1;
+	}
+	else if(getRightSr() || CMA.Real<-410){
+		dir=1;
+	}
+	if(PowerHeat.chassis_power_buffer>100){ChassisAdd =600*dir;}
+	else{ChassisAdd =450*dir;}
+}
+void fleeing1(){
+	static int8_t dir=0,lock=0;
+	static int16_t pos,tgt;
+	pos=CMA.Real;
+	//125,252,370,488
+	if(!lock){
+		if(GMY.encoderAngle<0){tgt=-125;dir=sgn(tgt-pos);}
+		else{tgt=-370;dir=sgn(tgt-pos);}
+	}
 
-void fleeing(){
-	//0,1400,2400 [4400] 6400,7400,8800
-	if(PowerHeat.chassis_power_buffer<100){
-		CML.positionPID.outputMax=2000;
-		CMR.positionPID.outputMax=2000;
+	ChassisAdd=1200*dir;
+
+	if(abs(pos-tgt)<8){ChassisAdd*=0.5;}
+	if(abs(pos-tgt)<4){
+		StateFlee=0;
+		StateSway=1;
+		SwayRef=0;
 	}
-	else if(stateFlee==2){
-		CML.positionPID.outputMax=3500;
-		CMR.positionPID.outputMax=3500;
-	}
-	else if(stateFlee==1){
-		CML.positionPID.outputMax=2500;
-		CMR.positionPID.outputMax=2500;
-	}
-	
-	double pos=(CML.Real+CMR.Real)/2;
-	if(pos>-4400){
-		CML.Target=-1800;
-		CMR.Target=-1800;
-	}else{
-		CML.Target=-7000;
-		CMR.Target=-7000;
-	}
-	if(fabs(CML.positionPID.errorCurr)<50){
-		stateFlee=0;
-		stateSway=1;
-		swayRef=0;
-		CML.positionPID.outputMax=3500;
-		CMR.positionPID.outputMax=3500;
-	}
-	stateCnt++;
+	StateCnt++;
 	if(getRightSr() || getLeftSr()){remv();}
 }
 void fleeing2(){
-	static int8_t lock=0,dir=0;
-	static float yaw,pos;
-	if(!lock){
-		yaw=imu.yaw;
-		pos=(CML.Real+CMR.Real)/2;
-		//0,1400,2400 [4400] 6400,7400,8800
-		if(pos>-1800){dir=-1;}
-		else if(pos>-4400){dir=1;}
-		else if(pos>-7000){dir=-1;}
-		else{dir=1;}
-		lock=1;
+	static int8_t dir=0;
+	static int16_t pos,tgt;
+	pos=CMA.Real;
+	//125,252,370,488
+	if(pos>-125){dir=-1;tgt=-125;}
+	else if(pos>-250){dir=1;tgt=-125;}
+	else if(pos>-375){dir=-1;tgt=-375;}
+	else{dir=1;tgt=-375;}
+	
+	if(StateFlee==2){
+		ChassisAdd=1800*dir;
 	}
-	if(PowerHeat.chassis_power_buffer<100){
-		CML.positionPID.outputMax=2000;
-		CMR.positionPID.outputMax=2000;
+	else if(StateFlee==1){
+		ChassisAdd=1200*dir;
 	}
-	if(fabs(imu.yaw-yaw)>20){
-		stateFlee=0;
-		stateSway=1;
-		swayRef=0;
-		CML.positionPID.outputMax=4000;
-		CMR.positionPID.outputMax=4000;
+	if(abs(pos-tgt)<8){ChassisAdd*=0.5;}
+	if(abs(pos-tgt)<4){
+		StateSway=1;
+		SwayRef=0;
 	}
-	stateCnt++;
+	StateCnt++;
 	if(getRightSr() || getLeftSr()){remv();}
 }
+void fleeing3(){
+	static int8_t dir=0,lock=0;
+	static int16_t pos,tgt;
+	pos=CMA.Real;
+	//125,252,375,490
+	if(!lock){
+		if(pos>-80){dir=-1;tgt=-125;}
+		else if(pos<-400){dir=1;tgt=-375;}
+		else if(pos>-250){dir=-1;tgt=-375;}
+		else{dir=1;tgt=-110;}
+		lock=1;
+	}
+	ChassisAdd=1800*dir;
+	if(abs(pos-tgt)<8){ChassisAdd*=0.5;}
+	if(abs(pos-tgt)<4){
+		StateFlee=0;
+		StateSway=1;
+		SwayRef=0;
+		lock=0;
+	}
+	StateCnt++;
+	if(getRightSr() || getLeftSr()){remv();lock=0;}
+}
 
+void tossing(int8_t dir,int16_t tgt){
+	int16_t pos=CMA.Real;
+	ChassisAdd=1800*dir;
+	if(abs(pos-tgt)<8){ChassisAdd*=0.5;}
+	if(abs(pos-tgt)<4){
+		StateFlee=0;
+		StateSway=1;
+		SwayRef=0;
+	}
+}
 void swaying(){
-	chassisAdd=850*cos(swayRef);
-	swayRef+=0.032f;//0.016= 0.087965*0.5= 2*3.1416*0.014 *0.5
-	stateCnt++;
+	ChassisAdd=950*cos(SwayRef);
+	SwayRef+=0.028f;//0.016= 0.087965*0.5= 2*3.1416*0.014 *0.5
+	StateCnt++;
 	if(getRightSr() || getLeftSr()){remv();}
 }
 void scaning(){
-	GMY.Target-=0.5;
-	GMP.Target=-10;
+	GMY.Target-=0.32;
+	GMP.Target=-15;
+	STIRv.Target=0;
 }
 
 
@@ -133,32 +139,37 @@ void scaning(){
 void firing1(){
 	static int8_t jam=-1;
 	if(STIRv.RxMsgC6x0.moment>8000){jam=30;}
-	///TargetSpeed = shootFrq*45/360*36*60 = shootFrq*270
+	///TargetSpeed = ShootFrq*45/360*36*60 = ShootFrq*270
 	if(jam<0){STIRv.Target=(2+channelrcol/66) *270;}
 	else{STIRv.Target=-3500;jam--;}
 }
 void firing2(){
 	static int8_t jam=-1;
-	if(realHeat0<100){shootFrq=25;}//40
-	else if(realHeat0<200){shootFrq=20;}//30
-	else if(realHeat0<300){shootFrq=12;}//20
-	else if(realHeat0<360 && shootFrq<8){shootFrq+=0.2f;}//12
-	else if(realHeat0>440 && shootFrq>5){shootFrq--;}
-	else if(realHeat0>400 && shootFrq>7){shootFrq-=0.1f;}
-	else{shootFrq=8;}
+	
+	ShootFrq=(440-realHeat0)*0.1;
+	
+	MINMAX(ShootFrq,0,22);
+//	if(realHeat0<100){ShootFrq=25;}//40
+//	else if(realHeat0<200){ShootFrq=20;}//30
+//	else if(realHeat0<300){ShootFrq=12;}//20
+//	else if(realHeat0<360 && ShootFrq<8){ShootFrq+=0.02f;}//12
+//	else if(realHeat0>440 && ShootFrq>5){ShootFrq--;}
+//	else if(realHeat0>400 && ShootFrq>7){ShootFrq-=0.01f;}
+//	else{ShootFrq=8;}
 	
 	if(STIRv.RxMsgC6x0.moment>8000){jam=30;}
-	///TargetSpeed = shootFrq*45/360*36*60 = shootFrq*270
-	if(jam<0){STIRv.Target=shootFrq *270;}
+	///TargetSpeed = ShootFrq*45/360*36*60 = ShootFrq*270
+	if(jam<0){STIRv.Target=ShootFrq *270;}
 	else{STIRv.Target=-3500;jam--;}
 }
 void firing3(){
 	static int8_t jam=-1;
 	if(STIRv.RxMsgC6x0.moment>8000){jam=9;}
-	///TargetSpeed = shootFrq*45/360*36*60 = shootFrq*270
+	///TargetSpeed = ShootFrq*45/360*36*60 = ShootFrq*270
 	if(jam<0){STIRv.Target=(20+channelrcol/66) *270;}
 	else{STIRv.Target=-3000;jam--;}
 }
 
+int sgn(float x){return x>0?1:(x<0?-1:0);}
 
 

@@ -159,7 +159,9 @@ void Send_User_Data(){
 	while(HAL_UART_Transmit_DMA(&JUDGE_UART,(uint8_t *)&buffer,22)!=HAL_OK);
 }
 
-//RM2019
+//****************************************************
+//**********************RM2019************************
+//****************************************************
 #define getbit(x,y) ((x) >> (y)&1)//获取某一位的值
 
 ext_game_robot_state_t GameRobotState;
@@ -169,6 +171,8 @@ ext_shoot_data_t ShootData;
 ext_robot_hurt_t hurtData;
 
 void Referee_Update_RobotState(){
+	static uint16_t lastHP=200,receiveCnt=0;
+	
 	unsigned char* grs0 = (unsigned char*)&GameRobotState.robot_id;
 	char tmp0[1] = {buffer[7]};
 	grs0[0] = (unsigned char)tmp0[0];
@@ -215,6 +219,21 @@ void Referee_Update_RobotState(){
 	
 	maxHP = GameRobotState.max_HP;
 	remainHP = GameRobotState.remain_HP;
+	if(lastHP-remainHP>80){
+		StateFlee=8;
+		receiveCnt=0;
+	}
+	else if(lastHP-remainHP>9){
+		if(StateSway){StateFlee+=2;}
+		else{StateFlee=2;}
+		receiveCnt=0;
+	}
+	
+	lastHP=remainHP;
+	receiveCnt++;
+	if(receiveCnt>30&&StateFlee>1){StateFlee=0;}
+	
+	
 	switch(maxHP){
 		case 200:{maxHeat0 = 240;cooldown0 = 40;}break;
 		case 250:{maxHeat0 = 360;cooldown0 = 60;}break;
@@ -285,10 +304,18 @@ void Referee_Update_ShootData(){
 }
 
 void Referee_Update_hurt(){//@yyp
-	uint8_t tmp=buffer[7]&0xf0;
-	if(tmp==0x0 && stateFlee==0 && stateSway==0){stateFlee=2;stateCnt=0;}
-	JUDGE_Received = 1;
+//	uint8_t tmp=buffer[7]&0xf0;
+////	if(tmp==0x0 && StateSway==0){StateFlee=2;StateCnt=0;}
+//	if(tmp==0x0){StateFlee+=2;StateCnt=0;}
+//	JUDGE_Received = 1;
+	
+//	uint8_t tmp=buffer[7]&0x0f;
+//	if(tmp==0x1){StateHurt=1;}
+//	if(tmp==0x2){StateHurt=1;}
 }
+
+
+
 client_custom_data_t custom_data;
 void Referee_Transmit_UserData(){
 	uint8_t buffer[28]={0};

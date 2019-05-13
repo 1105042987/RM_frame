@@ -13,8 +13,8 @@
 #ifndef __AUXDEVICE_H
 #define __AUXDEVICE_H
 
-#define GUARD		'U'
-//#define GUARD		'D'
+//#define GUARD		'U'
+#define GUARD		'D'
 
 #if GUARD == 'U'
 	#define USE_POWER_LIMIT 	20
@@ -51,9 +51,6 @@
 //IO÷ÿ√¸√˚
 #define laserOn() 	HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET)
 #define laserOff() 	HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_RESET)
-#define onLed(x) 	HAL_GPIO_WritePin(GPIOG,1<<x, GPIO_PIN_RESET)
+#define onLed(x) 		HAL_GPIO_WritePin(GPIOG,1<<x, GPIO_PIN_RESET)
 #define offLed(x) 	HAL_GPIO_WritePin(GPIOG,1<<x, GPIO_PIN_SET)
-#define FUNC__RED_RAY_M__READ()	HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_5)
-#define FUNC__RED_RAY_L__READ()	HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_5)
-#define FUNC__RED_RAY_R__READ()	HAL_GPIO_ReadPin(GPIOF,GPIO_PIN_10)
 #endif

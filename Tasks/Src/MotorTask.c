@@ -11,6 +11,7 @@
   */
 #include "includes.h"
 void ControlNM(MotorINFO *id);
+void ControlNA(MotorINFO *id);
 void ControlCM(MotorINFO *id);
 void ControlANTI_CM(MotorINFO *id);
 void ControlGMY(MotorINFO *id);
@@ -27,16 +28,16 @@ MotorINFO FRICR = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_D
 
 MotorINFO GMP  =  Gimbal6020_MOTORINFO_Init(1,&ControlGMP,7900,1100,20,
 								fw_PID_INIT_EASY(110, 2, 22, 5000),
-								fw_PID_INIT_EASY(22, 1, 5,  16000));
+								fw_PID_INIT_EASY(24, 1, 5,  16000));
 //								fw_PID_INIT_EASY(90, 2, 20, 5000),
 //								fw_PID_INIT_EASY(15, 2, 2,  16000));
 
-MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(-1,&ControlGMY,3300,400,20,
+MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(-1,&ControlGMY,2000,400,20,
 //								fw_PID_INIT_EASY(0.6, 0.02, 0.2, 10),
 //								fw_PID_INIT_EASY(0.4, 0.02, 2, 10),
 //								fw_PID_INIT_EASY(3000, 500, 200, 20000));
-								fw_PID_INIT_EASY(0.4, 0.02, 2, 10),
-								fw_PID_INIT_EASY(3000, 500, 200, 20000));
+								fw_PID_INIT_EASY(0.45, 0.06, 2, 10),
+								fw_PID_INIT_EASY(2800, 500, 200, 20000));
 								
 
 //MotorINFO GMY  =  Gimbal6020_MOTORINFO_Init(1.0,&ControlGMYEncoder,0,0,20,
@@ -54,15 +55,18 @@ MotorINFO CML = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
 MotorINFO CMR = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT_EASY(10, 0, 0, 3500),
 								fw_PID_INIT_EASY(40, 0, 5, 15000));
+MotorINFO CMA = AngleBased_MOTORINFO_Init(19.0,&ControlNA,
+								fw_PID_INIT_EASY(10, 0, 0, 0),
+								fw_PID_INIT_EASY(40, 0, 5, 0));
 								
 MotorINFO* can1[8]={&FRICL,&FRICR,&STIRv,0,&GMP,&GMY,0,0};
-MotorINFO* can2[8]={&CML,&CMR,0,0,0,0,0,0};
+MotorINFO* can2[8]={&CML,&CMR,&CMA,0,0,0,0,0};
 //#if GUARD == 'U'
 //	MotorINFO* can1[8]={0,0,0,0,0,0,0,0};
-//	MotorINFO* can2[8]={&CML,&CMR,0,0,0,0,0,0};
+//	MotorINFO* can2[8]={&CML,&CMR,&CMA,0,0,0,0,0};
 //#else
-//	MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMP,&GMY,0,0};
-//	MotorINFO* can2[8]={0,0,0,0,&STIRv,0,0,0};
+//	MotorINFO* can1[8]={&FRICL,&FRICR,&STIRv,0,&GMP,&GMY,0,0};
+//	MotorINFO* can2[8]={0,0,0,0,0,0,0,0};
 //#endif
 
 //MotorINFO* can1[8]={0,0,0,0,&STIRp,0,0,0};
@@ -86,6 +90,25 @@ void ControlNM(MotorINFO* id){
 		id->Real+= (tmp<180?(tmp>-180?tmp:tmp+360):tmp-360)/ id->ReductionRate;//处理编码器溢出
 		ThisSpeed = id->RxMsgC6x0.rotateSpeed * 6 / id->ReductionRate;		//单位：度每秒
 		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
+		
+		id->s_count = 0;
+		id->lastRead = id->encoderAngle;
+	}
+	else{id->s_count++;}		
+}
+void ControlNA(MotorINFO* id){
+	if(id==0) return;
+	if(id->s_count == 1){
+		id->encoderAngle = (id->RxMsgC6x0.angle) *360/8192.0f;
+		NORMALIZE_ANGLE180(id->encoderAngle);
+		if(id->FirstEnter==1){
+			id->lastRead = id->encoderAngle;
+			id->Real=0;
+			id->FirstEnter = 0;
+			return;
+		}
+		float tmp=id->encoderAngle - id->lastRead;
+		id->Real+= (tmp<180?(tmp>-180?tmp:tmp+360):tmp-360)/ id->ReductionRate;//处理编码器溢出
 		
 		id->s_count = 0;
 		id->lastRead = id->encoderAngle;
@@ -160,7 +183,7 @@ void ControlGMY(MotorINFO* id){
 		if(id->FirstEnter==1){
 			id->lastRead=ThisAngle;
 			id->Real=ThisAngle;//EncoderAngle;
-			id->Target= id->Real;//target取了个负号，电机反向装
+			id->Target= id->Real;
 			id->imuEncorderDiff= id->Real-id->encoderAngle;//借此参数表示imu与encoder的差值
 			id->FirstEnter = 0;
 			return;

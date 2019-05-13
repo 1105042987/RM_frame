@@ -74,7 +74,7 @@ void InitAutoAim(){
 	
 	//角度变量初始化（不需要修改）
 	aim.yaw=0;				aim.pit=0;
-	adjust.yaw=0;			adjust.pit=1;
+	adjust.yaw=2;			adjust.pit=0;
 	
 	//设置坐标初始值（根据不同安装情况调整这3个参数）
 	scopeGun.x=0;		scopeGun.y=-10;		scopeGun.z=0;
@@ -99,20 +99,20 @@ void AutoAimUartRxCpltCallback(){
 	#else
 	if(RX_ENEMY_START=='s'&&RX_ENEMY_END=='e'){
 		onLed(6);
-		aim.yaw=(float)( (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)>0x7fff) ? (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)-0xffff) : (RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2 )*kAngle;
-		aim.pit=-(float)( (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)>0x7fff) ? (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)-0xffff) : (RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2 )*kAngle;
+		aim.yaw=(float)(( (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)>0x7fff) ? (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)-0xffff) : (RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2 )*kAngle);
+		aim.pit=-(float)(( (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)>0x7fff) ? (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)-0xffff) : (RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2 )*kAngle);
 		aim.yaw+=adjust.yaw;
-		aim.yaw*=0.9;
 		aim.pit+=adjust.pit;
 		aim.pit*=0.9;
 //		MINMAX(aim.yaw,-3.0f,3.0f);
 //		MINMAX(aim.pit,-3.0f,3.0f);
-		//enemyScope.z=350;
+//		enemyScope.z=350;
+		adjust.pit=GMP.Real/20-0.8;
 		if(GMP.Real+aim.pit<0){findEnemy=1;}
 		receiveCnt++;
 	}
 	#endif
-	HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t *)&Enemy_INFO,8);
+	HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t*)&Enemy_INFO,8);
 	
 }
 //****************************************坐标角度转换函数*************************************//
@@ -141,11 +141,11 @@ void EnemyINFOProcess(){
 }
 
 //**************************普通模式自瞄控制函数****************************//
-int sgn(float x){return x>0?1:(x<0?-1:0);}
+
 void autoAim(){
 	if(aimCnt<1){
-		GMY.Target=GMY.Real+aim.yaw*0.9;//(sgn(aim.yaw)*(aim.yaw*aim.yaw)+aim.yaw)*0.4;//(aim.yaw+aimLast.yaw)/kk;//8;
-		GMP.Target=GMP.Real+aim.pit*0.6;//(sgn(aim.pit)*(aim.pit*aim.pit)+aim.pit)*0.3;//(aim.pitch+aimLast.pitch)/kk;//8;
+		GMY.Target=GMY.Real+aim.yaw*0.6;//sgn(aim.yaw)*0.5*sqrt(fabs(aim.yaw));//(aim.yaw+aimLast.yaw)/kk;//8;
+		GMP.Target=GMP.Real+(double)aim.pit*0.5;//(sgn(aim.pit)*(aim.pit*aim.pit)+aim.pit)*0.3;//(aim.pitch+aimLast.pitch)/kk;//8;
 		aimCnt++;
 	}else{
 		findEnemy=0;
@@ -157,8 +157,8 @@ void autoAim(){
 void autoAimNormal(){
 	if(findEnemy){
 		if(aimCnt<1){
-			GMY.Target=GMY.Real+aim.yaw*0.9;//(sgn(aim.yaw)*(aim.yaw*aim.yaw)+aim.yaw)*0.4;//(aim.yaw+aimLast.yaw)/kk;//8;
-			GMP.Target=GMP.Real+aim.pit*0.6;//(sgn(aim.pit)*(aim.pit*aim.pit)+aim.pit)*0.3;//(aim.pitch+aimLast.pitch)/kk;//8;
+			GMY.Target=GMY.Real+(double)aim.yaw*0.9;//(sgn(aim.yaw)*(aim.yaw*aim.yaw)+aim.yaw)*0.4;//(aim.yaw+aimLast.yaw)/kk;//8;
+			GMP.Target=GMP.Real+(double)aim.pit*0.6;//(sgn(aim.pit)*(aim.pit*aim.pit)+aim.pit)*0.3;//(aim.pitch+aimLast.pitch)/kk;//8;
 			aimCnt++;
 		}else{
 			findEnemy=0;
@@ -172,7 +172,7 @@ void AutoAimYYP(){
 	if(findEnemy){
 		GMY.Target=kalmanCalc(&kFilter,GMY.Real+aim.yaw,1);
 //		GMY.Target=GMY.Real+aim.yaw*0.8;//(sgn(aim.yaw)*(aim.yaw*aim.yaw)+aim.yaw)*1.3;
-		GMP.Target=GMP.Real+aim.pit*0.7;//(sgn(aim.pit)*(aim.pit*aim.pit)+aim.pit)*0.85;
+		GMP.Target=GMP.Real+(double)aim.pit*0.7;//(sgn(aim.pit)*(aim.pit*aim.pit)+aim.pit)*0.85;
 		findEnemy=0;
 	}
 }

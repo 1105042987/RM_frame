@@ -151,7 +151,7 @@ int main(void)
 	//¼ÆÊ±Æ÷
 	HAL_TIM_Base_Start_IT(&ONE_MS_TIM);
 	HAL_TIM_Base_Start_IT(&TWO_MS_TIM);
-	HAL_TIM_Base_Start_IT(&TEN_MS_TIM);
+//	HAL_TIM_Base_Start_IT(&TEN_MS_TIM);
 
 	//ÖÐ¶Ï
 	HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);

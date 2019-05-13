@@ -45,9 +45,14 @@ extern int32_t auto_counter;
 
 void FunctionTaskInit(void);
 
-extern int8_t stateFlee;
-extern int8_t stateSway;
-extern int16_t stateCnt;
-extern double chassisAdd;
+extern int8_t StateFlee;
+extern int8_t StateSway;
+extern int8_t StateHurt;
+extern int16_t StateCnt;
+extern double ChassisAdd;
+extern int16_t channelrrow;
+extern int16_t channelrcol;
+extern int16_t channellrow;
+extern int16_t channellcol;
 
 #endif /*__FUNCTIONTASK_H*/

@@ -498,6 +498,11 @@
               <FilePath>..\Tasks\Src\FunctionTask.c</FilePath>
             </File>
             <File>
+              <FileName>FunctionLib.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Tasks\Src\FunctionLib.c</FilePath>
+            </File>
+            <File>
               <FileName>ControlTask.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Tasks\Src\ControlTask.c</FilePath>

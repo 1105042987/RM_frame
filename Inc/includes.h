@@ -29,6 +29,7 @@
 #include "math.h"
 
 #include "RemoteTask.h"
+#include "FunctionLib.h"
 #include "FunctionTask.h"
 #include "ControlTask.h"
 #include "drivers_ramp.h"
