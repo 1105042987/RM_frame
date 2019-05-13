@@ -286,7 +286,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		dataSendCnt++;
 		if(dataSendCnt >= 120)
 		{
-			Referee_Transmit_UserData();
+			//Referee_Transmit_UserData();
 			dataSendCnt = 0;
 		}
 		
