@@ -520,12 +520,12 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 				AutoClimb_Level=2;
 			}
-			else if(key->v & KEY_R)							
+			else if(key->v & KEY_X)							
 			{
 				YTY.RealAngle=0;
 				YTP.RealAngle=0;
 				YTY.TargetAngle=0;
-				YTY.TargetAngle=0;
+				YTP.TargetAngle=0;
 			}
 			else if(key->v & KEY_V)
 			{
@@ -669,7 +669,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				}
 				else if(EngineerState==COMMON_STATE&&ON_THE_GROUND)
 				{
-					ChassisSpeedRef.rotate_ref = 150 * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
+					if(saving==1)
+						ChassisSpeedRef.rotate_ref = 150 * MOUSE_TO_YAW_ANGLE_INC_FACT;
+					else
+						ChassisSpeedRef.rotate_ref = 150 * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
 				}
 			}
 			else if(key->v & KEY_E)
@@ -686,7 +689,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			  }
 				else if(EngineerState==COMMON_STATE&&ON_THE_GROUND)
 				{
-					ChassisSpeedRef.rotate_ref = -150 * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
+					if(saving==1)
+						ChassisSpeedRef.rotate_ref = -150 * MOUSE_TO_YAW_ANGLE_INC_FACT;
+					else
+						ChassisSpeedRef.rotate_ref = -150 * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
 				}
 			}
 			else if(key->v & KEY_R)

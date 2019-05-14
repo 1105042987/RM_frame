@@ -207,8 +207,8 @@ void RescueLoop()
 			if(firstread==0)
 			{
 				firstread=1;
-				SL.TargetAngle=-50;
-				SR.TargetAngle=50;
+				SL.TargetAngle=-40;
+				SR.TargetAngle=40;
 			}
 			loosed = 1;
 			if(leftClaw == 1 && !leftClawTight)

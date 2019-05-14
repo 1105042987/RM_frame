@@ -12,6 +12,7 @@
 	#include "includes.h"
 extern Distance_Couple_t distance_couple;
 extern Engineer_State_e EngineerState;
+extern uint32_t Direction_Indicator;
 
 extern int8_t Test_UD_Direction;
 uint32_t adfl=0,adfr=0,adbl=0,adbr=0,addf=0,addb=0;
@@ -161,7 +162,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 				}
 				break;				
 			case 15:                                             //上岛时候降架子把车抬起来
-				if(ChassisSpeedRef.forward_back_ref>0){
+				if(ChassisSpeedRef.forward_back_ref>0 && Direction_Indicator==0){
 					ChassisSpeedRef.forward_back_ref/=2;
 					CM1.TargetAngle=0;
 					CM2.TargetAngle=0;

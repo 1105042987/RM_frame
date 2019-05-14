@@ -99,11 +99,11 @@ MotorINFO DOOR = Normal_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
 								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));		
 MotorINFO SL = Normal_MOTORINFO_Init(36.0,&ControlNM,
-								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
-								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
+								fw_PID_INIT(60.0, 0.0, 0.0, 	2400.0, 2400.0, 2400.0, 2400.0),
+								fw_PID_INIT(10, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
 MotorINFO SR = Normal_MOTORINFO_Init(36.0,&ControlNM,
-								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
-								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));								
+								fw_PID_INIT(60.0, 0.0, 0.0, 	2400.0, 2400.0, 2400.0, 2400.0),
+								fw_PID_INIT(10, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));								
 							
 //2006是36 3508是19
 //MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
@@ -128,21 +128,21 @@ void ControlNM(MotorINFO* id)
 		if(id->FirstEnter==1) {id->lastRead = ThisAngle;id->FirstEnter = 0;return;}
 		if(ThisAngle<=id->lastRead)
 		{
-			if((id->lastRead-ThisAngle)>4000)//编码器上溢
+			if((id->lastRead-ThisAngle)>4096)//编码器上溢
 				id->RealAngle = id->RealAngle + (ThisAngle+8192-id->lastRead) * 360 / 8192.0 / id->ReductionRate;
 			else//正常
 				id->RealAngle = id->RealAngle - (id->lastRead - ThisAngle) * 360 / 8192.0 / id->ReductionRate;
 		}
 		else
 		{
-			if((ThisAngle-id->lastRead)>4000)//编码器下溢
+			if((ThisAngle-id->lastRead)>4096)//编码器下溢
 				id->RealAngle = id->RealAngle - (id->lastRead+8192-ThisAngle) *360 / 8192.0 / id->ReductionRate;
 			else//正常
 				id->RealAngle = id->RealAngle + (ThisAngle - id->lastRead) * 360 / 8192.0 / id->ReductionRate;
 		}
-		if(leftClawTight || rightClawTight)ThisSpeed = id->RxMsgC6x0.RotateSpeed / id->ReductionRate;		//单位：度每秒
-		else ThisSpeed = id->RxMsgC6x0.RotateSpeed * 6 / id->ReductionRate;
-		
+		//if(leftClawTight || rightClawTight)ThisSpeed = id->RxMsgC6x0.RotateSpeed / id->ReductionRate;		//单位：度每秒
+		//else ThisSpeed = id->RxMsgC6x0.RotateSpeed * 6 / id->ReductionRate;
+		ThisSpeed = id->RxMsgC6x0.RotateSpeed * 6 / id->ReductionRate;
 		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->TargetAngle,id->RealAngle,ThisSpeed);
 		
 		id->s_count = 1;
