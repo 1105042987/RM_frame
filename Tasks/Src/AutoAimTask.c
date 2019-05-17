@@ -74,7 +74,7 @@ void InitAutoAim(){
 	
 	//角度变量初始化（不需要修改）
 	aim.yaw=0;				aim.pit=0;
-	adjust.yaw=2;			adjust.pit=0;
+	adjust.yaw=0;			adjust.pit=0;
 	
 	//设置坐标初始值（根据不同安装情况调整这3个参数）
 	scopeGun.x=0;		scopeGun.y=-10;		scopeGun.z=0;
@@ -104,11 +104,11 @@ void AutoAimUartRxCpltCallback(){
 		aim.yaw+=adjust.yaw;
 		aim.pit+=adjust.pit;
 		aim.pit*=0.9;
-//		MINMAX(aim.yaw,-3.0f,3.0f);
-//		MINMAX(aim.pit,-3.0f,3.0f);
 //		enemyScope.z=350;
 		adjust.pit=GMP.Real/20-0.8;
 		if(GMP.Real+aim.pit<0){findEnemy=1;}
+		MINMAX(aim.yaw,-10,10);
+		MINMAX(aim.pit,-8,8);
 		receiveCnt++;
 	}
 	#endif
@@ -143,16 +143,19 @@ void EnemyINFOProcess(){
 //**************************普通模式自瞄控制函数****************************//
 
 void autoAim(){
-	if(aimCnt<1){
-		GMY.Target=GMY.Real+aim.yaw*0.6;//sgn(aim.yaw)*0.5*sqrt(fabs(aim.yaw));//(aim.yaw+aimLast.yaw)/kk;//8;
-		GMP.Target=GMP.Real+(double)aim.pit*0.5;//(sgn(aim.pit)*(aim.pit*aim.pit)+aim.pit)*0.3;//(aim.pitch+aimLast.pitch)/kk;//8;
-		aimCnt++;
-	}else{
-		findEnemy=0;
-		aimCnt=0;
-		aimLast.yaw=aim.yaw;
-		aimLast.pit=aim.pit;
-	}
+	static float sumY,sumP;
+	sumY+=aim.yaw;
+	sumP+=aim.pit;
+//	GMY.Target=GMY.Real+(double)aim.yaw*0.5;//sgn(aim.yaw)*0.5*sqrt(fabs(aim.yaw));//(aim.yaw+aimLast.yaw)/kk;//8;
+//	GMP.Target=GMP.Real+(double)aim.pit*0.4;//(sgn(aim.pit)*(aim.pit*aim.pit)+aim.pit)*0.3;//(aim.pitch+aimLast.pitch)/kk;//8;
+	GMY.Target=GMY.Real+(double)aim.yaw*0.6+sumY*0+ (aim.yaw-aimLast.yaw)*0.5;
+	GMP.Target=GMP.Real+(double)aim.pit*0.35+sumP*0+ (aim.pit-aimLast.pit)*0.2;
+	sumY*=0.9;
+	sumP*=0.9;
+	
+	aimLast.yaw=aim.yaw;
+	aimLast.pit=aim.pit;
+	findEnemy=0;
 }
 void autoAimNormal(){
 	if(findEnemy){

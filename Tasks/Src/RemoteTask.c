@@ -58,10 +58,11 @@ void GetRemoteSwitchAction(RemoteSwitch_t *sw, uint8_t val){
 //遥控器数据解算
 extern int can13Dog;
 void RemoteDataProcess(uint8_t *pData){
-	if(can13Dog){//@yyp
-		HAL_IWDG_Refresh(&hiwdg);
-		can13Dog--;
-	}
+	HAL_IWDG_Refresh(&hiwdg);
+//	if(can13Dog){//@yyp
+//		HAL_IWDG_Refresh(&hiwdg);
+//		can13Dog--;
+//	}
 	if(pData == NULL){
 			return;
 	}
@@ -187,4 +188,41 @@ void UART_IDLE_Handler(UART_HandleTypeDef *UartHandle){
 			ctrlUartRxCpltCallback();
 		#endif
 	}
+}
+uint16_t ERRORTEST;
+ void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
+{
+  ERRORTEST = UartHandle->ErrorCode;
+	tx_free = 1;
+	uint32_t isrflags   = READ_REG(UartHandle->Instance->SR);//手册上有讲，清错误都要先读SR
+	if((__HAL_UART_GET_FLAG(UartHandle, UART_FLAG_PE))!=RESET)
+	{
+		READ_REG(UartHandle->Instance->DR);//PE清标志，第二步读DR
+		__HAL_UART_CLEAR_FLAG(UartHandle, UART_FLAG_PE);//清标志
+		UartHandle->gState = HAL_UART_STATE_READY;
+		UartHandle->RxState = HAL_UART_STATE_READY;
+	}
+	if((__HAL_UART_GET_FLAG(UartHandle, UART_FLAG_FE))!=RESET)
+	{
+		READ_REG(UartHandle->Instance->DR);//FE清标志，第二步读DR
+		__HAL_UART_CLEAR_FLAG(UartHandle, UART_FLAG_FE);
+		UartHandle->gState = HAL_UART_STATE_READY;
+		UartHandle->RxState = HAL_UART_STATE_READY;
+	}
+	
+	if((__HAL_UART_GET_FLAG(UartHandle, UART_FLAG_NE))!=RESET)
+	{
+		READ_REG(UartHandle->Instance->DR);//NE清标志，第二步读DR
+		__HAL_UART_CLEAR_FLAG(UartHandle, UART_FLAG_NE);
+		UartHandle->gState = HAL_UART_STATE_READY;
+		UartHandle->RxState = HAL_UART_STATE_READY;
+	}        
+	
+	if((__HAL_UART_GET_FLAG(UartHandle, UART_FLAG_ORE))!=RESET)
+	{
+		READ_REG(UartHandle->Instance->CR1);//ORE清标志，第二步读CR
+		__HAL_UART_CLEAR_FLAG(UartHandle, UART_FLAG_ORE);
+		UartHandle->gState = HAL_UART_STATE_READY;
+		UartHandle->RxState = HAL_UART_STATE_READY;
+	}  
 }

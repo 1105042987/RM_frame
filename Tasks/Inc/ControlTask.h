@@ -75,8 +75,7 @@ typedef struct {
 	auto_counter=time;\
 }
 
-typedef enum
-{
+typedef enum{
 	STOP_STATE=-1,
 	PREPARE_STATE=0,
 	NORMAL_STATE=1,

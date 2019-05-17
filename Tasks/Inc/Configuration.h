@@ -13,8 +13,8 @@
 #ifndef __AUXDEVICE_H
 #define __AUXDEVICE_H
 
-//#define GUARD		'U'
-#define GUARD		'D'
+#define GUARD		'U'
+//#define GUARD		'D'
 
 #if GUARD == 'U'
 	#define USE_POWER_LIMIT 	20

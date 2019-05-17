@@ -29,9 +29,13 @@ int8_t oneShootFlag=0;
 int8_t StateSway=0;
 int8_t StateFlee=0;
 int8_t StateHurt=0;
+int8_t StateRand=1;
 int16_t StateCnt=1;
 int16_t noEnemyCnt=1;
-
+void strategyAct(void);
+void strategyRand(void);
+void strategyShoot(void);
+void uartSend(int8_t i);
 //初始化
 void FunctionTaskInit(){
 	ChassisAdd=0;
@@ -59,7 +63,8 @@ void RemoteControlProcess(Remote *rc){
 	ChassisAdd=-channelrrow*2;
 	sendData[0].data[0]=(int16_t)WorkState | (int16_t)inputmode<<8;
 	sendData[0].data[1]=channellrow;
-	sendData[0].data[2]=channellcol;
+	if(channelrcol>600){sendData[0].data[2]=channellcol+5000;}
+	else{sendData[0].data[2]=channellcol;}
 	sendData[0].data[3]=(int16_t)(realHeat0*20);//
 	if(WorkState == NORMAL_STATE){
 		
@@ -87,50 +92,50 @@ void selfControlProcess(Remote *rc){
 	sendData[0].data[2]=channellcol;
 	sendData[0].data[3]=(int16_t)(realHeat0*20);
 	if(WorkState == NORMAL_STATE){
+		remv1();
 		ChassisAdd=-channelrrow*2;
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
-		remv();
+		strategyRand();
 		//routing();
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
-		if(findEnemy){
-			if(StateSway||StateFlee){}
-			else{StateFlee=1;}
-			StateCnt=0;
-		}
-		if(StateFlee>7){fleeing3();}
-		else if(StateSway){swaying();}
-		else if(StateFlee==1){fleeing1();}
-		else if(StateFlee==2){fleeing2();}
-		else{routing();}
-		if(StateCnt>400){remv();}
-		
+		strategyRand();
 	}
 	limtSync();
 }
-void celue2(){
-	if(WorkState == ADDITIONAL_STATE_TWO){
-		if(findEnemy){
-			if(StateFlee){}
-			else if(CMA.Real>-120){}
-			else if(CMA.Real>-360){
-				if(GMY.encoderAngle<-90){}
-			}
-			else{}
-		}
-		if(StateFlee>7){fleeing2();}
-		else if(StateFlee){fleeing1();}
-		else if(StateSway){swaying();}
-		else{routing();}
-		if(StateCnt>400){remv();}
-		
+
+
+
+void strategyRand(){
+	if(findEnemy){
+		if(StateFlee){}
+		else{StateFlee=1;}
 	}
+	if(StateFlee>7){randing1(10);}
+	else if(StateFlee==1){randing1(2);}
+	else if(StateFlee==2){randing1(5);}
+	else{randing1(0);}
+}
+void strategyAct(){
+	if(findEnemy){
+		if(StateSway||StateFlee){}
+		else{StateFlee=1;}
+		StateCnt=0;
+	}
+	if(StateFlee>7){fleeing3();}
+	else if(StateSway){swaying();}
+	else if(StateFlee==1){fleeing1();}
+	else if(StateFlee==2){fleeing2();}
+	else{routing();}
+	if(StateCnt>400){remv2();}
 }
 
-#endif
+
+#endif  //GUARD == 'U'
 #if GUARD == 'D'
 //下平台代码
+int8_t flagFireTest=0;
 void RemoteControlProcess(){
 	offLed(6);
 	if(WorkState <= 0) return;
@@ -139,6 +144,8 @@ void RemoteControlProcess(){
 	channelrcol=0;
 	channellrow= -receiveData[0].data[1];//leftRight
 	channellcol= receiveData[0].data[2];//upDown
+	if(channellcol>4000){channellcol=channellcol-5000;flagFireTest=1;}
+	else{flagFireTest=0;}
 	realHeat0=receiveData[0].data[3]/(float)(20.0);
 	GMY.Target+=channellrow*0.001f;
 	GMP.Target+=channellcol*0.001f;
@@ -146,55 +153,43 @@ void RemoteControlProcess(){
 		oneShootFlag=10;
 //		STIRp.Real=0;
 //		STIRp.Target=0;
-		STIRv.Target=0;
-		FRICL.Target=0;
-		FRICR.Target=0;
+		if(flagFireTest){
+			FRICL.Target =-5400;
+			FRICR.Target = 5400;
+			firing2();
+		}
+		else{
+			STIRv.Target=0;
+			FRICL.Target=0;
+			FRICR.Target=0;
+		}
 		laserOn();
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
 //		STIRp.Real=0;
 //		STIRp.Target=0;
-		if(oneShootFlag){
-			STIRv.Target=2700;oneShootFlag--;}
-		else{STIRv.Target=0;}
-		FRICL.Target=-5400;
-		FRICR.Target= 5400;
+//		if(oneShootFlag){
+//			STIRv.Target=2700;oneShootFlag--;}
+//		else{STIRv.Target=0;}
+		STIRv.Target=0;
+		FRICL.Target=-0;
+		FRICR.Target= 0;
 		laserOn();
 		if(findEnemy){autoAim();}
+		uartSend(1);//enemy is red
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
-		FRICL.Target=-5400;
-		FRICR.Target= 5400;
+		STIRv.Target=0;
+		FRICL.Target=-0;
+		FRICR.Target= 0;
 		laserOn();
 		if(findEnemy){autoAim();}
-		firing2();
-
-//		if(findEnemy){
-//			autoAim();
-//			
-//			if(fabs(aim.yaw)<4){firing2();}
-//			//else {firing1();}
-//			
-//			noEnemyCnt=-300;
-//			sendData[0].data[0]=(int16_t)1;
-//		}
-//		else if(noEnemyCnt>1){
-//			scaning();
-//			sendData[0].data[0]=(int16_t)0;
-//		}
-//		else if(noEnemyCnt<-240){
-//			noEnemyCnt++;
-//			if(fabs(aim.yaw)<4){firing2();}
-//			else{STIRv.Target=0;}
-//		}
-//		else{
-//			noEnemyCnt++;
-//			STIRv.Target=0;
-//		}
+		uartSend(2);//enemy is blue
 	}
 	limtSync();
 }
 //*******************下平台代码2
+
 
 void selfControlProcess(){
 	offLed(6);
@@ -215,43 +210,55 @@ void selfControlProcess(){
 		laserOn();
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
-		if(oneShootFlag){STIRv.Target=2700;oneShootFlag--;}
-		else{STIRv.Target=0;}
-		
-		FRICL.Target =-5400;
-		FRICR.Target = 5400;
-		laserOn();
-		//if(!findEnemy){scaning();}
+//		if(oneShootFlag){STIRv.Target=2700;oneShootFlag--;}
+//		else{STIRv.Target=0;}
+		strategyShoot();
+		uartSend(1);//enemy is red
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
-		FRICL.Target =-5400;
-		FRICR.Target = 5400;
-		laserOn();
-		if(findEnemy){
-			autoAim();
-			
-			if(fabs(aim.yaw)<3){firing2();}
-			//else {firing1();}
-			
-			noEnemyCnt=-400;
-			sendData[0].data[0]=(int16_t)1;
-		}
-		else if(noEnemyCnt>1){
-			scaning();
-			sendData[0].data[0]=(int16_t)0;
-		}
-		else if(noEnemyCnt<-370){
-			noEnemyCnt++;
-			if(fabs(aim.yaw)<0.8){firing2();}
-			else{STIRv.Target=0;}
-		}
-		else{
-			noEnemyCnt++;
-			STIRv.Target=0;
-		}
+		strategyShoot();
+		uartSend(2);//enemy is blue
 	}
 	limtSync();
 }
-#endif
+
+void strategyShoot(){
+	FRICL.Target =-5400;
+	FRICR.Target = 5400;
+	laserOn();
+	if(findEnemy){
+		autoAim();
+		if(fabs(aim.yaw)<1){firing2();}
+		//else {firing1();}
+		noEnemyCnt=-400;
+		sendData[0].data[0]=(int16_t)1;
+	}
+	else if(noEnemyCnt>1){
+		scaning();
+		sendData[0].data[0]=(int16_t)0;
+	}
+	else if(noEnemyCnt<-370){
+		noEnemyCnt++;
+		if(fabs(aim.yaw)<1){firing2();}
+		else{STIRv.Target=0;}
+	}
+	else{
+		noEnemyCnt++;
+		STIRv.Target=0;
+	}
+}
+
+uint8_t msgRed[]="1\n",msgBlue[]="2\n";
+void uartSend(int8_t i){
+	static int16_t cnt;
+	if(cnt>500){
+		if(i==1){HAL_UART_Transmit_IT(&AUTOAIM_UART,(uint8_t*)msgRed,2);}
+		if(i==2){HAL_UART_Transmit_IT(&AUTOAIM_UART,(uint8_t*)msgBlue,2);}
+		cnt=0;
+	}
+	cnt++;
+}
+
+#endif // GUARD == 'D'
 
 

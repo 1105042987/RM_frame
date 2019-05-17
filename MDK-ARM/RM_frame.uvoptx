@@ -245,6 +245,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>imu</ItemText>
         </Ww>
+        <Ww>
+          <count>19</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>adjust.yaw</ItemText>
+        </Ww>
       </WatchWindow1>
       <MemoryWindow4>
         <Mm>
@@ -744,7 +749,7 @@
 
   <Group>
     <GroupName>Application/User</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

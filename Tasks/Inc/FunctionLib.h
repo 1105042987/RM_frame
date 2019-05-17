@@ -20,15 +20,21 @@ extern int16_t StateCnt;
 
 void routing(void);
 void routing2(void);
+
+void randing1(int8_t spd);
+	
 void fleeing1(void);
 void fleeing2(void);
 void fleeing3(void);
+
 void tossing(int8_t dir,int16_t tgt);
 void swaying(void);
 void scaning(void);
 void firing1(void);
 void firing2(void);
 void firing3(void);
-void remv(void);
+
+void remv1(void);
+void remv2(void);
 int sgn(float x);
 

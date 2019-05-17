@@ -231,7 +231,7 @@ void Referee_Update_RobotState(){
 	
 	lastHP=remainHP;
 	receiveCnt++;
-	if(receiveCnt>30&&StateFlee>1){StateFlee=0;}
+	if(receiveCnt>10&&StateFlee>1){StateFlee=0;}
 	
 	
 	switch(maxHP){
@@ -309,9 +309,9 @@ void Referee_Update_hurt(){//@yyp
 //	if(tmp==0x0){StateFlee+=2;StateCnt=0;}
 //	JUDGE_Received = 1;
 	
-//	uint8_t tmp=buffer[7]&0x0f;
-//	if(tmp==0x1){StateHurt=1;}
-//	if(tmp==0x2){StateHurt=1;}
+	uint8_t tmp=buffer[7]&0x0f;
+	if(tmp==0x1){StateHurt=1;}
+	if(tmp==0x2){StateHurt=2;}
 }
 
 
