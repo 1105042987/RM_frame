@@ -158,7 +158,7 @@ void firing1(){
 	static int8_t jam=-1;
 	if(STIRv.RxMsgC6x0.moment>8000){jam=30;}
 	///TargetSpeed = ShootFrq*45/360*36*60 = ShootFrq*270
-	if(jam<0){STIRv.Target=(2+channelrcol/66) *270;}
+	if(jam<0){STIRv.Target=(1+channelrcol/66) *270;}
 	else{STIRv.Target=-3500;jam--;}
 }
 void firing2(){
@@ -200,17 +200,25 @@ void randing1(int8_t spd){
 		tgtLast=tgt;
 		dir=sgn(tgt-pos);
 		sspd=spd;
+		CML.Target=CML.Real;
+		CMR.Target=CMR.Real;
 	}
 	if(spd>5){cnt=1;}
 	if(getLeftSr()){
-		dir=-1;
 		sspd=-1;
 		CMA.Real=-20;
+		CML.Target=CML.Real;
+		CMR.Target=CMR.Real;
+		ChassisAdd=-2000;
+		return;
 	}
 	else if(getRightSr()){
-		dir=1;
 		sspd=-1;
 		CMA.Real=-480;
+		CML.Target=CML.Real;
+		CMR.Target=CMR.Real;
+		ChassisAdd=2000;
+		return;
 	}
 	if(cnt<0){
 		cnt++;
@@ -219,7 +227,7 @@ void randing1(int8_t spd){
 	}
 	ChassisAdd=(spd*100+700)*dir;
 	if(abs(pos-tgt)<8){ChassisAdd*=0.5;}
-	if(abs(pos-tgt)<4){sspd=-1;cnt=-12;}
+	if(abs(pos-tgt)<4){sspd=-1;cnt=-10;}
 }
 
 

@@ -36,6 +36,7 @@ void strategyAct(void);
 void strategyRand(void);
 void strategyShoot(void);
 void uartSend(int8_t i);
+void uartSend2(void);
 //初始化
 void FunctionTaskInit(){
 	ChassisAdd=0;
@@ -62,9 +63,13 @@ void RemoteControlProcess(Remote *rc){
 
 	ChassisAdd=-channelrrow*2;
 	sendData[0].data[0]=(int16_t)WorkState | (int16_t)inputmode<<8;
-	sendData[0].data[1]=channellrow;
+	
+	if(GameRobotState.robot_id==7){sendData[0].data[1]=channellrow+5000;}
+	else{sendData[0].data[1]=channellrow;}
+	
 	if(channelrcol>600){sendData[0].data[2]=channellcol+5000;}
 	else{sendData[0].data[2]=channellcol;}
+	
 	sendData[0].data[3]=(int16_t)(realHeat0*20);//
 	if(WorkState == NORMAL_STATE){
 		
@@ -88,15 +93,20 @@ void selfControlProcess(Remote *rc){
 	
 	findEnemy=(uint8_t)receiveData[0].data[0];
 	sendData[0].data[0]=(int16_t)WorkState | (int16_t)inputmode<<8;
-	sendData[0].data[1]=channellrow;
-	sendData[0].data[2]=channellcol;
+//	sendData[0].data[1]=channellrow;
+//	sendData[0].data[2]=channellcol;
+	if(GameRobotState.robot_id==7){sendData[0].data[1]=channellrow+5000;}
+	else{sendData[0].data[1]=channellrow;}
+	
+	if(channellcol>600){sendData[0].data[2]=channellcol+5000;}
+	else{sendData[0].data[2]=channellcol;}
+	
 	sendData[0].data[3]=(int16_t)(realHeat0*20);
 	if(WorkState == NORMAL_STATE){
-		remv1();
 		ChassisAdd=-channelrrow*2;
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
-		strategyRand();
+		remv2();
 		//routing();
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
@@ -135,7 +145,7 @@ void strategyAct(){
 #endif  //GUARD == 'U'
 #if GUARD == 'D'
 //下平台代码
-int8_t flagFireTest=0;
+//int8_t flagFireTest=0;
 void RemoteControlProcess(){
 	offLed(6);
 	if(WorkState <= 0) return;
@@ -144,25 +154,32 @@ void RemoteControlProcess(){
 	channelrcol=0;
 	channellrow= -receiveData[0].data[1];//leftRight
 	channellcol= receiveData[0].data[2];//upDown
-	if(channellcol>4000){channellcol=channellcol-5000;flagFireTest=1;}
-	else{flagFireTest=0;}
+	
+	if(channellrow<-4000){channellrow+=5000;}
+	if(channellcol>4000){channellcol-=5000;}
+	
 	realHeat0=receiveData[0].data[3]/(float)(20.0);
+	
 	GMY.Target+=channellrow*0.001f;
 	GMP.Target+=channellcol*0.001f;
 	if(WorkState == NORMAL_STATE){
 		oneShootFlag=10;
 //		STIRp.Real=0;
 //		STIRp.Target=0;
-		if(flagFireTest){
-			FRICL.Target =-5400;
-			FRICR.Target = 5400;
-			firing2();
-		}
-		else{
-			STIRv.Target=0;
-			FRICL.Target=0;
-			FRICR.Target=0;
-		}
+//		if(flagFireTest){
+//			FRICL.Target =-5400;
+//			FRICR.Target = 5400;
+//			firing2();
+//		}
+//		else{
+//			STIRv.Target=0;
+//			FRICL.Target=0;
+//			FRICR.Target=0;
+//		}
+		
+		STIRv.Target=0;
+		FRICL.Target=0;
+		FRICR.Target=0;
 		laserOn();
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
@@ -175,16 +192,17 @@ void RemoteControlProcess(){
 		FRICL.Target=-0;
 		FRICR.Target= 0;
 		laserOn();
+		uartSend2();
 		if(findEnemy){autoAim();}
-		uartSend(1);//enemy is red
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
-		STIRv.Target=0;
-		FRICL.Target=-0;
-		FRICR.Target= 0;
+		FRICL.Target =-5400;
+		FRICR.Target = 5400;
 		laserOn();
+		uartSend2();
 		if(findEnemy){autoAim();}
-		uartSend(2);//enemy is blue
+		if(receiveData[0].data[2]>4000){firing2();}
+		else{firing1();}
 	}
 	limtSync();
 }
@@ -199,9 +217,14 @@ void selfControlProcess(){
 	channelrcol = 0;
 	channellrow = -receiveData[0].data[1];//leftRight
 	channellcol = receiveData[0].data[2];//upDown
+	
+	if(channellrow<-4000){channellrow+=5000;}
+	if(channellcol>4000){channellcol-=5000;}
+	
 	realHeat0=receiveData[0].data[3]/(float)(20.0);
 	GMY.Target+=channellrow*0.001f;
 	GMP.Target+=channellcol*0.001f;
+	
 	if(WorkState == NORMAL_STATE){
 		oneShootFlag=8;
 		STIRv.Target=0;
@@ -212,12 +235,16 @@ void selfControlProcess(){
 	if(WorkState == ADDITIONAL_STATE_ONE){
 //		if(oneShootFlag){STIRv.Target=2700;oneShootFlag--;}
 //		else{STIRv.Target=0;}
-		strategyShoot();
-		uartSend(1);//enemy is red
+		STIRv.Target=0;
+		FRICL.Target=-0;
+		FRICR.Target= 0;
+		laserOn();
+		uartSend2();
+		if(findEnemy){autoAim();}
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
 		strategyShoot();
-		uartSend(2);//enemy is blue
+		uartSend2();
 	}
 	limtSync();
 }
@@ -258,7 +285,15 @@ void uartSend(int8_t i){
 	}
 	cnt++;
 }
-
+void uartSend2(){
+	static int16_t cnt;
+	if(cnt>500){
+		if(receiveData[0].data[1]>4000){HAL_UART_Transmit_IT(&AUTOAIM_UART,(uint8_t*)msgBlue,2);}
+		else{HAL_UART_Transmit_IT(&AUTOAIM_UART,(uint8_t*)msgRed,2);}
+		cnt=0;
+	}
+	cnt++;
+}
 #endif // GUARD == 'D'
 
 

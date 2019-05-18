@@ -250,6 +250,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>adjust.yaw</ItemText>
         </Ww>
+        <Ww>
+          <count>20</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>GameRobotState.robot_id,0x0A</ItemText>
+        </Ww>
       </WatchWindow1>
       <MemoryWindow4>
         <Mm>
