@@ -405,10 +405,13 @@ void Referee_Transmit_UserData()//数据上传可以限制在10hz
 {
 	uint8_t buffer[28]={0};
 	//test
-	custom_data.data1 += 0.1f;
-	custom_data.data2 += 0.2f;
-	custom_data.data3 += 0.3f;
-	//user_data.mask = 0xE0;//二进制最左位对应灯条最右灯
+	custom_data.data1 = AutoClimb_Level;
+	custom_data.data2 = 6*AutoGet_Bullet_S+20*AutoGet_Bullet_B;
+	if(CLAW_IS_UP)
+		custom_data.data3=111111;
+	if(CLAW_IS_DOWN)
+		custom_data.data3=0.0f;
+	//user_data.masks = 0xE0;//二进制最左位对应灯条最右灯
 	
 	unsigned char * bs1 = (unsigned char*)&custom_data.data1;
 	unsigned char * bs2 = (unsigned char*)&custom_data.data2;

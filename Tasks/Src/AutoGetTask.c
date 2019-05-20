@@ -11,18 +11,19 @@
   */
 	#include "includes.h"
 	
-#define FIRSTBOX 25
-#define SECONDBOX 820
-#define THIRDBOX 1615             //这五个是箱子位置
+#define FIRSTBOX 10
+#define SECONDBOX 790
+#define THIRDBOX 1600             //这五个是箱子位置
 #define FOURTHBOX 400
 #define FIFTHBOX 1200
-#define SIXTHBOX 800
+#define SIXTHBOX 850
 
 #define LOWERCRITICIAL 2000      //岛下临界值
 #define UPPERCRITICIAL_LEFT 300 // 岛上临界值
 #define UPPERCRITICIAL_RIGHT 700
 
-//#define UPLEVEL 432    //抬升时的合适高度 必须被4整除   已写到.h里
+
+//#define UPLEVEL 432    //抬升时的合适高度 必须被4整除                            已写到.h里
 #define UPPROTECT 400  //抬升的临界保护值
 
 #define OUTANGLE 190  //抓箱子的角度值
@@ -37,6 +38,8 @@ uint32_t AutoGet_Alreadywaited=0;
 uint32_t AutoGet_Success=0;
 uint32_t AutoGet_Error=0;
 uint32_t AutoGet_Skill=0;
+uint32_t AutoGet_Bullet_S=0;
+uint32_t AutoGet_Bullet_B=0;
 uint32_t Claw_AlreadyRollOut=0;
 uint32_t Claw_AlreadyWaited=0;
 uint32_t Claw_AlreadyTight=0;
@@ -521,10 +524,18 @@ void Claw_Go_and_Get(int position)
 					{auto_waiter=0;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{Box_ThrowForward();     break;}
-				default:{AutoGet_Stop_And_Clear(); AutoGet_Success=1;  break;}
+				default:{
+					if(ON_THE_GROUND)
+						AutoGet_Bullet_S+=1;
+					if(ON_THE_FLOOR)
+						AutoGet_Bullet_B+=1;
+				AutoGet_Stop_And_Clear(); 
+				AutoGet_Success=1;	
+        custom_data.masks=0x00;					
+				break;}
 			}
 		}
-	if(AutoGet_Skill==1)
+	if(AutoGet_Skill==1)  //将箱子取回来
 	{
 		switch(AutoGet_TotalStep)
 			{
@@ -541,7 +552,7 @@ void Claw_Go_and_Get(int position)
 					if(AutoGet_Alreadywaited==0)
 					{auto_waiter=0;AutoGet_Alreadywaited=1;}  
 					  break;}
-				case 4:{CLAWIN;auto_waiter=500;AutoGet_TotalStep++;break;}
+				case 4:{CLAWIN;auto_waiter=1000;AutoGet_TotalStep++;break;}
 				case 5:{if(auto_waiter==0){CLAWLOOSE;auto_counter=200;AutoGet_TotalStep++;break;}}
 				default:
 				{
@@ -731,7 +742,7 @@ void AutoGet_SensorControl()
 	if(Claw_FindingNextBox_Upper_Forward==1||Claw_FindingNextBox_Upper_Backward==1)
 			Claw_GoToNextBox_upper();	
 }
-void Claw_Up()//整个机构的抬升
+void Claw_Up()//整个机构的抬升  往上走时角度下降
 {
 			if(Claw_UpToPosition==1&&Claw_UpAngle<=UPLEVEL&&auto_counter==0)//-480
 			{
@@ -741,15 +752,15 @@ void Claw_Up()//整个机构的抬升
 				NMUDR.TargetAngle=-Claw_UpAngle;
 				auto_counter=1;
 			}
-			if(Claw_UpToPosition==1&&NMUDL.RealAngle<=(-UPLEVEL+20)&&NMUDR.RealAngle<=(-UPLEVEL+20))
+			if(Claw_UpToPosition==1&&CLAW_IS_UP)
 			{
 				Claw_UpToPosition=0;
 				NMUDL.TargetAngle=-UPLEVEL;
 				NMUDR.TargetAngle=-UPLEVEL;
 			}
 }
-
-void Claw_Down()
+uint32_t Down_stucking=0;
+void Claw_Down()   //往下走时角度增加
 {
 	 if(Claw_DownToPosition==1&&auto_counter==0)
 	 {
@@ -759,13 +770,30 @@ void Claw_Down()
 		 auto_counter=1;
 	 }
 	 if(NMUDL.TargetAngle)
-	 if(Claw_DownToPosition==1&&NMUDL.RealAngle>=-15&&NMUDR.RealAngle>=-15)
+	 if(Claw_DownToPosition==1&&CLAW_IS_DOWN)
 	 {
 		 Claw_DownToPosition=0;
 		 NMUDL.TargetAngle=-15;
 		 NMUDR.TargetAngle=-15;
 		 UFM.TargetAngle=FOURTHBOX;
+		 Down_stucking=0;
+		 custom_data.masks=0x00;
 	 }
+}
+
+
+void ClawUpDown_Protect()
+{
+	if(Claw_DownToPosition==1&& NMUDL.RxMsgC6x0.moment>10000&&NMUDR.RxMsgC6x0.moment>10000)
+		Down_stucking+=1;
+	if(Down_stucking>=35)
+	{
+		 Claw_DownToPosition=0;
+		 NMUDL.TargetAngle=NMUDL.RealAngle-20;
+		 NMUDR.TargetAngle=NMUDR.RealAngle-20;
+		 UFM.TargetAngle=FOURTHBOX;
+		 custom_data.masks=0x01;
+	}
 }
 
 void AutoGet_SwitchState()//执行哪种取弹模式 岛下/岛上

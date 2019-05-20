@@ -59,10 +59,11 @@ void GetRemoteSwitchAction(RemoteSwitch_t *sw, uint8_t val)
 	}			
 }
 
-
+extern uint32_t protect_cnt;
 //遥控器数据解算
 void RemoteDataProcess(uint8_t *pData)
 {
+	protect_cnt=0;
 	HAL_IWDG_Refresh(&hiwdg);
 	if(pData == NULL)
 	{

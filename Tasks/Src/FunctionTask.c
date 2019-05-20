@@ -602,7 +602,11 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			else if(key->v &KEY_F)
 			{
 				if((ON_THE_GROUND&&CLAW_IS_UP)||(ON_THE_FLOOR&&CLAW_IS_DOWN))
+				{
 				dooropen=1;
+				AutoGet_Bullet_S=0;
+				AutoGet_Bullet_B=0;
+				}
 			}
 			else if(key->v& KEY_Z)
 			{
@@ -726,6 +730,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		AutoGet_AutoDown();
 		AutoClimb_SwitchState();
 		ClawUpDown_SwitchState();
+		ClawUpDown_Protect();
 		Saving_SwitchState();
 		Yaw_Check();
 		Rotate_Check();

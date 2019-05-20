@@ -31,7 +31,7 @@
 #define FLAG_SETbr(target) if(target.val_ref>CHANGE_POINTbr) target.flag = 0; else target.flag = 1;
 #define FLAG_SETdb(target) if(target.val_ref<CHANGE_POINTdb) target.flag = 0; else target.flag = 1;
 #define FLAG_SET_TRICK(target) if((AutoClimbing==1&&ChassisSpeedRef.forward_back_ref>0&&NMCDL.RealAngle>-230)||(AutoClimbing==1&&NMCDL.RealAngle<-950)) target.flag = 1; else target.flag = 0;
-
+//Ô¶0½ü1
 #define ON_THE_GROUND AutoClimb_Level==0
 #define ON_THE_FLOOR AutoClimb_Level==2
 typedef __packed struct

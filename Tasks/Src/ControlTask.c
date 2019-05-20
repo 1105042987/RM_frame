@@ -100,6 +100,8 @@ void WorkStateFSM(void)
 		}break;
 		case STOP_STATE:				//紧急停止
 		{
+			CLAWLOOSE;
+			CLAWIN;
 			for(int i=0;i<8;i++) {InitMotor(can1[i]);InitMotor(can2[i]);}
 			setCAN11();setCAN12();setCAN21();setCAN22();
 			for(int i=0;i<8;i++) {can1[i]->Intensity = 0;can2[i]->Intensity = 0;}
@@ -231,13 +233,23 @@ void checkAutoGet()
 		if(AutoGetCnt > 2000)
 		{
 			AutoGet_Error=1;
+			if(AutoGet_TotalStep==2)
+				custom_data.masks=0x80;
+			if(AutoGet_TotalStep==3)
+				custom_data.masks=0x40;
 			AutoGet_Stop_And_Clear();
 			AutoGetCnt = 0;
 		}
 		AutoGet_LastStep = AutoGet_TotalStep;
 	}
 }
-
+uint32_t protect_cnt=0;
+void Protect_dog()
+{
+	CLAWLOOSE;
+	CLAWIN;
+	WorkState=STOP_STATE;
+}
 //时间中断入口函数
 uint16_t dataSendCnt = 0;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
@@ -280,13 +292,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(clawback==1&&clawback_cnt>0) clawback_cnt--;
 		if(clawback==0) clawback_cnt=1000;
 		if(doorshake_cnt>0) doorshake_cnt--;
+		protect_cnt++;
+		if(protect_cnt>=150)
+			Protect_dog();
 		checkStuck();
 		checkAutoGet();
 		
 		dataSendCnt++;
 		if(dataSendCnt >= 120)
 		{
-			//Referee_Transmit_UserData();
+			Referee_Transmit_UserData();
 			dataSendCnt = 0;
 		}
 		
@@ -307,6 +322,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				HAL_UART_Receive_DMA(&RC_UART, rc_data, 18);
 				rc_cnt = 0;
 				rc_first_frame = 1;
+				CMBL.TargetAngle=0;
+				CMBR.TargetAngle=0;
+				CMFL.TargetAngle=0;
+				CMFR.TargetAngle=0;
 			}
 			rc_update = 0;
 		}
