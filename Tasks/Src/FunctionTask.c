@@ -160,6 +160,8 @@ void Saving_SwitchState()
 		EndSaving();
 	else if(saving==1)
 		Saving();
+	else if(saving == 2)
+		SavingTest();
 }
 
 void Look_Normally()
@@ -576,6 +578,11 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 				dooropen=0;
 			}
+			else if(key->v & KEY_R)
+			{
+				saving = 2;
+			}
+			
 		}break;
 		case SHIFT:				//quick
 		{

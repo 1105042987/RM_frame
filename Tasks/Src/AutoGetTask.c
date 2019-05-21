@@ -12,10 +12,10 @@
 	#include "includes.h"
 	
 #define FIRSTBOX 10
-#define SECONDBOX 790
-#define THIRDBOX 1600             //这五个是箱子位置
-#define FOURTHBOX 400
-#define FIFTHBOX 1200
+#define SECONDBOX 820
+#define THIRDBOX 1630             //这五个是箱子位置
+#define FOURTHBOX 430
+#define FIFTHBOX 1230
 #define SIXTHBOX 850
 
 #define LOWERCRITICIAL 2000      //岛下临界值
@@ -332,7 +332,7 @@ void Claw_GoTo(int a)//爪子走到第a个箱子的位置
 	switch(a)
 	{
 		case 1:{UFM.TargetAngle=FIRSTBOX;
-		        if(hasReach(&UFM,15))
+		        if(hasReach(&UFM,5))
 		           AutoGet_TotalStep++;
 		        break;}
 		case 2:{UFM.TargetAngle=SECONDBOX;
@@ -340,7 +340,7 @@ void Claw_GoTo(int a)//爪子走到第a个箱子的位置
 		           AutoGet_TotalStep++;
 		        break;}
 		case 3:{UFM.TargetAngle=THIRDBOX;
-		        if(hasReach(&UFM,20))
+		        if(hasReach(&UFM,5))
 		           AutoGet_TotalStep++;
 		        break;}
 		case 4:{UFM.TargetAngle=FOURTHBOX;

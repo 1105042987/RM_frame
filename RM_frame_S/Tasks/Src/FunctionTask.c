@@ -254,10 +254,15 @@ void RescueLoop()
 		
 		if(masterHigh==0 && masterLow==1)//tight
 		{
-			firstread=0;
 			loosed=1;
-			SR.TargetAngle = 0;
-			SL.TargetAngle = 0;
+			if(!leftClawTight || !rightClawTight)
+			{
+				SR.TargetAngle = 0;
+				SL.TargetAngle = 0;
+			}
+			rightClawTight = 1;
+			leftClawTight = 1;
+			
 		}
 	}
 	
