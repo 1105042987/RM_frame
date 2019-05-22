@@ -11,16 +11,16 @@
   */
 	#include "includes.h"
 	
-#define FIRSTBOX 10
+#define FIRSTBOX 25
 #define SECONDBOX 820
-#define THIRDBOX 1630             //这五个是箱子位置
+#define THIRDBOX 1600             //这五个是箱子位置
 #define FOURTHBOX 430
 #define FIFTHBOX 1230
 #define SIXTHBOX 850
 
 #define LOWERCRITICIAL 2000      //岛下临界值
-#define UPPERCRITICIAL_LEFT 300 // 岛上临界值
-#define UPPERCRITICIAL_RIGHT 700
+#define UPPERCRITICIAL_LEFT 500 // 岛上临界值
+#define UPPERCRITICIAL_RIGHT 1200
 
 
 //#define UPLEVEL 432    //抬升时的合适高度 必须被4整除                            已写到.h里
@@ -332,7 +332,7 @@ void Claw_GoTo(int a)//爪子走到第a个箱子的位置
 	switch(a)
 	{
 		case 1:{UFM.TargetAngle=FIRSTBOX;
-		        if(hasReach(&UFM,5))
+		        if(hasReach(&UFM,20))
 		           AutoGet_TotalStep++;
 		        break;}
 		case 2:{UFM.TargetAngle=SECONDBOX;
@@ -340,7 +340,7 @@ void Claw_GoTo(int a)//爪子走到第a个箱子的位置
 		           AutoGet_TotalStep++;
 		        break;}
 		case 3:{UFM.TargetAngle=THIRDBOX;
-		        if(hasReach(&UFM,5))
+		        if(hasReach(&UFM,50))
 		           AutoGet_TotalStep++;
 		        break;}
 		case 4:{UFM.TargetAngle=FOURTHBOX;
@@ -862,7 +862,7 @@ void AutoGet_AutoDown()
 //	if(((abs(ChassisSpeedRef.forward_back_ref)>=200 * RC_CHASSIS_SPEED_REF)||(abs(ChassisSpeedRef.rotate_ref)>=15* MOUSE_TO_YAW_ANGLE_INC_FACT*15))
 //		&&AutoGet_Success==1)
 	if(abs(CMFL.RxMsgC6x0.RotateSpeed)>2500 && abs(CMFR.RxMsgC6x0.RotateSpeed)>2500 && abs(CMBL.RxMsgC6x0.RotateSpeed)>2500 && abs(CMBR.RxMsgC6x0.RotateSpeed)>2500			//to be modified
-		&&AutoGet_Success==1)
+		&&AutoGet_Success==1&&ON_THE_GROUND)
 	{
 		Claw_DownToPosition=1;
 		State_Common();

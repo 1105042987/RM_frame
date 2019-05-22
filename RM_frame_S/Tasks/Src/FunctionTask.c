@@ -239,7 +239,7 @@ void RescueLoop()
 			}
 		}
 		
-		if(masterHigh==1 && masterLow==1)//loose
+		if(masterHigh==0 && masterLow==1)//loose
 		{
 			firstread=0;
 			loosing = 1;
@@ -252,7 +252,7 @@ void RescueLoop()
 			rightClawZero = 0;
 		}
 		
-		if(masterHigh==0 && masterLow==1)//tight
+		if(masterHigh==1 && masterLow==1)//tight
 		{
 			loosed=1;
 			if(!leftClawTight || !rightClawTight)
@@ -262,7 +262,41 @@ void RescueLoop()
 			}
 			rightClawTight = 1;
 			leftClawTight = 1;
-			
+		}
+		if(masterHigh==0 && masterLow==0)
+		{
+			loosed = 1;
+		}
+	}
+	else
+	{
+		if(masterHigh==0 && masterLow==1)//loose
+		{
+			firstread=0;
+			loosing = 1;
+		}
+		else loosing = 0;
+		if(loosing && loosed)
+		{
+			loosed = 0;
+			leftClawZero = 0;
+			rightClawZero = 0;
+		}
+		
+		if(masterHigh==1 && masterLow==1)//tight
+		{
+			loosed=1;
+			if(!leftClawTight || !rightClawTight)
+			{
+				SR.TargetAngle = 0;
+				SL.TargetAngle = 0;
+			}
+			rightClawTight = 1;
+			leftClawTight = 1;
+		}
+		if(masterHigh==0 && masterLow==0)
+		{
+			loosed = 1;
 		}
 	}
 	

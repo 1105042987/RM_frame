@@ -42,8 +42,10 @@ extern uint32_t sensorlock_cnt;
 extern uint32_t clawback;
 extern uint32_t clawback_cnt;
 extern uint32_t doorshake_cnt;
+extern uint32_t saving;
 uint32_t AutoGet_LastStep = 1;
 uint32_t AutoGetCnt = 0;
+uint16_t SaveClearCnt = 0;
 
 void playMusicSuperMario(void){
 	HAL_TIM_PWM_Start(&BUZZER_TIM, TIM_CHANNEL_1);
@@ -51,6 +53,12 @@ void playMusicSuperMario(void){
 			PLAY(SuperMario[i].note, SuperMario[i].time);
 	}
 	HAL_TIM_PWM_Stop(&BUZZER_TIM, TIM_CHANNEL_1);
+}
+
+void SaveClear()
+{
+	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_RESET);
 }
 
 //状态机切换
@@ -292,6 +300,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(clawback==1&&clawback_cnt>0) clawback_cnt--;
 		if(clawback==0) clawback_cnt=1000;
 		if(doorshake_cnt>0) doorshake_cnt--;
+		if(SaveClearCnt < 1000)SaveClearCnt++;
+		else
+		{
+			SaveClearCnt = 0;
+			SaveClear();
+			if(saving == 0)saving = 12;
+		}
 		protect_cnt++;
 		if(protect_cnt>=150)
 			Protect_dog();

@@ -22,6 +22,9 @@ MouseMode_e MouseLMode = NO_CLICK;
 MouseMode_e MouseRMode = NO_CLICK;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
+int16_t forwardRamp=0;
+int16_t leftRamp = 0;
+float rampRate = 0.1;
 ChassisSpeed_Ref_t ChassisSpeedRef; 
 #define leftstate HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_12)
 #define rightstate HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_13)
@@ -51,7 +54,7 @@ uint32_t shift_locker=0;
 uint32_t ctrl_cnt=0;
 uint32_t shift_cnt=0;
 uint32_t saving_count=0;
-uint32_t saving=2;
+uint32_t saving=12;
 uint32_t saveing_flag=0;
 
 uint32_t OnePush_Locker=0;
@@ -60,7 +63,29 @@ uint32_t openthegay=0;
 
 uint32_t Direction_Indicator=0;
 
+void InitialSave()
+{
+	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_RESET);
+}
 
+void Saving()
+{
+	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_RESET);
+}
+
+void EndSaving()
+{
+	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_SET);
+}
+
+void SavingTest()
+{
+	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_SET);
+}
 //初始化
 void FunctionTaskInit()
 {
@@ -129,39 +154,20 @@ void Door_SwitchState()
 	Door_Shake();
 }
 
-void InitialSave()
-{
-	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_RESET);
-}
-
-void Saving()
-{
-	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_RESET);
-}
-
-void EndSaving()
-{
-	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_SET);
-}
-
-void SavingTest()
-{
-	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_SET);
-}
-	
-
 void Saving_SwitchState()
 {
 	if(saving==0)
+	{
 		EndSaving();
+	}
 	else if(saving==1)
+	{
 		Saving();
+	}
 	else if(saving == 2)
+	{
 		SavingTest();
+	}
 }
 
 void Look_Normally()
@@ -226,19 +232,31 @@ void RemoteControlProcess(Remote *rc)
 		
 		SetDoorZero();//右纵向是开关舱门	
 		Door_SwitchState();
-		if(channelrcol<-500)
-			dooropen=1;
-		if(channelrcol>500)
-			dooropen=0;
-		if(DebugState==DEBUG_GET_STATE)                               //取弹模式
-	{
-		UM1.TargetAngle+=channelrrow*0.001;
-		UM2.TargetAngle-=channelrrow*0.001;//右横向是爪子的上下移动
+//		if(channelrcol<-500)
+//			dooropen=1;
+//		if(channelrcol>500)
+//			dooropen=0;
+		if(1)
+		{
+			UM1.TargetAngle+=channelrrow*0.001;
+			UM2.TargetAngle-=channelrrow*0.001;//右横向是爪子的上下移动
+			NMUDL.TargetAngle+=channelrcol*0.06;
+			NMUDR.TargetAngle+=channelrcol*0.06;
 			
-		if(channellcol>500)
-		CLAWOUT;//左纵向是爪子的向前弹出
-		if(channellcol<-500)                                  
-		CLAWIN;
+			if(channellcol>500)
+				CLAWOUT;//左纵向是爪子的向前弹出
+			if(channellcol<-500)                                  
+				CLAWIN;
+		}
+		else if(DebugState==DEBUG_GET_STATE)                               //取弹模式
+		{
+			UM1.TargetAngle+=channelrrow*0.001;
+			UM2.TargetAngle-=channelrrow*0.001;//右横向是爪子的上下移动
+			
+			if(channellcol>500)
+				CLAWOUT;//左纵向是爪子的向前弹出
+			if(channellcol<-500)                                  
+				CLAWIN;
 	}
 	
 	else if(DebugState==DEBUG_CLIMB_STATE)
@@ -356,10 +374,12 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
   {
 	  if(EngineerState==COMMON_STATE||EngineerState==CLIMB_STATE)
 		{
-			if(saving==0||saving==2)
-		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-20;
+			if(saving==0||saving==12)
+				ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-20;
 			else if(saving==1)
-			ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-175;	
+				ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-20;	
+			else if(saving==2)
+				ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-175;	
 		}
 	  else if(EngineerState==GET_STATE)
 		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
@@ -367,10 +387,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	
 	if((EngineerState!=COMMON_STATE||saving==1)||ON_THE_FLOOR)
 	{
-	if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
-	YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
-	if(YTP.RxMsgC6x0.moment>-1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
-	YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
+		if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
+		YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
+		if(YTP.RxMsgC6x0.moment>-1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
+		YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
   }
 
 	#else
@@ -429,27 +449,49 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	KeyboardModeFSM(key);//下面是移动的控制 在写命令时不要用wasd键
 		if(key->v & KEY_W)  		//key: w
 		{
-				if (Direction_Indicator==NORMAL)
-					ChassisSpeedRef.forward_back_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
-				if (Direction_Indicator==REVERSE)
-					ChassisSpeedRef.forward_back_ref =  -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
-			  if(Direction_Indicator==GET)
+			if (Direction_Indicator==NORMAL)
+			{
+				//ChassisSpeedRef.forward_back_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+				forwardRamp += rampRate*(KM_FORWORD_BACK_SPEED * FBSpeedRamp.Calc(&FBSpeedRamp) - forwardRamp);
+				ChassisSpeedRef.forward_back_ref = forwardRamp;
+			}
+			if (Direction_Indicator==REVERSE)
+			{
+				//ChassisSpeedRef.forward_back_ref =  -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+				forwardRamp += rampRate*(-KM_FORWORD_BACK_SPEED * FBSpeedRamp.Calc(&FBSpeedRamp) - forwardRamp);
+				ChassisSpeedRef.forward_back_ref = forwardRamp;
+			}
+			if(Direction_Indicator==GET)
+			{
 				ChassisSpeedRef.left_right_ref =  -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp)/2;
+			}
 		}
 			else if(key->v & KEY_S) 	//key: s
 			{
-					if(Direction_Indicator==NORMAL)
-						ChassisSpeedRef.forward_back_ref = -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
-					if(Direction_Indicator==REVERSE)
-						ChassisSpeedRef.forward_back_ref = KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
-				  if(Direction_Indicator==GET)
+				if(Direction_Indicator==NORMAL)
+				{
+					//ChassisSpeedRef.forward_back_ref = -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+					forwardRamp += rampRate*(-KM_FORWORD_BACK_SPEED * FBSpeedRamp.Calc(&FBSpeedRamp) - forwardRamp);
+					ChassisSpeedRef.forward_back_ref = forwardRamp;
+				}
+				if(Direction_Indicator==REVERSE)
+				{
+					//ChassisSpeedRef.forward_back_ref = KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
+					forwardRamp += rampRate*(KM_FORWORD_BACK_SPEED * FBSpeedRamp.Calc(&FBSpeedRamp) - forwardRamp);
+					ChassisSpeedRef.forward_back_ref = forwardRamp;
+				}
+				if(Direction_Indicator==GET)
+				{
 					ChassisSpeedRef.left_right_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp)/2;
+				}
 			}
 			else
 			{
 				if(Direction_Indicator==NORMAL||Direction_Indicator==REVERSE)
 				{
-					ChassisSpeedRef.forward_back_ref = 0;
+					//ChassisSpeedRef.forward_back_ref = 0;
+					forwardRamp += rampRate*(0 - forwardRamp);
+					ChassisSpeedRef.forward_back_ref = forwardRamp;
 				}
 				else if(Direction_Indicator==GET)
 				{
@@ -459,27 +501,35 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			if(key->v & KEY_D)  		//key: d
 			{	
-					if(Direction_Indicator==NORMAL)
-						ChassisSpeedRef.left_right_ref =  KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
-					if(Direction_Indicator==REVERSE)
-						ChassisSpeedRef.left_right_ref =  -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
-					if(Direction_Indicator==GET)
-					{
+				if(Direction_Indicator==NORMAL)
+				{
+					ChassisSpeedRef.left_right_ref =  KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+				}
+				if(Direction_Indicator==REVERSE)
+				{
+					ChassisSpeedRef.left_right_ref =  -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+				}
+				if(Direction_Indicator==GET)
+				{
 					ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/12;
-					ChassisSpeedRef.forward_back_ref =  -KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/2;
-					}
+					ChassisSpeedRef.forward_back_ref =  -KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp);
+				}
 			}
 			else if(key->v & KEY_A) 	//key: a
 			{	
-					if(Direction_Indicator==NORMAL)
-						ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
-					if(Direction_Indicator==REVERSE)
-						ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
-			    if(Direction_Indicator==GET)
-					{
+				if(Direction_Indicator==NORMAL)
+				{
+					ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+				}
+				if(Direction_Indicator==REVERSE)
+				{
+					ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
+				}
+				if(Direction_Indicator==GET)
+				{
 					ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/12;
 					ChassisSpeedRef.forward_back_ref =  KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/2;
-					}
+				}
 			}
 			else
 			{
