@@ -78,6 +78,14 @@ void judgeUartRxCpltCallback(void)
 			}					
 		}
 		
+		
+		//@yyp 
+		if(buffercnt == 16 && cmdID == 0x0301){
+			if (myVerify_CRC16_Check_Sum(buffer, 16)){
+				Judge_Refresh_Interact();
+			}					
+		}
+		
 	}
 	else{
 		if(tmp_judge == 0xA5){
@@ -224,7 +232,7 @@ void Referee_Update_RobotState(){
 		receiveCnt=0;
 	}
 	else if(lastHP-remainHP>9){
-		if(StateSway){StateFlee+=2;}
+		if(StateSway||StateFlee){StateFlee+=2;}
 		else{StateFlee=2;}
 		receiveCnt=0;
 	}
@@ -313,7 +321,12 @@ void Referee_Update_hurt(){//@yyp
 	if(tmp==0x1){StateHurt=1;}
 	if(tmp==0x2){StateHurt=2;}
 }
-
+//int test;
+void Judge_Refresh_Interact(){
+	if(buffer[14]==1){
+		StateFlee=8;
+	}
+}
 
 
 client_custom_data_t custom_data;

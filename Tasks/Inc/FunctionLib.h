@@ -22,6 +22,7 @@ void routing(void);
 void routing2(void);
 
 void randing1(int8_t spd);
+void randing2(int8_t spd);
 	
 void fleeing1(void);
 void fleeing2(void);
@@ -29,7 +30,8 @@ void fleeing3(void);
 
 void tossing(int8_t dir,int16_t tgt);
 void swaying(void);
-void scaning(void);
+void scaning1(void);
+void scaning2(void);
 void firing1(void);
 void firing2(void);
 void firing3(void);

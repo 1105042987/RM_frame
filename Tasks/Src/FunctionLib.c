@@ -146,10 +146,26 @@ void swaying(){
 }
 
 
-void scaning(){
-	GMY.Target-=0.32;
-	GMP.Target=-15;
+void scaning1(){
+	static float ref;
 	STIRv.Target=0;
+	GMY.Target-=0.32;
+	GMP.Target=-10+15*sin(ref);
+	ref+=0.015;
+}
+void scaning2(){
+	static float ref;
+	STIRv.Target=0;
+	if(receiveData[0].data[1]>4000){//enemy blue
+		GMY.Target-=0.32;
+		GMP.Target=-10+15*sin(ref);
+		ref+=0.015;
+	}
+	else{//enemy red
+		GMY.Target-=0.25;
+		GMP.Target=-12+10*sin(ref);
+		ref+=0.03;
+	}
 }
 
 
@@ -191,19 +207,6 @@ void firing3(){
 
 void randing1(int8_t spd){
 	static int8_t dir=0,sspd=-1,cnt=1;
-	static int16_t pos,tgt,tgtLast;
-	pos=CMA.Real;
-	//125,252,370,488
-	if(sspd!=spd){
-		tgt=-rand()%45*10-20;
-		while(abs(tgt-tgtLast)>160){tgt=-rand()%45*10-20;}
-		tgtLast=tgt;
-		dir=sgn(tgt-pos);
-		sspd=spd;
-		CML.Target=CML.Real;
-		CMR.Target=CMR.Real;
-	}
-	if(spd>5){cnt=1;}
 	if(getLeftSr()){
 		sspd=-1;
 		CMA.Real=-20;
@@ -220,6 +223,20 @@ void randing1(int8_t spd){
 		ChassisAdd=2000;
 		return;
 	}
+	static int16_t pos,tgt,tgtLast;
+	pos=CMA.Real;
+	//125,252,370,488
+	if(sspd!=spd){
+		tgt=-rand()%45*10-20;
+		while(abs(tgt-tgtLast)>160 || abs(tgt-tgtLast)<60){tgt=-rand()%45*10-20;}
+		tgtLast=tgt;
+		dir=sgn(tgt-pos);
+		sspd=spd;
+		CML.Target=CML.Real;
+		CMR.Target=CMR.Real;
+	}
+	if(spd>5){cnt=1;}
+	
 	if(cnt<0){
 		cnt++;
 		ChassisAdd=0;
@@ -228,6 +245,59 @@ void randing1(int8_t spd){
 	ChassisAdd=(spd*100+700)*dir;
 	if(abs(pos-tgt)<8){ChassisAdd*=0.5;}
 	if(abs(pos-tgt)<4){sspd=-1;cnt=-10;}
+}
+
+
+void randing2(int8_t spd){
+	static int8_t dir=0,sspd=-1,pauseCnt=1,aeriaLock;
+	static int16_t pos,tgt,tgtLast,lockCnt;
+	if(getLeftSr()){
+		sspd=-1;
+		CMA.Real=-20;
+		CML.Target=CML.Real;
+		CMR.Target=CMR.Real;
+		ChassisAdd=-2000;
+		return;
+	}
+	else if(getRightSr()){
+		sspd=-1;
+		CMA.Real=-480;
+		CML.Target=CML.Real;
+		CMR.Target=CMR.Real;
+		ChassisAdd=2000;
+		return;
+	}
+	pos=CMA.Real;
+	//125,252,370,488
+	if(sspd!=spd){
+		tgt=-rand()%45*10-20;
+		while(abs(tgt-tgtLast)>160 || abs(tgt-tgtLast)<60){tgt=-rand()%45*10-20;}
+		if(aeriaLock){
+			while(tgt>-120 || abs(tgt-tgtLast)>160 || abs(tgt-tgtLast)<60){tgt=-rand()%45*10-20;}
+		}
+		tgtLast=tgt;
+		dir=sgn(tgt-pos);
+		sspd=spd;
+		CML.Target=CML.Real;
+		CMR.Target=CMR.Real;
+		if(spd>9){aeriaLock=1;}
+	}
+	if(spd>5){pauseCnt=1;}
+	if(pauseCnt<0){
+		pauseCnt++;
+		ChassisAdd=0;
+		return;
+	}
+	if(aeriaLock){
+		lockCnt++;
+		if(lockCnt>15000){
+			aeriaLock=0;
+			lockCnt=0;
+		}
+	}
+	ChassisAdd=(spd*100+700)*dir;
+	if(abs(pos-tgt)<8){ChassisAdd*=0.5;}
+	if(abs(pos-tgt)<4){sspd=-1;pauseCnt=-10;}
 }
 
 

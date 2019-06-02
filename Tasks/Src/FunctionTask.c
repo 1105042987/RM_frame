@@ -123,10 +123,12 @@ void strategyRand(){
 		else{StateFlee=1;}
 	}
 	if(StateFlee>7){randing1(10);}
+	else if(StateFlee>1){randing1(5);}
 	else if(StateFlee==1){randing1(2);}
-	else if(StateFlee==2){randing1(5);}
 	else{randing1(0);}
 }
+
+
 void strategyAct(){
 	if(findEnemy){
 		if(StateSway||StateFlee){}
@@ -196,8 +198,8 @@ void RemoteControlProcess(){
 		if(findEnemy){autoAim();}
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
-		FRICL.Target =-5400;
-		FRICR.Target = 5400;
+		FRICL.Target =-5500;
+		FRICR.Target = 5500;
 		laserOn();
 		uartSend2();
 		if(findEnemy){autoAim();}
@@ -250,23 +252,23 @@ void selfControlProcess(){
 }
 
 void strategyShoot(){
-	FRICL.Target =-5400;
-	FRICR.Target = 5400;
+	FRICL.Target =-5500;
+	FRICR.Target = 5500;
 	laserOn();
 	if(findEnemy){
 		autoAim();
-		if(fabs(aim.yaw)<1){firing2();}
+		if(fabs(aim.yaw)<2 && aim.dis==0){firing2();}
 		//else {firing1();}
-		noEnemyCnt=-400;
+		noEnemyCnt=-200;
 		sendData[0].data[0]=(int16_t)1;
 	}
 	else if(noEnemyCnt>1){
-		scaning();
+		scaning2();
 		sendData[0].data[0]=(int16_t)0;
 	}
-	else if(noEnemyCnt<-370){
+	else if(noEnemyCnt<-170){
 		noEnemyCnt++;
-		if(fabs(aim.yaw)<1){firing2();}
+		if(fabs(aim.yaw)<3 && aim.dis==0){firing2();}
 		else{STIRv.Target=0;}
 	}
 	else{
@@ -274,6 +276,11 @@ void strategyShoot(){
 		STIRv.Target=0;
 	}
 }
+
+
+
+
+
 
 uint8_t msgRed[]="1\n",msgBlue[]="2\n";
 void uartSend(int8_t i){

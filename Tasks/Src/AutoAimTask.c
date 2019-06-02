@@ -56,6 +56,7 @@ GMAngle_t adjust;																							//校准发射变量
 Coordinate_t enemy_gun,enemyScope,scopeGun;										//坐标
 uint8_t Enemy_INFO[8],Tx_INFO[8];															//接收
 uint8_t findEnemy=0,aimMode=0,upper_mode;											//aimMode用于选择瞄准模式，0为手动瞄准，1为正常自瞄，2为打符，3暂无（吊射？）
+
 uint16_t aimCnt=0;																						//自瞄分频延时变量
 int16_t receiveCnt=0,receiveFps=0;														//检测上位机信号帧数
 extern int16_t receiveCnt,receiveFps;
@@ -81,7 +82,6 @@ void InitAutoAim(){
 }
 
 //*******************************UART回调函数********************************//
-
 void AutoAimUartRxCpltCallback(){
 	#ifndef USE_AUTOAIM_ANGLE
 	//串口数据解码
@@ -101,12 +101,14 @@ void AutoAimUartRxCpltCallback(){
 		onLed(6);
 		aim.yaw=(float)(( (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)>0x7fff) ? (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)-0xffff) : (RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2 )*kAngle);
 		aim.pit=-(float)(( (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)>0x7fff) ? (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)-0xffff) : (RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2 )*kAngle);
+		aim.dis=(float)(( (((RX_ENEMY_DIS1<<8)|RX_ENEMY_DIS2)>0x7fff) ? (((RX_ENEMY_DIS1<<8)|RX_ENEMY_DIS2)-0xffff) : (RX_ENEMY_DIS1<<8)|RX_ENEMY_DIS2 ));
 		aim.yaw+=adjust.yaw;
 		aim.pit+=adjust.pit;
 		aim.pit*=0.9;
 //		enemyScope.z=350;
-		adjust.pit=GMP.Real/20-0.8;
-		if(GMP.Real+aim.pit<0){findEnemy=1;}
+		adjust.pit=GMP.Real*0.16+0.5;
+		
+		if(GMP.Real+aim.pit<3){findEnemy=1;}
 		MINMAX(aim.yaw,-10,10);
 		MINMAX(aim.pit,-8,8);
 		receiveCnt++;
@@ -143,20 +145,27 @@ void EnemyINFOProcess(){
 //**************************普通模式自瞄控制函数****************************//
 
 void autoAim(){
-	static float sumY,sumP;
-	sumY+=aim.yaw;
-	sumP+=aim.pit;
+	static float wy,wp;
 //	GMY.Target=GMY.Real+(double)aim.yaw*0.5;//sgn(aim.yaw)*0.5*sqrt(fabs(aim.yaw));//(aim.yaw+aimLast.yaw)/kk;//8;
 //	GMP.Target=GMP.Real+(double)aim.pit*0.4;//(sgn(aim.pit)*(aim.pit*aim.pit)+aim.pit)*0.3;//(aim.pitch+aimLast.pitch)/kk;//8;
-	GMY.Target=GMY.Real+(double)aim.yaw*0.6+sumY*0+ (aim.yaw-aimLast.yaw)*0.5;
-	GMP.Target=GMP.Real+(double)aim.pit*0.35+sumP*0+ (aim.pit-aimLast.pit)*0.2;
-	sumY*=0.9;
-	sumP*=0.9;
+	GMY.Target=GMY.Real+(double)aim.yaw*1.1-aimLast.yaw*0.3;
+	GMP.Target=GMP.Real+(double)aim.pit*0.65-aimLast.pit*0.2;
+//	wy=GMY.Real+aim.yaw-wy;
+//	GMY.Target=GMY.Real+aim.yaw*0.8+wy;
+//	GMP.Target=GMP.Real+aim.pit*0.65-aimLast.pit*0.2;
 	
 	aimLast.yaw=aim.yaw;
 	aimLast.pit=aim.pit;
+	
+//	wy=GMY.Real+aim.yaw;
 	findEnemy=0;
 }
+
+
+
+
+
+
 void autoAimNormal(){
 	if(findEnemy){
 		if(aimCnt<1){
@@ -208,17 +217,17 @@ void autoAimCtrl(){
 		default: break;
 	}
 }
-//*****************************************************************//
-float a=1;
-float t=5,k=0.5;//暂时调试用
-float myWYaw,myWPit,myWYawLast,myWPitLast,myAYaw,myAPit;
-float enYawLast,enPitLast,enWYaw,enWPit,enWYawLast,enWPitLast,enAYaw,enAPit;//差分的敌方角速度，角加速度，
-float enYaw,enPit;
+////*****************************************************************//
+//float a=1;
+//float t=5,k=0.5;//暂时调试用
+//float myWYaw,myWPit,myWYawLast,myWPitLast,myAYaw,myAPit;
+//float enYawLast,enPitLast,enWYaw,enWPit,enWYawLast,enWPitLast,enAYaw,enAPit;//差分的敌方角速度，角加速度，
+//float enYaw,enPit;
 //void autoAimPredict(){//@尹云鹏
 //	if(findEnemy){
 //		float GMYAngle=GMY.encoderAngle,GMPAngle=GMP.encoderAngle;
 //		static float GMYAngleLast,GMPAngleLast;
-////		static float myWYaw,myWPit,myWYawLast,myWPitLast,myAYaw,myAPit;//差分的本身角速度，角加速度，单位：度/周期(遥控器14ms)，所以采用了差分而不是直接读编码器角速度
+////		static float myWYaw,myWPit,myWYawLast,myWPitLast,myAYaw,myAPit;//差分的本身角速度，角加速度，单位：度/周期(2ms)，所以采用了差分而不是直接读编码器角速度
 ////		float enYaw=aim.yaw*a,enPit=aim.pit*3;
 //		enYaw=aim.yaw*a;
 ////		static float enYawLast,enPitLast,enWYaw,enWPit,enWYawLast,enWPitLast,enAYaw,enAPit;//差分的敌方角速度，角加速度，
@@ -234,7 +243,7 @@ float enYaw,enPit;
 //		enAYaw=enWYaw-enWYawLast;
 //		enAPit=enWPit-enWPitLast;
 //		
-//		//float t=aim.z*4; //距离*1000ms/子弹速度18/周期14ms，约为4
+//		//float t=aim.z*4; //距离*1000ms/子弹速度18/周期2ms，约为4
 //		GMY.Target=GMY.Real+(enYaw+enWYaw*t)*k;
 ////		GMP.Target=GMP.Real+aim.pit*0.7;
 //		GMP.Target=GMP.Real+(enPit+enWPit*t)*k;

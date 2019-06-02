@@ -41,7 +41,7 @@ MotorINFO GMP  =  Gimbal6020_MOTORINFO_Init(1,&ControlGMP,7900,1100,20,
 								
 
 MotorINFO GMY  =  Gimbal6020_MOTORINFO_Init(1,&ControlGMYEncoder,2000,400,20,
-								fw_PID_INIT_EASY(25, 2, 12, 5000),
+								fw_PID_INIT_EASY(23, 5, 12, 5000),
 								fw_PID_INIT_EASY(55, 2, 10,	20000));
 								
 //MotorINFO STIRp = AngleBased_MOTORINFO_Init(36.0,&ControlNM,
