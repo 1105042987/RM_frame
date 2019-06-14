@@ -49,7 +49,7 @@ extern int8_t StateFlee;
 extern int8_t StateSway;
 extern int8_t StateHurt;
 extern int16_t StateCnt;
-extern double ChassisAdd;
+extern double ChassisSpeed;
 extern int16_t channelrrow;
 extern int16_t channelrcol;
 extern int16_t channellrow;

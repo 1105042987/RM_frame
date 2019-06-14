@@ -14,7 +14,7 @@
 #define getRightSr()	!HAL_GPIO_ReadPin(GPIOE,rightSensor_Pin) //
 
 
-double ChassisAdd;
+double ChassisSpeed;
 extern float fakeHeat0;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
@@ -39,7 +39,7 @@ void uartSend(int8_t i);
 void uartSend2(void);
 //初始化
 void FunctionTaskInit(){
-	ChassisAdd=0;
+	ChassisSpeed=0;
 }
 //限位与同步
 void limtSync(){
@@ -61,7 +61,7 @@ void RemoteControlProcess(Remote *rc){
 	channellrow = (rc->ch2 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET);
 	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET);
 
-	ChassisAdd=-channelrrow*2;
+	ChassisSpeed=channelrrow*2;
 	sendData[0].data[0]=(int16_t)WorkState | (int16_t)inputmode<<8;
 	
 	if(GameRobotState.robot_id==7){sendData[0].data[1]=channellrow+5000;}
@@ -103,11 +103,13 @@ void selfControlProcess(Remote *rc){
 	
 	sendData[0].data[3]=(int16_t)(realHeat0*20);
 	if(WorkState == NORMAL_STATE){
-		ChassisAdd=-channelrrow*2;
+		ChassisSpeed=channelrrow*4;
+		int8_t dir=sgn(channelrrow);
+		onePushDir(dir,LimitCnt=500);
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
 		remv2();
-		//routing();
+//		routing2();
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
 		strategyRand();

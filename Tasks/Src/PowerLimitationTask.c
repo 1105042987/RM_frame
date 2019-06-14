@@ -15,15 +15,25 @@
 
 //底盘功率限制
 #ifdef USE_POWER_LIMIT
+int LimitCnt=500;
 void PowerLimitation(){
-	if(JUDGE_State == OFFLINE || PowerHeat.chassis_power_buffer>100){
-		CML.positionPID.outputMax=3500;
-		CMR.positionPID.outputMax=3500;
-		return;
+//	if(JUDGE_State == OFFLINE || PowerHeat.chassis_power_buffer>100){
+//		CML.positionPID.outputMax=3500;
+//		CMR.positionPID.outputMax=3500;
+//		return;
+//	}
+	static float limitTgt=100;
+	if(LimitCnt){
+		LimitCnt--;
+		limitTgt=50;
 	}
-	float rate=((float)PowerHeat.chassis_power_buffer)/100;
-	CML.positionPID.outputMax=3000*rate;
-	CMR.positionPID.outputMax=3000*rate;
+	else if(limitTgt<100){
+		limitTgt+=0.05;
+	}
+	float tmp=(float)PowerHeat.chassis_power_buffer-limitTgt;
+	float rate=tmp/100;
+	CML.offical_speedPID.outputMax=3000*rate;
+	CMR.offical_speedPID.outputMax=3000*rate;
 	
 //	CML.Intensity*=rate;
 //	CMR.Intensity*=rate;

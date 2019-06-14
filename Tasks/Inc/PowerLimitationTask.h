@@ -20,6 +20,7 @@ extern void PowerLimitation(void);
 extern void SpeedLimitation(void);
 extern void getRealSpeed(void);
 extern uint8_t flag;
+extern int LimitCnt;
 
 #define POWER_LIMITATION_PID_DEFAULT \
 {\

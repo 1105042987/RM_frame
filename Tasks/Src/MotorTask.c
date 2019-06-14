@@ -49,18 +49,21 @@ MotorINFO GMY  =  Gimbal6020_MOTORINFO_Init(1,&ControlGMYEncoder,2000,400,20,
 //								fw_PID_INIT_EASY(40, 1, 0.0,	 15000.0));
 								
 MotorINFO STIRv = SpeedBased_MOTORINFO_Init(&ControlCM,STIRv_PID_DEFAULT);
-MotorINFO CML = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT_EASY(10, 0, 0, 3500),
-								fw_PID_INIT_EASY(40, 0, 5, 15000));
-MotorINFO CMR = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT_EASY(10, 0, 0, 3500),
-								fw_PID_INIT_EASY(40, 0, 5, 15000));
+MotorINFO CMR = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
+MotorINFO CML = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
+//MotorINFO CML = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
+//								fw_PID_INIT_EASY(10, 0, 0, 3500),
+//								fw_PID_INIT_EASY(40, 0, 5, 15000));
+//MotorINFO CMR = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
+//								fw_PID_INIT_EASY(10, 0, 0, 3500),
+//								fw_PID_INIT_EASY(40, 0, 5, 15000));
 MotorINFO CMA = AngleBased_MOTORINFO_Init(19.0,&ControlNA,
 								fw_PID_INIT_EASY(10, 0, 0, 0),
 								fw_PID_INIT_EASY(40, 0, 5, 0));
 								
 MotorINFO* can1[8]={&FRICL,&FRICR,&STIRv,0,&GMP,&GMY,0,0};
 MotorINFO* can2[8]={&CML,&CMR,&CMA,0,0,0,0,0};
+//MotorINFO* can2[8]={&CML,&CMR,&CMA,0,0,0,0,0};
 //#if GUARD == 'U'
 //	MotorINFO* can1[8]={0,0,0,0,0,0,0,0};
 //	MotorINFO* can2[8]={&CML,&CMR,&CMA,0,0,0,0,0};
