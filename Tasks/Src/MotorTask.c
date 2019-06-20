@@ -169,6 +169,7 @@ void ControlGMYEncoder(MotorINFO* id){
 		id->Real+= (tmp<180?(tmp>-180?tmp:tmp+360):tmp-360)/ id->ReductionRate;//处理编码器溢出
 		
 		ThisSpeed = id->RxMsgC6x0.rotateSpeed * 6 ;// id->ReductionRate;//单位：度每秒
+
 		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);//+ id->Compensation
 		//id->s_count = 0;
 		id->lastRead = id->encoderAngle;

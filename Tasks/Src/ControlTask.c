@@ -189,7 +189,7 @@ void heatCalc(){//2ms
 //	else fakeHeat0 = 0;
 //}
 //时间中断入口函数
-extern int8_t Control_Update;
+extern int8_t Control_Update,AimTic;
 extern int16_t receiveCnt,receiveFps;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	if (htim->Instance == TWO_MS_TIM.Instance){//2ms时钟
@@ -221,6 +221,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		rc_cnt++;
 		if(auto_counter > 0) auto_counter--;
 		#ifdef SLAVE_MODE
+		if(AimTic<100){
+			AimTic++;
+		}
 		if(Control_Update==1){
 			HAL_IWDG_Refresh(&hiwdg);
 			Control_Update=0;

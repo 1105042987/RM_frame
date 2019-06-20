@@ -20,7 +20,6 @@ extern int16_t StateCnt;
 
 void routing(void);
 void routing2(void);
-void routing20w(void);
 
 void randing1(int8_t spd);
 void randing2(int8_t spd);

@@ -51,6 +51,9 @@ typedef struct GMAngle_t
 	float yaw;
 	float pit;
 	float dis;//distance
+	float abs;
+	float absLast;
+	float wz;
 }GMAngle_t;
 
 typedef struct Coordinate_t

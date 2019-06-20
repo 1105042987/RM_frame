@@ -109,6 +109,7 @@ void selfControlProcess(Remote *rc){
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
 		remv2();
+		
 //		routing2();
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
