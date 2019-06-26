@@ -150,7 +150,7 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 		}
 		#ifdef CAN3
 		//Ignore the TX message(for motor) of another Main control board
-		if(Can1RxMsg.StdId == 0x200||Can1RxMsg.StdId == 0x1ff||Can2RxMsg.StdId == CAN_COMM_SELF_ID) flag=1;
+		if(Can1RxMsg.StdId == 0x200||Can1RxMsg.StdId == 0x1ff||Can1RxMsg.StdId == CAN_COMM_SELF_ID) flag=1;
 		else if(Can1RxMsg.StdId >= CAN_COMM_OTHER_ID){
 			flag = Can1RxMsg.StdId-CAN_COMM_OTHER_ID;
 			if(flag<maxSendSize){
@@ -200,6 +200,7 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 				for(int i=0;i<4;i++) receiveData[flag].data[i] = CanRxGetU16(Can2RxMsg, i);
 				if(flag==maxSendSize-1) Control_Update=1;
 				flag = 1;
+				can13Dog=10;
 			}
 		}
 		#endif
