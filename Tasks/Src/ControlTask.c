@@ -159,22 +159,17 @@ void WorkStateFSM(void){
 
 
 //主控制循环
-#ifdef USE_POWER_LIMIT
-#endif
 void controlLoop(){
 	getJudgeState();
 	WorkStateFSM();
-	
 	if(WorkState > 0){// && WorkState != STOP_STATE)
 		CML.Target = ChassisSpeed*3.2;//*60*19/360;
 		CMR.Target = CML.Target;
-		
-		for(int i=0;i<8;i++) if(can1[i]!=0) (can1[i]->Handle)(can1[i]);
-		for(int i=0;i<8;i++) if(can2[i]!=0) (can2[i]->Handle)(can2[i]);
 		#ifdef USE_POWER_LIMIT
 			PowerLimitation();
 		#endif
-		
+		for(int i=0;i<8;i++) if(can1[i]!=0) (can1[i]->Handle)(can1[i]);
+		for(int i=0;i<8;i++) if(can2[i]!=0) (can2[i]->Handle)(can2[i]);
 		sendAllData(0);
 	}
 }
@@ -205,17 +200,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		//主循环在时间中断中启动
 		controlLoop();
 		heatCalc();
-		
-		#ifdef USE_AUTOAIM
-		//自瞄数据解算（6ms）
-		static uint8_t aimCnt=0;
-		if(++aimCnt==3){
-			EnemyINFOProcess();
-			aimCnt=0;
-		}
-		#endif
-		
-		//HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
 	}
 	else if (htim->Instance == ONE_MS_TIM.Instance){//ims时钟
 		rc_cnt++;

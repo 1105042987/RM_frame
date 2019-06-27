@@ -53,6 +53,8 @@
 #define leftSensor_GPIO_Port GPIOE
 #define rightSensor_Pin GPIO_PIN_5
 #define rightSensor_GPIO_Port GPIOE
+#define leftSwitch_Pin GPIO_PIN_6
+#define leftSwitch_GPIO_Port GPIOE
 #define LED8_Pin GPIO_PIN_8
 #define LED8_GPIO_Port GPIOG
 #define LED7_Pin GPIO_PIN_7
@@ -79,6 +81,8 @@
 #define LED_RED_GPIO_Port GPIOE
 #define LED_GREEN_Pin GPIO_PIN_14
 #define LED_GREEN_GPIO_Port GPIOF
+#define rightSwitch_Pin GPIO_PIN_12
+#define rightSwitch_GPIO_Port GPIOE
 
 /* ########################## Assert Selection ############################## */
 /**

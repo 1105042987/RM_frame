@@ -32,6 +32,7 @@ void PowerLimitation(){
 	}
 	float tmp=(float)PowerHeat.chassis_power_buffer-limitTgt;
 	float rate=tmp/100;
+	if(rate<0.1){rate=0.1;}
 	CML.offical_speedPID.outputMax=3000*rate;
 	CMR.offical_speedPID.outputMax=3000*rate;
 	

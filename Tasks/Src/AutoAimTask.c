@@ -10,13 +10,12 @@
   *
   ******************************************************************************
 */
-
 #include "includes.h"
-
 #ifndef DEBUG_MODE
 #ifdef	USE_AUTOAIM
 #define USE_AUTOAIM_ANGLE
-
+float *aimProcess(float yaw,float pit,int16_t *tic);
+void fallCompsition();
 typedef struct{
 	float x,v,k1,k2,t,R;
 	float q1,q2,p11,p12,p21,p22;
@@ -51,52 +50,29 @@ float kalmanCalc(kalman_t *f,float z,int t){
 }
 //*****************************************声明变量******************************************//
 
-GMAngle_t aim,aimLast,opt;//optimize													//目标角度
-GMAngle_t adjust;																							//校准发射变量
-Coordinate_t enemy_gun,enemyScope,scopeGun;										//坐标
-uint8_t Enemy_INFO[8],Tx_INFO[8];															//接收
-uint8_t findEnemy=0,aimMode=0,upper_mode;											//aimMode用于选择瞄准模式，0为手动瞄准，1为正常自瞄，2为打符，3暂无（吊射？）
+GMAngle_t aim,aimLast,opt;//optimize					//目标角度
+GMAngle_t adjust;															//校准发射变量
+uint8_t Enemy_INFO[8],Tx_INFO[8];							//接收
+uint8_t findEnemy=0,aimMode=0,upper_mode;			//aimMode用于选择瞄准模式，0为手动瞄准，1为正常自瞄，2为打符，3暂无（吊射？）
 
-uint16_t aimCnt=0;																						//自瞄分频延时变量
-int16_t receiveCnt=0,receiveFps=0,AimTic=1;											//检测上位机信号帧数
+uint16_t aimCnt=0;														//自瞄分频延时变量
+int16_t receiveCnt=0,receiveFps=0,AimTic=1;		//检测上位机信号帧数
 extern int16_t receiveCnt,receiveFps;
-int8_t trackCnt=0;																						//追踪变量
+int8_t trackCnt=0;														//追踪变量
 
 //********************************自瞄初始化********************************//
 
 void InitAutoAim(){
 	//开启AUTO_AIM_UART的DMA接收
 	if(HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t *)&Enemy_INFO,8)!= HAL_OK){Error_Handler();}
-	//坐标变量初始化（不需要修改）
-	enemyScope.x=0;	enemyScope.y=0;	enemyScope.z=200;
-	enemy_gun.x=0;		enemy_gun.y=0;		enemy_gun.z=200;
 	//角度变量初始化（不需要修改）
 	aim.yaw=0;				aim.pit=0;
 	adjust.yaw=0;			adjust.pit=0;
-	//设置坐标初始值（根据不同安装情况调整这3个参数）
-	scopeGun.x=0;		scopeGun.y=-10;		scopeGun.z=0;
 }
 //*******************************UART回调函数********************************//
 void AutoAimUartRxCpltCallback(){
-	#ifndef USE_AUTOAIM_ANGLE
-	//串口数据解码
-	if(RX_ENEMY_START=='s'&&RX_ENEMY_END=='e')
-	{
-		enemyScope.x=(float)((RX_ENEMY_X1<<8)|RX_ENEMY_X2)*k_coordinate;
-		enemyScope.y=(float)((RX_ENEMY_Y1<<8)|RX_ENEMY_Y2)*k_coordinate;
-//		enemyScope.z=(float)((RX_ENEMY_Z1<<8)|RX_ENEMY_Z2)*k_distance;
-		enemyScope.z=350;
-		enemyScope.x=(enemyScope.x>coordinate_max)?(enemyScope.x-2*coordinate_max):enemyScope.x;
-		enemyScope.y=(enemyScope.y>coordinate_max)?(enemyScope.y-2*coordinate_max):enemyScope.y;
-		findEnemy=1;
-		receiveCnt++;
-	}
-	#else
 	if(RX_ENEMY_START=='s'&&RX_ENEMY_END=='e'){
 		onLed(6);
-//		aim.yaw=(float)(( (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)>0x7fff) ? (((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)-0xffff) : (RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2 )*kAngle);
-//		aim.pit=-9-(float)(( (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)>0x7fff) ? (((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)-0xffff) : (RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2 )*kAngle);
-//		aim.dis=(float)(( (((RX_ENEMY_DIS1<<8)|RX_ENEMY_DIS2)>0x7fff) ? (((RX_ENEMY_DIS1<<8)|RX_ENEMY_DIS2)-0xffff) : (RX_ENEMY_DIS1<<8)|RX_ENEMY_DIS2 ));
 		aim.yaw=(int16_t)((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)*kAngle;
 		aim.pit=-10-(int16_t)((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)*kAngle;
 		aim.dis=(int16_t)((RX_ENEMY_DIS1<<8)|RX_ENEMY_DIS2);
@@ -107,7 +83,7 @@ void AutoAimUartRxCpltCallback(){
 //		aim.abs=(GMY.Real+aim.yaw);
 		aim.absLast=aim.abs;
 //		adjust.pit=GMP.Real*0.16+0.5;
-		if(GMP.Real+aim.pit<3){findEnemy=1;}
+		if(GMP.Real+aim.pit<-15){findEnemy=1;}
 //		MINMAX(aim.yaw,-10,10);
 //		MINMAX(aim.pit,-8,8);
 		if(AimTic<50){findEnemy=0;}
@@ -121,41 +97,16 @@ void AutoAimUartRxCpltCallback(){
 			AimTic=1;
 		}
 	}
-	#endif
 	HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t*)&Enemy_INFO,8);
 }
 //****************************************坐标角度转换函数*************************************//
-
 //在时间中断中分频后调用该函数
-void EnemyINFOProcess(){
-	#ifndef USE_AUTOAIM_ANGLE
-	//坐标转换
-	enemy_gun.x=enemyScope.x+scopeGun.x;
-	enemy_gun.x=enemyScope.y+scopeGun.y;
-	enemy_gun.z=enemyScope.z+scopeGun.z;
-	
-	//角度计算（计算消耗内存较多，不能放在2ms以下的时间中断内执行）
-	aim.yaw=atan(enemy_gun.x/(enemy_gun.z*cos(GMP_ANGLE)-enemy_gun.y*sin(GMP_ANGLE)))/constPi*180.0-adjust.yaw;
-	aim.pit=atan(enemy_gun.y/enemy_gun.z)/constPi*180.0+adjust.pit;
-	#endif
-	
-	//追踪
-	if(((aim.yaw>0 && aimLast.yaw>0) || (aim.yaw<0 && aimLast.yaw<0))){
-		trackCnt++;
-		MINMAX(trackCnt,0,100);
-	}
-	else{
-		trackCnt=0;
-	}
-}
+
 
 //**************************普通模式自瞄控制函数****************************//
 float tmp=30;
-float wzSum,wzLast;
 void autoAim(){
-//	GMY.Target=GMY.Real+(double)aim.yaw*0.5;//sgn(aim.yaw)*0.5*sqrt(fabs(aim.yaw));//(aim.yaw+aimLast.yaw)/kk;//8;
-//	GMP.Target=GMP.Real+(double)aim.pit*0.4;//(sgn(aim.pit)*(aim.pit*aim.pit)+aim.pit)*0.3;//(aim.pitch+aimLast.pitch)/kk;//8;
-
+	static float wzSum,wzLast;
 	wzSum+=opt.wz;
 	wzSum*=0.85;
 //	GMY.Target=opt.abs+opt.wz*tmp;
@@ -165,8 +116,6 @@ void autoAim(){
 
 	aimLast.yaw=aim.yaw;
 	aimLast.pit=aim.pit;
-	
-//	wy=GMY.Real+aim.yaw;
 	findEnemy=0;
 }
 
@@ -183,6 +132,52 @@ void UpperStateFSM(){
 	}
 }
 
+float *aimProcess(float yaw,float pit,int16_t *tic){
+/*@尹云鹏，自瞄预测及下坠补偿
+	核心思想：
+	1.视觉数据需要与真实角度标定，传入参数为目标绝对角度，差分出速度
+	2.视觉数据存在误差，以一定时间间隔采样(即高中做实验学过的，高考必考内容)
+	3.在循环里速度线性累加与指数衰减对抗
+	4.基于pitch的重力下坠补偿
+*/
+	#define amt 5	//间隔点个数amount，调节amt使时间间隔大约为50ms，即 amt=50ms/1000ms*fps
+	static int8_t i;						//计数器
+	static float 	y[amt],p[amt],//yaw,pit历史
+								tSum,t[amt],	//间隔时间,tic历史
+								wy,wp,				//yaw,pit角速度
+								wySum,wpSum,	//角速度累加对抗
+								angle[2];			//返回值目标角度
+	if(*tic>100){	//if两次数据时间间隔大于100*2ms，清空历史
+		i=0;
+		memset(y,0,sizeof(y));
+		memset(p,0,sizeof(p));
+		memset(t,0,sizeof(t));
+		wy=0;wp=0;tSum=0;
+		angle[0]=yaw;angle[1]=pit;
+		angle[1]-=40/angle[1]-0.4;//重力下坠补偿，哨兵实际曲线拟合
+		*tic=1;
+		return angle;
+	}
+	tSum+=*tic-t[i];						//与pid的i计算如出一辙，加上本次并减去amt次以前的数据
+	wy=(wy+(yaw-y[i])/tSum)/2;	//本次与上次平均滤波
+	wp=(wp+(pit-p[i])/tSum)/2;
+	
+	wySum+=wy;	//角速度累加与指数衰减对抗
+	wpSum+=wp;
+	wySum*=0.9;	//指数衰减限制累加,失去物理意义
+	wpSum*=0.9;
+	
+	y[i]=yaw;		//yaw历史
+	p[i]=pit;		//pit历史
+	t[i]=*tic;	//tic历史
+	i=(i+1)%amt;//amt次之内循环
+	
+	angle[0]=yaw+wySum*20;		//实现预测
+	angle[1]=pit+wpSum*20;
+	angle[1]-=40/angle[1]-0.4;//重力下坠补偿，哨兵实际曲线拟合
+	*tic=1;			//时间中断计时器重新开始
+	return angle;
+}
 #endif /*USE_AUTOAIM*/
 #endif /*DEBUG_MODE*/
 

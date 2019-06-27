@@ -10,8 +10,10 @@
   ******************************************************************************
   */
 #include "includes.h"
-#define getLeftSr()		!HAL_GPIO_ReadPin(GPIOE,leftSensor_Pin)// //红外检测到为低电平，故取非运算。Sr缩写Sensor
-#define getRightSr()	!HAL_GPIO_ReadPin(GPIOE,rightSensor_Pin) //
+#define getLeftSr()		!HAL_GPIO_ReadPin(GPIOE,leftSensor_Pin)		//红外检测到为低电平，故取非运算。Sr缩写Sensor
+#define getRightSr()	!HAL_GPIO_ReadPin(GPIOE,rightSensor_Pin)
+#define getLeftSw()		!HAL_GPIO_ReadPin(GPIOE,leftSwitch_Pin)		//微动开关
+#define getRightSw()	!HAL_GPIO_ReadPin(GPIOE,rightSwitch_Pin)
 
 
 double ChassisSpeed;
@@ -43,7 +45,7 @@ void FunctionTaskInit(){
 }
 //限位与同步
 void limtSync(){
-	MINMAX(GMP.Target,-42,20);//limit
+	MINMAX(GMP.Target,-60,0);//limit
 //	MINMAX(GMY.Target,-160+GMY.imuEncorderDiff,160+GMY.imuEncorderDiff);//limit
 	//CMR.Target =  -CML.Target;
 }
@@ -53,6 +55,7 @@ void limtSync(){
 #if GUARD == 'U'
 uint8_t findEnemy;
 //上平台代码
+int8_t dir=1;
 void RemoteControlProcess(Remote *rc){
 	if(WorkState <= 0) return;
 	//max=660
@@ -70,12 +73,17 @@ void RemoteControlProcess(Remote *rc){
 	if(channelrcol>600){sendData[0].data[2]=channellcol+5000;}
 	else{sendData[0].data[2]=channellcol;}
 	
-	sendData[0].data[3]=(int16_t)(realHeat0*20);//
+	sendData[0].data[3]=(int16_t)(realHeat0*20);
 	if(WorkState == NORMAL_STATE){
-		
+		dir=1;
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
-	
+		if(getLeftSw()){
+			dir=-1;
+			onLed(7);
+		}else{offLed(7);}
+		
+		ChassisSpeed=50*dir;
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
 //		swaying();
