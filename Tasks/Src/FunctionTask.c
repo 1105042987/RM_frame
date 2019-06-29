@@ -75,18 +75,25 @@ void RemoteControlProcess(Remote *rc){
 	
 	sendData[0].data[3]=(int16_t)(realHeat0*20);
 	if(WorkState == NORMAL_STATE){
-		dir=1;
+		dir=-1;
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
+		static int8_t dirCnt=10;
+		LimitRate=1;
 		if(getLeftSw()){
-			dir=-1;
+			if(dirCnt){dirCnt--;LimitRate=0;}
+			else{dir=1;LimitCnt=500;}
 			onLed(7);
-		}else{offLed(7);}
-		
-		ChassisSpeed=50*dir;
+		}else{
+			offLed(7);
+			dirCnt=10;
+		}
+		if(getLeftSr()){dir=-1;LimitCnt=500;}
+		ChassisSpeed=2640*dir;
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
 //		swaying();
+		dir=1;
 	}
 	limtSync();
 }

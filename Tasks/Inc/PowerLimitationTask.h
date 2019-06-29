@@ -14,14 +14,10 @@
 
 #include "includes.h"
 
-extern float SpeedAttenuation;
-//extern float PowerLimitation(void);
 extern void PowerLimitation(void);
 extern void SpeedLimitation(void);
-extern void getRealSpeed(void);
-extern uint8_t flag;
 extern int LimitCnt;
-
+extern int8_t LimitRate;
 #define POWER_LIMITATION_PID_DEFAULT \
 {\
 	0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ,\

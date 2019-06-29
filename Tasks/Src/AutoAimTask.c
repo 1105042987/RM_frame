@@ -14,7 +14,7 @@
 #ifndef DEBUG_MODE
 #ifdef	USE_AUTOAIM
 #define USE_AUTOAIM_ANGLE
-float *aimProcess(float yaw,float pit,int16_t *tic);
+GMAngle_t aimProcess(float yaw,float pit,int16_t *tic);
 void fallCompsition();
 typedef struct{
 	float x,v,k1,k2,t,R;
@@ -79,46 +79,23 @@ void AutoAimUartRxCpltCallback(){
 		aim.yaw/=1.6975;
 		aim.pit/=1.3976;
 		
-		aim.abs=(GMY.Real+aim.yaw+aim.absLast)/2;
-//		aim.abs=(GMY.Real+aim.yaw);
-		aim.absLast=aim.abs;
-//		adjust.pit=GMP.Real*0.16+0.5;
+		
+		aim.yaw=(GMY.Real+aim.yaw+aimLast.yaw)/2;
+		aim.pit=(GMP.Real+aim.pit+aimLast.pit)/2;
+		aimLast=aim;
 		if(GMP.Real+aim.pit<-15){findEnemy=1;}
-//		MINMAX(aim.yaw,-10,10);
-//		MINMAX(aim.pit,-8,8);
-		if(AimTic<50){findEnemy=0;}
-		else if(AimTic<100){
-			opt.wz=(opt.wz+(aim.abs-opt.abs)/AimTic)/2;
-			opt.abs=(opt.abs+opt.wz*AimTic+aim.abs)/2;
-			AimTic=1;
-		}else{
-			opt.abs=aim.abs;
-			opt.wz*=0.8;
-			AimTic=1;
-		}
+		opt=aimProcess(aim.yaw,aim.pit,&AimTic);	
 	}
 	HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t*)&Enemy_INFO,8);
 }
-//****************************************坐标角度转换函数*************************************//
-//在时间中断中分频后调用该函数
-
 
 //**************************普通模式自瞄控制函数****************************//
-float tmp=30;
 void autoAim(){
-	static float wzSum,wzLast;
-	wzSum+=opt.wz;
-	wzSum*=0.85;
-//	GMY.Target=opt.abs+opt.wz*tmp;
-	GMY.Target=opt.abs+wzSum*tmp;
-	wzLast=opt.wz;
+	GMY.Target=opt.yaw;
 	GMP.Target=GMP.Real+aim.pit*0.65-aimLast.pit*0.2;
-
-	aimLast.yaw=aim.yaw;
-	aimLast.pit=aim.pit;
+//	GMP.Target=opt.pit;
 	findEnemy=0;
 }
-
 
 //***************************上位机工作模式切换*****************************//
 void UpperStateFSM(){
@@ -132,7 +109,7 @@ void UpperStateFSM(){
 	}
 }
 
-float *aimProcess(float yaw,float pit,int16_t *tic){
+GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 /*@尹云鹏，自瞄预测及下坠补偿
 	核心思想：
 	1.视觉数据需要与真实角度标定，传入参数为目标绝对角度，差分出速度
@@ -145,16 +122,16 @@ float *aimProcess(float yaw,float pit,int16_t *tic){
 	static float 	y[amt],p[amt],//yaw,pit历史
 								tSum,t[amt],	//间隔时间,tic历史
 								wy,wp,				//yaw,pit角速度
-								wySum,wpSum,	//角速度累加对抗
-								angle[2];			//返回值目标角度
+								wySum,wpSum;	//角速度累加对抗
+	GMAngle_t angle;					//返回值目标角度
 	if(*tic>100){	//if两次数据时间间隔大于100*2ms，清空历史
 		i=0;
 		memset(y,0,sizeof(y));
 		memset(p,0,sizeof(p));
 		memset(t,0,sizeof(t));
 		wy=0;wp=0;tSum=0;
-		angle[0]=yaw;angle[1]=pit;
-		angle[1]-=40/angle[1]-0.4;//重力下坠补偿，哨兵实际曲线拟合
+		angle.yaw=yaw;angle.pit=pit;
+		angle.pit-=40/angle.pit-0.4;//重力下坠补偿，哨兵实际曲线拟合
 		*tic=1;
 		return angle;
 	}
@@ -172,9 +149,9 @@ float *aimProcess(float yaw,float pit,int16_t *tic){
 	t[i]=*tic;	//tic历史
 	i=(i+1)%amt;//amt次之内循环
 	
-	angle[0]=yaw+wySum*20;		//实现预测
-	angle[1]=pit+wpSum*20;
-	angle[1]-=40/angle[1]-0.4;//重力下坠补偿，哨兵实际曲线拟合
+	angle.yaw=yaw+wySum*20;		//实现预测
+	angle.pit=pit+wpSum*20;
+	angle.pit-=40/angle.pit-0.4;//重力下坠补偿，哨兵实际曲线拟合
 	*tic=1;			//时间中断计时器重新开始
 	return angle;
 }

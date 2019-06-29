@@ -16,13 +16,10 @@
 //底盘功率限制
 #ifdef USE_POWER_LIMIT
 int LimitCnt=500;
+int8_t LimitRate=1;
 void PowerLimitation(){
-//	if(JUDGE_State == OFFLINE || PowerHeat.chassis_power_buffer>100){
-//		CML.positionPID.outputMax=3500;
-//		CMR.positionPID.outputMax=3500;
-//		return;
-//	}
-	static float limitTgt=100;
+	static float limitTgt=90;
+	float rate;
 	if(LimitCnt){
 		LimitCnt--;
 		limitTgt=50;
@@ -31,25 +28,18 @@ void PowerLimitation(){
 		limitTgt+=0.05;
 	}
 	float tmp=(float)PowerHeat.chassis_power_buffer-limitTgt;
-	float rate=tmp/100;
+	if(tmp<150){rate=tmp/(150-limitTgt);}
+	else{rate=1;}
 	if(rate<0.1){rate=0.1;}
-	CML.offical_speedPID.outputMax=3000*rate;
-	CMR.offical_speedPID.outputMax=3000*rate;
-	
-//	CML.Intensity*=rate;
-//	CMR.Intensity*=rate;
-//	if(PowerHeat.chassis_power_buffer>90){
-//		MINMAX(CML.Intensity,-2500,2500);
-//		MINMAX(CMR.Intensity,-2500,2500);
-//	}
-//	else if(PowerHeat.chassis_power_buffer>50){
-//		MINMAX(CML.Intensity,-2000,2000);
-//		MINMAX(CMR.Intensity,-2000,2000);
-//	}
-//	else{
-//		MINMAX(CML.Intensity,-1500,1500);
-//		MINMAX(CMR.Intensity,-1500,1500);
-//	}
+//	ChassisSpeed*=rate;
+	if(LimitRate==0){
+		CML.offical_speedPID.outputMax=0;
+		CMR.offical_speedPID.outputMax=0;
+	}
+	else{
+		CML.offical_speedPID.outputMax=4000*rate;
+		CMR.offical_speedPID.outputMax=4000*rate;
+	}
 }
 
 #endif

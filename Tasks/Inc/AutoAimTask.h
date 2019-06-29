@@ -51,9 +51,6 @@ typedef struct GMAngle_t
 	float yaw;
 	float pit;
 	float dis;//distance
-	float abs;
-	float absLast;
-	float wz;
 }GMAngle_t;
 
 typedef struct Coordinate_t
@@ -62,17 +59,6 @@ typedef struct Coordinate_t
 	float y;
 	float z;
 }Coordinate_t;
-
-typedef struct targetMotion_t
-{
-	float yaw;
-	float pit;
-	float dis;
-	float wx;
-	float wy;
-	float wz;
-}targetMotion_t;
-
 
 extern uint8_t aimMode;
 extern uint8_t findEnemy;
