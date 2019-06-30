@@ -10,11 +10,6 @@
   ******************************************************************************
   */
 #include "includes.h"
-#define getLeftSr()		!HAL_GPIO_ReadPin(GPIOE,leftSensor_Pin)		//红外检测到为低电平，故取非运算。Sr缩写Sensor
-#define getRightSr()	!HAL_GPIO_ReadPin(GPIOE,rightSensor_Pin)
-#define getLeftSw()		!HAL_GPIO_ReadPin(GPIOE,leftSwitch_Pin)		//微动开关
-#define getRightSw()	!HAL_GPIO_ReadPin(GPIOE,rightSwitch_Pin)
-
 
 double ChassisSpeed;
 extern float fakeHeat0;
@@ -22,20 +17,11 @@ RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
 
 int32_t auto_counter= 0;		//用于准确延时的完成某事件
-int16_t channelrrow = 0;
-int16_t channelrcol = 0;
-int16_t channellrow = 0;
-int16_t channellcol = 0;
+int16_t channelrrow,channelrcol,channellrow,channellcol;
 
-int8_t oneShootFlag=0;
-int8_t StateSway=0;
-int8_t StateFlee=0;
-int8_t StateHurt=0;
-int8_t StateRand=1;
+int8_t oneShootFlag,StateSway,StateFlee,StateHurt,StateRand=1;
 int16_t StateCnt=1;
 int16_t noEnemyCnt=1;
-void strategyAct(void);
-void strategyRand(void);
 void strategyShoot(void);
 void uartSend(int8_t i);
 void uartSend2(void);
@@ -55,8 +41,8 @@ void limtSync(){
 #if GUARD == 'U'
 uint8_t findEnemy;
 //上平台代码
-int8_t dir=1;
-void RemoteControlProcess(Remote *rc){
+void RemoteControlP
+rocess(Remote *rc){
 	if(WorkState <= 0) return;
 	//max=660
 	channelrrow = (rc->ch0 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET);//leftRight
@@ -72,28 +58,17 @@ void RemoteControlProcess(Remote *rc){
 	
 	if(channelrcol>600){sendData[0].data[2]=channellcol+5000;}
 	else{sendData[0].data[2]=channellcol;}
-	
 	sendData[0].data[3]=(int16_t)(realHeat0*20);
+	if(getLeftSw()){onLed(7);}
+	else{offLed(7);}
 	if(WorkState == NORMAL_STATE){
-		dir=-1;
+
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
-		static int8_t dirCnt=10;
-		LimitRate=1;
-		if(getLeftSw()){
-			if(dirCnt){dirCnt--;LimitRate=0;}
-			else{dir=1;LimitCnt=500;}
-			onLed(7);
-		}else{
-			offLed(7);
-			dirCnt=10;
-		}
-		if(getLeftSr()){dir=-1;LimitCnt=500;}
-		ChassisSpeed=2640*dir;
+
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
 //		swaying();
-		dir=1;
 	}
 	limtSync();
 }
@@ -123,42 +98,12 @@ void selfControlProcess(Remote *rc){
 		onePushDir(dir,LimitCnt=500);
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
-		remv2();
-		
-//		routing2();
+		routing1();
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
-		strategyRand();
+		
 	}
 	limtSync();
-}
-
-
-
-void strategyRand(){
-	if(findEnemy){
-		if(StateFlee){}
-		else{StateFlee=1;}
-	}
-	if(StateFlee>7){randing1(10);}
-	else if(StateFlee>1){randing1(5);}
-	else if(StateFlee==1){randing1(2);}
-	else{randing1(0);}
-}
-
-
-void strategyAct(){
-	if(findEnemy){
-		if(StateSway||StateFlee){}
-		else{StateFlee=1;}
-		StateCnt=0;
-	}
-	if(StateFlee>7){fleeing3();}
-	else if(StateSway){swaying();}
-	else if(StateFlee==1){fleeing1();}
-	else if(StateFlee==2){fleeing2();}
-	else{routing();}
-	if(StateCnt>400){remv2();}
 }
 
 

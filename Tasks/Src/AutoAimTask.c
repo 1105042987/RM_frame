@@ -50,7 +50,7 @@ float kalmanCalc(kalman_t *f,float z,int t){
 }
 //*****************************************声明变量******************************************//
 
-GMAngle_t aim,aimLast,opt;//optimize					//目标角度
+GMAngle_t aim,aimLast,opt,tmp;//optimize					//目标角度
 GMAngle_t adjust;															//校准发射变量
 uint8_t Enemy_INFO[8],Tx_INFO[8];							//接收
 uint8_t findEnemy=0,aimMode=0,upper_mode;			//aimMode用于选择瞄准模式，0为手动瞄准，1为正常自瞄，2为打符，3暂无（吊射？）
@@ -70,21 +70,23 @@ void InitAutoAim(){
 	adjust.yaw=0;			adjust.pit=0;
 }
 //*******************************UART回调函数********************************//
+float tmpr=1.55;
 void AutoAimUartRxCpltCallback(){
 	if(RX_ENEMY_START=='s'&&RX_ENEMY_END=='e'){
 		onLed(6);
 		aim.yaw=(int16_t)((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)*kAngle;
 		aim.pit=-10-(int16_t)((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)*kAngle;
 		aim.dis=(int16_t)((RX_ENEMY_DIS1<<8)|RX_ENEMY_DIS2);
-		aim.yaw/=1.6975;
-		aim.pit/=1.3976;
-		
-		
-		aim.yaw=(GMY.Real+aim.yaw+aimLast.yaw)/2;
-		aim.pit=(GMP.Real+aim.pit+aimLast.pit)/2;
-		aimLast=aim;
+		aim.yaw/=1.55;
+		aim.pit/=1.7;
+//		aim.yaw=(GMY.Real+aim.yaw+aimLast.yaw)/2;
+//		aim.pit=(GMP.Real+aim.pit+aimLast.pit)/2;
+//		aimLast=aim;
+		tmp.yaw=(GMY.Real+aim.yaw+aimLast.yaw)/2;
+		tmp.pit=(GMP.Real+aim.pit+aimLast.pit)/2;
+		aimLast=tmp;
 		if(GMP.Real+aim.pit<-15){findEnemy=1;}
-		opt=aimProcess(aim.yaw,aim.pit,&AimTic);	
+		opt=aimProcess(tmp.yaw,tmp.pit,&AimTic);	
 	}
 	HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t*)&Enemy_INFO,8);
 }
@@ -108,7 +110,8 @@ void UpperStateFSM(){
 		upper_mode = aimMode;
 	}
 }
-
+int tmpt;
+float tmpw;
 GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 /*@尹云鹏，自瞄预测及下坠补偿
 	核心思想：
@@ -118,40 +121,37 @@ GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 	4.基于pitch的重力下坠补偿
 */
 	#define amt 5	//间隔点个数amount，调节amt使时间间隔大约为50ms，即 amt=50ms/1000ms*fps
-	static int8_t i;						//计数器
+	static int8_t i,lock;				//计数器，首次进入保护锁
 	static float 	y[amt],p[amt],//yaw,pit历史
 								tSum,t[amt],	//间隔时间,tic历史
 								wy,wp,				//yaw,pit角速度
 								wySum,wpSum;	//角速度累加对抗
-	GMAngle_t angle;					//返回值目标角度
-	if(*tic>100){	//if两次数据时间间隔大于100*2ms，清空历史
-		i=0;
-		memset(y,0,sizeof(y));
-		memset(p,0,sizeof(p));
-		memset(t,0,sizeof(t));
-		wy=0;wp=0;tSum=0;
-		angle.yaw=yaw;angle.pit=pit;
-		angle.pit-=40/angle.pit-0.4;//重力下坠补偿，哨兵实际曲线拟合
-		*tic=1;
-		return angle;
+	GMAngle_t angle;	//返回值目标角度
+	
+	tSum+=*tic-t[i];	//与pid的i计算如出一辙，加上本次并减去amt次以前的时间间隔，得到分频后的间隔
+	tmpt=tSum;
+	if(*tic>150){			//if两次数据时间间隔大于100*2ms，清空历史，进入保护锁
+		lock=amt;
+		wy=0;wp=0;
 	}
-	tSum+=*tic-t[i];						//与pid的i计算如出一辙，加上本次并减去amt次以前的数据
-	wy=(wy+(yaw-y[i])/tSum)/2;	//本次与上次平均滤波
-	wp=(wp+(pit-p[i])/tSum)/2;
-	
-	wySum+=wy;	//角速度累加与指数衰减对抗
-	wpSum+=wp;
-	wySum*=0.9;	//指数衰减限制累加,失去物理意义
-	wpSum*=0.9;
-	
+	if(lock){lock--;}	//函数首次进入保护，只记录数据不预测
+	else{
+		wy=(wy+(yaw-y[i])/tSum)/2;	//本次与上次平均滤波
+		wp=(wp+(pit-p[i])/tSum)/2;
+		wySum+=wy;	//角速度累加与指数衰减对抗
+		wpSum+=wp;
+		wySum*=0.85;//指数衰减限制累加,失去物理意义
+		wpSum*=0.85;
+		tmpw=wySum;
+	}
 	y[i]=yaw;		//yaw历史
 	p[i]=pit;		//pit历史
 	t[i]=*tic;	//tic历史
 	i=(i+1)%amt;//amt次之内循环
 	
-	angle.yaw=yaw+wySum*20;		//实现预测
-	angle.pit=pit+wpSum*20;
-	angle.pit-=40/angle.pit-0.4;//重力下坠补偿，哨兵实际曲线拟合
+	angle.yaw=yaw+wySum*10;		//实现预测
+	angle.pit=pit+wpSum*10;
+	angle.pit-=40/angle.pit-0.4;//重力下坠补偿
 	*tic=1;			//时间中断计时器重新开始
 	return angle;
 }

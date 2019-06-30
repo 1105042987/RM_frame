@@ -14,17 +14,17 @@
 #include "math.h"
 
 //底盘功率限制
-#ifdef USE_POWER_LIMIT
 int LimitCnt=500;
 int8_t LimitRate=1;
+#ifdef USE_POWER_LIMIT
 void PowerLimitation(){
 	static float limitTgt=90;
 	float rate;
 	if(LimitCnt){
 		LimitCnt--;
-		limitTgt=50;
+		limitTgt=40;
 	}
-	else if(limitTgt<100){
+	else if(limitTgt<90){
 		limitTgt+=0.05;
 	}
 	float tmp=(float)PowerHeat.chassis_power_buffer-limitTgt;
