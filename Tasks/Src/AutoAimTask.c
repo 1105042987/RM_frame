@@ -70,7 +70,7 @@ void InitAutoAim(){
 	adjust.yaw=0;			adjust.pit=0;
 }
 //*******************************UART回调函数********************************//
-float tmpr=2.65;
+
 void AutoAimUartRxCpltCallback(){
 	if(RX_ENEMY_START=='s'&&RX_ENEMY_END=='e'){
 		onLed(6);
@@ -82,11 +82,11 @@ void AutoAimUartRxCpltCallback(){
 //		aim.yaw=(GMY.Real+aim.yaw+aimLast.yaw)/2;
 //		aim.pit=(GMP.Real+aim.pit+aimLast.pit)/2;
 //		aimLast=aim;
-		tmp.yaw=(GMY.Real+aim.yaw+aimLast.yaw)/2;
-		tmp.pit=(GMP.Real+aim.pit+aimLast.pit)/2;
-//		tmp.yaw=GMY.Real+aim.yaw;
-//		tmp.pit=GMP.Real+aim.pit;
-		aimLast=tmp;
+//		tmp.yaw=(GMY.Real+aim.yaw+aimLast.yaw)/2;
+//		tmp.pit=(GMP.Real+aim.pit+aimLast.pit)/2;
+//		aimLast=tmp;
+		tmp.yaw=GMY.Real+aim.yaw;
+		tmp.pit=GMP.Real+aim.pit;
 		if(GMP.Real+aim.pit<-15){
 			opt=aimProcess(tmp.yaw,tmp.pit,&AimTic);
 			findEnemy=1;
@@ -114,8 +114,11 @@ void UpperStateFSM(){
 		upper_mode = aimMode;
 	}
 }
+
+float test1,test2,test3;
 GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 /*@尹云鹏，自瞄预测及下坠补偿
+	参数：绝对角度yaw，pit，计时器地址
 	核心思想：
 	1.视觉数据需要与真实角度标定，传入参数为目标绝对角度，差分出速度
 	2.视觉数据存在误差，以一定时间间隔采样(即高中做实验学过的，高考必考内容)
@@ -128,33 +131,37 @@ GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 								tSum,t[amt],	//间隔时间,tic历史
 								wy,wp,				//yaw,pit角速度
 								wySum,wpSum;	//角速度累加对抗
-	static GMAngle_t angle;	//返回值目标角度
-	
+	static GMAngle_t in,out;		//上一次值，返回值角度
 	tSum+=*tic-t[i];	//与pid的i计算如出一辙，加上本次并减去amt次以前的时间间隔，得到分频后的间隔
 	if(*tic>150){			//if两次数据时间间隔大于100*2ms，清空历史，进入保护锁
 		lock=amt;
 		wy=0;wp=0;
-		angle.yaw=0;angle.pit=0;
+		in.yaw=yaw;in.pit=pit;
+		out.yaw=yaw;out.pit=pit;
 	}
-	if(lock){lock--;}	//函数首次进入保护，只记录数据不预测
+	in.yaw=(yaw+in.yaw)/2;//传入值滤波
+	in.pit=(pit+in.pit)/2;
+	if(lock){lock--;}			//函数首次进入保护，只记录数据不预测
 	else{
-		wy=(wy+(yaw-y[i])/tSum)/2;	//本次与上次平均滤波
-		wp=(wp+(pit-p[i])/tSum)/2;
+		wy=(wy+(in.yaw-y[i])/tSum)/2;	//速度滤波
+		wp=(wp+(in.pit-p[i])/tSum)/2;
 		wySum+=wy;	//角速度累加与指数衰减对抗
 		wpSum+=wp;
-		wySum*=0.9;//指数衰减限制累加,失去物理意义
+		wySum*=0.9;	//指数衰减限制累加,失去物理意义
 		wpSum*=0.9;
 	}
-	y[i]=yaw;		//yaw历史
-	p[i]=pit;		//pit历史
-	t[i]=*tic;	//tic历史
-	i=(i+1)%amt;//amt次之内循环
-	
-	angle.yaw=(yaw+wySum*25+angle.yaw)/2;		//实现预测
-	angle.pit=(pit+wpSum*10+angle.pit)/2;
+	y[i]=in.yaw;	//yaw历史
+	p[i]=in.pit;	//pit历史
+	t[i]=*tic;		//tic历史
+	i=(i+1)%amt;	//amt次之内循环
+	test1=in.pit;
+	test2=out.pit;
+	test3=wpSum;
+	out.yaw=(in.yaw+wySum*20+out.yaw)/2;		//实现预测
+	out.pit=(in.pit+wpSum*10+out.pit)/2;
 //	angle.pit-=40/angle.pit-0.4;//重力下坠补偿
 	*tic=1;			//时间中断计时器重新开始
-	return angle;
+	return out;
 }
 #endif /*USE_AUTOAIM*/
 #endif /*DEBUG_MODE*/
