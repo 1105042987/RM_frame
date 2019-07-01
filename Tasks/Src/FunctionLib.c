@@ -30,8 +30,8 @@ void routing1(){
 		dirCnt=10;
 	}
 	
-	if(CMA.Real<-500 ||getRightSr()){dir=-1;LimitCnt=500;}
-	ChassisSpeed=1000*dir;
+	if(CMA.Real<-350 ||getRightSr()){dir=-1;LimitCnt=500;}
+	ChassisSpeed=2400*dir;
 }
 
 

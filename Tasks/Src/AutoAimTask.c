@@ -70,32 +70,36 @@ void InitAutoAim(){
 	adjust.yaw=0;			adjust.pit=0;
 }
 //*******************************UART回调函数********************************//
-float tmpr=1.55;
+float tmpr=2.65;
 void AutoAimUartRxCpltCallback(){
 	if(RX_ENEMY_START=='s'&&RX_ENEMY_END=='e'){
 		onLed(6);
-		aim.yaw=(int16_t)((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)*kAngle;
-		aim.pit=-10-(int16_t)((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)*kAngle;
+		aim.yaw=-(int16_t)((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)*kAngle;
+		aim.pit=(int16_t)((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)*kAngle;
 		aim.dis=(int16_t)((RX_ENEMY_DIS1<<8)|RX_ENEMY_DIS2);
-		aim.yaw/=1.55;
-		aim.pit/=1.7;
+		aim.yaw/=2.7;
+		aim.pit/=2.6;
 //		aim.yaw=(GMY.Real+aim.yaw+aimLast.yaw)/2;
 //		aim.pit=(GMP.Real+aim.pit+aimLast.pit)/2;
 //		aimLast=aim;
 		tmp.yaw=(GMY.Real+aim.yaw+aimLast.yaw)/2;
 		tmp.pit=(GMP.Real+aim.pit+aimLast.pit)/2;
+//		tmp.yaw=GMY.Real+aim.yaw;
+//		tmp.pit=GMP.Real+aim.pit;
 		aimLast=tmp;
-		if(GMP.Real+aim.pit<-15){findEnemy=1;}
-		opt=aimProcess(tmp.yaw,tmp.pit,&AimTic);	
+		if(GMP.Real+aim.pit<-15){
+			opt=aimProcess(tmp.yaw,tmp.pit,&AimTic);
+			findEnemy=1;
+		}
 	}
 	HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t*)&Enemy_INFO,8);
 }
 
 //**************************普通模式自瞄控制函数****************************//
 void autoAim(){
-	GMY.Target=opt.yaw;
-	GMP.Target=GMP.Real+aim.pit*0.65-aimLast.pit*0.2;
-//	GMP.Target=opt.pit;
+	GMY.Target=opt.yaw+2;
+//	GMP.Target=GMP.Real+aim.pit*0.65-aimLast.pit*0.2;
+	GMP.Target=opt.pit+3;
 	findEnemy=0;
 }
 
@@ -110,8 +114,6 @@ void UpperStateFSM(){
 		upper_mode = aimMode;
 	}
 }
-int tmpt;
-float tmpw;
 GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 /*@尹云鹏，自瞄预测及下坠补偿
 	核心思想：
@@ -126,13 +128,13 @@ GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 								tSum,t[amt],	//间隔时间,tic历史
 								wy,wp,				//yaw,pit角速度
 								wySum,wpSum;	//角速度累加对抗
-	GMAngle_t angle;	//返回值目标角度
+	static GMAngle_t angle;	//返回值目标角度
 	
 	tSum+=*tic-t[i];	//与pid的i计算如出一辙，加上本次并减去amt次以前的时间间隔，得到分频后的间隔
-	tmpt=tSum;
 	if(*tic>150){			//if两次数据时间间隔大于100*2ms，清空历史，进入保护锁
 		lock=amt;
 		wy=0;wp=0;
+		angle.yaw=0;angle.pit=0;
 	}
 	if(lock){lock--;}	//函数首次进入保护，只记录数据不预测
 	else{
@@ -140,18 +142,17 @@ GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 		wp=(wp+(pit-p[i])/tSum)/2;
 		wySum+=wy;	//角速度累加与指数衰减对抗
 		wpSum+=wp;
-		wySum*=0.85;//指数衰减限制累加,失去物理意义
-		wpSum*=0.85;
-		tmpw=wySum;
+		wySum*=0.9;//指数衰减限制累加,失去物理意义
+		wpSum*=0.9;
 	}
 	y[i]=yaw;		//yaw历史
 	p[i]=pit;		//pit历史
 	t[i]=*tic;	//tic历史
 	i=(i+1)%amt;//amt次之内循环
 	
-	angle.yaw=yaw+wySum*10;		//实现预测
-	angle.pit=pit+wpSum*10;
-	angle.pit-=40/angle.pit-0.4;//重力下坠补偿
+	angle.yaw=(yaw+wySum*25+angle.yaw)/2;		//实现预测
+	angle.pit=(pit+wpSum*10+angle.pit)/2;
+//	angle.pit-=40/angle.pit-0.4;//重力下坠补偿
 	*tic=1;			//时间中断计时器重新开始
 	return angle;
 }

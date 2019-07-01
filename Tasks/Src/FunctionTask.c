@@ -41,8 +41,7 @@ void limtSync(){
 #if GUARD == 'U'
 uint8_t findEnemy;
 //上平台代码
-void RemoteControlP
-rocess(Remote *rc){
+void RemoteControlProcess(Remote *rc){
 	if(WorkState <= 0) return;
 	//max=660
 	channelrrow = (rc->ch0 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET);//leftRight
@@ -172,8 +171,6 @@ void RemoteControlProcess(){
 	limtSync();
 }
 //*******************下平台代码2
-
-
 void selfControlProcess(){
 	offLed(6);
 	if(WorkState <= 0) return;
