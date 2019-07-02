@@ -50,7 +50,7 @@ float kalmanCalc(kalman_t *f,float z,int t){
 }
 //*****************************************声明变量******************************************//
 
-GMAngle_t aim,opt;//optimize					//目标角度
+GMAngle_t aim,aimLast,opt,tmp;//optimize					//目标角度
 GMAngle_t adjust;															//校准发射变量
 uint8_t Enemy_INFO[8],Tx_INFO[8];							//接收
 uint8_t findEnemy=0,aimMode=0,upper_mode;			//aimMode用于选择瞄准模式，0为手动瞄准，1为正常自瞄，2为打符，3暂无（吊射？）
@@ -79,8 +79,16 @@ void AutoAimUartRxCpltCallback(){
 		aim.dis=(int16_t)((RX_ENEMY_DIS1<<8)|RX_ENEMY_DIS2);
 		aim.yaw/=2.7;
 		aim.pit/=2.6;
+//		aim.yaw=(GMY.Real+aim.yaw+aimLast.yaw)/2;
+//		aim.pit=(GMP.Real+aim.pit+aimLast.pit)/2;
+//		aimLast=aim;
+//		tmp.yaw=(GMY.Real+aim.yaw+aimLast.yaw)/2;
+//		tmp.pit=(GMP.Real+aim.pit+aimLast.pit)/2;
+//		aimLast=tmp;
+		tmp.yaw=GMY.Real+aim.yaw;
+		tmp.pit=GMP.Real+aim.pit;
 		if(GMP.Real+aim.pit<-15){
-			opt=aimProcess(GMY.Real+aim.yaw, GMP.Real+aim.pit, &AimTic);
+			opt=aimProcess(tmp.yaw,tmp.pit,&AimTic);
 			findEnemy=1;
 		}
 	}
@@ -107,6 +115,7 @@ void UpperStateFSM(){
 	}
 }
 
+float test1,test2,test3;
 GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 /*@尹云鹏，自瞄预测及下坠补偿
 	参数：绝对角度yaw，pit，计时器地址
@@ -145,6 +154,9 @@ GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 	p[i]=in.pit;	//pit历史
 	t[i]=*tic;		//tic历史
 	i=(i+1)%amt;	//amt次之内循环
+	test1=in.pit;
+	test2=out.pit;
+	test3=wpSum;
 	out.yaw=(in.yaw+wySum*20+out.yaw)/2;		//实现预测
 	out.pit=(in.pit+wpSum*10+out.pit)/2;
 //	angle.pit-=40/angle.pit-0.4;//重力下坠补偿
