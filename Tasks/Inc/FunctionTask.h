@@ -55,4 +55,6 @@ extern int16_t channelrcol;
 extern int16_t channellrow;
 extern int16_t channellcol;
 
+
+void limtSync(void);
 #endif /*__FUNCTIONTASK_H*/

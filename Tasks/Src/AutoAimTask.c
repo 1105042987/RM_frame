@@ -14,54 +14,13 @@
 #ifndef DEBUG_MODE
 #ifdef	USE_AUTOAIM
 #define USE_AUTOAIM_ANGLE
-GMAngle_t aimProcess(float yaw,float pit,int16_t *tic);
-void fallCompsition();
-typedef struct{
-	float x,v,k1,k2,t,R;
-	float q1,q2,p11,p12,p21,p22;
-	float t11,t12,t21,t22;//tmp
-}kalman_t;
-#define kalmanInit \
-{ 0,0,0,0,1,1,\
-	0.1,0.1,1,0,0,1,\
-	0,0,0,0 \
-}
-kalman_t kFilter=kalmanInit;
-float kalmanCalc(kalman_t *f,float z,int t){
-	//x=A*x0
-	f->x += f->v * f->t;
-	//P=APA'+Q
-	f->t11 = f->p11+ (f->p12+ f->p21+ f->p22* f->t)* f->t+ f->q1;
-	f->t12 = f->p12+ f->p22* f->t;
-	f->t21 = f->p21+ f->p22* f->t;
-	f->t22 = f->p22+ f->q2;
-	//K=PH/(HPH'+R)
-	f->k1= f->t11/ (f->t11+ f->R);
-	f->k2= f->t12/ (f->t11+ f->R);
-	//x=x+K(z-Hx)
-	f->x += f->k1*(z- f->x);
-	f->v += f->k2*(z- f->x);
-	//P=(1-KH)PH
-	f->p11=(1- f->k1)* f->t11;
-	f->p12=(1- f->k1)* f->t12;
-	f->p21=f->t21- f->k2* f->t11;
-	f->p22=f->t22- f->k2* f->t12;
-	return f->x + f->v *t;
-}
 //*****************************************声明变量******************************************//
-
-GMAngle_t aim,opt;//optimize					//目标角度
-GMAngle_t adjust;															//校准发射变量
-uint8_t Enemy_INFO[8],Tx_INFO[8];							//接收
-uint8_t findEnemy=0,aimMode=0,upper_mode;			//aimMode用于选择瞄准模式，0为手动瞄准，1为正常自瞄，2为打符，3暂无（吊射？）
-
-uint16_t aimCnt=0;														//自瞄分频延时变量
-int16_t receiveCnt=0,receiveFps=0,AimTic=1;		//检测上位机信号帧数
-extern int16_t receiveCnt,receiveFps;
-int8_t trackCnt=0;														//追踪变量
-
+GMAngle_t aim,opt,adjust;										//校准发射变量
+uint8_t Enemy_INFO[8],Tx_INFO[8];						//接收
+uint8_t findEnemy=0,aimMode=0,upper_mode;		//aimMode用于选择瞄准模式，0为手动瞄准，1为正常自瞄，2为打符，3暂无（吊射？）
+int16_t AimTic=1;
+GMAngle_t aimProcess(float yaw,float pit,int16_t *tic);
 //********************************自瞄初始化********************************//
-
 void InitAutoAim(){
 	//开启AUTO_AIM_UART的DMA接收
 	if(HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t *)&Enemy_INFO,8)!= HAL_OK){Error_Handler();}
@@ -70,16 +29,16 @@ void InitAutoAim(){
 	adjust.yaw=0;			adjust.pit=0;
 }
 //*******************************UART回调函数********************************//
-
+float rate1=4.1,rate2=4.49;
 void AutoAimUartRxCpltCallback(){
 	if(RX_ENEMY_START=='s'&&RX_ENEMY_END=='e'){
 		onLed(6);
 		aim.yaw=-(int16_t)((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)*kAngle;
 		aim.pit=(int16_t)((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)*kAngle;
 		aim.dis=(int16_t)((RX_ENEMY_DIS1<<8)|RX_ENEMY_DIS2);
-		aim.yaw/=2.7;
-		aim.pit/=2.6;
-		if(GMP.Real+aim.pit<-15){
+		aim.yaw/=rate1;
+		aim.pit/=rate2;
+		if(GMP.Real+aim.pit<5){
 			opt=aimProcess(GMY.Real+aim.yaw, GMP.Real+aim.pit, &AimTic);
 			findEnemy=1;
 		}
@@ -89,7 +48,7 @@ void AutoAimUartRxCpltCallback(){
 
 //**************************普通模式自瞄控制函数****************************//
 void autoAim(){
-	GMY.Target=opt.yaw+2;
+	GMY.Target=opt.yaw;
 //	GMP.Target=GMP.Real+aim.pit*0.65-aimLast.pit*0.2;
 	GMP.Target=opt.pit+3;
 	findEnemy=0;

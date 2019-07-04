@@ -16,21 +16,19 @@ int sgn(float x){return x>0?1:(x<0?-1:0);}
 
 void routing1(){
 //-100,210,315,425,530,610
-	static int8_t dir=-1,dirCnt=10;
+	static int8_t dir=-1,dirCnt=5;
 	LimitRate=1;
-	
 	if(getLeftSw()){
 		if(dirCnt){dirCnt--;LimitRate=0;}
-		else{dir=1;LimitCnt=500;}
+		dir=1;
+		LimitCnt=500;
 		onLed(7);
 		CMA.Real=0;
-		
 	}else{
 		offLed(7);
 		dirCnt=10;
 	}
-	
-	if(CMA.Real<-350 ||getRightSr()){dir=-1;LimitCnt=500;}
+	if(CMA.Real<-380 ||getRightSr()){dir=-1;LimitCnt=500;}
 	ChassisSpeed=2400*dir;
 }
 
@@ -47,12 +45,12 @@ void scaning2(){
 	STIRv.Target=0;
 	if(receiveData[0].data[1]>4000){//enemy blue
 		GMY.Target-=0.32;
-		GMP.Target=-10+15*sin(ref);
+		GMP.Target=-30+15*sin(ref);
 		ref+=0.015;
 	}
 	else{//enemy red
 		GMY.Target-=0.25;
-		GMP.Target=-12+10*sin(ref);
+		GMP.Target=-30+10*sin(ref);
 		ref+=0.03;
 	}
 }

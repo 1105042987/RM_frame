@@ -13,8 +13,8 @@
 
 uint8_t rc_data[18];
 RC_Ctl_t RC_CtrlData;
-InputMode_e inputmode = REMOTE_Control; 
-FunctionMode_e functionmode = UPPER_POS;
+RCMode_e RCRightMode = Pos1; 
+RCMode_e RCLeftMode = Pos1;
 
 RemoteSwitch_t g_switch1;
 
@@ -89,14 +89,14 @@ void RemoteDataProcess(uint8_t *pData){
 	RC_CtrlData.key.v = ((int16_t)pData[14]) | ((int16_t)pData[15] << 8);
 
 	//输入状态设置
-	if(RC_CtrlData.rc.s2 == 1) inputmode = REMOTE_Control;
-	else if(RC_CtrlData.rc.s2 == 3) inputmode = SELF_Control; 
-	else inputmode = STOP; 
+	if(RC_CtrlData.rc.s2 == 1) RCRightMode = Pos1;
+	else if(RC_CtrlData.rc.s2 == 3) RCRightMode = Pos2; 
+	else RCRightMode = Pos3; 
 	
 	//功能状态设置
-	if(RC_CtrlData.rc.s1 == 1) functionmode = UPPER_POS; 
-	else if(RC_CtrlData.rc.s1 == 3) functionmode = MIDDLE_POS; 
-	else functionmode = LOWER_POS; 
+	if(RC_CtrlData.rc.s1 == 1) RCLeftMode = Pos1; 
+	else if(RC_CtrlData.rc.s1 == 3) RCLeftMode = Pos2; 
+	else RCLeftMode = Pos3; 
 	
 	//左上角拨杆状态（RC_CtrlData.rc.s1）获取
 	GetRemoteSwitchAction(&g_switch1, RC_CtrlData.rc.s1);
@@ -118,19 +118,21 @@ void RemoteDataProcess(uint8_t *pData){
 		HAL_GPIO_WritePin(GPIOE, LED_RED_Pin, GPIO_PIN_RESET);
 	}
 	//数据处理方式选择
-	switch(inputmode){
-		case REMOTE_Control:{
+	switch(RCRightMode){
+		case Pos1:{
 			if(WorkState > 0){
-				RemoteControlProcess(&(RC_CtrlData.rc));
+				RCProcess1(&(RC_CtrlData.rc));
 			}
 		}break;
-		case SELF_Control:{
+		case Pos2:{
 			if(WorkState > 0){
-				selfControlProcess(&(RC_CtrlData.rc));
+				RCProcess2(&(RC_CtrlData.rc));
 			}
 		}break;
-		case STOP:{
-			 
+		case Pos3:{
+			if(WorkState > 0){
+				RCProcess3(&(RC_CtrlData.rc));
+			}
 		}break;
 	}	
 }

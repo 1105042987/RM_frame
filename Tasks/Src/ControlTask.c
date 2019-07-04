@@ -11,7 +11,7 @@
   */
 #include "includes.h"
 
-WorkState_e WorkState = PREPARE_STATE;
+WorkState_e WorkState = STATE_pre;
 uint16_t prepare_time = 0;
 uint16_t normal_time = 0;
 uint16_t counter = 0;
@@ -102,7 +102,7 @@ void sendAllData(uint8_t isStop){
 //状态机切换
 void WorkStateFSM(void){
 	switch (WorkState){
-		case PREPARE_STATE:{			//准备模式
+		case STATE_pre:{			//准备模式
 			normal_time = 0;
 			if(prepare_time < 0x1ff && imu.InitFinish == 1) prepare_time++;
 			HAL_GPIO_WritePin(GPIOG, 0xff, GPIO_PIN_SET);//close all LED
@@ -115,42 +115,42 @@ void WorkStateFSM(void){
 				isCan12FirstRx == 1 && isCan21FirstRx == 1 && isCan22FirstRx == 1){
 			//开机2秒后且gyro初始化完成且所有can电机上电完成后进入正常模式
 				if(playMusicSuperMario()){
-					if(inputmode == STOP) WorkState = STOP_STATE;
-					else WorkState = NORMAL_STATE;
+					if(RCRightMode == Pos3 && RCLeftMode == Pos3) WorkState = STATE_stop;
+					else WorkState = STATE_1;
 					prepare_time = 0;
 				}
 			}
 		}break;
 		#ifndef SLAVE_MODE
-		case NORMAL_STATE:{				//正常模式
+		case STATE_1:{				//正常模式
 			if(normal_time<10000)normal_time++;
 			if(normal_time>=10)startUp = 1;
-			if(inputmode == STOP) WorkState = STOP_STATE;
-			if(functionmode == MIDDLE_POS) WorkState = ADDITIONAL_STATE_ONE;
-			if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
+			if(RCRightMode == Pos3 && RCLeftMode == Pos3) WorkState = STATE_stop;
+			if(RCLeftMode == Pos2) WorkState = STATE_2;
+			if(RCLeftMode == Pos3) WorkState = STATE_3;
 		}break;
-		case ADDITIONAL_STATE_ONE:{		//附加模式一
-			if(inputmode == STOP) WorkState = STOP_STATE;
-			if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
-			if(functionmode == LOWER_POS) WorkState = ADDITIONAL_STATE_TWO;
+		case STATE_2:{		//附加模式一
+			if(RCRightMode == Pos3 && RCLeftMode == Pos3) WorkState = STATE_stop;
+			if(RCLeftMode == Pos1) WorkState = STATE_1;
+			if(RCLeftMode == Pos3) WorkState = STATE_3;
 		}break;
-		case ADDITIONAL_STATE_TWO:{		//附加模式二
-			if(inputmode == STOP) WorkState = STOP_STATE;
-			if(functionmode == UPPER_POS) WorkState = NORMAL_STATE;
-			if(functionmode == MIDDLE_POS) WorkState = ADDITIONAL_STATE_ONE;
+		case STATE_3:{		//附加模式二
+			if(RCRightMode == Pos3 && RCLeftMode == Pos3) WorkState = STATE_stop;
+			if(RCLeftMode == Pos1) WorkState = STATE_1;
+			if(RCLeftMode == Pos2) WorkState = STATE_2;
 		}break;
-		case STOP_STATE:{				//紧急停止
+		case STATE_stop:{				//紧急停止
 			sendAllData(1);
-			if(inputmode == REMOTE_Control || inputmode == SELF_Control){
-				WorkState = PREPARE_STATE;
+			if(RCRightMode == Pos1 || RCRightMode == Pos2){
+				WorkState = STATE_pre;
 				FunctionTaskInit();
 			}
 		}break;
 		#else
-		case NORMAL_STATE:
-		case ADDITIONAL_STATE_ONE:
-		case ADDITIONAL_STATE_TWO:break;
-		case STOP_STATE:{
+		case STATE_1:
+		case STATE_2:
+		case STATE_3:break;
+		case STATE_stop:{
 			sendAllData(1);
 		}break;
 		#endif
@@ -162,7 +162,7 @@ void WorkStateFSM(void){
 void controlLoop(){
 	getJudgeState();
 	WorkStateFSM();
-	if(WorkState > 0){// && WorkState != STOP_STATE)
+	if(WorkState > 0){// && WorkState != STATE_stop)
 		CML.Target = ChassisSpeed*3.2;//*60*19/360;
 		CMR.Target = CML.Target;
 		#ifdef USE_POWER_LIMIT
@@ -210,16 +210,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		if(Control_Update==1){
 			HAL_IWDG_Refresh(&hiwdg);
 			Control_Update=0;
-			if(WorkState!=PREPARE_STATE){
-				if(WorkState==STOP_STATE&&receiveData[0].data[0]>0) WorkState = PREPARE_STATE;
+			if(WorkState!=STATE_pre){
+				if(WorkState==STATE_stop&&receiveData[0].data[0]>0) WorkState = STATE_pre;
 				else{
-					inputmode = (InputMode_e)(receiveData[0].data[0]>>8);
+					RCRightMode = (RCMode_e)(receiveData[0].data[0]>>8);
 					WorkState = (WorkState_e)(receiveData[0].data[0]&0x00ff);
 				}
-				if(inputmode==REMOTE_Control)
-					RemoteControlProcess();
+				if(RCRightMode==Pos1)
+					RCProcess1();
+				else if(RCRightMode==Pos2)
+					RCProcess2();
 				else
-					selfControlProcess();
+					RCProcess3();
 			}
 		}
 		#else
@@ -239,7 +241,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			}
 			else{
 				if(rc_first_frame == 0){
-					WorkState = PREPARE_STATE;
+					WorkState = STATE_pre;
 					HAL_UART_AbortReceive(&RC_UART);
 					while(HAL_UART_Receive_DMA(&RC_UART, rc_data, 18)!= HAL_OK);
 					rc_cnt = 0;
