@@ -110,7 +110,7 @@ uint16_t maxHeat0 = 480;
 uint16_t remainHeat0 = 480;
 uint16_t maxHeat1 = 480;
 uint16_t remainHeat1 = 480;
-uint16_t realHeat0 = 0;
+uint16_t RealHeat0 = 0;
 float fakeHeat0 = 0;
 float realBulletSpeed0 = 22;
 float cooldown0 = 72;
@@ -281,7 +281,7 @@ void Referee_Update_PowerHeatData(){
 	for(int i = 0; i<2; i++){
 		ph3[i] = (unsigned char)buffer[i+19];
 	}
-	realHeat0 = PowerHeat.shooter_heat0;
+	RealHeat0 = PowerHeat.shooter_heat0;
 	remainHeat0 = maxHeat0 - PowerHeat.shooter_heat0;
 	remainHeat1 = maxHeat1 - PowerHeat.shooter_heat1;
 	JUDGE_Received = 1;

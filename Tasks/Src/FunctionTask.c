@@ -20,8 +20,6 @@ int8_t StateSway,StateFlee,StateHurt,StateRand=1;
 int16_t StateCnt=1;
 int16_t noEnemyCnt=1;
 void strategyShoot(void);
-void uartSend(int8_t i);
-void uartSend2(void);
 //≥ı ºªØ
 void FunctionTaskInit(){
 	ChassisSpeed=0;
@@ -85,21 +83,21 @@ void RCProcess3(Remote *rc){
 void generalProcess(Remote *rc){	
 	if(WorkState <= 0) return;
 	//max=660
-	channelrrow = (rc->ch0 - (int16_t)Pos1LER_STICK_OFFSET);
+	channelrrow = (rc->ch0 - (int16_t)Pos1LER_STICK_OFFSET);//leftRight
 	channelrcol = (rc->ch1 - (int16_t)Pos1LER_STICK_OFFSET);
 	channellrow = (rc->ch2 - (int16_t)Pos1LER_STICK_OFFSET);
 	channellcol = (rc->ch3 - (int16_t)Pos1LER_STICK_OFFSET);
 	
-	ChassisSpeed=channelrrow*4;
+	ChassisSpeed=channelrrow*3;
 	findEnemy=(uint8_t)receiveData[0].data[0];
 	sendData[0].data[0]=(int16_t)WorkState | (int16_t)RCRightMode<<8;
 	
 	if(GameRobotState.robot_id==7){sendData[0].data[1]=channellrow+5000;}
 	else{sendData[0].data[1]=channellrow;}
 	
-	if(channellcol>600){sendData[0].data[2]=channellcol+5000;}
+	if(channelrcol>600){sendData[0].data[2]=channellcol+5000;}
 	else{sendData[0].data[2]=channellcol;}
-	sendData[0].data[3]=(int16_t)(realHeat0*20);
+	sendData[0].data[3]=(int16_t)(RealHeat0*20);
 }
 void limtSync(){
 	MINMAX(GMP.Target,-60,0);//limit
@@ -121,13 +119,13 @@ void RCProcess1(){
 		STIRv.Target=0;
 		FRICL.Target=-0;
 		FRICR.Target= 0;
-		uartSend2();
+		uartSend();
 		if(findEnemy){autoAim();}
 	}
 	if(WorkState == STATE_3){
 		FRICL.Target =-5500;
 		FRICR.Target = 5500;
-		uartSend2();
+		uartSend();
 		if(findEnemy){autoAim();}
 		if(receiveData[0].data[2]>4000){firing2();}
 		else{firing1();}
@@ -146,12 +144,12 @@ void RCProcess2(){
 		STIRv.Target=0;
 		FRICL.Target=-0;
 		FRICR.Target= 0;
-		uartSend2();
+		uartSend();
 		if(findEnemy){autoAim();}
 	}
 	if(WorkState == STATE_3){
 		strategyShoot();
-		uartSend2();
+		uartSend();
 	}
 	limtSync();
 }
@@ -166,7 +164,7 @@ void RCProcess3(){
 	}
 	if(WorkState == STATE_2){
 		strategyShoot();
-		uartSend2();
+		uartSend();
 	}
 	limtSync();
 }
@@ -177,18 +175,18 @@ void strategyShoot(){
 	laserOn();
 	if(findEnemy){
 		autoAim();
-		if(fabs(aim.yaw)<2.5 && aim.dis==0){firing2();}
+		if(fabs(aim.yaw)<3 && aim.dis==0){firing2();}
 		//else {firing1();}
-		noEnemyCnt=-200;
+		noEnemyCnt=-300;
 		sendData[0].data[0]=(int16_t)1;
 	}
 	else if(noEnemyCnt>1){
-		//scaning2();
+		scaning1();
 		sendData[0].data[0]=(int16_t)0;
 	}
-	else if(noEnemyCnt<-170){
+	else if(noEnemyCnt<-200){
 		noEnemyCnt++;
-		if(fabs(aim.yaw)<3 && aim.dis==0){firing2();}
+		if(fabs(aim.yaw)<4 && aim.dis==0){firing2();}
 		else{STIRv.Target=0;}
 	}
 	else{
@@ -213,7 +211,7 @@ void generalProcess(){
 	if(channellrow<-4000){channellrow+=5000;}
 	if(channellcol>4000){channellcol-=5000;}
 	
-	realHeat0=receiveData[0].data[3]/(float)(20.0);
+	RealHeat0=receiveData[0].data[3]/(float)(20.0);
 	GMY.Target+=channellrow*0.001f;
 	GMP.Target+=channellcol*0.001f;
 }
@@ -223,25 +221,7 @@ void limtSync(){
 //	MINMAX(GMY.Target,-160+GMY.imuEncorderDiff,160+GMY.imuEncorderDiff);//limit
 	//CMR.Target =  -CML.Target;
 }
-uint8_t msgRed[]="1\n",msgBlue[]="2\n";
-void uartSend(int8_t i){
-	static int16_t cnt;
-	if(cnt>500){
-		if(i==1){HAL_UART_Transmit_IT(&AUTOAIM_UART,(uint8_t*)msgRed,2);}
-		if(i==2){HAL_UART_Transmit_IT(&AUTOAIM_UART,(uint8_t*)msgBlue,2);}
-		cnt=0;
-	}
-	cnt++;
-}
-void uartSend2(){
-	static int16_t cnt;
-	if(cnt>500){
-		if(receiveData[0].data[1]>4000){HAL_UART_Transmit_IT(&AUTOAIM_UART,(uint8_t*)msgBlue,2);}
-		else{HAL_UART_Transmit_IT(&AUTOAIM_UART,(uint8_t*)msgRed,2);}
-		cnt=0;
-	}
-	cnt++;
-}
+
 #endif // GUARD == 'D'
 
 

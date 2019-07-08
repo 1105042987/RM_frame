@@ -26,19 +26,19 @@ void routing1(){
 		CMA.Real=0;
 	}else{
 		offLed(7);
-		dirCnt=10;
+		dirCnt=5;
 	}
 	if(CMA.Real<-380 ||getRightSr()){dir=-1;LimitCnt=500;}
-	ChassisSpeed=2400*dir;
+	ChassisSpeed=2000*dir;
 }
 
 
 void scaning1(){
 	static float ref;
 	STIRv.Target=0;
-	GMY.Target-=0.32;
-	GMP.Target=-10+15*sin(ref);
-	ref+=0.015;
+	GMY.Target-=0.3;
+	GMP.Target=-20+15*sin(ref);
+	ref+=0.03;
 }
 void scaning2(){
 	static float ref;
@@ -67,15 +67,15 @@ void firing1(){
 void firing2(){
 	static int8_t jam=-1;
 	
-	ShootFrq=(440-realHeat0)*0.1;
+	ShootFrq=(440-RealHeat0)*0.1;
 	
 	MINMAX(ShootFrq,0,22);
-//	if(realHeat0<100){ShootFrq=25;}//40
-//	else if(realHeat0<200){ShootFrq=20;}//30
-//	else if(realHeat0<300){ShootFrq=12;}//20
-//	else if(realHeat0<360 && ShootFrq<8){ShootFrq+=0.02f;}//12
-//	else if(realHeat0>440 && ShootFrq>5){ShootFrq--;}
-//	else if(realHeat0>400 && ShootFrq>7){ShootFrq-=0.01f;}
+//	if(RealHeat0<100){ShootFrq=25;}//40
+//	else if(RealHeat0<200){ShootFrq=20;}//30
+//	else if(RealHeat0<300){ShootFrq=12;}//20
+//	else if(RealHeat0<360 && ShootFrq<8){ShootFrq+=0.02f;}//12
+//	else if(RealHeat0>440 && ShootFrq>5){ShootFrq--;}
+//	else if(RealHeat0>400 && ShootFrq>7){ShootFrq-=0.01f;}
 //	else{ShootFrq=8;}
 	
 	if(STIRv.RxMsgC6x0.moment>8000){jam=30;}
@@ -91,4 +91,13 @@ void firing3(){
 	else{STIRv.Target=-3000;jam--;}
 }
 
-
+uint8_t msgRed[]="1\n",msgBlue[]="2\n";
+void uartSend(){
+	static int16_t cnt;
+	if(cnt>500){
+		if(receiveData[0].data[1]>4000){HAL_UART_Transmit_IT(&AUTOAIM_UART,(uint8_t*)msgBlue,2);}
+		else{HAL_UART_Transmit_IT(&AUTOAIM_UART,(uint8_t*)msgRed,2);}
+		cnt=0;
+	}
+	cnt++;
+}

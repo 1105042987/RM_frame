@@ -15,7 +15,7 @@
 #ifdef	USE_AUTOAIM
 #define USE_AUTOAIM_ANGLE
 //*****************************************声明变量******************************************//
-GMAngle_t aim,opt,adjust;										//校准发射变量
+GMAngle_t aim,opt,tmp,adjust;										//校准发射变量
 uint8_t Enemy_INFO[8],Tx_INFO[8];						//接收
 uint8_t findEnemy=0,aimMode=0,upper_mode;		//aimMode用于选择瞄准模式，0为手动瞄准，1为正常自瞄，2为打符，3暂无（吊射？）
 int16_t AimTic=1;
@@ -29,16 +29,19 @@ void InitAutoAim(){
 	adjust.yaw=0;			adjust.pit=0;
 }
 //*******************************UART回调函数********************************//
-float rate1=4.1,rate2=4.49;
+//float rate1=4.1,rate2=4.49;
+float rate1=2.7,rate2=2.88;
 void AutoAimUartRxCpltCallback(){
 	if(RX_ENEMY_START=='s'&&RX_ENEMY_END=='e'){
 		onLed(6);
-		aim.yaw=-(int16_t)((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)*kAngle;
-		aim.pit=(int16_t)((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)*kAngle;
+		aim.yaw=(int16_t)((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)*kAngle;
+		aim.pit=-(int16_t)((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)*kAngle;
 		aim.dis=(int16_t)((RX_ENEMY_DIS1<<8)|RX_ENEMY_DIS2);
 		aim.yaw/=rate1;
 		aim.pit/=rate2;
 		if(GMP.Real+aim.pit<5){
+			tmp.yaw=GMY.Real+aim.yaw;
+			tmp.pit=GMP.Real+aim.pit;
 			opt=aimProcess(GMY.Real+aim.yaw, GMP.Real+aim.pit, &AimTic);
 			findEnemy=1;
 		}
@@ -48,9 +51,9 @@ void AutoAimUartRxCpltCallback(){
 
 //**************************普通模式自瞄控制函数****************************//
 void autoAim(){
-	GMY.Target=opt.yaw;
+	GMY.Target=opt.yaw-2;
 //	GMP.Target=GMP.Real+aim.pit*0.65-aimLast.pit*0.2;
-	GMP.Target=opt.pit+3;
+	GMP.Target=opt.pit;
 	findEnemy=0;
 }
 
@@ -104,7 +107,7 @@ GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 	p[i]=in.pit;	//pit历史
 	t[i]=*tic;		//tic历史
 	i=(i+1)%amt;	//amt次之内循环
-	out.yaw=(in.yaw+wySum*20+out.yaw)/2;		//实现预测，滤波
+	out.yaw=(in.yaw+wySum*18+out.yaw)/2;		//实现预测，滤波
 	out.pit=(in.pit+wpSum*10+out.pit)/2;
 //	angle.pit-=40/angle.pit-0.4;//重力下坠补偿
 	*tic=1;			//时间中断计时器重新开始

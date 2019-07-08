@@ -122,24 +122,24 @@ void WorkStateFSM(void){
 			}
 		}break;
 		#ifndef SLAVE_MODE
-		case STATE_1:{				//正常模式
+		case STATE_1:{
 			if(normal_time<10000)normal_time++;
 			if(normal_time>=10)startUp = 1;
 			if(RCRightMode == Pos3 && RCLeftMode == Pos3) WorkState = STATE_stop;
 			if(RCLeftMode == Pos2) WorkState = STATE_2;
 			if(RCLeftMode == Pos3) WorkState = STATE_3;
 		}break;
-		case STATE_2:{		//附加模式一
+		case STATE_2:{
 			if(RCRightMode == Pos3 && RCLeftMode == Pos3) WorkState = STATE_stop;
 			if(RCLeftMode == Pos1) WorkState = STATE_1;
 			if(RCLeftMode == Pos3) WorkState = STATE_3;
 		}break;
-		case STATE_3:{		//附加模式二
+		case STATE_3:{
 			if(RCRightMode == Pos3 && RCLeftMode == Pos3) WorkState = STATE_stop;
 			if(RCLeftMode == Pos1) WorkState = STATE_1;
 			if(RCLeftMode == Pos2) WorkState = STATE_2;
 		}break;
-		case STATE_stop:{				//紧急停止
+		case STATE_stop:{
 			sendAllData(1);
 			if(RCRightMode == Pos1 || RCRightMode == Pos2){
 				WorkState = STATE_pre;
@@ -175,14 +175,9 @@ void controlLoop(){
 }
 //哨兵：每秒冷却160，2ms为160/500=0.32
 void heatCalc(){//2ms
-	realHeat0-=0.32;
-	if(realHeat0<0){realHeat0=0;}
+	RealHeat0-=0.32;
+	if(RealHeat0<0){RealHeat0=0;}
 }
-//void heatCalc(){//2ms
-//	if(syncCnt0 > 35 && JUDGE_State == ONLINE){fakeHeat0 = realHeat0;}
-//	else if(fakeHeat0 >= cooldown0/500)fakeHeat0 -= cooldown0/500;
-//	else fakeHeat0 = 0;
-//}
 //时间中断入口函数
 extern int8_t Control_Update;
 extern int16_t receiveCnt,receiveFps,AimTic;
@@ -201,12 +196,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		controlLoop();
 		heatCalc();
 	}
-	else if (htim->Instance == ONE_MS_TIM.Instance){//ims时钟
+	else if (htim->Instance == ONE_MS_TIM.Instance){//1ms时钟
 		rc_cnt++;
 		if(auto_counter > 0) auto_counter--;
 		#ifdef SLAVE_MODE
 		if(AimTic<1000){AimTic++;}
-		
 		if(Control_Update==1){
 			HAL_IWDG_Refresh(&hiwdg);
 			Control_Update=0;
@@ -254,15 +248,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		
 	}
 	else if (htim->Instance == htim10.Instance){  //10ms
-		
-	#if GUARD == 'D'
-		static int cnt=0;
-		cnt++;
-		if(cnt==100){
-			cnt=0;
-			receiveFps=receiveCnt;
-			receiveCnt=0;
-		}
-	#endif //GUARD == 'D'
+		#if GUARD == 'D'
+		#endif //GUARD == 'D'
 	}
 }

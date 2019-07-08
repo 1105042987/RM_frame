@@ -19,6 +19,7 @@ extern int8_t StateSway;
 extern int8_t StateFlee;
 extern int16_t StateCnt;
 
+int sgn(float x);
 
 void routing1(void);
 
@@ -28,5 +29,4 @@ void firing1(void);
 void firing2(void);
 void firing3(void);
 
-int sgn(float x);
-
+void uartSend(void);
