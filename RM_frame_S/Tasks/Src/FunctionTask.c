@@ -20,8 +20,8 @@ RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
 ChassisSpeed_Ref_t ChassisSpeedRef; 
 
-#define leftClaw HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_12)
-#define rightClaw HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_13)
+#define rightClaw HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_12)
+#define leftClaw HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_13)
 #define masterHigh HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_4)
 #define masterLow HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_5)
 
@@ -33,9 +33,9 @@ int16_t testIntensity = 0;
 
 uint32_t relookcount=0;
 uint32_t counting=0;
-int32_t doorcount=0;
+int32_t wheelcount=0;
 uint32_t firsttime=0;
-uint32_t setdoorzero=0;
+uint32_t setwheelzero=0;
 uint32_t SLcnt=0;
 uint32_t SRcnt=0;
 uint32_t SLflag=0;
@@ -43,16 +43,16 @@ uint32_t SRflag=0;
 uint32_t checkleft=0;
 uint32_t checkright=0;
 
-uint32_t left_warning=0;
 uint32_t right_warning=0;
-int32_t  left_warning_state=0;
+uint32_t left_warning=0;
 int32_t  right_warning_state=0;
+int32_t  left_warnging_state=0;
 uint32_t left_warning_count=0;
 uint32_t right_warning_count=0;
 uint8_t leftClawZero = 0;
 uint8_t rightClawZero = 0;
-uint8_t leftClawTight = 0;
 uint8_t rightClawTight = 0;
+uint8_t leftClawTight = 0;
 uint8_t loosing = 0;
 uint8_t loosed = 0;
 uint8_t readL,readR;
@@ -97,152 +97,161 @@ void relook()
 				if(relookcount%2==0)
 					YTY.TargetAngle=0;
 }
-void SetDoorZero()
+uint32_t wheeldown=0;
+void SetWheelZero()
 {
-	if(setdoorzero==0)
+	if(setwheelzero==0)
 	{
-	if(DOOR.RxMsgC6x0.moment<2000)
+	if(WHEEL.RxMsgC6x0.moment<2000)
 	{
 		counting=0;
-		DOOR.TargetAngle+=10;
+		WHEEL.TargetAngle+=10;
 	}
-	if(DOOR.RxMsgC6x0.moment>=2000)
+	if(WHEEL.RxMsgC6x0.moment>=2000)
 	{
 	  counting=1;
 	}
-	if(doorcount>=1000)
+	if(wheelcount>=1000)
 	{
-		DOOR.RealAngle=0;
-		DOOR.TargetAngle=0;
-		setdoorzero=1;
+		WHEEL.RealAngle=0;
+		WHEEL.TargetAngle=0;
+		setwheelzero=1;
 	}
   }
-	if(DOOR.RxMsgC6x0.moment>4000)
-		DOOR.TargetAngle-=5;
-	if(DOOR.RxMsgC6x0.moment<-4000)
-		DOOR.TargetAngle+=5;
-}
-/*void protect()
-{
-	if(SR.RxMsgC6x0.moment>3000)
-	SR.TargetAngle-=20;
-	if(SL.RxMsgC6x0.moment<-3000)
-	SL.TargetAngle+=20;
-}
-void setzero()
-{
-	if(setzerol==0)
-	{	
-	  if(SR.RxMsgC6x0.moment>-3000)
-			SR.TargetAngle-=10;
-		else
-		{
-			SR.RealAngle=0;
-			SR.TargetAngle=0;
-			setzerol=1;
-		}
+	
+	if(setwheelzero==1&&wheeldown==1)
+	{
+		if(WHEEL.RxMsgC6x0.moment>-2000)
+	{
+		counting=0;
+		WHEEL.TargetAngle-=10;
 	}
-	if(setzeror==0)
-	{	
-	  if(SL.RxMsgC6x0.moment<3000)
-			SL.TargetAngle+=10;
-		else
-		{
-			SL.RealAngle=0;
-			SL.TargetAngle=0;
-			setzeror=1;
-		}
+	if(WHEEL.RxMsgC6x0.moment<=-2000)
+	{
+	  counting=1;
 	}
-}*/
-
-
-
-
+	if(wheelcount>=1000)
+	{
+		WHEEL.TargetAngle=WHEEL.RealAngle;
+		wheeldown=0;
+	}
+	}
+}
+extern uint8_t store;
+extern uint32_t slave_flag;
+uint32_t saving_left=0;
+uint32_t saving_right=0;
 void RescueLoop()
 {
 	readL = masterHigh;
 	readR = masterLow;
-	checkleft=leftClaw;
-	checkright=rightClaw;
+	checkleft=rightClaw;
+	checkright=leftClaw;
+	SetWheelZero();
 	if(!leftClawZero)
 	{
-		if(SR.RxMsgC6x0.moment < 3000)
-		{SR.TargetAngle += 1;SLflag=0;}
+		if(SL.RxMsgC6x0.moment < 3000)
+		{SL.TargetAngle += 1;SLflag=0;}
 		else
 		{
 			SLflag = 1;
 		}
 		if(SLcnt>=800)
 		{
-			SR.RealAngle = 130;
-			SR.TargetAngle = 120;
+			SL.RealAngle = 130;
+			SL.TargetAngle = 120;
 			leftClawZero = 1;
 			SLflag = 0;
 			SLcnt = 0;
 			leftClawTight = 0;
 		}
 	}
+	if(leftClawTight!=1&&saving_left==1)
+	{
+		if(SL.RxMsgC6x0.moment >- 3000)
+		{SL.TargetAngle -= 3;SLflag=0;}
+		else
+		{
+			SLflag = 1;
+		}
+		if(SLcnt>=800)
+		{
+			SL.TargetAngle = SL.RealAngle;
+			leftClawTight = 1;
+			SLflag = 0;
+			SLcnt = 0;
+		}
+	}
 	if(!rightClawZero)
 	{	
-		if(SL.RxMsgC6x0.moment > -3000)
-		{SL.TargetAngle -= 1;SRflag=0;}
+		if(SR.RxMsgC6x0.moment > -3000)
+		{SR.TargetAngle -= 1;SRflag=0;}
 		else
 		{
 			SRflag = 1;
 		}
 		if(SRcnt>=800)
 		{
-			SL.RealAngle = -130;
-			SL.TargetAngle = -120;
+			SR.RealAngle = -130;
+			SR.TargetAngle = -120;
 			rightClawZero = 1;
 			SRflag = 0;
 			SRcnt = 0;
 			rightClawTight = 0;
 		}
 	}
+	if(rightClawTight!=1&&saving_right==1)
+	{	
+		if(SR.RxMsgC6x0.moment <3000)
+		{SR.TargetAngle += 3;SRflag=0;}
+		else
+		{
+			SRflag = 1;
+		}
+		if(SRcnt>=800)
+		{
+			SR.TargetAngle = SR.RealAngle;
+			rightClawTight = 1;
+			SRflag = 0;
+			SRcnt = 0;
+		}
+	}
 	if(leftClawZero && rightClawZero)
 	{
-		if(masterHigh==1&&masterLow==0)//Rescue
+		if(slave_flag==1)//Rescue
 		{
 			if(firstread==0)
 			{
 				firstread=1;
-				SL.TargetAngle=-40;
-				SR.TargetAngle=40;
+				SR.TargetAngle=-60;
+				SL.TargetAngle=60;
 			}
 			loosed = 1;
-			if(leftClaw == 1 && !leftClawTight)
-			{
-				SR.TargetAngle = 0;
-				leftClawTight = 1;
-			}
 			if(rightClaw == 1 && !rightClawTight)
 			{
-				SL.TargetAngle = 0;
-				rightClawTight = 1;
+				saving_right=1;
+			}
+			if(leftClaw == 1 && !leftClawTight)
+			{
+				saving_left=1;
 			}
 		}
+		if(slave_flag==5)
 		{
-			if(leftClawTight == 1)
+			if(firstread==0)
 			{
-				if(SR.RxMsgC6x0.moment < -3000&&SR.TargetAngle<=5)
-					SR.TargetAngle += 1;
-				else if(SR.RxMsgC6x0.moment >=- 3000)
-					SR.TargetAngle -= 1;
+				firstread=1;
 			}
-			if(rightClawTight == 1)
-			{
-				if(SL.RxMsgC6x0.moment < 3000)
-					SL.TargetAngle += 1;
-				else if(SL.RxMsgC6x0.moment >= 3000&&SR.TargetAngle>-5)
-					SL.TargetAngle -= 1;
-			}
+			loosed = 1;
+			saving_right=1;
+			saving_left=1;
 		}
-		
-		if(masterHigh==0 && masterLow==1)//loose
+		if(slave_flag==2)//loose
 		{
 			firstread=0;
 			loosing = 1;
+			saving_left=0;
+			saving_right=0;
 		}
 		else loosing = 0;
 		if(loosing && loosed)
@@ -252,19 +261,14 @@ void RescueLoop()
 			rightClawZero = 0;
 		}
 		
-		if(masterHigh==1 && masterLow==1)//tight
+		if(slave_flag==3)//wheeldown
 		{
 			loosed=1;
-			if(!leftClawTight || !rightClawTight)
-			{
-				SR.TargetAngle = 0;
-				SL.TargetAngle = 0;
-			}
-			rightClawTight = 1;
-			leftClawTight = 1;
+			wheeldown=1;
 		}
-		if(masterHigh==0 && masterLow==0)
+		if(slave_flag==4)//common
 		{
+			setwheelzero=0;
 			loosed = 1;
 		}
 	}
@@ -283,67 +287,21 @@ void RescueLoop()
 			rightClawZero = 0;
 		}
 		
-		if(masterHigh==1 && masterLow==1)//tight
+		if(slave_flag==5)//tight
 		{
 			loosed=1;
-			if(!leftClawTight || !rightClawTight)
+			if(!rightClawTight || !leftClawTight)
 			{
-				SR.TargetAngle = 0;
 				SL.TargetAngle = 0;
+				SR.TargetAngle = 0;
 			}
-			rightClawTight = 1;
 			leftClawTight = 1;
+			rightClawTight = 1;
 		}
 		if(masterHigh==0 && masterLow==0)
 		{
 			loosed = 1;
 		}
-	}
-	
-	//保护
-	if(SR.RxMsgC6x0.moment>=3500||SR.RxMsgC6x0.moment<=-3500)
-	{
-		left_warning=1;
-		if(SR.RxMsgC6x0.moment>=3500)
-			left_warning_state=1;
-		if(SR.RxMsgC6x0.moment<=-3500)
-			left_warning_state=-1;
-	}
-	if(left_warning_count>800)
-	{
-		SR.TargetAngle=SR.RealAngle;
-		if(left_warning_state==1)
-			SR.TargetAngle-=10;
-		if(left_warning_state==-1)
-			SR.TargetAngle+=10;
-	}
-	if(SR.RxMsgC6x0.moment>-3500&&SR.RxMsgC6x0.moment<3500)
-	{
-		left_warning=0;
-		left_warning_state=0;
-	}
-	
-	
-	if(SL.RxMsgC6x0.moment>=3500||SL.RxMsgC6x0.moment<=-3500)
-	{
-		right_warning=1;
-		if(SL.RxMsgC6x0.moment>=3500)
-			right_warning_state=1;
-		if(SL.RxMsgC6x0.moment<=-3500)
-			right_warning_state=-1;
-	}
-	if(right_warning_count>800)
-	{
-		SL.TargetAngle=SL.RealAngle;
-		if(right_warning_state==1)
-			SL.TargetAngle-=10;
-		if(right_warning_state==-1)
-			SL.TargetAngle+=10;
-	}
-	if(SL.RxMsgC6x0.moment>-3500&&SL.RxMsgC6x0.moment<3500)
-	{
-		right_warning=0;
-		right_warning_state=0;
 	}
 }
 
@@ -371,11 +329,11 @@ void RemoteControlProcess(Remote *rc)
 	{	
 		
 		#ifdef qudan
-		SetDoorZero();
+		SetWheelZero();
 		if(channellrow>500)
-			DOOR.TargetAngle=0;
+			WHEEL.TargetAngle=0;
 		if(channellrow<-500)
-			DOOR.TargetAngle=-155;
+			WHEEL.TargetAngle=-155;
 		UM1.TargetAngle+=channelrrow*0.001;
 		UM2.TargetAngle-=channelrrow*0.001;//右横向是爪子的上下移动
 			
@@ -500,8 +458,8 @@ void RemoteControlProcess(Remote *rc)
 //			protect();
 //			if(channellcol>500)
 //			{
-//				SR.TargetAngle=240;
-//				SL.TargetAngle=-240;
+//				SL.TargetAngle=240;
+//				SR.TargetAngle=-240;
 //				lefttight=0;
 //				righttight=0;
 //				auto_counter=1000;
@@ -517,19 +475,19 @@ void RemoteControlProcess(Remote *rc)
 //				lefttight=1;
 //			if(lefttight==1)
 //			{
-//				if(SR.RxMsgC6x0.moment>-3000)
-//					SR.TargetAngle-=20;
-//				if(SR.RxMsgC6x0.moment<-5000)
-//					SR.TargetAngle+=10;
+//				if(SL.RxMsgC6x0.moment>-3000)
+//					SL.TargetAngle-=20;
+//				if(SL.RxMsgC6x0.moment<-5000)
+//					SL.TargetAngle+=10;
 //			}
 //			if(rightstate==1&&auto_counter==0)
 //				righttight=1;
 //			if(righttight==1)
 //			{
-//				if(SL.RxMsgC6x0.moment<3000)
-//					SL.TargetAngle+=20;
-//				if(SL.RxMsgC6x0.moment>5000)
-//					SL.TargetAngle-=10;
+//				if(SR.RxMsgC6x0.moment<3000)
+//					SR.TargetAngle+=20;
+//				if(SR.RxMsgC6x0.moment>5000)
+//					SR.TargetAngle-=10;
 //			}
 	}
 	Limit_and_Synchronization();

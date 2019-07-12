@@ -18,6 +18,7 @@ Engineer_State_e EngineerState = COMMON_STATE;
 Debug_State_e DebugState = DEBUG_GET_STATE;
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 View_State_e Viewstate = NORMAL_VIEW;
+SlaveMode_e Slave=INIT;
 MouseMode_e MouseLMode = NO_CLICK;
 MouseMode_e MouseRMode = NO_CLICK;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
@@ -63,28 +64,46 @@ uint32_t openthegay=0;
 
 uint32_t Direction_Indicator=0;
 
+
+
+extern uint8_t signal1;
+extern uint8_t signal2;
+extern uint32_t Slave_Commoning;
+
+uint8_t transdata[1];
 void InitialSave()
 {
+	transdata[0]='i';
+	HAL_UART_Transmit(&huart8,transdata,1,100);
 	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_RESET);
 }
 
+void Slave_Common()
+{
+	Slave=COMMON;
+	transdata[0]='c';
+	HAL_UART_Transmit(&huart8,transdata,1,100);
+}
 void Saving()
 {
-	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_RESET);
+	transdata[0]='s';
+	HAL_UART_Transmit(&huart8,transdata,1,100);
 }
-
+void ForceSaving()
+{
+	transdata[0]='f';
+	HAL_UART_Transmit(&huart8,transdata,1,100);
+}
 void EndSaving()
 {
-	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_SET);
+	transdata[0]='e';
+	HAL_UART_Transmit(&huart8,transdata,1,100);
 }
-
-void SavingTest()
-{
-	HAL_GPIO_WritePin(GPIOF,GPIO_PIN_0,GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,GPIO_PIN_SET);
+void Wheel()
+{ 
+	transdata[0]='w';
+	HAL_UART_Transmit(&huart8,transdata,1,100);
 }
 //初始化
 void FunctionTaskInit()
@@ -131,6 +150,8 @@ void SetDoorZero()
 }
 void Door_Shake()
 {
+	AutoGet_Bullet_S=0;
+	AutoGet_Bullet_B=0;
 	if(dooropen==1&&setdoorzero==1&&doorshake_cnt==0)
 	{
 		if(DOOR.TargetAngle<-180)
@@ -154,19 +175,27 @@ void Door_SwitchState()
 	Door_Shake();
 }
 
-void Saving_SwitchState()
+void Slave_SwitchState()
 {
-	if(saving==0)
+	if(Slave==ENDSAVING)
 	{
 		EndSaving();
 	}
-	else if(saving==1)
+	else if(Slave==AUTOSAVING)
 	{
 		Saving();
 	}
-	else if(saving == 2)
+	else if(Slave==FORCESAVING)
 	{
-		SavingTest();
+		ForceSaving();
+	}
+	else if(Slave==CLIMBING)
+	{
+		Wheel();
+	}
+	else if(Slave==COMMON)
+	{
+		Slave_Common();
 	}
 }
 
@@ -174,7 +203,7 @@ void Look_Normally()
 {
 	if(!(Viewstate==REVERSE_VIEW&&AutoClimbing==1))
 	{
-	YTP.TargetAngle = 60;
+	YTP.TargetAngle = YTP_NORMAL;
 	if(Yaw_Reset_Flag==0)
 	{
 		Yaw_Reset_Flag=1;
@@ -186,7 +215,7 @@ void Look_Normally()
 }
 void Look_Reversely()
 {
-	YTP.TargetAngle = 60;
+	YTP.TargetAngle = YTP_NORMAL;
 	if(Yaw_Set_Flag==0)
 	{
 		Yaw_Set_Flag=2;
@@ -199,7 +228,7 @@ void Look_Reversely()
 void Look_Screen()
 {
 	Direction_Indicator=2;
-	YTP.TargetAngle = 60;
+	YTP.TargetAngle = YTP_NORMAL;
 	if(Yaw_Set_Flag==0)
 	{
 		Yaw_Set_Flag=1;
@@ -236,22 +265,12 @@ void RemoteControlProcess(Remote *rc)
 //			dooropen=1;
 //		if(channelrcol>500)
 //			dooropen=0;
-		if(1)
+		if(DebugState==DEBUG_GET_STATE)
 		{
 			UM1.TargetAngle+=channelrrow*0.001;
 			UM2.TargetAngle-=channelrrow*0.001;//右横向是爪子的上下移动
 			NMUDL.TargetAngle+=channelrcol*0.06;
 			NMUDR.TargetAngle+=channelrcol*0.06;
-			
-			if(channellcol>500)
-				CLAWOUT;//左纵向是爪子的向前弹出
-			if(channellcol<-500)                                  
-				CLAWIN;
-		}
-		else if(DebugState==DEBUG_GET_STATE)                               //取弹模式
-		{
-			UM1.TargetAngle+=channelrrow*0.001;
-			UM2.TargetAngle-=channelrrow*0.001;//右横向是爪子的上下移动
 			
 			if(channellcol>500)
 				CLAWOUT;//左纵向是爪子的向前弹出
@@ -304,7 +323,7 @@ void RemoteControlProcess(Remote *rc)
 			if(channelrcol<-500)
 				LAND;
 
-			UFM.TargetAngle-=channellrow*0.01;//左横向是水平电机   向左远离（角度++）向右靠近（角度--）
+			UFM.TargetAngle-=channellrow*0.01;//左横向是水平电机   向左靠近（角度++）向右远离（角度--）
 	  }
 	  else if(DebugState==DEBUG_CLIMB_STATE)
 		{
@@ -337,10 +356,10 @@ void RemoteControlProcess(Remote *rc)
 		  ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2;
 			ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
 			if(channellcol>500)     //左下救援，上松爪子
-				saving=0;
+				Slave=ENDSAVING;
 			if(channellcol<-500)
-				saving=1;
- 	      Saving_SwitchState();
+				Slave=AUTOSAVING;
+ 	      Slave_SwitchState();
 			
 			
 			ComeToTop();
@@ -374,23 +393,21 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
   {
 	  if(EngineerState==COMMON_STATE||EngineerState==CLIMB_STATE)
 		{
-			if(saving==0||saving==12)
+			if(Slave!=AUTOSAVING&&Slave!=FORCESAVING)
 				ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-20;
-			else if(saving==1)
-				ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-20;	
-			else if(saving==2)
+			else//这里要补上副板发回来数据
 				ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-175;	
 		}
 	  else if(EngineerState==GET_STATE)
-		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
+		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-20;
   }
 	
-	if((EngineerState!=COMMON_STATE||saving==1)||ON_THE_FLOOR)
+	if((EngineerState!=COMMON_STATE||Slave==AUTOSAVING||Slave==FORCESAVING)||ON_THE_FLOOR)
 	{
-		if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
-		YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
-		if(YTP.RxMsgC6x0.moment>-1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
-		YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
+		if(YTP.RxMsgC6x0.moment>=-1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
+		YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
+		if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
+		YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
   }
 
 	#else
@@ -413,10 +430,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
 			if(YTY.TargetAngle>-180&&mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-3<0)
 			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
-      if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
-	    YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
-	    if(YTP.RxMsgC6x0.moment>-1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
-	    YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;			
+      if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
+	    YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
+	    if(YTP.RxMsgC6x0.moment>-1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
+	    YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;			
 		}break;
 		case LONG_CLICK:
 		{
@@ -425,10 +442,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
 			if(YTY.TargetAngle>-180&&mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-3<0)
 			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;	
-			if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
-	    YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
-	    if(YTP.RxMsgC6x0.moment>-1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
-	    YTP.TargetAngle += mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;	
+			if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
+	    YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
+	    if(YTP.RxMsgC6x0.moment>-1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
+	    YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;	
 		}break;
 		default: break;
 	}
@@ -463,7 +480,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			if(Direction_Indicator==GET)
 			{
-				ChassisSpeedRef.left_right_ref =  -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp)/2;
+				ChassisSpeedRef.left_right_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp)/2;
 			}
 		}
 			else if(key->v & KEY_S) 	//key: s
@@ -482,7 +499,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				}
 				if(Direction_Indicator==GET)
 				{
-					ChassisSpeedRef.left_right_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp)/2;
+					ChassisSpeedRef.left_right_ref =  -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp)/2;
 				}
 			}
 			else
@@ -511,8 +528,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				}
 				if(Direction_Indicator==GET)
 				{
-					ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/12;
-					ChassisSpeedRef.forward_back_ref =  -KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp);
+					ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/12;
+					ChassisSpeedRef.forward_back_ref =  KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp);
 				}
 			}
 			else if(key->v & KEY_A) 	//key: a
@@ -527,8 +544,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				}
 				if(Direction_Indicator==GET)
 				{
-					ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/12;
-					ChassisSpeedRef.forward_back_ref =  KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/2;
+					ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/12;
+					ChassisSpeedRef.forward_back_ref =  -KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/2;
 				}
 			}
 			else
@@ -562,6 +579,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				NMCDR.TargetAngle = UD_TOP;
 				AlreadyClimbed=0;
 				AlreadyDowned=0;
+				signal1=0;
+				signal2=0;
 				State_Common();
 			}
 			else if(key->v & KEY_Q)							
@@ -630,7 +649,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_R)
 			{
-				saving = 2;
+				Slave_Commoning=0;
+				Slave=FORCESAVING;
 			}
 			
 		}break;
@@ -654,11 +674,12 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v &KEY_R)
 			{
-				saving=1;
+				Slave_Commoning=0;
+				Slave=AUTOSAVING;
 			}
 			else if(key->v &KEY_F)
 			{
-				if((ON_THE_GROUND&&CLAW_IS_UP)||(ON_THE_FLOOR&&CLAW_IS_DOWN))
+				if((ON_THE_GROUND&&CLAW_IS_UP)||(ON_THE_FLOOR&&CLAW_IS_DOWN)||MouseRMode==LONG_CLICK)
 				{
 				dooropen=1;
 				AutoGet_Bullet_S=0;
@@ -669,7 +690,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 					if(EngineerState==GET_STATE)
 				{
-					AutoGet_FillQueue();
+					//AutoGet_FillQueue();
+					AutoGet_Fillstream();
 				}
 				
 			}
@@ -687,6 +709,11 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			else if(key->v & KEY_C)
 			{
 				AutoGet_Enqueue(3);
+				if(AutoClimb_Level==1)
+				{
+					if(EngineerState==COMMON_STATE)
+				  State_AutoClimb();
+				}
 			}
 			else if(key->v & KEY_V)
 			{
@@ -730,7 +757,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				}
 				else if(EngineerState==COMMON_STATE&&ON_THE_GROUND)
 				{
-					if(saving==1)
+					if(Slave==AUTOSAVING&&Slave==FORCESAVING)
 						ChassisSpeedRef.rotate_ref = 150 * MOUSE_TO_YAW_ANGLE_INC_FACT;
 					else
 						ChassisSpeedRef.rotate_ref = 150 * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
@@ -750,7 +777,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			  }
 				else if(EngineerState==COMMON_STATE&&ON_THE_GROUND)
 				{
-					if(saving==1)
+					if(Slave==AUTOSAVING&&Slave==FORCESAVING)
 						ChassisSpeedRef.rotate_ref = -150 * MOUSE_TO_YAW_ANGLE_INC_FACT;
 					else
 						ChassisSpeedRef.rotate_ref = -150 * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
@@ -759,7 +786,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			else if(key->v & KEY_R)
 			{
 				if(EngineerState==COMMON_STATE)
-				saving=0;
+				Slave=ENDSAVING;
 				else if(EngineerState==GET_STATE&&ON_THE_FLOOR)
 				Claw_Wait();
 			}
@@ -783,12 +810,12 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		Claw_Protect();
 		Claw_AutoBack();
 		Box_Land();
-		//AutoGet_SwitchState();
+		AutoGet_SwitchState();
 		AutoGet_AutoDown();
 		AutoClimb_SwitchState();
 		ClawUpDown_SwitchState();
 		ClawUpDown_Protect();
-		Saving_SwitchState();
+		Slave_SwitchState();
 		Yaw_Check();
 		Rotate_Check();
 	}

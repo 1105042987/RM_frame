@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=D:/lenovo/Documents/GitHub/RM_frame/Inc
+HeaderPath=C:/Users/wyh/Documents/GitHub/RM_frame/Inc
 HeaderFiles=gpio.h;can.h;dma.h;spi.h;usart.h;stm32f4xx_it.h;stm32f4xx_hal_conf.h;main.h;tim.h;adc.h;iwdg.h;
-SourcePath=D:/lenovo/Documents/GitHub/RM_frame/Src
+SourcePath=C:/Users/wyh/Documents/GitHub/RM_frame/Src
 SourceFiles=gpio.c;can.c;dma.c;spi.c;usart.c;stm32f4xx_it.c;stm32f4xx_hal_msp.c;main.c;tim.c;adc.c;iwdg.c;
 
 [PreviousLibFiles]

@@ -77,6 +77,8 @@ void WorkStateFSM(void)
 				WorkState = NORMAL_STATE;
 				prepare_time = 0;
 				HAL_GPIO_WritePin(GPIOH,1<<3,GPIO_PIN_SET);
+				
+				
 			}
 		}break;
 		case NORMAL_STATE:				//正常模式
@@ -300,13 +302,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(clawback==1&&clawback_cnt>0) clawback_cnt--;
 		if(clawback==0) clawback_cnt=1000;
 		if(doorshake_cnt>0) doorshake_cnt--;
-		if(SaveClearCnt < 1000)SaveClearCnt++;
-		else
-		{
-			SaveClearCnt = 0;
-			SaveClear();
-			if(saving == 0)saving = 12;
-		}
+		//		if(SaveClearCnt < 1000)SaveClearCnt++;      暂时不知道是干什么用的
+//		else
+//		{
+//			SaveClearCnt = 0;
+//			SaveClear();
+//			if(saving == 0)saving = 12;
+//		}
 		protect_cnt++;
 		if(protect_cnt>=150)
 			Protect_dog();

@@ -4,7 +4,7 @@
   * Description        : 用于记录机器人独有的功能
   ******************************************************************************
   *
-  * Copyright (c) 2018 Team TPP-Shanghai Jiao Tong University
+  * Copyright (c) 2019 Team JiaoLong-Shanghai Jiao Tong University
   * All rights reserved.
   *
   ******************************************************************************
@@ -54,8 +54,8 @@
 
 #define MK_ROTATE_SPEED_REF 			1.20f
 
-#define SCREEN_POSITION					-89
-#define BACK_POSITION           -180
+#define SCREEN_POSITION					80
+#define BACK_POSITION           180
 
 #define OnePush(button,execution)\
 {\
@@ -97,6 +97,17 @@ typedef enum
 	NO_CLICK,
 }MouseMode_e;
 
+typedef enum
+{
+	AUTOSAVING,
+	FORCESAVING,
+	ENDSAVING,
+	CLIMBING,
+	COMMON,
+	INIT,
+}SlaveMode_e;
+
+
 typedef __packed struct
 {
     int16_t forward_back_ref;
@@ -110,5 +121,8 @@ void funcReset(uint8_t);
 void FunctionTaskInit(void);
 void Limit_Position(void);
 void OptionalFunction(void);
+void Wheel(void);
+void InitialSave(void);
+void Slave_Common(void);
 
 #endif /*__FUNCTIONTASK_H*/

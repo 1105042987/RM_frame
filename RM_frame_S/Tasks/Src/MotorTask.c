@@ -99,17 +99,20 @@ MotorINFO DOOR = Normal_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
 								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));		
 MotorINFO SL = Normal_MOTORINFO_Init(36.0,&ControlNM,
-								fw_PID_INIT(60.0, 0.0, 0.0, 	2400.0, 2400.0, 2400.0, 2400.0),
+								fw_PID_INIT(15.0, 0.0, 0.0, 	2400.0, 2400.0, 2400.0, 2400.0),
 								fw_PID_INIT(10, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
 MotorINFO SR = Normal_MOTORINFO_Init(36.0,&ControlNM,
-								fw_PID_INIT(60.0, 0.0, 0.0, 	2400.0, 2400.0, 2400.0, 2400.0),
-								fw_PID_INIT(10, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));								
+								fw_PID_INIT(15.0, 0.0, 0.0, 	2400.0, 2400.0, 2400.0, 2400.0),
+								fw_PID_INIT(10, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));
+MotorINFO WHEEL = Normal_MOTORINFO_Init(36.0,&ControlNM,
+								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
+								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0));								
 							
 //2006ÊÇ36 3508ÊÇ19
 //MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
 //MotorINFO* can2[8]={&CMFL,&CMFR,&CMBL,&CMBR,&NMUDL,&NMUDR,0,0};
 
-MotorINFO* can1[8]={&SL,&SR,0,0,0,0,0,0};
+MotorINFO* can1[8]={&SL,&SR,&WHEEL,0,0,0,0,0};
 MotorINFO* can2[8]={0,0,0,0,0,0,0,0};
 
 int16_t someIntensity;

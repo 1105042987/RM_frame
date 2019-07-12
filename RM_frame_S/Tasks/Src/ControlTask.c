@@ -29,7 +29,7 @@ extern uint32_t SLcnt;
 extern uint32_t SRcnt;
 extern uint32_t SLflag;
 extern uint32_t SRflag;
-extern int32_t doorcount;
+extern int32_t wheelcount;
 extern uint32_t counting;
 extern int32_t left_warning;
 extern int32_t right_warning;
@@ -53,8 +53,8 @@ void WorkStateFSM(void)
 		case PREPARE_STATE:				//准备模式
 		{
 			//if (inputmode == STOP) WorkState = STOP_STATE;
-			if(prepare_time < 2000) prepare_time++;	
-			if(prepare_time == 2000)//开机二秒进入正常模式
+			if(prepare_time < 5300) prepare_time++;	
+			if(prepare_time == 5300)//开机二秒进入正常模式
 			{
 				playMusicSuperMario();
 				CMRotatePID.Reset(&CMRotatePID);
@@ -182,8 +182,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(cnt_clk > 0) cnt_clk--;
 		if(auto_wait>0) auto_wait--;
 		if(auto_waiter>0)auto_waiter--;
-		if(counting==1) doorcount++;
-		if(counting==0) doorcount=0;
+		if(counting==1) wheelcount++;
+		if(counting==0) wheelcount=0;
 		if(SLflag==1) SLcnt++;
 		if(SLflag==0) SLcnt=0;
 		if(SRflag==1) SRcnt++;

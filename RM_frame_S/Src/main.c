@@ -65,6 +65,7 @@ uint32_t lefttight=0;
 uint32_t righttight=0;
 uint8_t cncnt;
 uint8_t open=0;
+uint8_t store[1];
 extern uint8_t startUp;
 
 /* Private variables ---------------------------------------------------------*/
@@ -133,11 +134,12 @@ int main(void)
   MX_TIM7_Init();
   MX_TIM10_Init();
   MX_TIM2_Init();
- // MX_IWDG_Init();
+  //MX_IWDG_Init();
   MX_TIM5_Init();
   MX_USART3_UART_Init();
   MX_UART7_Init();
   MX_ADC1_Init();
+  MX_UART8_Init();
 
   /* USER CODE BEGIN 2 */
 	//各模块初始化
@@ -182,7 +184,7 @@ int main(void)
   //HAL_ADC_Start_DMA(&hadc2,ADC2_value,10);
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_3);
-	
+	HAL_UART_Receive_IT(&huart8,(uint8_t *)&store,1); 
 	
 
   /* USER CODE END 2 */

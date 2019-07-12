@@ -10,15 +10,17 @@
   ******************************************************************************
   */
 	#include "includes.h"
+	#define FRONT -1550 
 extern Distance_Couple_t distance_couple;
 extern Engineer_State_e EngineerState;
 extern uint32_t Direction_Indicator;
-
+extern SlaveMode_e Slave;
 extern int8_t Test_UD_Direction;
 uint32_t adfl=0,adfr=0,adbl=0,adbr=0,addf=0,addb=0;
 uint32_t disfl=0,disfr=0,disbl=0,disbr=0,disdf=0,disdb=0;
 uint32_t AutoClimb_ComeToTop=0;
 uint32_t AutoClimb_AlreadyTop=0;
+uint32_t Slave_Commoning=0;
 uint8_t signal1=0;
 uint8_t signal2=0;
 
@@ -61,11 +63,11 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 		if(ChassisSpeedRef.forward_back_ref>0)
 		ChassisSpeedRef.forward_back_ref/=3;
 		if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==0)
-		ChassisSpeedRef.forward_back_ref/=6;
+		ChassisSpeedRef.forward_back_ref/=3.5;
     if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==1)
-		ChassisSpeedRef.forward_back_ref/=12;			
+		ChassisSpeedRef.forward_back_ref/=3.5;			
 	}
-	if(NMCDL.RealAngle<-950 )
+	if(NMCDL.RealAngle<-600 )
 	{//small chassis
 		signal1=0;
 		if((distance_couple.move_flags&0x0006)==0)      //下岛之后抬架子让车落地
@@ -76,8 +78,8 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 					CM1.TargetAngle=0;
 					CM2.TargetAngle=0;
 					if(signal2==0){
-						NMCDL.positionPID.outputMax = 1080;
-						NMCDR.positionPID.outputMax = 1080;
+						NMCDL.positionPID.outputMax = 7000;
+						NMCDR.positionPID.outputMax = 7000;
 							NMCDL.TargetAngle = UD_TOP;
 						  NMCDR.TargetAngle = UD_TOP;
 						signal2=1;
@@ -86,7 +88,9 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 							AlreadyDowned=0;
 							AutoClimb_Level--;
 							if(AutoClimb_Level==0)
+							{
 								State_Common();
+							}
 						}
 					}
 				}
@@ -96,13 +100,13 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 		{
 			case 14:
 				if(ChassisSpeedRef.forward_back_ref > 0){
-					ChassisSpeedRef.forward_back_ref=0;
+				//	ChassisSpeedRef.forward_back_ref=0;
 					ChassisSpeedRef.rotate_ref=0;
 					CM1.TargetAngle=0;
 					CM2.TargetAngle=0;
 					if(signal2==0){
-						NMCDL.positionPID.outputMax = 1800;
-						NMCDR.positionPID.outputMax = 1800;
+						NMCDL.positionPID.outputMax = 7000;
+						NMCDR.positionPID.outputMax = 7000;
 							NMCDL.TargetAngle = UD_TOP;
 						  NMCDR.TargetAngle = UD_TOP;
 						signal2=1;
@@ -146,12 +150,13 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 							}
 							break;
 						case 0:
+							if(AutoClimb_Level==2)
 							ChassisSpeedRef.forward_back_ref=0;
 						  ChassisSpeedRef.rotate_ref=0;
 							if(signal1==0 && ensure==1)
 							{
-								NMCDL.positionPID.outputMax = 1800;
-						NMCDR.positionPID.outputMax = 1800;
+								NMCDL.positionPID.outputMax = 7000;
+						NMCDR.positionPID.outputMax =7000;
 									NMCDL.TargetAngle = UD_BOTTOM;
 								  NMCDR.TargetAngle = UD_BOTTOM;
 								signal1=1;
@@ -168,8 +173,8 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 					CM2.TargetAngle=0;
 					ChassisSpeedRef.rotate_ref=0;
 					if(signal1==0 && ensure==1){
-						NMCDL.positionPID.outputMax = 1800;
-						NMCDR.positionPID.outputMax = 1800;
+						NMCDL.positionPID.outputMax = 7000;
+						NMCDR.positionPID.outputMax = 7000;
 							NMCDL.TargetAngle = UD_BOTTOM;
 						  NMCDR.TargetAngle = UD_BOTTOM;
 						signal1=1;
@@ -182,7 +187,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 		}
 	}
 	else{
-		ChassisSpeedRef.forward_back_ref=0;
+//		ChassisSpeedRef.forward_back_ref=0;
 		CM1.TargetAngle=0;
 		CM2.TargetAngle=0;
 	}
@@ -222,11 +227,19 @@ void ComeToTop()
 
 void Speed_Locker()
 {
-	if(!hasReach(&NMCDL,45)||!hasReach(&NMCDR,45))
+	if(AutoClimb_Level==1&&ChassisSpeedRef.forward_back_ref>0&&AlreadyClimbed==0)
 	{
-	ChassisSpeedRef.forward_back_ref=0.0;
-	ChassisSpeedRef.rotate_ref=0.0;
+		ChassisSpeedRef.forward_back_ref/=3.2;
 	}
+	if(AutoClimb_Level==2&&EngineerState==COMMON_STATE)
+	{
+		ChassisSpeedRef.forward_back_ref/=3.2;
+	}
+//	if(((!hasReach(&NMCDL,45)||!hasReach(&NMCDR,45))&&(distance_couple.move_flags&0x000e)!=14&&ChassisSpeedRef.forward_back_ref<=0))
+//	{
+//	ChassisSpeedRef.forward_back_ref=0.0;
+//	ChassisSpeedRef.rotate_ref=0.0;
+//	}
 	if(AutoClimb_Level!=0&&AutoClimbing==0)
 	{
 		if((disbl>1000||disbr>1000)&&ChassisSpeedRef.forward_back_ref<0)
@@ -235,6 +248,8 @@ void Speed_Locker()
 	    ChassisSpeedRef.rotate_ref=0.0;
 		}
 	}
+	if(AutoClimbing==0&&AutoClimb_Level==0&&(hasReach(&NMCDL,20)&&hasReach(&NMCDR,20))&&NMCDL.RealAngle>-100&&NMCDR.TargetAngle>-100&&Slave_Commoning==1)
+		Slave_Common();
 }
 
 void AutoClimb_SwitchState()
@@ -247,6 +262,9 @@ void AutoClimb_SwitchState()
 void State_AutoClimb()
 {
 	EngineerState=CLIMB_STATE;
+	Slave=CLIMBING;
+	Slave_Commoning=0;
 	AutoClimbing=1;
+	UFM.TargetAngle=FRONT;
 }
 

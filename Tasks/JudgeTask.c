@@ -24,7 +24,7 @@ uint8_t tmp_judge;
 void InitJudgeUart(void){
 	//tx_free = 1;
 //	Send_User_Data();
-	//Referee_Transmit_UserData();
+	Referee_Transmit_UserData();
 	if(HAL_UART_Receive_DMA(&JUDGE_UART, &tmp_judge, 1) != HAL_OK){
 			Error_Handler();
 	}
@@ -35,9 +35,7 @@ uint8_t buffer[80] = {0};
 uint8_t buffercnt = 0;
 uint16_t cmdID;
 uint8_t tmpBuffer[80] = {0};
-uint8_t coooool = 0;
 
-uint32_t testJudgeFreq = 0; //jxy test
 void judgeUartRxCpltCallback(void)
 {
 //	fw_printfln("judge receive");
@@ -133,7 +131,6 @@ void judgeUartRxCpltCallback(void)
 				if (myVerify_CRC16_Check_Sum(buffer, 23))
 				{
 					Referee_Update_PowerHeatData();
-					testJudgeFreq++;
 					receiving = 0;
 					buffercnt = 0;
 				}					
@@ -235,78 +232,12 @@ uint8_t AL,AH;
 uint8_t HitedNum[40] = {6};
 float HitedAngle[40] = {180};
 uint8_t HitedCnt = 0;
-//extern uint8_t AAAAmode;
-//extern float ChassisTwistGapAngle;
-//extern uint8_t colorAim;
+extern uint8_t AAAAmode;
+extern float ChassisTwistGapAngle;
 
 uint8_t HitCnt=0;
 void Judge_Refresh_Hit()
 {
-	HitCnt++;
-	ArmorHitted = buffer[7];
-	AL = ArmorHitted & 0x7;
-	AH = ArmorHitted >> 4;
-	if(AH == 0)
-	{
-		if(detectingAAAA.Delay == 0)detectingAAAA.Armor = AL;
-		if(AL == 0 || AL == 1)
-		{
-			HitedAngle[HitedCnt] = (GMY.RxMsgC6x0.angle - GM_YAW_ZERO) * 360 / 8192.0f;
-			NORMALIZE_ANGLE180(HitedAngle[HitedCnt]);
-			HitedNum[HitedCnt] = AL;
-			if(HitedNum[HitedCnt] == 0 )
-			{
-				if(reactingAAAA.Dir == 1 && reactingAAAA.inPosition)
-				{
-					//reactingAAAA.Angle0 += 5;
-				}
-				reactingAAAA.Dir = 1;
-				//ChassisTwistGapAngle = reactingAAAA.Angle0;
-				if(reactingAAAA.counting0)
-				{
-					reactingAAAA.redetect0 = reactingAAAA.redC0;
-				}
-				reactingAAAA.counting0 = 0;
-				reactingAAAA.redC0 = 0;
-//				if(HitedAngle[HitedCnt] > reactingAAAA.Angle0)
-//				{
-//					if(HitedAngle[HitedCnt] < 90 && HitedAngle[HitedCnt] > -90)
-//					{
-//						float angleAdjust0 = HitedAngle[HitedCnt] - reactingAAAA.Angle0;
-////						reactingAAAA.Angle0 += angleAdjust0 + 1;
-////						reactingAAAA.Angle1 += angleAdjust0 + 1;
-//					}
-//				}
-			}
-
-			else if(HitedNum[HitedCnt] == 1 )
-			{
-				if(reactingAAAA.Dir == -1 && reactingAAAA.inPosition)
-				{
-					//reactingAAAA.Angle1 -= 5;
-				}
-				reactingAAAA.Dir = -1;
-				//ChassisTwistGapAngle = reactingAAAA.Angle1;
-				if(reactingAAAA.counting1)
-				{
-					reactingAAAA.redetect1 = reactingAAAA.redC1;
-				}
-				reactingAAAA.counting1 = 0;
-				reactingAAAA.redC1 = 0;
-//				if(HitedAngle[HitedCnt] < reactingAAAA.Angle1)
-//				{
-//					if(HitedAngle[HitedCnt] < 90 && HitedAngle[HitedCnt] > -90)
-//					{
-//						float angleAdjust1 = reactingAAAA.Angle1 - HitedAngle[HitedCnt];
-////						reactingAAAA.Angle0 -= angleAdjust1 + 1;
-////						reactingAAAA.Angle1 -= angleAdjust1 + 1;
-//					}
-//				}
-			}
-			HitedCnt++;
-			if(HitedCnt > 35)HitedCnt = 0;
-		}
-	}
 	JUDGE_Received = 1;
 }
 
@@ -369,9 +300,10 @@ void Referee_Update_RobotState()
 	for(int i = 0; i<2; i++){
 		grs4[i] = (unsigned char)tmp4[i];
 	}
-//	if(GameRobotState.shooter_heat0_cooling_rate == 200
+//		if(GameRobotState.shooter_heat0_cooling_rate == 40 || GameRobotState.shooter_heat0_cooling_rate == 60
+//		|| GameRobotState.shooter_heat0_cooling_rate == 80 || GameRobotState.shooter_heat0_cooling_rate == 200
 //		|| GameRobotState.shooter_heat0_cooling_rate == 300 || GameRobotState.shooter_heat0_cooling_rate == 400)
-//		coooool = 1;
+//	cooldown0 = GameRobotState.shooter_heat0_cooling_rate;
 	unsigned char* grs5 = (unsigned char*)&GameRobotState.shooter_heat0_cooling_limit;
 	char tmp5[2] = {buffer[15], buffer[16]};
 	for(int i = 0; i<2; i++){
@@ -394,20 +326,16 @@ void Referee_Update_RobotState()
 	remainHP = GameRobotState.remain_HP;
 	switch(maxHP)
 	{
-		case 200:{maxHeat0 = 240;cooldown0 = 40;}break;
-		case 250:{maxHeat0 = 360;cooldown0 = 60;}break;
-		case 300:{maxHeat0 = 480;cooldown0 = 80;}break;
-		default:{maxHeat0 = 480;cooldown0 = 80;}break;
-//		case 200:{maxHeat0 = 240;}break;
-//		case 250:{maxHeat0 = 360;}break;
-//		case 300:{maxHeat0 = 480;}break;
-//		default:{maxHeat0 = 480;}break;
+//		case 200:{maxHeat0 = 240;cooldown0 = 40;}break;
+//		case 250:{maxHeat0 = 360;cooldown0 = 60;}break;
+//		case 300:{maxHeat0 = 480;cooldown0 = 80;}break;
+//		default:{maxHeat0 = 480;cooldown0 = 80;}break;
+		case 200:{maxHeat0 = 240;}break;
+		case 250:{maxHeat0 = 360;}break;
+		case 300:{maxHeat0 = 480;}break;
+		default:{maxHeat0 = 480;}break;
 	}
-//	if(coooool)cooldown0 *= 5;
 	JUDGE_Received = 1;
-	
-//	if(GameRobotState.robot_id > 9)colorAim = 1;//blue
-	//else colorAim = 0;
 	//电源输出情况TBD
 	
 //	unsigned char* grs = (unsigned char*)&GameRobotState;
@@ -472,19 +400,21 @@ void Referee_Update_ShootData()
 	realBulletSpeed0 = ShootData.bullet_speed;
 	JUDGE_Received = 1;
 }
-extern Distance_Couple_t distance_couple;
-uint16_t State_Flag;
+
 void Referee_Transmit_UserData()//数据上传可以限制在10hz
 {
 	uint8_t buffer[28]={0};
 	//test
-	custom_data.data1 = AutoClimb_Level;
-	custom_data.data2 = AutoGet_Bullet_S*3+AutoGet_Bullet_B*15;
-	custom_data.data3 = 111111;
-	
-	State_Flag=(distance_couple.left.flag)*128+(distance_couple.right.flag)*4;
-	
-	custom_data.masks = State_Flag;//二进制最左位对应灯条最右灯
+	//custom_data.data1 = AutoClimb_Level;
+	//custom_data.data2 = 6*AutoGet_Bullet_S+20*AutoGet_Bullet_B;
+	//if(CLAW_IS_UP)
+		//custom_data.data3=111111;
+	//if(CLAW_IS_DOWN)
+		//custom_data.data3=0.0f;
+	//user_data.masks = 0xE0;//二进制最左位对应灯条最右灯
+	custom_data.data1+=0.1f;
+	custom_data.data2+=0.2f;
+	custom_data.data3+=0.3f;
 	
 	unsigned char * bs1 = (unsigned char*)&custom_data.data1;
 	unsigned char * bs2 = (unsigned char*)&custom_data.data2;
@@ -500,7 +430,7 @@ void Referee_Transmit_UserData()//数据上传可以限制在10hz
 	buffer[7] = 0x80;//数据的内容 ID:0xD180  ,占两个字节
 	buffer[8] = 0xD1;
 	buffer[9] = GameRobotState.robot_id;//发送者的 ID, 占两个字节
-	buffer[10] = 0;
+	buffer[10] = 0;//存疑
 	buffer[11] = GameRobotState.robot_id;//客户端的 ID, 只能为发送者机器人对应的客户端,  占两个字节
 	if(buffer[11]>9&&buffer[11]<16)buffer[11]+=6;
 	buffer[12] = 0x01;//注意哨兵没有这个ID
@@ -513,47 +443,10 @@ void Referee_Transmit_UserData()//数据上传可以限制在10hz
 	buffer[26] = CRC16 & 0x00ff;//0xff
 	buffer[27] = (CRC16 >> 8) & 0xff;
 
-	//tx_free = 0;
+//	tx_free = 0;
 	while(HAL_UART_Transmit_IT(&JUDGE_UART,(uint8_t *)&buffer,28)!=HAL_OK);
 }
 
-uint8_t flying = 0;
-void Referee_Transmit_RobotData()
-{
-	uint8_t buffer[28]={0};
-
-	buffer[0] = 0xA5;//数据帧起始字节，固定值为 0xA5
-	buffer[1] = 7;//数据帧中 data 的长度,占两个字节
-	
-	buffer[3] = 1;//包序号
-	buffer[4] = myGet_CRC8_Check_Sum(&buffer[0], 5-1, myCRC8_INIT);//帧头 CRC8 校验
-	buffer[5] = 0x01;
-	buffer[6] = 0x03;
-	
-	buffer[7] = 0x03;//数据的内容 ID:0x200-0x2FF  ,占两个字节
-	buffer[8] = 0x02;
-	if(GameRobotState.robot_id < 9)buffer[9] = 3;//发送者的 ID, 占两个字节
-	else buffer[9] = 13;
-	buffer[10] = 0;
-//	buffer[11] = GameRobotState.robot_id;//客户端的 ID, 只能为发送者机器人对应的客户端,  占两个字节
-//	if(buffer[11]>9&&buffer[11]<16)buffer[11]+=6;
-//	if(colorAim == 1)
-//	{
-//		buffer[11] = 17;
-//	}
-//	else 
-//	{
-//		buffer[11] = 7;
-//		buffer[12] = 0;
-//	}
-	buffer[13] = flying;
-	static uint16_t CRC16=0;
-	CRC16 = myGet_CRC16_Check_Sum(buffer, 14, myCRC16_INIT);
-	buffer[14] = CRC16 & 0x00ff;//0xff
-	buffer[15] = (CRC16 >> 8) & 0xff;
-	//tx_free = 0;
-	while(HAL_UART_Transmit_IT(&JUDGE_UART,(uint8_t *)&buffer,28)!=HAL_OK);
-}
 
 //void Send_User_Data()
 //{

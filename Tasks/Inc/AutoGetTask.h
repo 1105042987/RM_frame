@@ -21,13 +21,14 @@
 #define LAUNCH    HAL_GPIO_WritePin(GPIOH,1<<4,GPIO_PIN_SET)//弹射起飞
 #define LAND      HAL_GPIO_WritePin(GPIOH,1<<4,GPIO_PIN_RESET)//弹射机构归位
 
-#define CLAW_IS_UP NMUDL.RealAngle<=-(UPLEVEL-30)
-#define CLAW_IS_DOWN NMUDL.RealAngle>=-50
+#define CLAW_IS_UP NMUDL.RealAngle>=(UPLEVEL-30)
+#define CLAW_IS_DOWN NMUDL.RealAngle<=50
 
-#define UPLEVEL 440
+#define UPLEVEL 628
 
 #define CLAW_INSPECT_SUCCEED Claw_SelfInspecting==3
 
+#define YTP_NORMAL -65
 extern uint32_t AutoGet_Start;  
 extern uint32_t AutoGet_TotalStep;
 extern uint32_t AutoGet_Alreadywaited;
@@ -119,4 +120,5 @@ void AutoGet_Enqueue(int);
 void Claw_Wait(void);
 void AutoGet_FillQueue(void);
 void ClawUpDown_Protect(void);
+void AutoGet_Fillstream(void);
 #endif /*__ AUTOGETTASK_H */

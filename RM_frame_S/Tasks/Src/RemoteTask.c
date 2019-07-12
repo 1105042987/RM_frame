@@ -142,8 +142,17 @@ uint8_t rc_update = 0;
 uint8_t rc_cnt = 0;
 uint8_t tx_cnt = 200;
 
+extern uint8_t store;
+uint32_t slave_flag=0;
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
+	UNUSED(&huart8);
+	
+	if(store=='s')slave_flag=1;
+	if(store=='e')slave_flag=2;
+	if(store=='w')slave_flag=3;
+	if(store=='c')slave_flag=4;
+	if(store=='f')slave_flag=5;
 	if(UartHandle == &RC_UART){
 		rc_update = 1;
 	}
@@ -157,7 +166,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 	{
 		judgeUartRxCpltCallback();  //裁判系统数据解算
 	}
-	
+	 HAL_UART_Receive_IT(&huart8,(uint8_t *)&store,1);
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)

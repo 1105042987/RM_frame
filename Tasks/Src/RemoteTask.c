@@ -5,7 +5,7 @@
   * Description        : 遥控器处理任务
   ******************************************************************************
   *
-  * Copyright (c) 2018 Team TPP-Shanghai Jiao Tong University
+  * Copyright (c) 2019 Team Jiaolong-Shanghai Jiao Tong University
   * All rights reserved.
   *
   ******************************************************************************

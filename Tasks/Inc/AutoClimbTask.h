@@ -23,15 +23,15 @@
 //1v/5v 	27cm
 
 #define UD_TOP			0
-#define UD_BOTTOM		-1056
+#define UD_BOTTOM		-950
 //-1010
-#define FLAG_SET(target) if(target.val_ref<CHANGE_POINT) target.flag = 0; else target.flag = 1;
-#define FLAG_SETr(target) if(target.val_ref<CHANGE_POINTr) target.flag = 0; else target.flag = 1;
+#define FLAG_SET(target) if(target.val_ref>CHANGE_POINT) target.flag = 0; else target.flag = 1;
+#define FLAG_SETr(target) if(target.val_ref>CHANGE_POINTr) target.flag = 0; else target.flag = 1;
 #define FLAG_SETbl(target) if(target.val_ref>CHANGE_POINTbl) target.flag = 0; else target.flag = 1;
 #define FLAG_SETbr(target) if(target.val_ref>CHANGE_POINTbr) target.flag = 0; else target.flag = 1;
-#define FLAG_SETdb(target) if(target.val_ref<CHANGE_POINTdb) target.flag = 0; else target.flag = 1;
-#define FLAG_SET_TRICK(target) if((AutoClimbing==1&&ChassisSpeedRef.forward_back_ref>0&&NMCDL.RealAngle>-230)||(AutoClimbing==1&&NMCDL.RealAngle<-950)) target.flag = 1; else target.flag = 0;
-//远0近1
+#define FLAG_SETdb(target) if(target.val_ref>CHANGE_POINTdb) target.flag = 0; else target.flag = 1;
+#define FLAG_SET_TRICK(target) if((AutoClimbing==1&&ChassisSpeedRef.forward_back_ref>0&&NMCDL.RealAngle>-230)||(AutoClimbing==1&&NMCDL.RealAngle<-600)) target.flag = 1; else target.flag = 0;
+//小传感器远小近大 黄传感器远大近小    这里的对应方式是远0近1
 #define ON_THE_GROUND AutoClimb_Level==0
 #define ON_THE_FLOOR AutoClimb_Level==2
 typedef __packed struct
