@@ -35,7 +35,9 @@ uint8_t findEnemy;
 //********************上平台代码1
 void RCProcess1(Remote *rc){
 	generalProcess(rc);
-	if(getLeftSw()){onLed(7);}
+	if(getLeftSw()){onLed(6);}
+	else{offLed(6);}
+	if(getLeftSr()){onLed(7);}
 	else{offLed(7);}
 	if(WorkState == STATE_1){
 
@@ -49,18 +51,17 @@ void RCProcess1(Remote *rc){
 	limtSync();
 }
 //********************上平台代码2
-
 void RCProcess2(Remote *rc){
 	generalProcess(rc);
 	if(WorkState == STATE_1){
 		int8_t dir=sgn(channelrrow);
-		onePushDir(dir,LimitCnt=500);
+		onePushDir(dir,powLmtCnt=500);
 	}
 	if(WorkState == STATE_2){
-		routing1();
+		routing3();
 	}
 	if(WorkState == STATE_3){
-		routing1();
+		routing3();
 	}
 	limtSync();
 }
@@ -90,7 +91,10 @@ void generalProcess(Remote *rc){
 	
 	ChassisSpeed=channelrrow*3;
 	findEnemy=(uint8_t)receiveData[0].data[0];
-	sendData[0].data[0]=(int16_t)WorkState | (int16_t)RCRightMode<<8;
+	
+	sendData[0].data[0]=(int16_t)WorkState | (int16_t)RCRightMode<<4;
+	uint8_t upSpd=CMA.RxMsgC6x0.rotateSpeed/8+127;
+	sendData[0].data[0]=sendData[0].data[0] | ((uint16_t)upSpd)<<8;
 	
 	if(GameRobotState.robot_id==7){sendData[0].data[1]=channellrow+5000;}
 	else{sendData[0].data[1]=channellrow;}
@@ -107,6 +111,7 @@ void limtSync(){
 #endif  //GUARD == 'U'
 #if GUARD == 'D'
 //下平台代码
+float vx,dx;//基于imu的伪补偿
 void generalProcess();
 void RCProcess1(){
 	generalProcess();
@@ -114,6 +119,8 @@ void RCProcess1(){
 		STIRv.Target=0;
 		FRICL.Target=0;
 		FRICR.Target=0;
+//		vy+=imu.vy;
+//		GMY.Target-=vy/rate;
 	}
 	if(WorkState == STATE_2){
 		STIRv.Target=0;
@@ -175,9 +182,12 @@ void strategyShoot(){
 	laserOn();
 	if(findEnemy){
 		autoAim();
-		if(fabs(aim.yaw)<3 && aim.dis==0){firing2();}
-		//else {firing1();}
-		noEnemyCnt=-300;
+		//自瞄数据会有绝对坐标的覆盖，重新补偿
+		GMY.Target-=(((uint16_t)(receiveData[0].data[0])>>8) -127)/1100.0;
+		GMP.Target-=dx*15;
+		if(fabs(aim.yaw)<8 && aim.dis==0){firing2();}
+		if(aim.dis==500){noEnemyCnt=1;}
+		else{noEnemyCnt=-300;}
 		sendData[0].data[0]=(int16_t)1;
 	}
 	else if(noEnemyCnt>1){
@@ -186,7 +196,7 @@ void strategyShoot(){
 	}
 	else if(noEnemyCnt<-200){
 		noEnemyCnt++;
-		if(fabs(aim.yaw)<4 && aim.dis==0){firing2();}
+		if(fabs(aim.yaw)<6 && aim.dis==0){firing2();}
 		else{STIRv.Target=0;}
 	}
 	else{
@@ -199,7 +209,7 @@ void strategyShoot(){
 //*******************下平台通用代码
 //===================================
 void generalProcess(){
-	offLed(6);
+	offLed(5);
 	laserOn();
 	if(WorkState <= 0) return;
 	//max=660
@@ -207,13 +217,19 @@ void generalProcess(){
 	channelrcol = 0;
 	channellrow = -receiveData[0].data[1];//leftRight
 	channellcol = receiveData[0].data[2];//upDown
-	
 	if(channellrow<-4000){channellrow+=5000;}
 	if(channellcol>4000){channellcol-=5000;}
 	
 	RealHeat0=receiveData[0].data[3]/(float)(20.0);
-	GMY.Target+=channellrow*0.001f;
+	//基于顶盘速度的yaw运动补偿
+	GMY.Target+=channellrow*0.001f-(((uint16_t)(receiveData[0].data[0])>>8) -127)/1100.0;
 	GMP.Target+=channellcol*0.001f;
+	//基于imu的pit运动补偿 
+	dx=imu.vx-dx;
+	vx+=dx;
+	vx*=0.99;
+	GMP.Target-=dx*15;
+	dx=imu.vx;
 }
 
 void limtSync(){

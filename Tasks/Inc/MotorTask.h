@@ -14,8 +14,7 @@
 #include "includes.h"
 
 #define NORMALIZE_ANGLE180(angle) angle = ((angle) > 180) ? ((angle) - 360) : (((angle) < -180) ? (angle) + 360 : angle)
-#define CHASSIS_MOTOR_ROTATE_PID_DEFAULT \
-{\
+#define CHASSIS_MOTOR_ROTATE_PID_DEFAULT {\
 	0,0,{0,0},\
 	1.1f,0.0f,0.5f,/*p i d*/\
 	0,0,0,\

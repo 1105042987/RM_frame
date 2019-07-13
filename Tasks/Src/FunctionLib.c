@@ -10,35 +10,103 @@
   ******************************************************************************
   */
 #include "includes.h"
-float ShootFrq=20;
-
 int sgn(float x){return x>0?1:(x<0?-1:0);}
 
 void routing1(){
-//-100,210,315,425,530,610
+//100,210,315,425,530,610
 	static int8_t dir=-1,dirCnt=5;
 	LimitRate=1;
 	if(getLeftSw()){
 		if(dirCnt){dirCnt--;LimitRate=0;}
 		dir=1;
-		LimitCnt=500;
+		powLmtCnt=500;
 		onLed(7);
 		CMA.Real=0;
 	}else{
 		offLed(7);
 		dirCnt=5;
 	}
-	if(CMA.Real<-380 ||getRightSr()){dir=-1;LimitCnt=500;}
+	if(CMA.Real>440 ||getRightSr()){dir=-1;powLmtCnt=500;}
 	ChassisSpeed=2000*dir;
 }
+
+void routing2(){//ÁÖ¿ÏÄ£Ê½
+//100,210,315,425,530,610
+	static int8_t dir=-1,dirCnt=5,nutCnt=8,nutLock;
+	LimitRate=1;
+	if(getLeftSw()){
+		if(dirCnt){dirCnt--;LimitRate=0;}
+		dir=1;
+		powLmtCnt=50;
+		onLed(7);
+		CMA.Real=0;
+		nutCnt=0;
+	}else{
+		offLed(7);
+		dirCnt=5;
+	}
+	if(getLeftSr()&& !nutLock){
+		//Ô¶ÀëÅö×²
+		if(CMA.RxMsgC6x0.rotateSpeed<0){nutCnt++;}
+		else{nutCnt--;}
+		nutLock=1;
+	}else{nutLock=0;}
+	
+	if(nutCnt==0 && dir==-1){LimitRate=0;}
+	
+	if(nutCnt==8 || CMA.Real>440 ||getRightSr()){dir=-1;powLmtCnt=50;}
+	ChassisSpeed=2000*dir;
+}
+void routing3(){//Ëæ»ú»»Ïò
+//100,210,315,425,530,610
+	static int8_t dir=-1,dirCnt=5,nutCnt=8,nutOpen,randOpen=1;
+	LimitRate=1;
+	if(getLeftSw()){//×²Ç½
+		if(dirCnt){dirCnt--;LimitRate=0;}
+		dir=1;
+		powLmtCnt=50;
+		onLed(7);
+		CMA.Real=0;
+		nutCnt=0;
+		randOpen=1;
+	}else{
+		offLed(7);
+		dirCnt=5;
+	}
+	if(getLeftSr()&& nutOpen){//nut¼ÆÊý
+		//Ô¶ÀëÅö×²
+		if(CMA.RxMsgC6x0.rotateSpeed<0){nutCnt++;}
+		else{nutCnt--;}
+		nutOpen=0;
+	}else{nutOpen=1;}
+	
+	if(nutCnt==0 && dir==-1){LimitRate=0;}
+	if(CMA.Real>210 && CMA.Real<310 && randOpen){//Ëæ»úÕÛ·µ
+		static uint8_t timDiv;
+		if(timDiv<120){timDiv++;}
+		else if(rand()%20<2){
+			dir*=-1;
+			powLmtCnt=50;
+			randOpen=0;
+			timDiv=0;
+		}
+	}
+	if(nutCnt==8 || CMA.Real>450 ||getRightSr()){
+		dir=-1;
+		powLmtCnt=50;
+		randOpen=1;
+	}
+	ChassisSpeed=2000*dir;
+}
+
 
 
 void scaning1(){
 	static float ref;
 	STIRv.Target=0;
 	GMY.Target-=0.3;
-	GMP.Target=-20+15*sin(ref);
-	ref+=0.03;
+	GMP.Target=-25+8*sin(ref);
+	ref+=0.02;
 }
 void scaning2(){
 	static float ref;
@@ -54,7 +122,16 @@ void scaning2(){
 		ref+=0.03;
 	}
 }
-
+void scaning3(){
+	static float tic=0;
+	STIRv.Target=0;
+	if(tic>150){
+		GMY.Target-=40;
+		tic=0;
+	}
+	GMP.Target=-25;
+	tic++;
+}
 
 
 void firing1(){
@@ -66,29 +143,13 @@ void firing1(){
 }
 void firing2(){
 	static int8_t jam=-1;
-	
+	static float ShootFrq=20;
 	ShootFrq=(440-RealHeat0)*0.1;
-	
 	MINMAX(ShootFrq,0,22);
-//	if(RealHeat0<100){ShootFrq=25;}//40
-//	else if(RealHeat0<200){ShootFrq=20;}//30
-//	else if(RealHeat0<300){ShootFrq=12;}//20
-//	else if(RealHeat0<360 && ShootFrq<8){ShootFrq+=0.02f;}//12
-//	else if(RealHeat0>440 && ShootFrq>5){ShootFrq--;}
-//	else if(RealHeat0>400 && ShootFrq>7){ShootFrq-=0.01f;}
-//	else{ShootFrq=8;}
-	
 	if(STIRv.RxMsgC6x0.moment>8000){jam=30;}
 	///TargetSpeed = ShootFrq*45/360*36*60 = ShootFrq*270
 	if(jam<0){STIRv.Target=ShootFrq *270;}
 	else{STIRv.Target=-3500;jam--;}
-}
-void firing3(){
-	static int8_t jam=-1;
-	if(STIRv.RxMsgC6x0.moment>8000){jam=9;}
-	///TargetSpeed = ShootFrq*45/360*36*60 = ShootFrq*270
-	if(jam<0){STIRv.Target=(20+channelrcol/66) *270;}
-	else{STIRv.Target=-3000;jam--;}
 }
 
 uint8_t msgRed[]="1\n",msgBlue[]="2\n";

@@ -3,6 +3,6 @@
 #include "includes.h"
 
 extern void PowerLimitation(void);
-extern int LimitCnt;
+extern int powLmtCnt;
 extern int8_t LimitRate;
 #endif /*__POWERLIMITATIONTASK_H */

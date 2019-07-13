@@ -35,9 +35,7 @@
 #include "drivers_ramp.h"
 #include "AutoAimTask.h"
 #include "JudgeTask.h"
-#include "UpperTask.h"
 #include "PowerLimitationTask.h"
-#include "GyroReadTask.h"
 #include "bsp_imu.h"
 
 

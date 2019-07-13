@@ -74,14 +74,12 @@ int can13Dog=1000;//@yyp
 
 int main(void)
 {
-
   /* USER CODE BEGIN 1 */
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-
   HAL_Init();
 
   /* USER CODE BEGIN Init */
@@ -119,6 +117,7 @@ int main(void)
   MX_TIM7_Init();
   MX_TIM10_Init();
   MX_TIM2_Init();
+  //MX_IWDG_Init();
   MX_TIM5_Init();
   MX_USART3_UART_Init();
   MX_UART7_Init();
@@ -166,7 +165,7 @@ int main(void)
 	
 	//看门狗
 	MX_IWDG_Init();	//Cube配置完记得注释掉上面自动生成的看门狗初始化函数
-	HAL_GPIO_WritePin(GPIOG, 0xff, GPIO_PIN_SET);//close all LED
+	HAL_GPIO_WritePin(GPIOG, 0x1ff, GPIO_PIN_SET);//close all LED
   /* USER CODE END 2 */
 
   /* Infinite loop */

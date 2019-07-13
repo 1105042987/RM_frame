@@ -338,7 +338,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F427xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;                          ../Drivers/STM32F4xx_HAL_Driver/Inc;                          ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;                          ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;                          ../Drivers/CMSIS/Include;                          ../Tasks/Inc</IncludePath>
+              <IncludePath>../Inc;                           ../Drivers/STM32F4xx_HAL_Driver/Inc;                           ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;                           ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;                           ../Drivers/CMSIS/Include;                           ../Tasks/Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -526,11 +526,6 @@
               <FileName>JudgeTask.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Tasks\Src\JudgeTask.c</FilePath>
-            </File>
-            <File>
-              <FileName>UpperTask.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Tasks\Src\UpperTask.c</FilePath>
             </File>
             <File>
               <FileName>AutoAimTask.c</FileName>

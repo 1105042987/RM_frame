@@ -22,11 +22,13 @@ extern int16_t StateCnt;
 int sgn(float x);
 
 void routing1(void);
+void routing2(void);
+void routing3(void);
 
 void scaning1(void);
 void scaning2(void);
+void scaning3(void);
 void firing1(void);
 void firing2(void);
-void firing3(void);
 
 void uartSend(void);

@@ -26,13 +26,13 @@ MotorINFO FRICL = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_D
 MotorINFO FRICR = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
 
 
-MotorINFO GMP  =  Gimbal6020_MOTORINFO_Init(1,&ControlGMP,8140,1100,20,
+MotorINFO GMP  =  Gimbal6020_MOTORINFO_Init(1,&ControlGMP,8140,0,20,
 								fw_PID_INIT_EASY(100, 2, 22, 5000),
 								fw_PID_INIT_EASY(24, 1, 5,  16000));
 //								fw_PID_INIT_EASY(90, 2, 20, 5000),
 //								fw_PID_INIT_EASY(15, 2, 2,  16000));
 
-MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(-1,&ControlGMY,2000,400,20,
+MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(-1,&ControlGMY,2000,0,20,
 //								fw_PID_INIT_EASY(0.6, 0.02, 0.2, 10),
 //								fw_PID_INIT_EASY(0.4, 0.02, 2, 10),
 //								fw_PID_INIT_EASY(3000, 500, 200, 20000));
@@ -40,7 +40,7 @@ MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(-1,&ControlGMY,2000,400,20,
 								fw_PID_INIT_EASY(2800, 500, 200, 16000));
 								
 
-//MotorINFO GMY  =  Gimbal6020_MOTORINFO_Init(1,&ControlGMYEncoder,2000,400,20,
+//MotorINFO GMY  =  Gimbal6020_MOTORINFO_Init(1,&ControlGMYEncoder,2000,0,20,
 //								fw_PID_INIT_EASY(23, 5, 12, 5000),
 //								fw_PID_INIT_EASY(55, 2, 10,	20000));
 								
@@ -57,7 +57,7 @@ MotorINFO CML = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEF
 //MotorINFO CMR = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
 //								fw_PID_INIT_EASY(10, 0, 0, 3500),
 //								fw_PID_INIT_EASY(40, 0, 5, 15000));
-MotorINFO CMA = AngleBased_MOTORINFO_Init(19.0,&ControlNA,
+MotorINFO CMA = AngleBased_MOTORINFO_Init(-19.0,&ControlNA,
 								fw_PID_INIT_EASY(10, 0, 0, 0),
 								fw_PID_INIT_EASY(40, 0, 5, 0));
 								

@@ -207,8 +207,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			if(WorkState!=STATE_pre){
 				if(WorkState==STATE_stop&&receiveData[0].data[0]>0) WorkState = STATE_pre;
 				else{
-					RCRightMode = (RCMode_e)(receiveData[0].data[0]>>8);
-					WorkState = (WorkState_e)(receiveData[0].data[0]&0x00ff);
+					RCRightMode = (RCMode_e)((receiveData[0].data[0]&0x00ff)>>4);
+					WorkState = (WorkState_e)(receiveData[0].data[0]&0x000f);
 				}
 				if(RCRightMode==Pos1)
 					RCProcess1();
