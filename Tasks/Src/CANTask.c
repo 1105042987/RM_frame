@@ -12,7 +12,14 @@
 #include "includes.h"
 
 #define CanRxGetU16(canRxMsg, num) (((uint16_t)canRxMsg.Data[num * 2] << 8) | (uint16_t)canRxMsg.Data[num * 2 + 1])
-#define CAN_COMM_BASE_ID 0x300
+// Master id: 0x300;    Slave id: 0x600
+#ifdef SLAVE_MODE
+	#define CAN_COMM_SELF_ID 0x600
+	#define CAN_COMM_OTHER_ID 0x300
+#else
+	#define CAN_COMM_SELF_ID 0x300
+	#define CAN_COMM_OTHER_ID 0x600
+#endif
 uint8_t isRcan1Started = 0, isRcan2Started = 0;
 uint8_t isCan11FirstRx = 0, isCan12FirstRx = 0, isCan21FirstRx = 0, isCan22FirstRx = 0;
 CanRxMsgTypeDef Can1RxMsg,Can2RxMsg;
@@ -32,11 +39,9 @@ uint8_t can1_type = 1;
 uint8_t can2_update = 1;
 uint8_t can2_type = 1;
 uint8_t Control_Update=0;
-
 /********************CAN发送*****************************/
 //CAN数据标记发送，保证发送资源正常
-void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef* hcan)
-{
+void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef* hcan){
 	if(hcan == &hcan1){
 		can1_update = 1;
 	}
@@ -46,8 +51,7 @@ void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef* hcan)
 }
 
 /********************CAN******************************/
-void InitCanReception()
-{
+void InitCanReception(){
 	#ifndef CAN11
 		isCan11FirstRx = 1;
 	#endif
@@ -117,49 +121,46 @@ void InitCanReception()
 }
  
 //CAN接收中断入口函数
+extern int can13Dog;
 void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 	uint8_t flag = 0;
 	if(hcan == &hcan1)	//CAN1数据
 	{
-		for(int i=0;i<8;i++)
-		{
+		for(int i=0;i<8;i++){
 			if(can1[i]==0)continue;
-			if(Can1RxMsg.StdId==can1[i]->RXID)
-			{
+			if(Can1RxMsg.StdId==can1[i]->RXID){
 				if(i<4) isCan11FirstRx = 1;
 				else if(i<8) isCan12FirstRx = 1;
 				flag=1;
-				switch(can1[i]->ESCtype)
-				{
-					case ESC_C6x0:
-					{
+				switch(can1[i]->ESCtype){
+					case ESC_C6x0:{
 						can1[i]->RxMsgC6x0.angle		 = CanRxGetU16(Can1RxMsg, 0);
 						can1[i]->RxMsgC6x0.rotateSpeed   = CanRxGetU16(Can1RxMsg, 1);
 						can1[i]->RxMsgC6x0.moment		 = CanRxGetU16(Can1RxMsg, 2);
-					}break;
-					case ESC_6623:
-					{
+						break;
+					}
+					case ESC_6623:{
 						can1[i]->RxMsg6623.angle		 = CanRxGetU16(Can1RxMsg, 0);
 						can1[i]->RxMsg6623.realIntensity = CanRxGetU16(Can1RxMsg, 1);
 						can1[i]->RxMsg6623.giveIntensity = CanRxGetU16(Can1RxMsg, 2);
-					}break;
+						break;
+					}
 				}
 			}
-			
 		}
 		#ifdef CAN3
-		if(Can1RxMsg.StdId == 0x200||Can1RxMsg.StdId == 0x1ff) flag=1;
-		else if(Can1RxMsg.StdId >= CAN_COMM_BASE_ID)
-		{
-			flag = Can1RxMsg.StdId-CAN_COMM_BASE_ID;
-			if(flag<maxSendSize)
-			{
+		//Ignore the TX message(for motor) of another Main control board
+		if(Can1RxMsg.StdId == 0x200||Can1RxMsg.StdId == 0x1ff||Can2RxMsg.StdId == CAN_COMM_SELF_ID) flag=1;
+		else if(Can1RxMsg.StdId >= CAN_COMM_OTHER_ID){
+			flag = Can1RxMsg.StdId-CAN_COMM_OTHER_ID;
+			if(flag<maxSendSize){
 				for(int i=0;i<4;i++) receiveData[flag].data[i] = CanRxGetU16(Can1RxMsg, i);
+				if(flag==maxSendSize-1) Control_Update=1;
 				flag = 1;
-				Control_Update=1;
+				can13Dog=10;
 			}
 		}
-		#endif
+		#endif //CAN3
 		if(flag==0) Error_Handler();
 		if(HAL_CAN_Receive_IT(&hcan1, CAN_FIFO0) != HAL_OK){
 			isRcan1Started = 0;
@@ -169,47 +170,41 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 	}
 	else if(hcan == &hcan2)//CAN2数据
 	{
-		for(int i=0;i<8;i++)
-		{
+		for(int i=0;i<8;i++){
 			if(can2[i]==0)continue;
-			if(Can2RxMsg.StdId==can2[i]->RXID)
-			{
+			if(Can2RxMsg.StdId==can2[i]->RXID){
 				if(i<4) isCan21FirstRx = 1;
 				else if(i<8) isCan22FirstRx = 1;
 				flag=1;
-				switch(can2[i]->ESCtype)
-				{
-					case ESC_C6x0:
-					{
+				switch(can2[i]->ESCtype){
+					case ESC_C6x0:{
 						can2[i]->RxMsgC6x0.angle		 = CanRxGetU16(Can2RxMsg, 0);
 						can2[i]->RxMsgC6x0.rotateSpeed   = CanRxGetU16(Can2RxMsg, 1);
 						can2[i]->RxMsgC6x0.moment		 = CanRxGetU16(Can2RxMsg, 2);
-					}break;
-					case ESC_6623:
-					{
+						break;
+					}
+					case ESC_6623:{
 						can2[i]->RxMsg6623.angle		 = CanRxGetU16(Can2RxMsg, 0);
 						can2[i]->RxMsg6623.realIntensity = CanRxGetU16(Can2RxMsg, 1);
 						can2[i]->RxMsg6623.giveIntensity = CanRxGetU16(Can2RxMsg, 2);
-					}break;
+						break;
+					}
 				}
 			}
 		}
 		#ifdef CAN3
-		if(Can2RxMsg.StdId == 0x200||Can2RxMsg.StdId == 0x1ff) flag=1;
-		else if(Can2RxMsg.StdId >= CAN_COMM_BASE_ID)
-		{
-			flag = Can2RxMsg.StdId-CAN_COMM_BASE_ID;
-			if(flag<maxSendSize)
-			{
+		if(Can2RxMsg.StdId == 0x200||Can2RxMsg.StdId == 0x1ff||Can2RxMsg.StdId == CAN_COMM_SELF_ID) flag=1;
+		else if(Can2RxMsg.StdId >= CAN_COMM_OTHER_ID){
+			flag = Can2RxMsg.StdId-CAN_COMM_OTHER_ID;
+			if(flag<maxSendSize){
 				for(int i=0;i<4;i++) receiveData[flag].data[i] = CanRxGetU16(Can2RxMsg, i);
+				if(flag==maxSendSize-1) Control_Update=1;
 				flag = 1;
-				Control_Update=1;
 			}
 		}
 		#endif
 		if(flag==0) Error_Handler();
-		if(HAL_CAN_Receive_IT(&hcan2, CAN_FIFO0) != HAL_OK)
-		{
+		if(HAL_CAN_Receive_IT(&hcan2, CAN_FIFO0) != HAL_OK){
 			isRcan2Started = 0;
 		}else{
 			isRcan2Started = 1;
@@ -217,20 +212,16 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan){
 	}
 }
 
-void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
-{
-	if(hcan == &hcan1) 
-	{
+void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan){
+	if(hcan == &hcan1){
 		if(HAL_CAN_Receive_IT(&hcan1, CAN_FIFO0) != HAL_OK){
 			isRcan1Started = 0;
 		}else{
 			isRcan1Started = 1;
 		}
 	}
-	else if(hcan == &hcan2)
-	{
-		if(HAL_CAN_Receive_IT(&hcan2, CAN_FIFO0) != HAL_OK)
-		{
+	else if(hcan == &hcan2){
+		if(HAL_CAN_Receive_IT(&hcan2, CAN_FIFO0) != HAL_OK){
 			isRcan2Started = 0;
 		}else{
 			isRcan2Started = 1;
@@ -238,8 +229,7 @@ void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
 	}
 }
 #ifdef CAN3
-void setCANMessage(uint8_t index)
-{
+void setCANMessage(uint8_t index){
 	uint8_t target;
 	#ifdef CAN13
 	#ifndef CAN23
@@ -277,7 +267,7 @@ void setCANMessage(uint8_t index)
 	CanTxMsgTypeDef pData;
 	hcan_P->pTxMsg = &pData;
 	
-	hcan_P->pTxMsg->StdId = CAN_COMM_BASE_ID+index;
+	hcan_P->pTxMsg->StdId = CAN_COMM_SELF_ID+index;
 	hcan_P->pTxMsg->ExtId = 0;
 	hcan_P->pTxMsg->IDE = CAN_ID_STD;
 	hcan_P->pTxMsg->RTR = CAN_RTR_DATA;
@@ -287,8 +277,7 @@ void setCANMessage(uint8_t index)
 		hcan_P->pTxMsg->Data[i*2]   = (uint8_t)(sendData[index].data[i] >> 8);
 		hcan_P->pTxMsg->Data[i*2+1] = (uint8_t)sendData[index].data[i];
 	}
-	if(*update == 1 && *type == 3)
-	{
+	if(*update == 1 && *type == 3){
 		HAL_NVIC_DisableIRQ(CAN1_RX0_IRQn);
 		HAL_NVIC_DisableIRQ(CAN2_RX0_IRQn);
 		HAL_NVIC_DisableIRQ(USART1_IRQn);
@@ -298,8 +287,8 @@ void setCANMessage(uint8_t index)
 		#ifdef DEBUG_MODE
 			HAL_NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
 		#endif
-		if(HAL_CAN_Transmit_IT(hcan_P) != HAL_OK)
-		{
+		
+		if(HAL_CAN_Transmit_IT(hcan_P) != HAL_OK){
 			Error_Handler();
 		}
 		*update = 0;

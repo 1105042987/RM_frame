@@ -42,5 +42,12 @@ extern uint8_t isCan22FirstRx;
 
 void InitCanReception(void);
 void setCANMessage(uint8_t index);
+#ifdef CAN13
+extern CAN_DATA_t 	sendData[CAN13],receiveData[CAN13];
+#else
+#ifdef CAN23
+extern CAN_DATA_t 	sendData[CAN23],receiveData[CAN23];
+#endif
+#endif
 
 #endif /*__ CANTASK_H */
