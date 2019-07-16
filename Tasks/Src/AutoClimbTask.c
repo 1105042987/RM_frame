@@ -235,6 +235,10 @@ void Speed_Locker()
 	{
 		ChassisSpeedRef.forward_back_ref/=3.2;
 	}
+	if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==1)
+	{
+		ChassisSpeedRef.forward_back_ref/=1.3;
+	}
 //	if(((!hasReach(&NMCDL,45)||!hasReach(&NMCDR,45))&&(distance_couple.move_flags&0x000e)!=14&&ChassisSpeedRef.forward_back_ref<=0))
 //	{
 //	ChassisSpeedRef.forward_back_ref=0.0;

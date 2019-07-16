@@ -57,7 +57,7 @@
 /* USER CODE BEGIN PV */
 uint32_t ADC_value[160];//用于存储红外传感器的返回数据
 uint32_t ADC2_value[10];
-
+uint8_t store[1];
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE END PV */
@@ -187,6 +187,7 @@ int main(void)
 	CLAWLOOSE;
 	queue_init(&AutoGet_Queue);
 	InitialSave();
+	HAL_UART_Receive_IT(&huart8,store,1); 
   /* USER CODE END 2 */
 
   /* Infinite loop */

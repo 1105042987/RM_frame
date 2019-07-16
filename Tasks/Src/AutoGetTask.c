@@ -12,8 +12,8 @@
 #include "includes.h"
 	
 #define FIRSTBOX -30
-#define SECONDBOX -820
-#define THIRDBOX -1550            //这五个是箱子位置
+#define SECONDBOX -800
+#define THIRDBOX -1580            //这五个是箱子位置
 #define FOURTHBOX -415
 #define FIFTHBOX -1230
 #define SIXTHBOX -820
@@ -202,33 +202,39 @@ uint8_t stuckNegetive(MotorINFO* id)
 
 void Sensor_Read_Lower()//用于检测红外传感器是否检测到两个空隙
 {
-	if(Sensor_Tmp[0]<LOWERCRITICIAL&&adgl<LOWERCRITICIAL)
-		Sensor_Count[0]=1;
-	else
-	{Sensor_Tmp[0]=adgl;Sensor_Count[0]=0;}
-	if(Sensor_Count[0]==1&&Sensor_Ready[0]==0)
-		Sensor_Ready[0]=1;
-	if(Sensor_Tmp[1]<LOWERCRITICIAL&&adgr<LOWERCRITICIAL)
-		Sensor_Count[1]=1;
-	else
-	{Sensor_Tmp[1]=adgr;Sensor_Count[1]=0;}
-	if(Sensor_Count[1]==1&&Sensor_Ready[0]==1)
+//	if(Sensor_Tmp[0]>LOWERCRITICIAL&&adgl>LOWERCRITICIAL)
+//		Sensor_Count[0]=1;
+//	else
+//	{Sensor_Tmp[0]=adgl;Sensor_Count[0]=0;}
+//	if(Sensor_Count[0]==1&&Sensor_Ready[0]==0)
+//		Sensor_Ready[0]=1;
+//	if(Sensor_Tmp[1]>LOWERCRITICIAL&&adgr>LOWERCRITICIAL)
+//		Sensor_Count[1]=1;
+//	else
+//	{Sensor_Tmp[1]=adgr;Sensor_Count[1]=0;}
+//	if(Sensor_Count[1]==1&&Sensor_Ready[0]==1)
+//		Sensor_Ready[0]=2;
+//	
+	if(adgl>LOWERCRITICIAL&&adgr>LOWERCRITICIAL)
 		Sensor_Ready[0]=2;
 		
 }
 void Sensor_Read_Upper()//用于检测红外传感器是否检测到两个空隙
 {
-	if(Sensor_Tmp[0]<UPPERCRITICIAL_LEFT&&adgl<UPPERCRITICIAL_LEFT)
-		Sensor_Count[0]=1;
-	else
-	{Sensor_Tmp[0]=adgl;Sensor_Count[0]=0;Sensor_Ready[0]=0;}
-	if(Sensor_Count[0]==1&&Sensor_Ready[0]==0)
-		Sensor_Ready[0]=1;
-	if(Sensor_Tmp[1]<UPPERCRITICIAL_RIGHT&&adgr<UPPERCRITICIAL_RIGHT)
-		Sensor_Count[1]=1;
-	else
-	{Sensor_Tmp[1]=adgr;Sensor_Count[1]=0;Sensor_Ready[0]=0;}
-	if(Sensor_Count[1]==1&&Sensor_Ready[0]==1)
+//	if(Sensor_Tmp[0]>UPPERCRITICIAL_LEFT&&adgl>UPPERCRITICIAL_LEFT)
+//		Sensor_Count[0]=1;
+//	else
+//	{Sensor_Tmp[0]=adgl;Sensor_Count[0]=0;Sensor_Ready[0]=0;}
+//	if(Sensor_Count[0]==1&&Sensor_Ready[0]==0)
+//		Sensor_Ready[0]=1;
+//	if(Sensor_Tmp[1]>UPPERCRITICIAL_RIGHT&&adgr>UPPERCRITICIAL_RIGHT)
+//		Sensor_Count[1]=1;
+//	else
+//	{Sensor_Tmp[1]=adgr;Sensor_Count[1]=0;Sensor_Ready[0]=0;}
+//	if(Sensor_Count[1]==1&&Sensor_Ready[0]==1)
+//		Sensor_Ready[0]=2;
+	
+	if(adgl>UPPERCRITICIAL_LEFT&&adgr>UPPERCRITICIAL_RIGHT)
 		Sensor_Ready[0]=2;
 		
 }
@@ -722,9 +728,9 @@ void Claw_GoToNextBox_lower()//红外传感器控制爪子向前到达下一个箱子处
 	if(Sensor_Ready[0]!=2)
 	{
 		if(Claw_FindingNextBox_Lower_Forward==1)
-		ChassisSpeedRef.forward_back_ref = -45 * RC_CHASSIS_SPEED_REF;
+		ChassisSpeedRef.forward_back_ref = -100 * RC_CHASSIS_SPEED_REF;
 		else if(Claw_FindingNextBox_Lower_Backward==1)
-		ChassisSpeedRef.forward_back_ref = 45 * RC_CHASSIS_SPEED_REF;
+		ChassisSpeedRef.forward_back_ref = 100 * RC_CHASSIS_SPEED_REF;
 	}
 	if(Sensor_Ready[0]==2)
 	{
@@ -748,9 +754,9 @@ void Claw_GoToNextBox_upper()//红外传感器控制爪子到达下一个箱子处
 	if(Sensor_Ready[0]!=2)
 	{
 		if(Claw_FindingNextBox_Upper_Forward==1)
-		ChassisSpeedRef.forward_back_ref = -45 * RC_CHASSIS_SPEED_REF;
+		ChassisSpeedRef.forward_back_ref = -100 * RC_CHASSIS_SPEED_REF;
 		else if(Claw_FindingNextBox_Upper_Backward==1)
-		ChassisSpeedRef.forward_back_ref = 45 * RC_CHASSIS_SPEED_REF;	
+		ChassisSpeedRef.forward_back_ref = 100 * RC_CHASSIS_SPEED_REF;	
 	}
 	if(Sensor_Ready[0]==2)
 	{
@@ -778,7 +784,7 @@ void AutoGet_SensorControl()
 }
 void Claw_Up()//整个机构的抬升  往上走时角度下降
 {
-			if(Claw_UpToPosition==1&&Claw_UpAngle<=UPLEVEL&&auto_counter==0)//-480
+			if(Claw_UpToPosition==1&&Claw_UpAngle<UPLEVEL&&auto_counter==0)//-480
 			{
 				UFM.TargetAngle=FOURTHBOX;
 				Claw_UpAngle+=10;
@@ -937,12 +943,12 @@ void State_AutoGet()
 }
 void Rotate_Check()
 {
-	if(CM_AutoRotate90==1&&rotate_waiter==0&&imu.target_yaw>=(imu_start_angle-99))
+	if(CM_AutoRotate90==1&&rotate_waiter==0&&imu.target_yaw>=(imu_start_angle-114))
 	{
 		imu.target_yaw -= 3;
 		rotate_waiter=1;
 	}
-	if(imu.target_yaw<(imu_start_angle-99))
+	if(imu.target_yaw<(imu_start_angle-114))
 	{
 		CM_AutoRotate90 = 0;
 	}

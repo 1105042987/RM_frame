@@ -143,9 +143,17 @@ uint8_t rc_first_frame = 0;
 uint8_t rc_update = 0;
 uint8_t rc_cnt = 0;
 uint8_t tx_cnt = 200;
-
+extern uint8_t store[1];
+extern uint32_t isTight;
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
+	if(UartHandle==&huart8)
+	{
+		UNUSED(UartHandle);
+		if(store[0]=='t')isTight=1;
+		else isTight=0;
+		HAL_UART_Receive_IT(&huart8,(uint8_t *)&store,1); 
+	}
 	if(UartHandle == &RC_UART){
 		rc_update = 1;
 	}

@@ -137,6 +137,7 @@ void SetWheelZero()
 	}
 	}
 }
+uint8_t transdata[1];
 extern uint8_t store;
 extern uint32_t slave_flag;
 uint32_t saving_left=0;
@@ -215,6 +216,16 @@ void RescueLoop()
 			SRflag = 0;
 			SRcnt = 0;
 		}
+	}
+	if(leftClawTight==1&&rightClawTight==1)
+  {
+		transdata[0]='t';
+		HAL_UART_Transmit_IT(&huart8,transdata,1);
+	}
+	else
+	{
+		transdata[0]='n';
+		HAL_UART_Transmit_IT(&huart8,transdata,1);
 	}
 	if(leftClawZero && rightClawZero)
 	{

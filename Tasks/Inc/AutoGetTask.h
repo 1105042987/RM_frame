@@ -24,7 +24,7 @@
 #define CLAW_IS_UP NMUDL.RealAngle>=(UPLEVEL-30)
 #define CLAW_IS_DOWN NMUDL.RealAngle<=50
 
-#define UPLEVEL 628
+#define UPLEVEL 730  //700
 
 #define CLAW_INSPECT_SUCCEED Claw_SelfInspecting==3
 

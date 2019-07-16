@@ -127,26 +127,26 @@ void SetDoorZero()
 {
 	if(setdoorzero==0)
 	{
-	if(DOOR.RxMsgC6x0.moment<1000)
+	if(DOOR.RxMsgC6x0.moment>-2000)
 	{
 		counting=0;
-		DOOR.TargetAngle+=5;
+		DOOR.TargetAngle-=5;
 	}
-	if(DOOR.RxMsgC6x0.moment>=1000)
+	if(DOOR.RxMsgC6x0.moment<=-2000)
 	{
 	  counting=1;
 	}
 	if(doorcount>=1000)
 	{
 		DOOR.RealAngle=0;
-		DOOR.TargetAngle=0;
+		DOOR.TargetAngle=5;
 		setdoorzero=1;
 	}
   }
-	if(DOOR.RxMsgC6x0.moment>3000)
-		DOOR.TargetAngle-=10;
-	if(DOOR.RxMsgC6x0.moment<-3000)
-		DOOR.TargetAngle+=10;
+	if(DOOR.RxMsgC6x0.moment>4500)
+		DOOR.TargetAngle-=5;
+	if(DOOR.RxMsgC6x0.moment<-4500)
+		DOOR.TargetAngle+=5;
 }
 void Door_Shake()
 {
@@ -154,9 +154,9 @@ void Door_Shake()
 	AutoGet_Bullet_B=0;
 	if(dooropen==1&&setdoorzero==1&&doorshake_cnt==0)
 	{
-		if(DOOR.TargetAngle<-180)
+		if(DOOR.TargetAngle<260)
 			DOOR.TargetAngle+=180;
-		else if(DOOR.TargetAngle>=-180)
+		else if(DOOR.TargetAngle>=260)
 			DOOR.TargetAngle-=180;
 		doorshake_cnt=80;
 	}
@@ -165,16 +165,20 @@ void Door_SwitchState()
 {
 	if(dooropen==1&&setdoorzero==1)
 	{
-	DOOR.TargetAngle=-180;
+		if((AutoClimb_Level==0||EngineerState!=GET_STATE)&&CLAW_IS_DOWN)
+	   DOOR.TargetAngle=155;
+		else if(AutoClimb_Level==2||EngineerState==GET_STATE||CLAW_IS_UP)
+			DOOR.TargetAngle=250;
 	if(open_once==0)
 	{doorshake_cnt=500;open_once=1;}
 	}
 	else if(dooropen==0&&setdoorzero==1)
 	{DOOR.TargetAngle=-10;open_once=0;}
 	
-	Door_Shake();
+//	Door_Shake();
 }
 
+uint32_t isTight=0;
 void Slave_SwitchState()
 {
 	if(Slave==ENDSAVING)
@@ -393,13 +397,13 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
   {
 	  if(EngineerState==COMMON_STATE||EngineerState==CLIMB_STATE)
 		{
-			if(Slave!=AUTOSAVING&&Slave!=FORCESAVING)
+			if(isTight!=1)
 				ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-20;
-			else//这里要补上副板发回来数据
+			else if(isTight==1)
 				ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-175;	
 		}
 	  else if(EngineerState==GET_STATE)
-		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-20;
+		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
   }
 	
 	if((EngineerState!=COMMON_STATE||Slave==AUTOSAVING||Slave==FORCESAVING)||ON_THE_FLOOR)
@@ -529,7 +533,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				if(Direction_Indicator==GET)
 				{
 					ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/12;
-					ChassisSpeedRef.forward_back_ref =  KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp);
+					ChassisSpeedRef.forward_back_ref =  KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/2;
 				}
 			}
 			else if(key->v & KEY_A) 	//key: a
@@ -679,12 +683,12 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v &KEY_F)
 			{
-				if((ON_THE_GROUND&&CLAW_IS_UP)||(ON_THE_FLOOR&&CLAW_IS_DOWN)||MouseRMode==LONG_CLICK)
-				{
+//				if((ON_THE_GROUND&&CLAW_IS_UP)||(ON_THE_FLOOR&&CLAW_IS_DOWN)||MouseRMode==LONG_CLICK)
+//				{
 				dooropen=1;
 				AutoGet_Bullet_S=0;
 				AutoGet_Bullet_B=0;
-				}
+//				}
 			}
 			else if(key->v& KEY_Z)
 			{
@@ -708,7 +712,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_C)
 			{
-				AutoGet_Enqueue(3);
+				AutoGet_Enqueue(1);
 				if(AutoClimb_Level==1)
 				{
 					if(EngineerState==COMMON_STATE)
@@ -721,19 +725,19 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_B)
 			{
-				AutoGet_Enqueue(1);
+				AutoGet_Enqueue(3);
 			}
 			else if(key->v & KEY_F)
 			{
 				if(ON_THE_GROUND)
-				AutoGet_Enqueue(5);
+				AutoGet_Enqueue(4);
 				else if(ON_THE_FLOOR)
 				AutoGet_Enqueue(6);
 			}
 			else if(key->v & KEY_G)
 			{
 				if(ON_THE_GROUND)
-				AutoGet_Enqueue(4);
+				AutoGet_Enqueue(5);
 				else if(ON_THE_FLOOR)
 				AutoGet_Enqueue(6);
 			}
