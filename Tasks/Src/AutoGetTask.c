@@ -270,10 +270,10 @@ void Claw_Rollin()
 		}
 		Claw_AlreadyRollOut=2;
 	}
-	if((fabs(UM1.RealAngle+65)<=10||fabs(UM2.RealAngle+(-65))<=10)&&ON_THE_GROUND&&auto_counter==0&&Claw_AlreadyRollOut==2)   
-	{
-		CLAWLOOSE;
-	}
+//	if((fabs(UM1.RealAngle+65)<=10||fabs(UM2.RealAngle+(-65))<=10)&&ON_THE_GROUND&&auto_counter==0&&Claw_AlreadyRollOut==2)   
+//	{
+//		CLAWLOOSE;
+//	}
 	if((hasReach(&UM1, 5) || hasReach(&UM2, 5))&&Claw_AlreadyRollOut==2)
 	{
 		AutoGet_TotalStep++;

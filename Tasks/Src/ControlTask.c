@@ -318,7 +318,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		imu_ahrs_update();
 		imu_attitude_update();
 		imu_yaw_normalize();
-		if(imu_pause==1) imu.target_yaw = imu.now_yaw;		//暂停陀螺仪时直接让目标值等于陀螺仪当前值
+		if(imu_pause==1&&CM_AutoRotate90!=1) imu.target_yaw = imu.now_yaw;		//暂停陀螺仪时直接让目标值等于陀螺仪当前值
 		//主循环在时间中断中启动
 		controlLoop();
 		
