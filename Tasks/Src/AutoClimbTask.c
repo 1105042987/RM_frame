@@ -61,11 +61,11 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 	if(flag)
 	{		
 		if(ChassisSpeedRef.forward_back_ref>0)
-		ChassisSpeedRef.forward_back_ref/=3;
+		ChassisSpeedRef.forward_back_ref/=1.4;
 		if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==0)
-		ChassisSpeedRef.forward_back_ref/=3.5;
+		ChassisSpeedRef.forward_back_ref/=3;
     if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==1)
-		ChassisSpeedRef.forward_back_ref/=3.5;			
+		ChassisSpeedRef.forward_back_ref/=3;			
 	}
 	if(NMCDL.RealAngle<-600 )
 	{//small chassis
@@ -227,17 +227,21 @@ void ComeToTop()
 
 void Speed_Locker()
 {
-	if(AutoClimb_Level==1&&ChassisSpeedRef.forward_back_ref>0&&AlreadyClimbed==0)
+	if(AutoClimb_Level==1&&ChassisSpeedRef.forward_back_ref>0&&AlreadyClimbed==0)  //ÖÐ¼äÌ¨½×
 	{
-		ChassisSpeedRef.forward_back_ref/=3.2;
+		ChassisSpeedRef.forward_back_ref/=2;
 	}
 	if(AutoClimb_Level==2&&EngineerState==COMMON_STATE)
 	{
-		ChassisSpeedRef.forward_back_ref/=3.2;
+		ChassisSpeedRef.forward_back_ref/=2.3;
+	}
+	if(AutoClimb_Level==2&&EngineerState==COMMON_STATE&&(!hasReach(&NMCDL,30)||!hasReach(&NMCDR,30)))
+	{
+		ChassisSpeedRef.forward_back_ref/=1.5;
 	}
 	if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==1)
 	{
-		ChassisSpeedRef.forward_back_ref/=1.3;
+		ChassisSpeedRef.forward_back_ref/=1.5;
 	}
 //	if(((!hasReach(&NMCDL,45)||!hasReach(&NMCDR,45))&&(distance_couple.move_flags&0x000e)!=14&&ChassisSpeedRef.forward_back_ref<=0))
 //	{
@@ -265,6 +269,7 @@ void AutoClimb_SwitchState()
 
 void State_AutoClimb()
 {
+	imu_pause=1;
 	EngineerState=CLIMB_STATE;
 	Slave=CLIMBING;
 	Slave_Commoning=0;

@@ -133,7 +133,7 @@ void ControlRotate(void)
 //	#endif
 	//if(fabs(imu.target_yaw-imu.now_yaw)<1)
 		//CM_AutoRotate90 = 0;
-	if(CM_AutoRotate90==1)
+	if(imu_pause==0||CM_AutoRotate90==1)
 	{
 		CMRotatePID.ref = imu.target_yaw;
 		CMRotatePID.fdb = imu.now_yaw;
@@ -145,9 +145,55 @@ void ControlRotate(void)
 	}
 	
 	CMRotatePID.Calc(&CMRotatePID);
-	rotate_speed = CMRotatePID.output * 13 + ChassisSpeedRef.forward_back_ref * 0.01 + ChassisSpeedRef.left_right_ref * 0.01;
+	rotate_speed = CMRotatePID.output * 13 ;
 }
+/*struct wheel_rotate_speed calc_wheel_rpm(int16_t fb_ref, int16_t lr_ref, float GapAngle)
+{
+	struct wheel_rotate_speed wheel_speed;
+	static float rotate_ratio_f = ((WHEELBASE+WHEELTRACK)/2-GIMBAL_Y_OFFSET)/RADIAN_COEF; //改成了乘
+	static float rotate_ratio_b = ((WHEELBASE+WHEELTRACK)/2+GIMBAL_Y_OFFSET)/RADIAN_COEF; //改成了乘
+	static float wheel_rpm_ratio = 60.0f*CHASSIS_DECELE_RATIO/(PI*WHEEL_DIAMETER);//rpm//改成了乘
+	float max = 0;
+	float gap_angle_radian = GapAngle / RADIAN_COEF;
+	int16_t vy = fb_ref;
+	int16_t vx = lr_ref;
+	int16_t vw = 0;
 
+		//底盘跟随云台
+		rotate_ref = GapAngle - ChassisTwistGapAngle;
+		vw = PID_PROCESS_Single(&(CHASSIS_FOLLOW_PID),0, rotate_ref);
+		if((rotate_ref >= 20) && (rotate_ref <= 40))
+		{
+			vw += -pow(rotate_ref - 30, 2) + 100;
+		}
+	
+	MINMAX(vx,-MAX_CHASSIS_VX_SPEED,MAX_CHASSIS_VX_SPEED);//mm/s
+	MINMAX(vy,-MAX_CHASSIS_VY_SPEED,MAX_CHASSIS_VY_SPEED);//mm/s
+	MINMAX(vw,-MAX_CHASSIS_VW_SPEED,MAX_CHASSIS_VW_SPEED);//degree/s
+	float cos_sub_sin = cos(gap_angle_radian)-sin(gap_angle_radian);
+	float cos_add_sin = cos(gap_angle_radian)+sin(gap_angle_radian);
+	wheel_speed.wheel_rpm[0] = (-vx*cos_sub_sin-vy*cos_add_sin+vw*rotate_ratio_f)*wheel_rpm_ratio; //转子的转每分
+	wheel_speed.wheel_rpm[1] = (-vx*cos_add_sin+vy*cos_sub_sin+vw*rotate_ratio_f)*wheel_rpm_ratio;
+	wheel_speed.wheel_rpm[2] = (vx*cos_sub_sin+vy*cos_add_sin+vw*rotate_ratio_b)*wheel_rpm_ratio;
+	wheel_speed.wheel_rpm[3] = (vx*cos_add_sin-vy*cos_sub_sin+vw*rotate_ratio_b)*wheel_rpm_ratio;
+//	wheel_speed.wheel_rpm[0] = (-vx*(cos(gap_angle_radian)-sin(gap_angle_radian))-vy*(cos(gap_angle_radian)+sin(gap_angle_radian))+vw*rotate_ratio_f)*wheel_rpm_ratio; //转子的转每分
+//	wheel_speed.wheel_rpm[1] = (-vx*(cos(gap_angle_radian)+sin(gap_angle_radian))+vy*(cos(gap_angle_radian)-sin(gap_angle_radian))+vw*rotate_ratio_f)*wheel_rpm_ratio;
+//	wheel_speed.wheel_rpm[2] = (vx*(cos(gap_angle_radian)-sin(gap_angle_radian))+vy*(cos(gap_angle_radian)+sin(gap_angle_radian))+vw*rotate_ratio_b)*wheel_rpm_ratio;
+//	wheel_speed.wheel_rpm[3] = (vx*(cos(gap_angle_radian)+sin(gap_angle_radian))-vy*(cos(gap_angle_radian)-sin(gap_angle_radian))+vw*rotate_ratio_b)*wheel_rpm_ratio;
+	//find max item
+	for(uint8_t i=0;i<4;i++)
+	{
+		if(abs(wheel_speed.wheel_rpm[i]) > max)
+			max = abs(wheel_speed.wheel_rpm[i]);
+	}
+	//equal propotion
+	if(max>MAX_RPM)
+	{
+		float rate=MAX_RPM/max;
+		for(uint8_t i=0;i<4;i++) wheel_speed.wheel_rpm[i]*=rate;
+	}
+	return wheel_speed;
+}*/
 void Chassis_Data_Decoding()
 {
 	ControlRotate();
@@ -272,7 +318,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		imu_ahrs_update();
 		imu_attitude_update();
 		imu_yaw_normalize();
-		if(CM_AutoRotate90==0) imu.target_yaw = imu.now_yaw;		//平时直接让目标值等于陀螺仪当前值
+		if(imu_pause==1) imu.target_yaw = imu.now_yaw;		//暂停陀螺仪时直接让目标值等于陀螺仪当前值
 		//主循环在时间中断中启动
 		controlLoop();
 		

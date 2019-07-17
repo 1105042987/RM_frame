@@ -188,6 +188,7 @@ int main(void)
 	queue_init(&AutoGet_Queue);
 	InitialSave();
 	HAL_UART_Receive_IT(&huart8,store,1); 
+	imu.target_yaw =imu.now_yaw;
   /* USER CODE END 2 */
 
   /* Infinite loop */

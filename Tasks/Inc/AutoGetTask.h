@@ -13,9 +13,14 @@
 #ifndef __AUTOGETTASK_H
 #define __AUTOGETTASK_H
 
-
-#define CLAWOUT   HAL_GPIO_WritePin(GPIOH,1<<2,GPIO_PIN_SET)//爪子弹出
-#define CLAWIN    HAL_GPIO_WritePin(GPIOH,1<<2,GPIO_PIN_RESET)//爪子进入
+//爪子弹出
+#define CLAWOUT   \
+HAL_GPIO_WritePin(GPIOH,1<<2,GPIO_PIN_SET);\
+Claw_Out=1
+//爪子进入
+#define CLAWIN    \
+HAL_GPIO_WritePin(GPIOH,1<<2,GPIO_PIN_RESET);\
+Claw_Out=0
 #define CLAWTIGHT HAL_GPIO_WritePin(GPIOH,1<<5,GPIO_PIN_SET)//爪子抓紧
 #define CLAWLOOSE HAL_GPIO_WritePin(GPIOH,1<<5,GPIO_PIN_RESET)//爪子松开  //左中右 弹箱 前后 抓紧  4 2 5
 #define LAUNCH    HAL_GPIO_WritePin(GPIOH,1<<4,GPIO_PIN_SET)//弹射起飞
@@ -23,6 +28,8 @@
 
 #define CLAW_IS_UP NMUDL.RealAngle>=(UPLEVEL-30)
 #define CLAW_IS_DOWN NMUDL.RealAngle<=50
+#define CLAW_IS_OUT Claw_Out==1
+#define CLAW_IS_IN Claw_Out==0
 
 #define UPLEVEL 730  //700
 
@@ -43,6 +50,7 @@ extern uint32_t Claw_UpToPosition;
 extern uint32_t Claw_DownToPosition;
 extern uint16_t Claw_TruePosition[5];
 extern int32_t Claw_UpAngle;
+extern uint32_t Claw_Out;
 extern int Claw_TakeThisBox;
 extern uint32_t Claw_SelfInspecting;
 extern uint32_t Claw_FindingNextBox_Lower_Forward;

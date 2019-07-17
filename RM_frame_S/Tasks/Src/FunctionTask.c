@@ -102,12 +102,12 @@ void SetWheelZero()
 {
 	if(setwheelzero==0)
 	{
-	if(WHEEL.RxMsgC6x0.moment<2000)
+	if(WHEEL.RxMsgC6x0.moment>-2000)
 	{
 		counting=0;
-		WHEEL.TargetAngle+=10;
+		WHEEL.TargetAngle-=10;
 	}
-	if(WHEEL.RxMsgC6x0.moment>=2000)
+	if(WHEEL.RxMsgC6x0.moment<=-2000)
 	{
 	  counting=1;
 	}
@@ -121,12 +121,12 @@ void SetWheelZero()
 	
 	if(setwheelzero==1&&wheeldown==1)
 	{
-		if(WHEEL.RxMsgC6x0.moment>-2000)
+		if(WHEEL.RxMsgC6x0.moment<2000)
 	{
 		counting=0;
-		WHEEL.TargetAngle-=10;
+		WHEEL.TargetAngle+=10;
 	}
-	if(WHEEL.RxMsgC6x0.moment<=-2000)
+	if(WHEEL.RxMsgC6x0.moment>=2000)
 	{
 	  counting=1;
 	}

@@ -60,7 +60,7 @@ uint32_t Claw_Zero_Counting=0;
 uint32_t Claw_Zero_Count=0;
 uint32_t Claw_SelfInspect_cnt=0;
 uint32_t Claw_FirstInspect=0;
-
+uint32_t Claw_Out=0;
 
 uint8_t CM_AutoRotate90=0;				//底盘自动转90度，1——转，0——到位
 //存储红外传感器的数值
@@ -136,13 +136,14 @@ void RefreshADC()
 	disgl=adgl;
 	disgr=adgr;
 	
+	adgr=3000;
 	distance_couple.frontl.val_ref	= adfl;
 	distance_couple.frontr.val_ref	= adfr;
 	distance_couple.frontf.val_ref	= addf;
 	distance_couple.backl.val_ref	= adbl;
 	distance_couple.backr.val_ref	= adbr;
 	distance_couple.backb.val_ref	= addb;
-	distance_couple.left.val_ref	= adgl;
+	distance_couple.left.val_ref	= adgl;//adgl
 	distance_couple.right.val_ref	= adgr;
 		
 		
@@ -268,6 +269,10 @@ void Claw_Rollin()
     UM2.TargetAngle=INANGLE;
 		}
 		Claw_AlreadyRollOut=2;
+	}
+	if((fabs(UM1.RealAngle+65)<=10||fabs(UM2.RealAngle+(-65))<=10)&&ON_THE_GROUND&&auto_counter==0&&Claw_AlreadyRollOut==2)   
+	{
+		CLAWLOOSE;
 	}
 	if((hasReach(&UM1, 5) || hasReach(&UM2, 5))&&Claw_AlreadyRollOut==2)
 	{
@@ -488,7 +493,7 @@ void AutoGet_LowerANDThrow()//自动取弹（岛下五个弹）
 void Claw_Wait()
 {
 	CLAWOUT;
-	Claw_GoTo(1);
+	Claw_GoTo(2);
 	UM1.TargetAngle=-(OUTANGLE/2+2);
 	UM2.TargetAngle=(OUTANGLE+2);
 	
@@ -786,7 +791,7 @@ void Claw_Up()//整个机构的抬升  往上走时角度下降
 {
 			if(Claw_UpToPosition==1&&Claw_UpAngle<UPLEVEL&&auto_counter==0)//-480
 			{
-				UFM.TargetAngle=FOURTHBOX;
+				UFM.TargetAngle=SECONDBOX;
 				Claw_UpAngle+=10;
 				NMUDL.TargetAngle=Claw_UpAngle;
 				NMUDR.TargetAngle=Claw_UpAngle;
@@ -960,6 +965,7 @@ void State_Common()
   UM2.TargetAngle=INANGLE;
 	AutoClimbing=0;
 	AutoGet_Success=0;
+//	imu_pause=0;
 	if(EngineerState==GET_STATE)
 	{
 		Direction_Indicator=0;

@@ -59,12 +59,12 @@ uint32_t saving=12;
 uint32_t saveing_flag=0;
 
 uint32_t OnePush_Locker=0;
-
+uint32_t Mouse_LR=0;
 uint32_t openthegay=0;
 
 uint32_t Direction_Indicator=0;
 
-
+uint32_t imu_pause=1;
 
 extern uint8_t signal1;
 extern uint8_t signal2;
@@ -102,7 +102,7 @@ void EndSaving()
 }
 void Wheel()
 { 
-	transdata[0]='w';
+	transdata[0]='p';//w
 	HAL_UART_Transmit(&huart8,transdata,1,100);
 }
 //³õÊ¼»¯
@@ -127,19 +127,19 @@ void SetDoorZero()
 {
 	if(setdoorzero==0)
 	{
-	if(DOOR.RxMsgC6x0.moment>-2000)
+	if(DOOR.RxMsgC6x0.moment>-1500)
 	{
 		counting=0;
 		DOOR.TargetAngle-=5;
 	}
-	if(DOOR.RxMsgC6x0.moment<=-2000)
+	if(DOOR.RxMsgC6x0.moment<=-1500)
 	{
 	  counting=1;
 	}
 	if(doorcount>=1000)
 	{
 		DOOR.RealAngle=0;
-		DOOR.TargetAngle=5;
+		DOOR.TargetAngle=10;
 		setdoorzero=1;
 	}
   }
@@ -167,13 +167,13 @@ void Door_SwitchState()
 	{
 		if((AutoClimb_Level==0||EngineerState!=GET_STATE)&&CLAW_IS_DOWN)
 	   DOOR.TargetAngle=155;
-		else if(AutoClimb_Level==2||EngineerState==GET_STATE||CLAW_IS_UP)
-			DOOR.TargetAngle=250;
+		if(AutoClimb_Level==2||EngineerState==GET_STATE||CLAW_IS_UP)
+			DOOR.TargetAngle=220;
 	if(open_once==0)
 	{doorshake_cnt=500;open_once=1;}
 	}
 	else if(dooropen==0&&setdoorzero==1)
-	{DOOR.TargetAngle=-10;open_once=0;}
+	{DOOR.TargetAngle=10;open_once=0;}
 	
 //	Door_Shake();
 }
@@ -395,15 +395,33 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 
   if(AutoClimbing==0||(AutoClimbing==1&&AlreadyDowned==0))
   {
-	  if(EngineerState==COMMON_STATE||EngineerState==CLIMB_STATE)
+		if(mouse->x!=0)
 		{
 			if(isTight!=1)
+			{
+				if(imu_pause==0)
+				imu.target_yaw =imu.now_yaw+ mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*80;
+				else
+				{
+					if(EngineerState!=GET_STATE)
 				ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-20;
+					else
+				ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
+				}
+			}
 			else if(isTight==1)
+			{
+				if(imu_pause==0)
+				imu.target_yaw =imu.now_yaw+ mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*160;
+				else
 				ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-175;	
+			}				
+	  }
+		if(mouse->x==0)
+		{
+			if(imu_pause==1)
+			  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-80;
 		}
-	  else if(EngineerState==GET_STATE)
-		  ChassisSpeedRef.rotate_ref = mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*20;
   }
 	
 	if((EngineerState!=COMMON_STATE||Slave==AUTOSAVING||Slave==FORCESAVING)||ON_THE_FLOOR)
@@ -532,7 +550,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				}
 				if(Direction_Indicator==GET)
 				{
-					ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/12;
+					//ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/8;
 					ChassisSpeedRef.forward_back_ref =  KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/2;
 				}
 			}
@@ -548,7 +566,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				}
 				if(Direction_Indicator==GET)
 				{
-					ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/12;
+					//ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/8;
 					ChassisSpeedRef.forward_back_ref =  -KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/2;
 				}
 			}
@@ -615,6 +633,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		case CTRL:				//slow
 		{
 			ctrl_locker=1;
+			imu_pause=1;
 			if(key->v & KEY_C)
 			{
 				if(EngineerState==COMMON_STATE)
@@ -622,7 +641,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_V)
 			{
-				//State_Common();
+				if(EngineerState==COMMON_STATE)
+				State_AutoClimb();
 			}
 			else if(key->v & KEY_Q)
 			{
@@ -704,6 +724,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		{//CM Movement Process
 		ctrl_locker=0;
 		shift_locker=0;
+//		imu_pause=0;
 			if(ctrl_cnt==0&&shift_cnt==0)
 		{
 			if(key->v & KEY_X)
@@ -712,6 +733,9 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_C)
 			{
+				if(EngineerState==COMMON_STATE&&(ON_THE_FLOOR||ON_THE_GROUND))
+					State_AutoGet();
+				if(EngineerState==GET_STATE)
 				AutoGet_Enqueue(1);
 				if(AutoClimb_Level==1)
 				{
@@ -721,31 +745,44 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_V)
 			{
+				if(EngineerState==COMMON_STATE)
+				State_AutoClimb();
+				if(EngineerState==GET_STATE)
 				AutoGet_Enqueue(2);
 			}
 			else if(key->v & KEY_B)
 			{
+				if(EngineerState==GET_STATE)
 				AutoGet_Enqueue(3);
 			}
 			else if(key->v & KEY_F)
 			{
+				if(EngineerState==GET_STATE)
+				{
 				if(ON_THE_GROUND)
 				AutoGet_Enqueue(4);
 				else if(ON_THE_FLOOR)
 				AutoGet_Enqueue(6);
+			  }
 			}
 			else if(key->v & KEY_G)
 			{
+				if(EngineerState==GET_STATE)
+				{
 				if(ON_THE_GROUND)
 				AutoGet_Enqueue(5);
 				else if(ON_THE_FLOOR)
 				AutoGet_Enqueue(6);
+			  }
 			}
 			else if(key->v & KEY_Z)
 			{
 				dooropen=0;
+				if(CLAW_IS_IN)
+				{
 				Claw_DownToPosition=1;
 				State_Common();
+				}
 			}
 			else if(key->v & KEY_Q)
 			{
@@ -908,7 +945,7 @@ void MouseModeFSM(Mouse *mouse)
 				MouseRMode = NO_CLICK;
 				counterr = 0;
 			}
-			else if(counterr>=20)
+			else if(counterr>=5)
 			{
 				MouseRMode = LONG_CLICK;
 				counterr = 0;
