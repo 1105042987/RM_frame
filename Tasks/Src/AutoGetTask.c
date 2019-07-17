@@ -686,6 +686,9 @@ void Claw_SelfInspect()//爪子横移自动对位零点
 	if(Claw_SelfInspect_cnt>20)
 	{
 		UFM.RealAngle=0;
+		if(CLAW_IS_UP)
+		UFM.TargetAngle=SECONDBOX;
+		else if(CLAW_IS_DOWN)
 		UFM.TargetAngle=FOURTHBOX;
 		Claw_SelfInspecting=2;
 		Claw_UpToPosition=0;
