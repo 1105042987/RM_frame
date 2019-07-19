@@ -53,8 +53,8 @@ void WorkStateFSM(void)
 		case PREPARE_STATE:				//准备模式
 		{
 			//if (inputmode == STOP) WorkState = STOP_STATE;
-			if(prepare_time < 5300) prepare_time++;	
-			if(prepare_time == 5300)//开机二秒进入正常模式
+			if(prepare_time < 1700) prepare_time++;	
+			if(prepare_time == 1700)//开机二秒进入正常模式
 			{
 				playMusicSuperMario();
 				CMRotatePID.Reset(&CMRotatePID);

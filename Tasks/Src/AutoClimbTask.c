@@ -43,6 +43,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 	CM1.TargetAngle=ChassisSpeedRef.forward_back_ref*8;
 	CM2.TargetAngle=-ChassisSpeedRef.forward_back_ref*8;
 	}
+	
 	if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==0)
 	{
 	CM1.TargetAngle=ChassisSpeedRef.forward_back_ref*1.2;
@@ -269,7 +270,8 @@ void AutoClimb_SwitchState()
 
 void State_AutoClimb()
 {
-	imu_pause=1;
+	if(ON_THE_GROUND)
+		imu_pause=0;
 	EngineerState=CLIMB_STATE;
 	Slave=CLIMBING;
 	Slave_Commoning=0;

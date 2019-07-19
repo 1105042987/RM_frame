@@ -52,6 +52,7 @@ uint32_t righttight=0;
 
 uint32_t ctrl_locker=0;
 uint32_t shift_locker=0;
+uint32_t ClawBack_Locker=0;
 uint32_t ctrl_cnt=0;
 uint32_t shift_cnt=0;
 uint32_t saving_count=0;
@@ -59,6 +60,8 @@ uint32_t saving=12;
 uint32_t saveing_flag=0;
 
 uint32_t OnePush_Locker=0;
+uint32_t ctrlR_count=0;
+uint32_t R_count=0;
 uint32_t Mouse_LR=0;
 uint32_t openthegay=0;
 
@@ -102,7 +105,13 @@ void EndSaving()
 }
 void Wheel()
 { 
-	transdata[0]='p';//w
+	transdata[0]='w';
+	HAL_UART_Transmit(&huart8,transdata,1,100);
+}
+
+void Echo()
+{
+	transdata[0]='o';
 	HAL_UART_Transmit(&huart8,transdata,1,100);
 }
 //³õÊ¼»¯
@@ -200,6 +209,10 @@ void Slave_SwitchState()
 	else if(Slave==COMMON)
 	{
 		Slave_Common();
+	}
+	else if(Slave==ECHO)
+	{
+		Echo();
 	}
 }
 
@@ -400,7 +413,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			if(isTight!=1)
 			{
 				if(imu_pause==0)
-				imu.target_yaw =imu.now_yaw+ mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*80;
+				imu.target_yaw =imu.now_yaw+ mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*30;
 				else
 				{
 					if(EngineerState!=GET_STATE)
@@ -633,7 +646,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		case CTRL:				//slow
 		{
 			ctrl_locker=1;
-			imu_pause=1;
+			//imu_pause=1;
 			if(key->v & KEY_C)
 			{
 				if(EngineerState==COMMON_STATE)
@@ -673,8 +686,21 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_R)
 			{
-				Slave_Commoning=0;
-				Slave=FORCESAVING;
+				if(OnePush_Locker==0)
+				{
+				if(EngineerState==COMMON_STATE&&ctrlR_count==0)
+				{
+					Slave_Commoning=0;
+				  Slave=FORCESAVING;
+				  ctrlR_count++;
+					R_count=0;
+				}
+				else if(EngineerState==COMMON_STATE&&ctrlR_count==1)
+				{Slave=ECHO;ctrlR_count=0;R_count=0;}
+				else if(EngineerState==GET_STATE&&ON_THE_FLOOR)
+				Claw_Wait();
+				OnePush_Locker=1;
+			  }
 			}
 			
 		}break;
@@ -700,6 +726,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 				Slave_Commoning=0;
 				Slave=AUTOSAVING;
+				R_count=0;
+				ctrlR_count=0;
 			}
 			else if(key->v &KEY_F)
 			{
@@ -714,8 +742,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 					if(EngineerState==GET_STATE)
 				{
-					//AutoGet_FillQueue();
-					AutoGet_Fillstream();
+					AutoGet_FillQueue();
+					//AutoGet_Fillstream();
 				}
 				
 			}
@@ -748,7 +776,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				if(EngineerState==COMMON_STATE)
 				State_AutoClimb();
 				if(EngineerState==GET_STATE)
-				AutoGet_Enqueue(2);
+				{AutoGet_Enqueue(2);ClawBack_Locker=1;}
 			}
 			else if(key->v & KEY_B)
 			{
@@ -826,10 +854,16 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_R)
 			{
-				if(EngineerState==COMMON_STATE)
-				Slave=ENDSAVING;
+				if(OnePush_Locker==0)
+				{
+				if(EngineerState==COMMON_STATE&&R_count==0)
+				{Slave=ENDSAVING;R_count++;ctrlR_count=0;}
+				else if(EngineerState==COMMON_STATE&&R_count==1)
+				{Slave=ECHO;R_count=0;ctrlR_count=0;}
 				else if(EngineerState==GET_STATE&&ON_THE_FLOOR)
 				Claw_Wait();
+				OnePush_Locker=1;
+			  }
 			}
 			else
 			{

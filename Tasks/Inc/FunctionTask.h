@@ -105,6 +105,7 @@ typedef enum
 	CLIMBING,
 	COMMON,
 	INIT,
+	ECHO,
 }SlaveMode_e;
 
 

@@ -137,11 +137,39 @@ void SetWheelZero()
 	}
 	}
 }
+
+
 uint8_t transdata[1];
 extern uint8_t store;
 extern uint32_t slave_flag;
+extern uint32_t last_flag;
 uint32_t saving_left=0;
 uint32_t saving_right=0;
+void Rescue()
+{
+	if(firstread==0)
+			{
+				firstread=1;
+				SR.TargetAngle=-0;
+				SL.TargetAngle=0;
+			}
+			loosed = 1;
+			if(rightClaw == 1 && !rightClawTight)
+			{
+				saving_right=1;
+			}
+			if(leftClaw == 1 && !leftClawTight)
+			{
+				saving_left=1;
+			}
+}
+void EndRescue()
+{
+	firstread=0;
+	loosing = 1;
+	saving_left=0;
+	saving_right=0;
+}
 void RescueLoop()
 {
 	readL = masterHigh;
@@ -231,21 +259,7 @@ void RescueLoop()
 	{
 		if(slave_flag==1)//Rescue
 		{
-			if(firstread==0)
-			{
-				firstread=1;
-				SR.TargetAngle=-60;
-				SL.TargetAngle=60;
-			}
-			loosed = 1;
-			if(rightClaw == 1 && !rightClawTight)
-			{
-				saving_right=1;
-			}
-			if(leftClaw == 1 && !leftClawTight)
-			{
-				saving_left=1;
-			}
+			Rescue();
 		}
 		if(slave_flag==5)
 		{
@@ -259,10 +273,7 @@ void RescueLoop()
 		}
 		if(slave_flag==2)//loose
 		{
-			firstread=0;
-			loosing = 1;
-			saving_left=0;
-			saving_right=0;
+			EndRescue();
 		}
 		else loosing = 0;
 		if(loosing && loosed)
@@ -281,6 +292,25 @@ void RescueLoop()
 		{
 			setwheelzero=0;
 			loosed = 1;
+		}
+		if(slave_flag==6)
+		{
+			if(last_flag==5)
+			{
+				firstread=0;
+				loosed=1;
+				leftClawZero=1;
+				rightClawZero=1;
+				saving_right=1;
+			  saving_left=1;
+				leftClawTight=0;
+				rightClawTight=0;
+			}
+			else if(last_flag==2)
+			{
+				loosed=1;
+				loosing=1;
+			}
 		}
 	}
 	else

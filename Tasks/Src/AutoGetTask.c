@@ -11,11 +11,11 @@
   */
 #include "includes.h"
 	
-#define FIRSTBOX -30
-#define SECONDBOX -800
-#define THIRDBOX -1580            //ÕâÎå¸öÊÇÏä×ÓÎ»ÖÃ
+#define FIRSTBOX -33
+#define SECONDBOX -815
+#define THIRDBOX -1590            //ÕâÎå¸öÊÇÏä×ÓÎ»ÖÃ
 #define FOURTHBOX -415
-#define FIFTHBOX -1230
+#define FIFTHBOX -1215
 #define SIXTHBOX -820
 
 #define LOWERCRITICIAL 2000      //µºÏÂÁÙ½çÖµ
@@ -44,6 +44,7 @@ uint32_t AutoGet_Bullet_B=0;
 uint32_t Claw_AlreadyRollOut=0;
 uint32_t Claw_AlreadyWaited=0;
 uint32_t Claw_AlreadyTight=0;
+uint32_t Claw_RollBack=0;
 uint32_t Claw_UpToPosition=0;
 uint32_t Claw_DownToPosition=0;
 uint16_t Claw_TruePosition[5] = {0, 820, 1600, 400, 1100};
@@ -61,6 +62,7 @@ uint32_t Claw_Zero_Count=0;
 uint32_t Claw_SelfInspect_cnt=0;
 uint32_t Claw_FirstInspect=0;
 uint32_t Claw_Out=0;
+extern uint32_t ClawBack_Locker;
 
 uint8_t CM_AutoRotate90=0;				//µ×ÅÌ×Ô¶¯×ª90¶È£¬1¡ª¡ª×ª£¬0¡ª¡ªµ½Î»
 //´æ´¢ºìÍâ´«¸ÐÆ÷µÄÊýÖµ
@@ -136,14 +138,13 @@ void RefreshADC()
 	disgl=adgl;
 	disgr=adgr;
 	
-	adgr=3000;
 	distance_couple.frontl.val_ref	= adfl;
 	distance_couple.frontr.val_ref	= adfr;
 	distance_couple.frontf.val_ref	= addf;
 	distance_couple.backl.val_ref	= adbl;
 	distance_couple.backr.val_ref	= adbr;
 	distance_couple.backb.val_ref	= addb;
-	distance_couple.left.val_ref	= adgl;//adgl
+	distance_couple.left.val_ref	= adgl;
 	distance_couple.right.val_ref	= adgr;
 		
 		
@@ -415,8 +416,13 @@ void AutoGet_Stop_And_Clear()//×´Ì¬ÇåÁã ×¦×Ó×ª»Ø ºáÒÆµç»úÍ£×ª£¨ÓÃÓÚÒì³£×´¿ö´¦Àíº
 	{
 		if(AutoClimb_Level!=1)
 		{
-	    clawback=1;
-	    clawback_cnt=1000;
+			if(ClawBack_Locker==0)
+	    {
+			 clawback=1;
+	     clawback_cnt=1000;
+			}
+			else if(ClawBack_Locker==1)
+				ClawBack_Locker=0;
 		}
 	}
 	else if(AutoGet_Error==1)
@@ -439,6 +445,33 @@ void Box_ThrowForward()//ÏòÇ°ÈÓ³öÏä×Ó
 		AutoGet_TotalStep++;
 	}
                      }
+}
+
+void Box_ThrowBackward()//ÏòºóÈÓ³öÏä×Ó
+{
+	if(auto_counter==0&&auto_waiter==0&&Claw_AlreadyRollOut==0)
+	{
+	UM1.TargetAngle=-OUTANGLE;
+	UM2.TargetAngle=OUTANGLE;
+	Claw_AlreadyRollOut=1;
+	}
+	if(fabs(UM1.RealAngle+140)<=10||fabs(UM2.RealAngle+(-140))<=10)   //±ä´óÊÇÍíÈÓ£¬±äÐ¡ÊÇÔçÈÓ
+	{
+	UM1.TargetAngle=-INANGLE;
+  UM2.TargetAngle=INANGLE;
+	Claw_RollBack=1;
+	}
+	if(Claw_RollBack==1&&(fabs(UM1.RealAngle+115)<=10||fabs(UM2.RealAngle+(-115))<=10))
+	{
+		Claw_RollBack=0;
+		CLAWLOOSE;
+	}
+	if(hasReach(&UM1,5)||hasReach(&UM2,5))
+	{
+		AutoGet_TotalStep++;
+		Claw_AlreadyRollOut=0;
+	}
+	
 }
 //void AutoGet_Lower()//×Ô¶¯È¡µ¯£¨µºÏÂÎå¸öµ¯£©
 //{
@@ -542,7 +575,9 @@ void Claw_Go_and_Get(int position)
 					if(AutoGet_Alreadywaited==0)
 					{auto_waiter=0;AutoGet_Alreadywaited=1;}  
 					  break;}
-				case 4:{Box_ThrowForward();     break;}
+				case 4:{
+				if(ON_THE_GROUND)    Box_ThrowBackward();
+        else if(ON_THE_FLOOR)Box_ThrowForward();				break;}
 				default:{
 					if(ON_THE_GROUND)
 						AutoGet_Bullet_S+=1;
@@ -674,12 +709,12 @@ void Claw_SelfInspect()//×¦×ÓºáÒÆ×Ô¶¯¶ÔÎ»Áãµã
 	}
 	if(Claw_SetZero==1)
 	{
-	if(UFM.RxMsgC6x0.moment<=5000&&Claw_SelfInspecting==1)
+	if(UFM.RxMsgC6x0.moment<=2000&&Claw_SelfInspecting==1)
 	{
-		UFM.TargetAngle+=15;
+		UFM.TargetAngle+=20;
 		Claw_SelfInspect_cnt=0;
 	}
-	if(UFM.RxMsgC6x0.moment>5000&&Claw_SelfInspecting==1)
+	if(UFM.RxMsgC6x0.moment>2000&&Claw_SelfInspecting==1)
 	{
 		Claw_SelfInspect_cnt++;
 	}
@@ -968,7 +1003,8 @@ void State_Common()
   UM2.TargetAngle=INANGLE;
 	AutoClimbing=0;
 	AutoGet_Success=0;
-//	imu_pause=0;
+	if(ON_THE_FLOOR||ON_THE_GROUND||AutoClimb_Level==1)
+	imu_pause=1;
 	if(EngineerState==GET_STATE)
 	{
 		Direction_Indicator=0;

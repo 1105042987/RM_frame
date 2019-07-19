@@ -144,15 +144,26 @@ uint8_t tx_cnt = 200;
 
 extern uint8_t store;
 uint32_t slave_flag=0;
+uint32_t last_flag=0;
+uint32_t first_enter=0;
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
 	UNUSED(&huart8);
 	
-	if(store=='s')slave_flag=1;
-	if(store=='e')slave_flag=2;
-	if(store=='w')slave_flag=3;
-	if(store=='c')slave_flag=4;
-	if(store=='f')slave_flag=5;
+	if(store=='s'){slave_flag=1;first_enter=0;}
+	if(store=='e'){slave_flag=2;first_enter=0;}
+	if(store=='w'){slave_flag=3;first_enter=0;}
+	if(store=='c'){slave_flag=4;first_enter=0;}
+	if(store=='f'){slave_flag=5;first_enter=0;}
+	if(store=='o')
+		{
+			if(first_enter==0)
+			{
+		    last_flag=slave_flag;
+				first_enter=1;
+			}
+		 slave_flag=6;
+		}
 	if(UartHandle == &RC_UART){
 		rc_update = 1;
 	}
