@@ -13,8 +13,8 @@
 #ifndef __AUXDEVICE_H
 #define __AUXDEVICE_H
 
-//#define GUARD		'U'
-#define GUARD		'D'
+#define GUARD		'U'
+//#define GUARD		'D'
 
 #if GUARD == 'U'
 	#define USE_POWER_LIMIT 	20
@@ -32,7 +32,6 @@
 //***************************
 //    外设组件功能配置
 //***************************
-
 #define STEER_TIM 				htim2
 #define TWO_MS_TIM 				htim6
 #define ONE_MS_TIM 				htim7
@@ -48,7 +47,6 @@
 #define BUZZER_CHANNEL			TIM_CHANNEL_1
 
 
-//IO重命名
 #define laserOn() 	HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET)
 #define laserOff() 	HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_RESET)
 #define onLed(x) 		HAL_GPIO_WritePin(GPIOG,1<<x, GPIO_PIN_RESET)

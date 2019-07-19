@@ -11,13 +11,12 @@
   */
 #include "includes.h"
 double ChassisSpeed;
-extern float fakeHeat0;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
 int32_t auto_counter= 0;		//用于准确延时的完成某事件
 int16_t channelrrow,channelrcol,channellrow,channellcol;
-int8_t StateSway,StateFlee,StateHurt,StateRand=1;
-int16_t StateCnt=1;
+int8_t StateSway,StateFlee,StateHurt,StateRand=1,ExtCmd;
+int16_t StateCnt=1,CmdTic;
 int16_t noEnemyCnt=1;
 void strategyShoot(void);
 //初始化
@@ -35,15 +34,13 @@ uint8_t findEnemy;
 //********************上平台代码1
 void RCProcess1(Remote *rc){
 	generalProcess(rc);
-	if(getLeftSw()){onLed(6);}
-	else{offLed(6);}
 	if(getLeftSr()){onLed(7);}
 	else{offLed(7);}
 	if(WorkState == STATE_1){
-
+		brakeOff();
 	}
 	if(WorkState == STATE_2){
-
+		brakeOn();
 	}
 	if(WorkState == STATE_3){
 		
@@ -58,10 +55,14 @@ void RCProcess2(Remote *rc){
 		onePushDir(dir,powLmtCnt=500);
 	}
 	if(WorkState == STATE_2){
-		routing3();
+		routing0();
 	}
 	if(WorkState == STATE_3){
-		routing3();
+		switch(ExtCmd){
+			case 1:routing1();break;
+			case 2:routing2();break;
+			default:routing0();
+		}
 	}
 	limtSync();
 }
@@ -102,6 +103,8 @@ void generalProcess(Remote *rc){
 	if(channelrcol>600){sendData[0].data[2]=channellcol+5000;}
 	else{sendData[0].data[2]=channellcol;}
 	sendData[0].data[3]=(int16_t)(RealHeat0*20);
+	
+	nutDetect();
 }
 void limtSync(){
 	MINMAX(GMP.Target,-60,0);//limit
@@ -183,9 +186,9 @@ void strategyShoot(){
 	if(findEnemy){
 		autoAim();
 		//自瞄数据会有绝对坐标的覆盖，重新补偿
-		GMY.Target-=(((uint16_t)(receiveData[0].data[0])>>8) -127)/1100.0;
+		GMY.Target-=sgn(GMY.encoderAngle)*(((uint16_t)(receiveData[0].data[0])>>8) -127)/800.0;
 		GMP.Target-=dx*15;
-		if(fabs(aim.yaw)<8 && aim.dis==0){firing2();}
+		if(fabs(aim.yaw)<8 && (aim.dis==0||aim.dis==2000||aim.dis==3000)){firing2();}
 		if(aim.dis==500){noEnemyCnt=1;}
 		else{noEnemyCnt=-300;}
 		sendData[0].data[0]=(int16_t)1;
@@ -196,7 +199,7 @@ void strategyShoot(){
 	}
 	else if(noEnemyCnt<-200){
 		noEnemyCnt++;
-		if(fabs(aim.yaw)<6 && aim.dis==0){firing2();}
+		if(fabs(aim.yaw)<6 && (aim.dis==0||aim.dis==2000||aim.dis==3000)){firing2();}
 		else{STIRv.Target=0;}
 	}
 	else{
@@ -222,13 +225,13 @@ void generalProcess(){
 	
 	RealHeat0=receiveData[0].data[3]/(float)(20.0);
 	//基于顶盘速度的yaw运动补偿
-	GMY.Target+=channellrow*0.001f-(((uint16_t)(receiveData[0].data[0])>>8) -127)/1100.0;
+	GMY.Target+=channellrow*0.001f-sgn(GMY.encoderAngle)*(((uint16_t)(receiveData[0].data[0])>>8) -127)/800.0;
 	GMP.Target+=channellcol*0.001f;
 	//基于imu的pit运动补偿 
 	dx=imu.vx-dx;
 	vx+=dx;
 	vx*=0.99;
-	GMP.Target-=dx*15;
+	GMP.Target-=dx*16;
 	dx=imu.vx;
 }
 

@@ -49,12 +49,14 @@
 
 #define LASER_Pin GPIO_PIN_13
 #define LASER_GPIO_Port GPIOG
-#define leftSensor_Pin GPIO_PIN_4
-#define leftSensor_GPIO_Port GPIOE
-#define rightSensor_Pin GPIO_PIN_5
+#define rightSensor_Pin GPIO_PIN_4
 #define rightSensor_GPIO_Port GPIOE
-#define leftSwitch_Pin GPIO_PIN_6
-#define leftSwitch_GPIO_Port GPIOE
+#define leftSensor_Pin GPIO_PIN_5
+#define leftSensor_GPIO_Port GPIOE
+#define middleSensor_Pin GPIO_PIN_6
+#define middleSensor_GPIO_Port GPIOE
+#define brake_Pin GPIO_PIN_2
+#define brake_GPIO_Port GPIOH
 #define LED8_Pin GPIO_PIN_8
 #define LED8_GPIO_Port GPIOG
 #define LED7_Pin GPIO_PIN_7

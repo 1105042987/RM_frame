@@ -84,7 +84,6 @@ typedef enum{
 }WorkState_e;
 
 extern WorkState_e WorkState;
-void WorkStateFSM(void);
 extern uint8_t startUp;
 #ifdef USE_CHASSIS_FOLLOW
 extern uint8_t ChassisTwistState;

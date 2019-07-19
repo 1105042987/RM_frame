@@ -70,12 +70,6 @@ void AutoAimUartRxCpltCallback(void);
 void AutoAimCallback(void);
 void CANTxINFO(void);
 void EnemyINFOProcess(void);
-void autoAimNormal(void);
-void AutoAimBuff(void);
-void autoAimCtrl(void);
-void UpperStateFSM(void);
-void autoAimPredict(void);
-void autoAimYYP(void);
 void autoAim(void);
 
 #endif /*USE_AUTOAIM*/

@@ -29,8 +29,7 @@ uint8_t buffer[80] = {0};
 uint8_t buffercnt = 0;
 uint16_t cmdID;
 
-void judgeUartRxCpltCallback(void)
-{
+void judgeUartRxCpltCallback(void){
 //	fw_printfln("judge receive");
 	if(receiving){
 		if(buffercnt >40)buffercnt = 4;
@@ -81,7 +80,7 @@ void judgeUartRxCpltCallback(void)
 		
 		//@yyp 
 		if(buffercnt == 16 && cmdID == 0x0301){
-			if (myVerify_CRC16_Check_Sum(buffer, 16)){
+			if (buffer[7] == 0x03 && buffer[8] == 0x02){
 				Judge_Refresh_Interact();
 			}					
 		}
@@ -111,7 +110,6 @@ uint16_t remainHeat0 = 480;
 uint16_t maxHeat1 = 480;
 uint16_t remainHeat1 = 480;
 uint16_t RealHeat0 = 0;
-float fakeHeat0 = 0;
 float realBulletSpeed0 = 22;
 float cooldown0 = 72;
 uint8_t shoot0Cnt = 0;
@@ -238,9 +236,10 @@ void Referee_Update_RobotState(){
 	}
 	
 	lastHP=remainHP;
-	receiveCnt++;
+	receiveCnt++;//10hz
 	if(receiveCnt>10&&StateFlee>1){StateFlee=0;}
-	
+	if(CmdTic<300){CmdTic++;}
+	else{ExtCmd=0;}
 	
 	switch(maxHP){
 		case 200:{maxHeat0 = 240;cooldown0 = 40;}break;
@@ -323,9 +322,9 @@ void Referee_Update_hurt(){//@yyp
 }
 //int test;
 void Judge_Refresh_Interact(){
-	if(buffer[14]==1){
-		StateFlee=8;
-	}
+	if(buffer[13]==1){CmdTic=0;ExtCmd=1;}
+	else if(buffer[13]==2){CmdTic=0;ExtCmd=2;}
+	else if(buffer[13]==3){CmdTic=0;ExtCmd=3;}
 }
 
 

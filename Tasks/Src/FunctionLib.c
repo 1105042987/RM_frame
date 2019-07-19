@@ -11,77 +11,119 @@
   */
 #include "includes.h"
 int sgn(float x){return x>0?1:(x<0?-1:0);}
+int8_t NutCnt=8;
+void routing0(){//全程
+//100,210,315,425,530,610
+	static int8_t dir=-1,dirCnt=2;
+	LimitRate=1;
+	if(getRightSr()){//撞墙
+		if(dirCnt){dirCnt--;LimitRate=0;}
+		dir=1;
+		powLmtCnt=50;
+		onLed(7);
+		CMA.Real=0;
+		NutCnt=0;
+	}else if(getLeftSr()){//飞机侧
+		if(dirCnt){dirCnt--;LimitRate=0;}
+		dir=-1;
+		powLmtCnt=50;
+		onLed(7);
+		CMA.Real=-610;
+		NutCnt=8;
+	}else{
+		offLed(7);
+		dirCnt=2;
+	}
+	if(NutCnt==0 && dir==-1){LimitRate=0;}
+	else if(NutCnt==8 && dir==1){LimitRate=0;}
 
-void routing1(){
+	brakeOff();
+	ChassisSpeed=2100*dir;
+}
+
+void routing1(){//躲飞机
 //100,210,315,425,530,610
 	static int8_t dir=-1,dirCnt=5;
 	LimitRate=1;
-	if(getLeftSw()){
+	if(getRightSr()){
 		if(dirCnt){dirCnt--;LimitRate=0;}
 		dir=1;
-		powLmtCnt=500;
+		powLmtCnt=50;
 		onLed(7);
 		CMA.Real=0;
+		NutCnt=0;
 	}else{
 		offLed(7);
 		dirCnt=5;
 	}
-	if(CMA.Real>440 ||getRightSr()){dir=-1;powLmtCnt=500;}
-	ChassisSpeed=2000*dir;
+	if(NutCnt==0 && dir==-1 && CMA.RxMsgC6x0.rotateSpeed>10){LimitRate=0;}
+	if(NutCnt==7 || CMA.Real<-440){dir=-1;powLmtCnt=50;}
+	if(CMA.RxMsgC6x0.rotateSpeed<-10 && dir==-1){brakeOn();}//刹车
+	else{brakeOff();}
+	ChassisSpeed=2100*dir;
+}
+void routing2(){//躲碉堡
+//100,210,315,425,530,610
+	static int8_t dir=1,dirCnt=5;
+	LimitRate=1;
+	if(getLeftSr()){
+		if(dirCnt){dirCnt--;LimitRate=0;}
+		dir=-1;
+		powLmtCnt=50;
+		onLed(7);
+		CMA.Real=-610;
+		NutCnt=8;
+	}else{
+		offLed(7);
+		dirCnt=5;
+	}
+	if(NutCnt==6 || CMA.Real>-500){dir=1;powLmtCnt=50;}
+	if(CMA.RxMsgC6x0.rotateSpeed>10 && dir==1){brakeOn();}//刹车
+	else{brakeOff();}
+	ChassisSpeed=2100*dir;
 }
 
-void routing2(){//林肯模式
+void routing3(){//保护模式
 //100,210,315,425,530,610
-	static int8_t dir=-1,dirCnt=5,nutCnt=8,nutLock;
+	static int8_t dir=-1,dirCnt=5;
 	LimitRate=1;
-	if(getLeftSw()){
+	if(getRightSr()){
 		if(dirCnt){dirCnt--;LimitRate=0;}
 		dir=1;
 		powLmtCnt=50;
 		onLed(7);
 		CMA.Real=0;
-		nutCnt=0;
+		NutCnt=0;
 	}else{
 		offLed(7);
 		dirCnt=5;
 	}
-	if(getLeftSr()&& !nutLock){
-		//远离碰撞
-		if(CMA.RxMsgC6x0.rotateSpeed<0){nutCnt++;}
-		else{nutCnt--;}
-		nutLock=1;
-	}else{nutLock=0;}
+	if(NutCnt==0 && dir==-1){LimitRate=0;}
 	
-	if(nutCnt==0 && dir==-1){LimitRate=0;}
-	
-	if(nutCnt==8 || CMA.Real>440 ||getRightSr()){dir=-1;powLmtCnt=50;}
-	ChassisSpeed=2000*dir;
+	if(NutCnt==8 || CMA.Real<-480){dir=-1;powLmtCnt=50;}
+	if(CMA.RxMsgC6x0.rotateSpeed*dir>0 && CMA.Real<-200 && abs(CMA.RxMsgC6x0.rotateSpeed)>10){brakeOn();}//刹车
+	else{brakeOff();}
+	ChassisSpeed=2100*dir;
 }
-void routing3(){//随机换向
+
+void routing4(){//随机换向
 //100,210,315,425,530,610
-	static int8_t dir=-1,dirCnt=5,nutCnt=8,nutOpen,randOpen=1;
+	static int8_t dir=-1,dirCnt=2,randOpen=1;
 	LimitRate=1;
-	if(getLeftSw()){//撞墙
+	if(getRightSr()){//撞墙
 		if(dirCnt){dirCnt--;LimitRate=0;}
 		dir=1;
 		powLmtCnt=50;
 		onLed(7);
 		CMA.Real=0;
-		nutCnt=0;
+		NutCnt=0;
 		randOpen=1;
 	}else{
 		offLed(7);
-		dirCnt=5;
+		dirCnt=2;
 	}
-	if(getLeftSr()&& nutOpen){//nut计数
-		//远离碰撞
-		if(CMA.RxMsgC6x0.rotateSpeed<0){nutCnt++;}
-		else{nutCnt--;}
-		nutOpen=0;
-	}else{nutOpen=1;}
-	
-	if(nutCnt==0 && dir==-1){LimitRate=0;}
-	if(CMA.Real>210 && CMA.Real<310 && randOpen){//随机折返
+	if(NutCnt==0 && dir==-1){LimitRate=0;}
+	if(CMA.Real<-210 && CMA.Real>-310 && randOpen){//随机折返
 		static uint8_t timDiv;
 		if(timDiv<120){timDiv++;}
 		else if(rand()%20<2){
@@ -91,13 +133,30 @@ void routing3(){//随机换向
 			timDiv=0;
 		}
 	}
-	if(nutCnt==8 || CMA.Real>450 ||getRightSr()){
+	if(NutCnt==8 || CMA.Real<-460 ||getLeftSr()){
 		dir=-1;
 		powLmtCnt=50;
 		randOpen=1;
 	}
-	ChassisSpeed=2000*dir;
+	if(CMA.RxMsgC6x0.rotateSpeed*dir>0 && CMA.Real<-200 && abs(CMA.RxMsgC6x0.rotateSpeed)>10){brakeOn();}//刹车
+	else{brakeOff();}
+	ChassisSpeed=2100*dir;
 }
+
+
+
+void nutDetect(){
+	static int8_t nutOpen=1;
+	if(getMidSr()){
+		if(nutOpen){
+			if(CMA.RxMsgC6x0.rotateSpeed<0){NutCnt++;}
+			else{NutCnt--;}
+		}
+		nutOpen=0;
+	}else{nutOpen=1;}
+}
+
+
 
 
 
@@ -108,6 +167,7 @@ void scaning1(){
 	GMP.Target=-25+8*sin(ref);
 	ref+=0.02;
 }
+
 void scaning2(){
 	static float ref;
 	STIRv.Target=0;

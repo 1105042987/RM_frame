@@ -94,7 +94,6 @@ extern extShootData_t ShootData0;
 extern extShootData_t ShootData1;
 extern JudgeState_e JUDGE_State;
 //extern extShowData_t user_data;
-extern float fakeHeat0;
 extern float realBulletSpeed0;
 extern uint16_t RealHeat0;
 extern uint8_t syncCnt0;
