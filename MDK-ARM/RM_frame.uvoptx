@@ -303,12 +303,12 @@
         <Ww>
           <count>29</count>
           <WinNumber>1</WinNumber>
-          <ItemText>NMCDL</ItemText>
+          <ItemText>NMCDL,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>30</count>
           <WinNumber>1</WinNumber>
-          <ItemText>NMCDR</ItemText>
+          <ItemText>NMCDR,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>31</count>
@@ -535,6 +535,21 @@
           <WinNumber>1</WinNumber>
           <ItemText>dooropen,0x0A</ItemText>
         </Ww>
+        <Ww>
+          <count>76</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>NMCDL.RxMsgC6x0</ItemText>
+        </Ww>
+        <Ww>
+          <count>77</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>NMCDL.RxMsgC6x0.moment,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>78</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>NMCDR.RxMsgC6x0.moment,0x0A</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>
@@ -655,7 +670,7 @@
         <Ww>
           <count>23</count>
           <WinNumber>2</WinNumber>
-          <ItemText>UFM</ItemText>
+          <ItemText>UFM,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>24</count>
@@ -676,6 +691,66 @@
           <count>27</count>
           <WinNumber>2</WinNumber>
           <ItemText>ctrlR_count,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>28</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>Chassis_locker,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>29</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>imu.pit</ItemText>
+        </Ww>
+        <Ww>
+          <count>30</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>imu.last_pit</ItemText>
+        </Ww>
+        <Ww>
+          <count>31</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>imu.now_pit</ItemText>
+        </Ww>
+        <Ww>
+          <count>32</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>imu.last_pit</ItemText>
+        </Ww>
+        <Ww>
+          <count>33</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>imu.pit</ItemText>
+        </Ww>
+        <Ww>
+          <count>34</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>imu.rol</ItemText>
+        </Ww>
+        <Ww>
+          <count>35</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>fancheck,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>36</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>EngineerState</ItemText>
+        </Ww>
+        <Ww>
+          <count>37</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>ctrlR_count</ItemText>
+        </Ww>
+        <Ww>
+          <count>38</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>R_count</ItemText>
+        </Ww>
+        <Ww>
+          <count>39</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>Slave</ItemText>
         </Ww>
       </WatchWindow2>
       <Tracepoint>
@@ -1168,7 +1243,7 @@
       <GroupNumber>2</GroupNumber>
       <FileNumber>36</FileNumber>
       <FileType>1</FileType>
-      <tvExp>1</tvExp>
+      <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Tasks\Src\AutoClimbTask.c</PathWithFileName>
@@ -1204,7 +1279,7 @@
 
   <Group>
     <GroupName>Application/User</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

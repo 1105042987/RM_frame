@@ -43,6 +43,7 @@ extern uint32_t clawback;
 extern uint32_t clawback_cnt;
 extern uint32_t doorshake_cnt;
 extern uint32_t saving;
+extern uint32_t Z_count;
 uint32_t AutoGet_LastStep = 1;
 uint32_t AutoGetCnt = 0;
 uint16_t SaveClearCnt = 0;
@@ -194,10 +195,21 @@ void ControlRotate(void)
 	}
 	return wheel_speed;
 }*/
+uint32_t fancheck=0;
+extern Engineer_State_e EngineerState;
 void Chassis_Data_Decoding()
 {
 	ControlRotate();
-	
+	//imu.rol 14.4上坡 15.5碉堡上坡-15.9碉堡下坡 -14.3下坡 -60正向翻 60反向翻
+	if(imu.rol<=-18&&EngineerState==COMMON_STATE&&AutoClimbing==0&&ON_THE_GROUND)
+	{
+		ChassisSpeedRef.forward_back_ref+=fabs(imu.rol+18)*55 * RC_CHASSIS_SPEED_REF;
+	}
+	if(imu.rol>=22&&EngineerState==COMMON_STATE&&AutoClimbing==0&&ON_THE_GROUND)
+	{
+		ChassisSpeedRef.forward_back_ref-=(imu.rol-18)*55*RC_CHASSIS_SPEED_REF;
+		fancheck+=1;
+	}
 	CMFL.TargetAngle = (  ChassisSpeedRef.forward_back_ref	*0.075 
 						+ ChassisSpeedRef.left_right_ref	*0.075 
 						+ rotate_speed					*0.075)*160;
@@ -211,6 +223,17 @@ void Chassis_Data_Decoding()
 						- ChassisSpeedRef.left_right_ref	*0.075 
 						+ rotate_speed					*0.075)*160;
 	CM1.TargetAngle=CM2.TargetAngle*CMFL.TargetAngle/CMFR.TargetAngle;
+	
+	
+//	if(imu.now_rol<=-30)
+//	{
+//		CMFL.TargetAngle*=2;
+//		CMFR.TargetAngle*=2;
+//	}
+//	if(imu.now_rol>=30)
+//	{
+//		CMBL.TargetAngle=fabs(CMBL.TargetAngle);
+//	}
 }
 
 //主控制循环
@@ -350,6 +373,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(clawback==1&&clawback_cnt>0) clawback_cnt--;
 		if(clawback==0) clawback_cnt=1000;
 		if(doorshake_cnt>0) doorshake_cnt--;
+		if(Z_count>0) Z_count--;
 		//		if(SaveClearCnt < 1000)SaveClearCnt++;      暂时不知道是干什么用的
 //		else
 //		{

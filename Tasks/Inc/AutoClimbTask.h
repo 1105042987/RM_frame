@@ -22,8 +22,8 @@
 #define CHANGE_POINTdb 1500//1100
 //1v/5v 	27cm
 
-#define UD_TOP			0
-#define UD_BOTTOM		-950
+#define UD_TOP			-10     //0
+#define UD_BOTTOM		-980    //980
 //-1010
 #define FLAG_SET(target) if(target.val_ref>CHANGE_POINT) target.flag = 0; else target.flag = 1;
 #define FLAG_SETr(target) if(target.val_ref>CHANGE_POINTr) target.flag = 0; else target.flag = 1;

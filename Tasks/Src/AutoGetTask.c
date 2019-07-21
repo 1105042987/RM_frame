@@ -11,7 +11,7 @@
   */
 #include "includes.h"
 	
-#define FIRSTBOX -33
+#define FIRSTBOX -40
 #define SECONDBOX -815
 #define THIRDBOX -1590            //ÕâÎå¸öÊÇÏä×ÓÎ»ÖÃ
 #define FOURTHBOX -415
@@ -26,7 +26,7 @@
 //#define UPLEVEL 432    //Ì§ÉıÊ±µÄºÏÊÊ¸ß¶È ±ØĞë±»4Õû³ı                            ÒÑĞ´µ½.hÀï
 #define UPPROTECT 600  //Ì§ÉıµÄÁÙ½ç±£»¤Öµ
 
-#define OUTANGLE 190  //×¥Ïä×ÓµÄ½Ç¶ÈÖµ
+#define OUTANGLE 187  //×¥Ïä×ÓµÄ½Ç¶ÈÖµ
 #define INANGLE  50   //´ø×ÅÏä×Ó»ØÀ´µÄ½Ç¶ÈÖµ
 
 #define THROWANGLE 180 //ÈÓµôÏä×ÓÊ±ÔÚÕâ¸ö½Ç¶ÈËÉ×¦×Ó
@@ -62,7 +62,11 @@ uint32_t Claw_Zero_Count=0;
 uint32_t Claw_SelfInspect_cnt=0;
 uint32_t Claw_FirstInspect=0;
 uint32_t Claw_Out=0;
+uint32_t Box_Clearing=0;
+uint32_t Box_Tight=0;
 extern uint32_t ClawBack_Locker;
+extern uint32_t Z_count;
+extern uint32_t Z_State;
 
 uint8_t CM_AutoRotate90=0;				//µ×ÅÌ×Ô¶¯×ª90¶È£¬1¡ª¡ª×ª£¬0¡ª¡ªµ½Î»
 //´æ´¢ºìÍâ´«¸ĞÆ÷µÄÊıÖµ
@@ -99,6 +103,7 @@ extern uint32_t OnePush_Locker;
 extern View_State_e Viewstate;
 extern SlaveMode_e Slave;
 extern uint32_t Slave_Commoning;
+extern uint32_t Chassis_locker;
 
 uint32_t Yaw_Reset_Flag=0;
 uint32_t Yaw_Reset_Cnt=0;
@@ -416,7 +421,7 @@ void AutoGet_Stop_And_Clear()//×´Ì¬ÇåÁã ×¦×Ó×ª»Ø ºáÒÆµç»úÍ£×ª£¨ÓÃÓÚÒì³£×´¿ö´¦Àíº
 	{
 		if(AutoClimb_Level!=1)
 		{
-			if(ClawBack_Locker==0)
+			if(ClawBack_Locker==0&&ON_THE_GROUND)
 	    {
 			 clawback=1;
 	     clawback_cnt=1000;
@@ -436,7 +441,7 @@ void Box_ThrowForward()//ÏòÇ°ÈÓ³öÏä×Ó
 	if(auto_counter==0&&auto_waiter==0){
 	UM1.TargetAngle=-OUTANGLE;
 	UM2.TargetAngle=OUTANGLE;
-	if(fabs(UM1.RealAngle+65)<=10||fabs(UM2.RealAngle+(-65))<=10)   //±ä´óÊÇÍíÈÓ£¬±äĞ¡ÊÇÔçÈÓ
+	if(fabs(UM1.RealAngle+75)<=10||fabs(UM2.RealAngle+(-75))<=10)   //±ä´óÊÇÍíÈÓ£¬±äĞ¡ÊÇÔçÈÓ ×îÔ¶Îª65
 	{
 		CLAWLOOSE;
 	}
@@ -472,6 +477,33 @@ void Box_ThrowBackward()//ÏòºóÈÓ³öÏä×Ó
 		Claw_AlreadyRollOut=0;
 	}
 	
+}
+void Box_Clear()
+{
+	if(Box_Clearing==1)
+	{
+		if(Box_Tight==0)
+		{
+			CLAWTIGHT;
+			Box_Tight=1;
+			auto_counter=300;
+		}
+	  if(auto_counter==0&&Claw_AlreadyRollOut==0)
+	  {
+	    UM1.TargetAngle=-OUTANGLE;
+	    UM2.TargetAngle=OUTANGLE;
+    	Claw_AlreadyRollOut=1;
+	  }
+		if(fabs(UM1.RealAngle+130)<=10||fabs(UM2.RealAngle+(-130))<=10)   //±ä´óÊÇÍíÈÓ£¬±äĞ¡ÊÇÔçÈÓ ×îÔ¶Îª65
+	  {
+		  CLAWLOOSE;
+			UM1.TargetAngle=-INANGLE;
+	    UM2.TargetAngle=INANGLE;
+			Claw_AlreadyRollOut=0;
+			Box_Tight=0;
+			Box_Clearing=0;
+	  }
+	}
 }
 //void AutoGet_Lower()//×Ô¶¯È¡µ¯£¨µºÏÂÎå¸öµ¯£©
 //{
@@ -576,7 +608,7 @@ void Claw_Go_and_Get(int position)
 					{auto_waiter=0;AutoGet_Alreadywaited=1;}  
 					  break;}
 				case 4:{
-				if(ON_THE_GROUND)    Box_ThrowBackward();
+				if(ON_THE_GROUND)    Box_ThrowForward();
         else if(ON_THE_FLOOR)Box_ThrowForward();				break;}
 				default:{
 					if(ON_THE_GROUND)
@@ -709,12 +741,12 @@ void Claw_SelfInspect()//×¦×ÓºáÒÆ×Ô¶¯¶ÔÎ»Áãµã
 	}
 	if(Claw_SetZero==1)
 	{
-	if(UFM.RxMsgC6x0.moment<=2000&&Claw_SelfInspecting==1)
+	if(UFM.RxMsgC6x0.moment<=4000&&Claw_SelfInspecting==1)
 	{
 		UFM.TargetAngle+=20;
 		Claw_SelfInspect_cnt=0;
 	}
-	if(UFM.RxMsgC6x0.moment>2000&&Claw_SelfInspecting==1)
+	if(UFM.RxMsgC6x0.moment>4000&&Claw_SelfInspecting==1)
 	{
 		Claw_SelfInspect_cnt++;
 	}
@@ -777,6 +809,7 @@ void Claw_GoToNextBox_lower()//ºìÍâ´«¸ĞÆ÷¿ØÖÆ×¦×ÓÏòÇ°µ½´ïÏÂÒ»¸öÏä×Ó´¦
 	}
 	if(Sensor_Ready[0]==2)
 	{
+		Chassis_locker=1;
 		Sensor_Ready[0]=0;
 		ChassisSpeedRef.forward_back_ref=0.0f;
 		Claw_FindingNextBox_Lower_Forward=0;
@@ -803,6 +836,7 @@ void Claw_GoToNextBox_upper()//ºìÍâ´«¸ĞÆ÷¿ØÖÆ×¦×Óµ½´ïÏÂÒ»¸öÏä×Ó´¦
 	}
 	if(Sensor_Ready[0]==2)
 	{
+		Chassis_locker=1;
 		Sensor_Ready[0]=0;
 		ChassisSpeedRef.forward_back_ref=0.0f;
 		Claw_FindingNextBox_Upper_Forward=0;
@@ -815,7 +849,7 @@ void Claw_GoToNextBox_upper()//ºìÍâ´«¸ĞÆ÷¿ØÖÆ×¦×Óµ½´ïÏÂÒ»¸öÏä×Ó´¦
 void AutoGet_SensorLock()      //ÔÚ³¤°´¶ÔÎ»¼üÊ±Ëø¶¨´«¸ĞÆ÷À´ÊµÏÖ³µµÄÇ¿ĞĞÒÆ¶¯
 {
 	if(Sensor_Lock==1)
-		sensorlock_cnt=300;
+		sensorlock_cnt=150;
 }
 void AutoGet_SensorControl()
 {
@@ -867,14 +901,14 @@ void Claw_Down()   //ÍùÏÂ×ßÊ±½Ç¶ÈÔö¼Ó
 
 void ClawUpDown_Protect()
 {
-	if(Claw_DownToPosition==1&& NMUDL.RxMsgC6x0.moment<-10000&&NMUDR.RxMsgC6x0.moment<-10000)
+	if(Claw_DownToPosition==1&& NMUDL.RxMsgC6x0.moment<-1000&&NMUDR.RxMsgC6x0.moment<-1000)
 		Down_stucking+=1;
-	if(Down_stucking>=35)
+	if(Down_stucking>=10)
 	{
+		 Down_stucking=0;
 		 Claw_DownToPosition=0;
-		 NMUDL.TargetAngle=NMUDL.RealAngle+20;
-		 NMUDR.TargetAngle=NMUDR.RealAngle+20;
-		 UFM.TargetAngle=FOURTHBOX;
+		 NMUDL.TargetAngle=NMUDL.RealAngle+50;
+		 NMUDR.TargetAngle=NMUDR.RealAngle+50;
 		 custom_data.masks=0x01;
 	}
 }
@@ -885,7 +919,17 @@ void AutoGet_SwitchState()//Ö´ĞĞÄÄÖÖÈ¡µ¯Ä£Ê½ µºÏÂ/µºÉÏ
 		AutoGet_LowerANDThrow();
 	if(AutoGet_Start==2)
 		AutoGet_Upper();
-		
+		Box_Clear();
+	 if(Z_State==1&&Z_count==0)
+	 {
+		 Z_State=2;
+	 }
+	 if(Z_State==2)
+	 {
+	   Z_State=0;
+	   Claw_DownToPosition=1;
+		 State_Common();
+	 }
 }
 
 void ClawUpDown_SwitchState()
@@ -1048,3 +1092,15 @@ void Yaw_Check()
 	Yaw_Set_Check();
 }
 
+void Chassis_Check()
+{
+	if(AutoGet_TotalStep!=1)
+	{
+		if(adgl<LOWERCRITICIAL)
+			ChassisSpeedRef.forward_back_ref = -20 * RC_CHASSIS_SPEED_REF;
+		if(adgr<LOWERCRITICIAL)
+			ChassisSpeedRef.forward_back_ref = 20 * RC_CHASSIS_SPEED_REF;
+	}
+//	if(CLAW_IS_OUT)
+//		 // ChassisSpeedRef.left_right_ref = 20 * RC_CHASSIS_SPEED_REF;
+}

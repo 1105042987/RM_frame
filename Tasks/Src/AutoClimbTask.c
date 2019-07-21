@@ -232,6 +232,10 @@ void Speed_Locker()
 	{
 		ChassisSpeedRef.forward_back_ref/=2;
 	}
+	if(AutoClimb_Level==1&&ChassisSpeedRef.forward_back_ref>0&&AlreadyClimbed==0&&(!hasReach(&NMCDL,30)||!hasReach(&NMCDR,30)))  //ÖÐ¼äÌ¨½×
+	{
+		ChassisSpeedRef.forward_back_ref/=2;
+	}
 	if(AutoClimb_Level==2&&EngineerState==COMMON_STATE)
 	{
 		ChassisSpeedRef.forward_back_ref/=2.3;

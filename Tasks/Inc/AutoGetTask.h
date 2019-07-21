@@ -20,7 +20,10 @@ Claw_Out=1
 //爪子进入
 #define CLAWIN    \
 HAL_GPIO_WritePin(GPIOH,1<<2,GPIO_PIN_RESET);\
-Claw_Out=0
+if(CLAW_IS_OUT)Z_count=500;\
+Claw_Out=0;
+
+
 #define CLAWTIGHT HAL_GPIO_WritePin(GPIOH,1<<5,GPIO_PIN_SET)//爪子抓紧
 #define CLAWLOOSE HAL_GPIO_WritePin(GPIOH,1<<5,GPIO_PIN_RESET)//爪子松开  //左中右 弹箱 前后 抓紧  4 2 5
 #define LAUNCH    HAL_GPIO_WritePin(GPIOH,1<<4,GPIO_PIN_SET)//弹射起飞
@@ -51,6 +54,8 @@ extern uint32_t Claw_DownToPosition;
 extern uint16_t Claw_TruePosition[5];
 extern int32_t Claw_UpAngle;
 extern uint32_t Claw_Out;
+extern uint32_t Box_Tight;
+extern uint32_t Box_Clearing;
 extern int Claw_TakeThisBox;
 extern uint32_t Claw_SelfInspecting;
 extern uint32_t Claw_FindingNextBox_Lower_Forward;
@@ -129,4 +134,5 @@ void Claw_Wait(void);
 void AutoGet_FillQueue(void);
 void ClawUpDown_Protect(void);
 void AutoGet_Fillstream(void);
+void Chassis_Check(void);
 #endif /*__ AUTOGETTASK_H */

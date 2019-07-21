@@ -15,7 +15,7 @@
 //#define jiuyuan                                                                    
 //#define shangdao
 Engineer_State_e EngineerState = COMMON_STATE;
-Debug_State_e DebugState = DEBUG_GET_STATE;
+Debug_State_e DebugState = DEBUG_CLIMB_STATE;
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 View_State_e Viewstate = NORMAL_VIEW;
 SlaveMode_e Slave=INIT;
@@ -60,10 +60,13 @@ uint32_t saving=12;
 uint32_t saveing_flag=0;
 
 uint32_t OnePush_Locker=0;
+uint32_t Chassis_locker=0;
 uint32_t ctrlR_count=0;
 uint32_t R_count=0;
 uint32_t Mouse_LR=0;
 uint32_t openthegay=0;
+uint32_t Z_State=0;
+uint32_t Z_count=0;
 
 uint32_t Direction_Indicator=0;
 
@@ -84,6 +87,7 @@ void InitialSave()
 
 void Slave_Common()
 {
+	Slave_Commoning=0;
 	Slave=COMMON;
 	transdata[0]='c';
 	HAL_UART_Transmit(&huart8,transdata,1,100);
@@ -439,9 +443,9 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	
 	if((EngineerState!=COMMON_STATE||Slave==AUTOSAVING||Slave==FORCESAVING)||ON_THE_FLOOR)
 	{
-		if(YTP.RxMsgC6x0.moment>=-1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
+		if(YTP.RxMsgC6x0.moment>=-1200&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
 		YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
-		if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
+		if(YTP.RxMsgC6x0.moment<1200&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
 		YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
   }
 
@@ -465,9 +469,9 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
 			if(YTY.TargetAngle>-180&&mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-3<0)
 			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
-      if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
+      if(YTP.RxMsgC6x0.moment<1200&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
 	    YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
-	    if(YTP.RxMsgC6x0.moment>-1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
+	    if(YTP.RxMsgC6x0.moment>-1200&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
 	    YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;			
 		}break;
 		case LONG_CLICK:
@@ -477,9 +481,9 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;
 			if(YTY.TargetAngle>-180&&mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*-3<0)
 			YTY.TargetAngle -= mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT*3;	
-			if(YTP.RxMsgC6x0.moment<1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
+			if(YTP.RxMsgC6x0.moment<1200&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)<0)
 	    YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;
-	    if(YTP.RxMsgC6x0.moment>-1500&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
+	    if(YTP.RxMsgC6x0.moment>-1200&&(mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT)>0)
 	    YTP.TargetAngle -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT*5;	
 		}break;
 		default: break;
@@ -515,6 +519,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			if(Direction_Indicator==GET)
 			{
+				Chassis_locker=0;
 				ChassisSpeedRef.left_right_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp)/2;
 			}
 		}
@@ -534,6 +539,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				}
 				if(Direction_Indicator==GET)
 				{
+					Chassis_locker=0;
 					ChassisSpeedRef.left_right_ref =  -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp)/2;
 				}
 			}
@@ -551,7 +557,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				}
 				FBSpeedRamp.ResetCounter(&FBSpeedRamp);
 			}
-			if(key->v & KEY_D)  		//key: d
+		  if(key->v & KEY_D)  		//key: d
 			{	
 				if(Direction_Indicator==NORMAL)
 				{
@@ -563,7 +569,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				}
 				if(Direction_Indicator==GET)
 				{
-					//ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/8;
+					Chassis_locker=0;
+					ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/8;
 					ChassisSpeedRef.forward_back_ref =  KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/2;
 				}
 			}
@@ -579,7 +586,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				}
 				if(Direction_Indicator==GET)
 				{
-					//ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/8;
+					Chassis_locker=0;
+					ChassisSpeedRef.left_right_ref = KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/8;
 					ChassisSpeedRef.forward_back_ref =  -KM_LEFT_RIGHT_SPEED* LRSpeedRamp.Calc(&LRSpeedRamp)/2;
 				}
 			}
@@ -592,6 +600,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				else if(Direction_Indicator==GET)
 				{
 					ChassisSpeedRef.forward_back_ref = 0;
+//					if(Chassis_locker==0&&!(key->v & KEY_W)&&!(key->v & KEY_S))
+//					ChassisSpeedRef.left_right_ref = 20*RC_CHASSIS_SPEED_REF;
 				}
 				LRSpeedRamp.ResetCounter(&LRSpeedRamp);
 			}
@@ -640,6 +650,10 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
       else if(key->v & KEY_B)
 			{
 				DebugState=DEBUG_CLIMB_STATE;
+			}
+      else if(key->v & KEY_R)
+			{
+				Box_Clearing=1;
 			}				
 			break;
 		}
@@ -757,6 +771,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		{
 			if(key->v & KEY_X)
 			{ 
+				queue_deinit(&AutoGet_Queue);
+	      queue_init(&AutoGet_Queue);
 				AutoGet_Stop_And_Clear();
 			}
 			else if(key->v & KEY_C)
@@ -806,8 +822,13 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			else if(key->v & KEY_Z)
 			{
 				dooropen=0;
-				if(CLAW_IS_IN)
+				Z_State=1;
+				CLAWIN;
+				queue_deinit(&AutoGet_Queue);
+	      queue_init(&AutoGet_Queue);
+				if(Z_State==2)
 				{
+				Z_State=0;
 				Claw_DownToPosition=1;
 				State_Common();
 				}
@@ -821,7 +842,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 						Claw_FindingNextBox_Lower_Forward=1;
 					else if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP&&ON_THE_FLOOR)
 						Claw_FindingNextBox_Upper_Forward=1;
-					if(Sensor_LongPush>=50)
+					if(Sensor_LongPush>=10)
 						Sensor_Lock=1;
 				}
 				else if(EngineerState==COMMON_STATE&&ON_THE_GROUND)
@@ -841,7 +862,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				Claw_FindingNextBox_Lower_Backward=1;
 				else if(CLAW_INSPECT_SUCCEED&&CLAW_IS_UP&&ON_THE_FLOOR)
 				Claw_FindingNextBox_Upper_Backward=1;
-				if(Sensor_LongPush>=50)
+				if(Sensor_LongPush>=10)
 						Sensor_Lock=1;
 			  }
 				else if(EngineerState==COMMON_STATE&&ON_THE_GROUND)
@@ -893,6 +914,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		Slave_SwitchState();
 		Yaw_Check();
 		Rotate_Check();
+		Chassis_Check();
 	}
 	Limit_and_Synchronization();
 }
