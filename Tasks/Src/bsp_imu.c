@@ -16,24 +16,23 @@
 #include "mpu6500_reg.h"
 #include "spi.h"
 
-#define BOARD_DOWN (1)   
+//#define BOARD_DOWN (1)   
 //#define IST8310
 #define MPU_HSPI hspi5
 #define MPU_NSS_LOW HAL_GPIO_WritePin(GPIOF, GPIO_PIN_6, GPIO_PIN_RESET)
 #define MPU_NSS_HIGH HAL_GPIO_WritePin(GPIOF, GPIO_PIN_6, GPIO_PIN_SET)
 
-#define Kp 0.8f                                              /* 
+#define Kp 0.15f                                              /* 
                                                               * proportional gain governs rate of 
                                                               * convergence to accelerometer/magnetometer 
 																															*/
-//#define Ki 0.02f 
-#define Ki 0.02f                                              /* 
+#define Ki 0.002f                                              /* 
                                                               * integral gain governs rate of 
                                                               * convergence of gyroscope biases 
 																															*/
-volatile float        q0 = 1.0f;
+volatile float        q0 = 0.0f;
 volatile float        q1 = 0.0f;
-volatile float        q2 = 0.0f;
+volatile float        q2 = 1.0f;
 volatile float        q3 = 0.0f;
 volatile float        exInt, eyInt, ezInt;                   /* error integral */
 static volatile float gx, gy, gz, ax, ay, az, mx, my, mz;  
@@ -361,7 +360,7 @@ uint8_t mpu_device_init(void)
 																			{ MPU6500_CONFIG, 0x04 },         /* LPF 41Hz */ 
 																			{ MPU6500_GYRO_CONFIG, 0x18 },    /* +-2000dps */ 
 																			{ MPU6500_ACCEL_CONFIG, 0x10 },   /* +-8G */ 
-																			{ MPU6500_ACCEL_CONFIG_2, 0x04 }, /* enable LowPassFilter  Set Acc LPF */ 
+																			{ MPU6500_ACCEL_CONFIG_2, 0x06 }, /* enable LowPassFilter  Set Acc LPF */ 
 																			{ MPU6500_USER_CTRL, 0x20 },};    /* Enable AUX */ 
 	for (i = 0; i < 10; i++)
 	{
@@ -387,7 +386,7 @@ uint8_t mpu_device_init(void)
 void mpu_offset_call(void)
 {
 	int i;
-	for (i=0; i<800;i++)
+	for (i=0; i<300;i++)
 	{
 		mpu_read_bytes(MPU6500_ACCEL_XOUT_H, mpu_buff, 14);
 
@@ -401,12 +400,12 @@ void mpu_offset_call(void)
 
 		MPU_DELAY(5);
 	}
-	mpu_data.ax_offset=mpu_data.ax_offset / 800;
-	mpu_data.ay_offset=mpu_data.ay_offset / 800;
-	mpu_data.az_offset=mpu_data.az_offset / 800;
-	mpu_data.gx_offset=mpu_data.gx_offset / 800;
-	mpu_data.gy_offset=mpu_data.gx_offset / 800;
-	mpu_data.gz_offset=mpu_data.gz_offset / 800;
+	mpu_data.ax_offset=mpu_data.ax_offset / 300;
+	mpu_data.ay_offset=mpu_data.ay_offset / 300;
+	mpu_data.az_offset=mpu_data.az_offset / 300;
+	mpu_data.gx_offset=mpu_data.gx_offset / 300;
+	mpu_data.gy_offset=mpu_data.gx_offset / 300;
+	mpu_data.gz_offset=mpu_data.gz_offset / 300;
 }
 
 

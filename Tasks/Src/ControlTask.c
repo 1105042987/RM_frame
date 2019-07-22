@@ -11,6 +11,16 @@
   */
 #include "includes.h"
 
+#define CAN1_SHUTDOWN(i)\
+{\
+	can1[i]->FirstEnter=1;\
+	can1[i]->lastRead=0;\
+	can1[i]->RealAngle=0;\
+	can1[i]->TargetAngle=0;\
+	can1[i]->offical_speedPID.Reset(&(can1[i]->offical_speedPID));\
+	(can1[i]->Handle)(can1[i]);\
+}
+
 WorkState_e WorkState = PREPARE_STATE;
 uint16_t prepare_time = 0;
 uint16_t counter = 0;
@@ -38,8 +48,8 @@ void WorkStateFSM(void){
 	switch (WorkState){
 		case PREPARE_STATE:{
 			//if (inputmode == STOP) WorkState = STOP_STATE;
-			if(prepare_time < 3000) prepare_time++;	
-			if(prepare_time >= 3000&& imu.InitFinish == 1 && isCan11FirstRx == 1 && isCan12FirstRx == 1 && isCan21FirstRx == 1 && isCan22FirstRx == 1)//开机二秒后且imu初始化完成且所有can电机上电完成后进入正常模式
+			if(prepare_time < 1000) prepare_time++;	
+			if(prepare_time >= 1000&& imu.InitFinish == 1 && isCan11FirstRx == 1 && isCan12FirstRx == 1 && isCan21FirstRx == 1 && isCan22FirstRx == 1)//开机二秒后且imu初始化完成且所有can电机上电完成后进入正常模式
 			{
 				playMusicSuperMario();
 				CMRotatePID.Reset(&CMRotatePID);
@@ -76,7 +86,19 @@ void WorkStateFSM(void){
 		}break;
 		case STOP_STATE:				//紧急停止
 		{
-			for(int i=0;i<8;i++) {InitMotor(can1[i]);InitMotor(can2[i]);}
+			for(int i=0;i<8;i++)
+			{
+				if(can1[i]==&FRICL || can1[i]==&FRICR)
+				{
+					CAN1_SHUTDOWN(i);
+					InitMotor(can2[i]);
+				}
+				else
+				{
+					InitMotor(can1[i]);
+					InitMotor(can2[i]);
+				}
+			}
 			setCAN11();setCAN12();setCAN21();setCAN22();
 			if (inputmode == REMOTE_INPUT || inputmode == KEY_MOUSE_INPUT)
 			{

@@ -42,10 +42,10 @@ MotorINFO FRICR = Chassis_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFA
 //									   fw_PID_INIT(1.5,0,0.3, 	10.0, 10.0, 10.0, 10.0),
 //									   fw_PID_INIT(4000,100,500, 	50000.0, 50000.0, 50000.0, 29000.0));
 MotorINFO GMP  = Gimbal_MOTORINFO_Init(1.0,&ControlGMP,
-									   fw_PID_INIT(0.6,0.1,0, 	10.0, 10.0, 10.0, 10.0),
-									   fw_PID_INIT(6500,300,0, 	50000.0, 50000.0, 50000.0, 29000.0));
+									   fw_PID_INIT(0.3,0,0, 	10.0, 10.0, 10.0, 10.0),
+									   fw_PID_INIT(12000,150,0, 	50000.0, 50000.0, 50000.0, 29000.0));
 MotorINFO GMY  = Normal_MOTORINFO_Init(1.0,&ControlGMY,
-									   fw_PID_INIT(0.5,0.1,0, 	10.0, 10.0, 10.0, 10.0),
+									   fw_PID_INIT(0.5,0,0, 	10.0, 10.0, 10.0, 10.0),
 									   fw_PID_INIT(5000,300,0, 	50000.0, 50000.0, 50000.0, 30000.0));
 //MotorINFO GMY = Normal_MOTORINFO_Init(36.0,&ControlGMY,
 //								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
@@ -185,6 +185,7 @@ void ControlGMP(MotorINFO* id)
 		double 	ThisAngle = (double)(GM_PITCH_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0;
 		#else
 		float		ThisAngle = imu.pit;
+		//float 	ThisAngle = (float)(GM_PITCH_ZERO - id->RxMsg6623.angle) * 360.0 / 8192.0;
  	  #endif
 		float 	ThisSpeed = -imu.wy;
 		int8_t 	dir;

@@ -16,7 +16,8 @@
 #ifdef	USE_AUTOAIM
 #define USE_AUTOAIM_ANGLE
 //*****************************************声明变量******************************************//
-GMAngle_t aim,abt,opt,jst0,jst1;									//目标角度
+GMAngle_t aim,abt,opt;									//目标角度
+GMAngle_t adjust;																//校准发射变量
 uint8_t Enemy_INFO[8],Tx_INFO[8];								//接收
 uint8_t find_enemy=0,upper_mode,aim_mode;
 uint16_t aim_cnt=0;															//自瞄分频延时变量
@@ -34,8 +35,7 @@ void InitAutoAim(){
 	}
 	//角度变量初始化（不需要修改）
 	aim.yaw=0;				aim.pit=0;
-	jst0.yaw=1;			jst0.pit=1;
-	jst1.yaw=1;			jst1.pit=3;
+	adjust.yaw=0.0f;			adjust.pit=-0.3f;
 }
 
 //*******************************UART回调函数********************************//
@@ -71,14 +71,8 @@ void AutoAim(){
 //		GMP.TargetAngle=abt.pit;
 		GMY.TargetAngle=opt.yaw;
 		GMP.TargetAngle=opt.pit;
-		if(AimArmor){
-			GMY.TargetAngle += jst0.yaw;
-			GMP.TargetAngle += jst0.pit;
-		}else{
-			GMY.TargetAngle += jst1.yaw;
-			GMP.TargetAngle += jst1.pit;
-		}
-		
+		GMY.TargetAngle += yawAj;
+		GMP.TargetAngle += pitAj;
 		find_enemy=0;
 	}
 }

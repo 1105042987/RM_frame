@@ -31,7 +31,9 @@ uint16_t aimcount=0;
 int16_t channelrrow,channelrcol,channellrow,channellcol;
 int16_t testIntensity = 0;
 uint8_t ShootState = 0;
-
+float fric_speed_left = 7000;
+float fric_speed_right = 7000;
+int32_t fric_rotate_speed_error = 0;
 
 //³õÊ¼»¯
 void FunctionTaskInit()
@@ -75,8 +77,8 @@ void RemoteControlProcess(Remote *rc){
 	}
 	if(WorkState == ADDITIONAL_STATE_ONE){
 		ShootState = 0;
-		FRICL.TargetAngle = -0;
-		FRICR.TargetAngle = 0;
+		FRICL.TargetAngle = -fric_speed_left;
+		FRICR.TargetAngle = fric_speed_right;
 		STIR.TargetAngle=STIR.RealAngle;
 		HAL_GPIO_WritePin(LASER_GPIO_Port, LASER_Pin, GPIO_PIN_SET);
 //		
@@ -88,8 +90,8 @@ void RemoteControlProcess(Remote *rc){
 	}
 	if(WorkState == ADDITIONAL_STATE_TWO){
 		ShootState = 1;
-		FRICL.TargetAngle = -7000;
-		FRICR.TargetAngle = 7000;
+		FRICL.TargetAngle = -fric_speed_left;
+		FRICR.TargetAngle = fric_speed_right;
 		//Delay(5,{STIR.TargetAngle-=60;})
 		if(STIR.TargetAngle-STIR.RealAngle>-150){
 			Delay(2,{STIR.TargetAngle-=60;});
@@ -139,6 +141,9 @@ void RemoteControlProcess(Remote *rc){
 		case 6:if(up_counter>30){up_counter=0;STIR.TargetAngle-=STIR_ANGLE;}break;
 		default:break;
 	}
+	
+	fric_rotate_speed_error = FRICL.RxMsgC6x0.RotateSpeed + FRICR.RxMsgC6x0.RotateSpeed;
+	
 	Limit_and_Synchronization();
 }
 
