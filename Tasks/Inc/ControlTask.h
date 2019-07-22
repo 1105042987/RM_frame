@@ -65,7 +65,7 @@ typedef struct {
 }MusicNote;
 
 #define PLAY(note, time) {\
-	while(auto_counter > 0);\
+	while(auto_counter != 0);\
 	if(note == 0){ \
 		__HAL_TIM_SET_AUTORELOAD(&BUZZER_TIM, 0);\
 	}else{ \
@@ -75,22 +75,16 @@ typedef struct {
 	auto_counter=time;\
 }
 
-typedef enum{
-	STATE_stop=-1,
-	STATE_pre=0,
-	STATE_1=1,
-	STATE_2=2,
-	STATE_3=3,
+typedef enum
+{
+	STOP_STATE=-1,
+	PREPARE_STATE=0, 
+	NORMAL_STATE=1,
+	ADDITIONAL_STATE_ONE=2,
+	ADDITIONAL_STATE_TWO=3,
 }WorkState_e;
 
 extern WorkState_e WorkState;
 void WorkStateFSM(void);
-extern uint8_t startUp;
-#ifdef USE_CHASSIS_FOLLOW
-extern uint8_t ChassisTwistState;
-void ChassisTwist(void);
-void ChassisDeTwist(void);
-#endif
-
 
 #endif /*__ CONTROLTASK_H */

@@ -13,14 +13,15 @@
 
 uint8_t rc_data[18];
 RC_Ctl_t RC_CtrlData;
-RCMode_e RCRightMode = Pos1; 
-RCMode_e RCLeftMode = Pos1;
+InputMode_e inputmode = REMOTE_INPUT; 
+FunctionMode_e functionmode = UPPER_POS;
 
 RemoteSwitch_t g_switch1;
 
-#ifndef SLAVE_MODE
+
 /*拨杆数据处理*/   
-void GetRemoteSwitchAction(RemoteSwitch_t *sw, uint8_t val){
+void GetRemoteSwitchAction(RemoteSwitch_t *sw, uint8_t val)
+{
 	static uint32_t switch_cnt = 0;
 
 	sw->switch_value_raw = val;
@@ -36,33 +37,35 @@ void GetRemoteSwitchAction(RemoteSwitch_t *sw, uint8_t val){
 	sw->switch_value2 = (sw->switch_value_buf[sw->buf_end_index]<<4)|sw->switch_value1;	
 
 	//如果两次数据一样，即没有更新数据，拨杆不动
-	if(sw->switch_value_buf[sw->buf_index] == sw->switch_value_buf[sw->buf_last_index]){
+	if(sw->switch_value_buf[sw->buf_index] == sw->switch_value_buf[sw->buf_last_index])
+	{
 		switch_cnt++;	
 	}
-	else{
+	else
+	{
 		switch_cnt = 0;
 	}
 	//如果拨杆维持了一定时间，即连续来了40帧一样的数据，则把拨杆数据写入switch_long_value
-	if(switch_cnt >= 40){
+	if(switch_cnt >= 40)
+	{
 		sw->switch_long_value = sw->switch_value_buf[sw->buf_index]; 	
 	}
 	//指向下一个缓冲区
 	sw->buf_last_index = sw->buf_index;
 	sw->buf_index++;		
-	if(sw->buf_index == REMOTE_SWITCH_VALUE_BUF_DEEP){
+	if(sw->buf_index == REMOTE_SWITCH_VALUE_BUF_DEEP)
+	{
 		sw->buf_index = 0;	
 	}			
 }
 
+
 //遥控器数据解算
-extern int can13Dog;
-void RemoteDataProcess(uint8_t *pData){
+void RemoteDataProcess(uint8_t *pData)
+{
 	HAL_IWDG_Refresh(&hiwdg);
-//	if(can13Dog){//@yyp
-//		HAL_IWDG_Refresh(&hiwdg);
-//		can13Dog--;
-//	}
-	if(pData == NULL){
+	if(pData == NULL)
+	{
 			return;
 	}
 	//遥控器 11*4 + 2*2 = 48，需要 6 Bytes
@@ -89,59 +92,48 @@ void RemoteDataProcess(uint8_t *pData){
 	RC_CtrlData.key.v = ((int16_t)pData[14]) | ((int16_t)pData[15] << 8);
 
 	//输入状态设置
-	if(RC_CtrlData.rc.s2 == 1) RCRightMode = Pos1;
-	else if(RC_CtrlData.rc.s2 == 3) RCRightMode = Pos2; 
-	else RCRightMode = Pos3; 
+	if(RC_CtrlData.rc.s2 == 1) inputmode = REMOTE_INPUT;
+	else if(RC_CtrlData.rc.s2 == 3) inputmode = KEY_MOUSE_INPUT; 
+	#ifndef NO_RC_MODE
+	else inputmode = STOP; 
+	#endif
 	
 	//功能状态设置
-	if(RC_CtrlData.rc.s1 == 1) RCLeftMode = Pos1; 
-	else if(RC_CtrlData.rc.s1 == 3) RCLeftMode = Pos2; 
-	else RCLeftMode = Pos3; 
+	if(RC_CtrlData.rc.s1 == 1) functionmode = UPPER_POS; 
+	else if(RC_CtrlData.rc.s1 == 3) functionmode = MIDDLE_POS; 
+	else functionmode = LOWER_POS; 
 	
 	//左上角拨杆状态（RC_CtrlData.rc.s1）获取
+	//用于遥控器发射控制
 	GetRemoteSwitchAction(&g_switch1, RC_CtrlData.rc.s1);
 	
-	//遥控模式按键切换
-	static uint8_t remote_change_counter = 0;
-	static uint8_t remote_test_mode = 0;
-	if(HAL_GPIO_ReadPin(BUTTON_GPIO_Port,BUTTON_Pin)){
-		remote_change_counter++;
-		if(remote_change_counter==40) remote_test_mode = !remote_test_mode;
-	}
-	else remote_change_counter = 0;
-	if(remote_test_mode==0){
-		HAL_GPIO_WritePin(GPIOF, LED_GREEN_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOE, LED_RED_Pin, GPIO_PIN_SET);
-	}
-	else{
-		HAL_GPIO_WritePin(GPIOF, LED_GREEN_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(GPIOE, LED_RED_Pin, GPIO_PIN_RESET);
-	}
-	//数据处理方式选择
-	switch(RCRightMode){
-		case Pos1:{
-			if(WorkState > 0){
-				RCProcess1(&(RC_CtrlData.rc));
+	switch(inputmode)
+	{
+		case REMOTE_INPUT:               
+		{
+			if(WorkState > 0)
+			{ 
+				RemoteControlProcess(&(RC_CtrlData.rc));
 			}
 		}break;
-		case Pos2:{
-			if(WorkState > 0){
-				RCProcess2(&(RC_CtrlData.rc));
+		case KEY_MOUSE_INPUT:              
+		{
+			if(WorkState > 0)
+			{ 
+				MouseKeyControlProcess(&RC_CtrlData.mouse,&RC_CtrlData.key);
 			}
 		}break;
-		case Pos3:{
-			if(WorkState > 0){
-				RCProcess3(&(RC_CtrlData.rc));
-			}
+		case STOP:               
+		{
+			 
 		}break;
 	}	
 }
-#endif
 
 //初始化遥控器串口DMA接收
 void InitRemoteControl(){
 	if(HAL_UART_Receive_DMA(&RC_UART, rc_data, 18) != HAL_OK){
-		Error_Handler();
+			Error_Handler();
 	} 
 	FunctionTaskInit();
 	rx_free = 1;
@@ -155,75 +147,44 @@ uint8_t tx_cnt = 200;
 
 uint8_t  tx_free = 1;
 uint8_t  rx_free = 1;
-extern uint8_t test;
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle){
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
+{
 	if(UartHandle == &RC_UART){
 		rc_update = 1;
 		rx_free = 1;
 	}
-	else if(UartHandle == &GYRO_UART){
-		#ifndef USE_IMU
+	else if(UartHandle == &GYRO_UART)
+	{
 		#ifdef USE_GYRO
-			gyroUartRxCpltCallback();
-		#endif
+		gyroUartRxCpltCallback();
 		#endif
 	}
-	else if(UartHandle == &JUDGE_UART){
+	else if(UartHandle == &JUDGE_UART)
+	{
 		judgeUartRxCpltCallback();  //裁判系统数据解算
 	}
-	else if(UartHandle == &AUTOAIM_UART){
+	else if(UartHandle == &AUTOAIM_UART)
+	{
 		#ifdef USE_AUTOAIM
-			AutoAimUartRxCpltCallback();
+		AutoAimUartRxCpltCallback();
 		#endif /*USE_AUTOAIM*/
 	}
 }
 
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle){
-	if(UartHandle == &JUDGE_UART){
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
+{
+	if(UartHandle == &JUDGE_UART)
+	{
 		tx_free = 1;
 	}
 }
-void UART_IDLE_Handler(UART_HandleTypeDef *UartHandle){
-	if(UartHandle == &DEBUG_UART){
+void UART_IDLE_Handler(UART_HandleTypeDef *UartHandle)
+{
+	if(UartHandle == &UPPER_UART)
+	{
 		#ifdef DEBUG_MODE
-			ctrlUartRxCpltCallback();
+		ctrlUartRxCpltCallback();
 		#endif
 	}
-}
-uint16_t ERRORTEST;
- void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
-{
-  ERRORTEST = UartHandle->ErrorCode;
-	tx_free = 1;
-	uint32_t isrflags   = READ_REG(UartHandle->Instance->SR);//手册上有讲，清错误都要先读SR
-	if((__HAL_UART_GET_FLAG(UartHandle, UART_FLAG_PE))!=RESET)
-	{
-		READ_REG(UartHandle->Instance->DR);//PE清标志，第二步读DR
-		__HAL_UART_CLEAR_FLAG(UartHandle, UART_FLAG_PE);//清标志
-		UartHandle->gState = HAL_UART_STATE_READY;
-		UartHandle->RxState = HAL_UART_STATE_READY;
-	}
-	if((__HAL_UART_GET_FLAG(UartHandle, UART_FLAG_FE))!=RESET)
-	{
-		READ_REG(UartHandle->Instance->DR);//FE清标志，第二步读DR
-		__HAL_UART_CLEAR_FLAG(UartHandle, UART_FLAG_FE);
-		UartHandle->gState = HAL_UART_STATE_READY;
-		UartHandle->RxState = HAL_UART_STATE_READY;
-	}
-	
-	if((__HAL_UART_GET_FLAG(UartHandle, UART_FLAG_NE))!=RESET)
-	{
-		READ_REG(UartHandle->Instance->DR);//NE清标志，第二步读DR
-		__HAL_UART_CLEAR_FLAG(UartHandle, UART_FLAG_NE);
-		UartHandle->gState = HAL_UART_STATE_READY;
-		UartHandle->RxState = HAL_UART_STATE_READY;
-	}        
-	
-	if((__HAL_UART_GET_FLAG(UartHandle, UART_FLAG_ORE))!=RESET)
-	{
-		READ_REG(UartHandle->Instance->CR1);//ORE清标志，第二步读CR
-		__HAL_UART_CLEAR_FLAG(UartHandle, UART_FLAG_ORE);
-		UartHandle->gState = HAL_UART_STATE_READY;
-		UartHandle->RxState = HAL_UART_STATE_READY;
-	}  
 }

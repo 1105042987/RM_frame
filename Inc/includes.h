@@ -12,10 +12,19 @@
 #ifndef __INCLUDES_H
 #define __INCLUDES_H
 
-#include "Configuration.h"
-#include "pid_regulator.h"
-#include "CANTask.h"
-#include "MotorTask.h"
+#define GM_TEST
+
+//#define DEBUG_MODE
+//#define NO_RC_MODE
+#define USE_AUTOAIM
+//#define USE_GYRO
+#define USE_IMU
+#define USE_CHASSIS_FOLLOW
+#define CAN11
+#define CAN12
+//#define CAN21
+//#define CAN22
+
 #include "main.h"
 #include "stm32f4xx_hal.h"
 #include "can.h"
@@ -28,14 +37,16 @@
 #include "adc.h"
 #include "math.h"
 
+#include "AuxDevice.h"
 #include "RemoteTask.h"
-#include "FunctionLib.h"
 #include "FunctionTask.h"
+#include "pid_regulator.h"
+#include "CANTask.h"
+#include "MotorTask.h"
 #include "ControlTask.h"
 #include "drivers_ramp.h"
 #include "AutoAimTask.h"
 #include "JudgeTask.h"
-#include "PowerLimitationTask.h"
 #include "bsp_imu.h"
 
 

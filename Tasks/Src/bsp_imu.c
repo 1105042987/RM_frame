@@ -22,11 +22,12 @@
 #define MPU_NSS_LOW HAL_GPIO_WritePin(GPIOF, GPIO_PIN_6, GPIO_PIN_RESET)
 #define MPU_NSS_HIGH HAL_GPIO_WritePin(GPIOF, GPIO_PIN_6, GPIO_PIN_SET)
 
-#define Kp 4.0f                                              /* 
+#define Kp 0.8f                                              /* 
                                                               * proportional gain governs rate of 
                                                               * convergence to accelerometer/magnetometer 
 																															*/
-#define Ki 0.02f                                             /* 
+//#define Ki 0.02f 
+#define Ki 0.02f                                              /* 
                                                               * integral gain governs rate of 
                                                               * convergence of gyroscope biases 
 																															*/
@@ -42,7 +43,7 @@ static uint8_t        tx_buff[14] = { 0xff };
 uint8_t               mpu_buff[14];                          /* buffer to save imu raw data */
 uint8_t               ist_buff[6];                           /* buffer to save IST8310 raw data */
 mpu_data_t            mpu_data;
-imu_t            imu={0};
+imu_t                 imu={0};
 
 /**
   * @brief  fast inverse square-root, to calculate 1/Sqrt(x)
@@ -310,7 +311,7 @@ void mpu_get_data()
 	
     imu.temp = 21 + mpu_data.temp / 333.87f;
 	  /* 2000dps -> rad/s */
-		imu.wx   = mpu_data.gx / 16.384f / 57.3f; 
+	  imu.wx   = mpu_data.gx / 16.384f / 57.3f; 
     imu.wy   = mpu_data.gy / 16.384f / 57.3f; 
     imu.wz   = mpu_data.gz / 16.384f / 57.3f;
 }
@@ -349,6 +350,7 @@ uint8_t id;
 	*/
 uint8_t mpu_device_init(void)
 {
+	imu.FirstEnter = 1;
 	MPU_DELAY(100);
 
 	id                               = mpu_read_byte(MPU6500_WHO_AM_I);
@@ -359,7 +361,7 @@ uint8_t mpu_device_init(void)
 																			{ MPU6500_CONFIG, 0x04 },         /* LPF 41Hz */ 
 																			{ MPU6500_GYRO_CONFIG, 0x18 },    /* +-2000dps */ 
 																			{ MPU6500_ACCEL_CONFIG, 0x10 },   /* +-8G */ 
-																			{ MPU6500_ACCEL_CONFIG_2, 0x02 }, /* enable LowPassFilter  Set Acc LPF */ 
+																			{ MPU6500_ACCEL_CONFIG_2, 0x04 }, /* enable LowPassFilter  Set Acc LPF */ 
 																			{ MPU6500_USER_CTRL, 0x20 },};    /* Enable AUX */ 
 	for (i = 0; i < 10; i++)
 	{
@@ -370,8 +372,9 @@ uint8_t mpu_device_init(void)
 	mpu_set_gyro_fsr(3); 		
 	mpu_set_accel_fsr(2);
 
-	ist8310_init();
+	//ist8310_init();
 	mpu_offset_call();
+	imu.InitFinish = 1;
 	return 0;
 }
 
@@ -384,7 +387,7 @@ uint8_t mpu_device_init(void)
 void mpu_offset_call(void)
 {
 	int i;
-	for (i=0; i<300;i++)
+	for (i=0; i<800;i++)
 	{
 		mpu_read_bytes(MPU6500_ACCEL_XOUT_H, mpu_buff, 14);
 
@@ -398,12 +401,12 @@ void mpu_offset_call(void)
 
 		MPU_DELAY(5);
 	}
-	mpu_data.ax_offset=mpu_data.ax_offset / 300;
-	mpu_data.ay_offset=mpu_data.ay_offset / 300;
-	mpu_data.az_offset=mpu_data.az_offset / 300;
-	mpu_data.gx_offset=mpu_data.gx_offset / 300;
-	mpu_data.gy_offset=mpu_data.gx_offset / 300;
-	mpu_data.gz_offset=mpu_data.gz_offset / 300;
+	mpu_data.ax_offset=mpu_data.ax_offset / 800;
+	mpu_data.ay_offset=mpu_data.ay_offset / 800;
+	mpu_data.az_offset=mpu_data.az_offset / 800;
+	mpu_data.gx_offset=mpu_data.gx_offset / 800;
+	mpu_data.gy_offset=mpu_data.gx_offset / 800;
+	mpu_data.gz_offset=mpu_data.gz_offset / 800;
 }
 
 
@@ -416,7 +419,6 @@ void mpu_offset_call(void)
 	*/
 void init_quaternion(void)
 {
-	imu.InitFinish = 1;
 	int16_t hx, hy;//hz;
 	
 	hx = imu.mx;
@@ -636,9 +638,6 @@ void imu_ahrs_update(void)
 	vx = 2.0f*(q1q3 - q0q2);
 	vy = 2.0f*(q0q1 + q2q3);
 	vz = q0q0 - q1q1 - q2q2 + q3q3;
-	//尹云鹏测试==================================
-	imu.vx=vx;
-	//============================================
 	wx = 2.0f*bx*(0.5f - q2q2 - q3q3) + 2.0f*bz*(q1q3 - q0q2);
 	wy = 2.0f*bx*(q1q2 - q0q3) + 2.0f*bz*(q0q1 + q2q3);
 	wz = 2.0f*bx*(q0q2 + q1q3) + 2.0f*bz*(0.5f - q1q1 - q2q2);  

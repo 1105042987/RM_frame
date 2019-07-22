@@ -15,7 +15,7 @@
 #include "includes.h"
 
 //解算数据区
-#define Pos1LER_STICK_OFFSET  1024u
+#define REMOTE_CONTROLLER_STICK_OFFSET  1024u
 
 #define REMOTE_SWITCH_VALUE_UP         	0x01u  
 #define REMOTE_SWITCH_VALUE_DOWN		0x02u
@@ -59,10 +59,19 @@ typedef __packed struct
 
 typedef enum
 {
-	Pos1 = 1,
-	Pos2 = 3,
-	Pos3 = 2,
-}RCMode_e;
+	REMOTE_INPUT = 1,
+	KEY_MOUSE_INPUT = 3,
+	STOP = 2,
+}InputMode_e;
+
+typedef enum
+{
+	UPPER_POS = 1,
+	MIDDLE_POS = 2,
+	LOWER_POS = 3,
+}FunctionMode_e;
+
+
 
 typedef __packed struct
 {
@@ -78,8 +87,8 @@ typedef __packed struct
 
 
 
-extern RCMode_e RCRightMode;
-extern RCMode_e RCLeftMode;
+extern InputMode_e inputmode;
+extern FunctionMode_e functionmode;
 
 
 extern uint8_t rc_data[18];
@@ -92,14 +101,7 @@ extern uint8_t rx_free;
 
 void RemoteDataProcess(uint8_t *pData);
 void InitRemoteControl(void);
-#ifdef SLAVE_MODE
-void RCProcess1(void);
-void RCProcess2(void);
-void RCProcess3(void);
-#else
-void RCProcess1(Remote *rc);
-void RCProcess2(Remote *rc);
-void RCProcess3(Remote *rc);
-#endif
+void RemoteControlProcess(Remote *rc);
+void MouseKeyControlProcess(Mouse *mouse, Key *key);
 
 #endif /*__ REMOTETASK_H */

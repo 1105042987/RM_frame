@@ -69,7 +69,7 @@ void SystemClock_Config(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-int can13Dog=1000;//@yyp
+
 /* USER CODE END 0 */
 
 int main(void)
@@ -96,12 +96,16 @@ int main(void)
 	HAL_NVIC_DisableIRQ(DMA1_Stream1_IRQn);
 	HAL_NVIC_DisableIRQ(DMA1_Stream5_IRQn);
 	HAL_NVIC_DisableIRQ(DMA2_Stream1_IRQn);
+	
 	HAL_NVIC_DisableIRQ(CAN1_RX0_IRQn);
 	HAL_NVIC_DisableIRQ(CAN2_RX0_IRQn);
 	HAL_NVIC_DisableIRQ(USART1_IRQn);
 	HAL_NVIC_DisableIRQ(DMA2_Stream2_IRQn);
 	HAL_NVIC_DisableIRQ(TIM7_IRQn);
 	HAL_NVIC_DisableIRQ(TIM6_DAC_IRQn);
+	#ifdef DEBUG_MODE
+		HAL_NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
+	#endif
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -124,48 +128,61 @@ int main(void)
   MX_ADC1_Init();
   MX_UART8_Init();
   MX_USART2_UART_Init();
-  MX_TIM8_Init();
+  MX_SPI4_Init();
 
   /* USER CODE BEGIN 2 */
-//各模块初始化
-
-	//电机控制
+	//各模块初始化
+	#ifdef FRIC_PWM_MODE//临时使用，后续不需要
+	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_2);
+	__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_2,800);
+	__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_3,800);
+	#endif /*FRIC_PWM_MODE*/
+	InitRemoteControl();
 	Motor_ID_Setting();
 	for(int i=0;i<8;i++) {InitMotor(can1[i]);InitMotor(can2[i]);}
+	InitPWM();
 	InitCanReception();
-	
-	//串口
-	#ifdef USE_AUTOAIM
-		InitAutoAim();
-	#endif
-	InitRemoteControl();
+	//InitGyroUart();
 	InitJudgeUart();
-	#ifdef USE_IMU
-		mpu_device_init();
-		init_quaternion();
-	#else
-		imu.InitFinish=1;
+	/*****陀螺仪初始化*****/
+	mpu_device_init();
+	init_quaternion();
+
+	/*****陀螺仪初始化结束*****/
+	/*****Open four 24V power suppliers*****/
+	HAL_GPIO_WritePin(GPIOH, GPIO_PIN_2, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOH, GPIO_PIN_3, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOH, GPIO_PIN_4, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOH, GPIO_PIN_5, GPIO_PIN_SET);
+	/*****Open finished*****/
+	MX_IWDG_Init();							//Cube配置完记得注释掉上面自动生成的看门狗初始化函数
+	InitAutoAim();
+	#ifdef DEBUG_MODE
+	ctrlUartInit();
+	//时间中断
+	HAL_TIM_Base_Start_IT(&htim10);
 	#endif
-
-	//计时器
-	HAL_TIM_Base_Start_IT(&ONE_MS_TIM);
-	HAL_TIM_Base_Start_IT(&TWO_MS_TIM);
-//	HAL_TIM_Base_Start_IT(&TEN_MS_TIM);
-
-	//中断
+	HAL_TIM_Base_Start_IT(&htim6);
+	HAL_TIM_Base_Start_IT(&htim7);
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
+	
+	//ADC
+	//HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&ADC_Value,160);
+	
+	//时间中断
 	HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 	HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
 	HAL_NVIC_EnableIRQ(USART1_IRQn);
-	HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn); 
+	HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
 	HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
 	HAL_NVIC_EnableIRQ(TIM7_IRQn);
+	#ifdef DEBUG_MODE
+		HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
+	#endif
+	__HAL_UART_ENABLE_IT(&UPPER_UART, UART_IT_IDLE);
 	
-	//ADC
-	HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&ADC_Value,160);
 	
-	//看门狗
-	MX_IWDG_Init();	//Cube配置完记得注释掉上面自动生成的看门狗初始化函数
-	HAL_GPIO_WritePin(GPIOG, 0x1ff, GPIO_PIN_SET);//close all LED
   /* USER CODE END 2 */
 
   /* Infinite loop */

@@ -29,8 +29,7 @@ uint8_t buffer[80] = {0};
 uint8_t buffercnt = 0;
 uint16_t cmdID;
 
-void judgeUartRxCpltCallback(void)
-{
+void judgeUartRxCpltCallback(void){
 //	fw_printfln("judge receive");
 	if(receiving){
 		if(buffercnt >40)buffercnt = 4;
@@ -111,7 +110,6 @@ uint16_t remainHeat0 = 480;
 uint16_t maxHeat1 = 480;
 uint16_t remainHeat1 = 480;
 uint16_t RealHeat0 = 0;
-float fakeHeat0 = 0;
 float realBulletSpeed0 = 22;
 float cooldown0 = 72;
 uint8_t shoot0Cnt = 0;
@@ -227,21 +225,11 @@ void Referee_Update_RobotState(){
 	
 	maxHP = GameRobotState.max_HP;
 	remainHP = GameRobotState.remain_HP;
-	if(lastHP-remainHP>80){
-		StateFlee=8;
-		receiveCnt=0;
-	}
-	else if(lastHP-remainHP>9){
-		if(StateSway||StateFlee){StateFlee+=2;}
-		else{StateFlee=2;}
-		receiveCnt=0;
-	}
+
 	
 	lastHP=remainHP;
-	receiveCnt++;
-	if(receiveCnt>10&&StateFlee>1){StateFlee=0;}
-	
-	
+	receiveCnt++;//10hz
+
 	switch(maxHP){
 		case 200:{maxHeat0 = 240;cooldown0 = 40;}break;
 		case 250:{maxHeat0 = 360;cooldown0 = 60;}break;
@@ -311,23 +299,11 @@ void Referee_Update_ShootData(){
 	JUDGE_Received = 1;
 }
 
-void Referee_Update_hurt(){//@yyp
-//	uint8_t tmp=buffer[7]&0xf0;
-////	if(tmp==0x0 && StateSway==0){StateFlee=2;StateCnt=0;}
-//	if(tmp==0x0){StateFlee+=2;StateCnt=0;}
-//	JUDGE_Received = 1;
+void Referee_Update_hurt(){
 	
-	uint8_t tmp=buffer[7]&0x0f;
-	if(tmp==0x1){StateHurt=1;}
-	if(tmp==0x2){StateHurt=2;}
 }
 //int test;
 void Judge_Refresh_Interact(){
-	if(buffer[13]==1){
-		StateFlee=8;
-	}else if(buffer[13]==2){
-		StateFlee=10;
-	}
 }
 
 

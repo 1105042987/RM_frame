@@ -67,10 +67,10 @@ typedef struct
 	uint8_t FirstEnter;
 	uint16_t InitCount;
 	uint8_t InitFinish;
-}imu_t;
+} imu_t;
 
 extern mpu_data_t mpu_data;
-extern imu_t imu;
+extern imu_t      imu;
 
 uint8_t   mpu_device_init(void);
 void init_quaternion(void);
