@@ -195,7 +195,7 @@ void RescueLoop()
 			leftClawTight = 0;
 		}
 	}
-	if(leftClawTight!=1&&saving_left==1)
+	if(saving_left==1)
 	{
 		if(SL.RxMsgC6x0.moment >- 3000)
 		{SL.TargetAngle -= 3;SLflag=0;}
@@ -203,9 +203,9 @@ void RescueLoop()
 		{
 			SLflag = 1;
 		}
-		if(SLcnt>=800)
+		if(SLcnt>=500)
 		{
-			SL.TargetAngle = SL.RealAngle;
+			SL.TargetAngle = SL.RealAngle+5;
 			leftClawTight = 1;
 			SLflag = 0;
 			SLcnt = 0;
@@ -229,7 +229,7 @@ void RescueLoop()
 			rightClawTight = 0;
 		}
 	}
-	if(rightClawTight!=1&&saving_right==1)
+	if(saving_right==1)
 	{	
 		if(SR.RxMsgC6x0.moment <3000)
 		{SR.TargetAngle += 3;SRflag=0;}
@@ -237,9 +237,9 @@ void RescueLoop()
 		{
 			SRflag = 1;
 		}
-		if(SRcnt>=800)
+		if(SRcnt>=500)
 		{
-			SR.TargetAngle = SR.RealAngle;
+			SR.TargetAngle = SR.RealAngle-5;
 			rightClawTight = 1;
 			SRflag = 0;
 			SRcnt = 0;

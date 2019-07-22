@@ -20,6 +20,8 @@ uint32_t adfl=0,adfr=0,adbl=0,adbr=0,addf=0,addb=0;
 uint32_t disfl=0,disfr=0,disbl=0,disbr=0,disdf=0,disdb=0;
 uint32_t AutoClimb_ComeToTop=0;
 uint32_t AutoClimb_AlreadyTop=0;
+uint32_t ManualClimb_DownState=0;
+uint32_t ManualClimb_UpState=0;
 uint32_t Slave_Commoning=0;
 uint8_t signal1=0;
 uint8_t signal2=0;
@@ -28,12 +30,39 @@ uint8_t AlreadyClimbed=0;
 uint8_t AlreadyDowned=0;
 
 uint32_t AutoClimbing=0;
+uint32_t ManualClimbing=0;
 uint32_t AutoClimb_Level=0;  //用于指示现在车在第几层
 //上 10000 8000
 //disfl>2000 disfr>2000
 //电机-8000 -6000
 //disbr >3500 到1300下岛
 
+ManualClimb_State_e ManualClimb_State=UP;
+void Manual_Climb()
+{
+	CM1.RealAngle=0;
+	CM2.RealAngle=0;
+	if(ChassisSpeedRef.forward_back_ref>=0)
+	{
+	CM1.TargetAngle=ChassisSpeedRef.forward_back_ref*8;
+	CM2.TargetAngle=-ChassisSpeedRef.forward_back_ref*8;
+	}
+	if(ChassisSpeedRef.forward_back_ref<0)
+	{
+	CM1.TargetAngle=ChassisSpeedRef.forward_back_ref*0.25;
+	CM2.TargetAngle=-ChassisSpeedRef.forward_back_ref*0.25;
+	}
+	if(ChassisSpeedRef.forward_back_ref==0)
+	{
+		CM1.TargetAngle=0;
+	  CM2.TargetAngle=0;
+	}
+		if(ChassisSpeedRef.forward_back_ref>0)
+		ChassisSpeedRef.forward_back_ref/=3;
+		if(ChassisSpeedRef.forward_back_ref<0)
+		ChassisSpeedRef.forward_back_ref/=5;
+		
+}
 void Chassis_Choose(uint8_t flag,uint8_t ensure)
 {
 	CM1.RealAngle=0;
@@ -270,6 +299,8 @@ void AutoClimb_SwitchState()
 	if(AutoClimbing==1)
 		Chassis_Choose(1,1);
 	Speed_Locker();
+	if(ManualClimbing==1)
+		Manual_Climb();
 }
 
 void State_AutoClimb()

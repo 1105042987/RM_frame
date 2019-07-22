@@ -104,6 +104,7 @@ extern View_State_e Viewstate;
 extern SlaveMode_e Slave;
 extern uint32_t Slave_Commoning;
 extern uint32_t Chassis_locker;
+extern ManualClimb_State_e ManualClimb_State;
 
 uint32_t Yaw_Reset_Flag=0;
 uint32_t Yaw_Reset_Cnt=0;
@@ -438,10 +439,11 @@ void AutoGet_Stop_And_Clear()//×´Ì¬ÇåÁã ×¦×Ó×ª»Ø ºáÒÆµç»úÍ£×ª£¨ÓÃÓÚÒì³£×´¿ö´¦Àíº
 }
 void Box_ThrowForward()//ÏòÇ°ÈÓ³öÏä×Ó
 { 
-	if(auto_counter==0&&auto_waiter==0){
+	if(auto_counter==0&&auto_waiter==0)
+ {
 	UM1.TargetAngle=-OUTANGLE;
 	UM2.TargetAngle=OUTANGLE;
-	if(fabs(UM1.RealAngle+75)<=10||fabs(UM2.RealAngle+(-75))<=10)   //±ä´óÊÇÍíÈÓ£¬±äĞ¡ÊÇÔçÈÓ ×îÔ¶Îª65
+	if(fabs(UM1.RealAngle+70)<=10||fabs(UM2.RealAngle+(-70))<=10)   //±ä´óÊÇÍíÈÓ£¬±äĞ¡ÊÇÔçÈÓ ×îÔ¶Îª65
 	{
 		CLAWLOOSE;
 	}
@@ -449,7 +451,7 @@ void Box_ThrowForward()//ÏòÇ°ÈÓ³öÏä×Ó
 	{
 		AutoGet_TotalStep++;
 	}
-                     }
+ }
 }
 
 void Box_ThrowBackward()//ÏòºóÈÓ³öÏä×Ó
@@ -1046,6 +1048,7 @@ void State_Common()
 	UM1.TargetAngle=-INANGLE;
   UM2.TargetAngle=INANGLE;
 	AutoClimbing=0;
+	ManualClimbing=0;
 	AutoGet_Success=0;
 	if(ON_THE_FLOOR||ON_THE_GROUND||AutoClimb_Level==1)
 	imu_pause=1;

@@ -79,10 +79,18 @@ typedef enum
 	DEBUG_CLIMB_STATE,
 }Debug_State_e;
 
+typedef enum
+{
+	UP,
+	DOWN,
+}ManualClimb_State_e;
 extern uint8_t AlreadyClimbed;
 extern uint8_t AlreadyDowned;
 extern uint32_t AutoClimbing;
 extern uint32_t AutoClimb_Level;
+extern uint32_t ManualClimbing;
+extern uint32_t ManualClimb_DownState;
+extern uint32_t ManualClimb_UpState;
 
 void Chassis_Choose(uint8_t flag,uint8_t ensure);
 void RefreshAnologRead(void);

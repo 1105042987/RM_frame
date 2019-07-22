@@ -222,7 +222,7 @@ void Chassis_Data_Decoding()
 	CMBR.TargetAngle = (- ChassisSpeedRef.forward_back_ref	*0.075 
 						- ChassisSpeedRef.left_right_ref	*0.075 
 						+ rotate_speed					*0.075)*160;
-	CM1.TargetAngle=CM2.TargetAngle*CMFL.TargetAngle/CMFR.TargetAngle;
+	//CM1.TargetAngle=CM2.TargetAngle*CMFL.TargetAngle/CMFR.TargetAngle;
 	
 	
 //	if(imu.now_rol<=-30)

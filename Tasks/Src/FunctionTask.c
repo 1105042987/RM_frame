@@ -75,6 +75,7 @@ uint32_t imu_pause=1;
 extern uint8_t signal1;
 extern uint8_t signal2;
 extern uint32_t Slave_Commoning;
+extern ManualClimb_State_e ManualClimb_State;
 
 uint8_t transdata[1];
 void InitialSave()
@@ -654,7 +655,42 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
       else if(key->v & KEY_R)
 			{
 				Box_Clearing=1;
-			}				
+			}
+      else if(key->v & KEY_C)
+			{
+				if(OnePush_Locker==0)
+				{
+					OnePush_Locker=1;
+					if(ManualClimb_State==UP)
+					{
+						AlreadyClimbed=0;
+				    AlreadyDowned=0;
+				    signal1=0;
+				    signal2=0;
+						AutoClimbing=0;
+						ManualClimbing=1;
+						ManualClimb_State=DOWN;
+						NMCDL.TargetAngle=UD_BOTTOM;
+						NMCDR.TargetAngle=UD_BOTTOM;
+						Slave=CLIMBING;
+	          Slave_Commoning=0;
+					}
+					else if(ManualClimb_State==DOWN)
+					{
+						AlreadyClimbed=0;
+				    AlreadyDowned=0;
+				    signal1=0;
+				    signal2=0;
+						AutoClimbing=0;
+						ManualClimbing=0;
+						ManualClimb_State=UP;
+						NMCDL.TargetAngle=UD_TOP;
+						NMCDR.TargetAngle=UD_TOP;
+						Slave_Commoning=1;
+					}
+				}
+			}
+			
 			break;
 		}
 		case CTRL:				//slow
