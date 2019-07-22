@@ -15,7 +15,7 @@
 //#define jiuyuan                                                                    
 //#define shangdao
 Engineer_State_e EngineerState = COMMON_STATE;
-Debug_State_e DebugState = DEBUG_CLIMB_STATE;
+Debug_State_e DebugState = DEBUG_GET_STATE;
 KeyboardMode_e KeyboardMode = NO_CHANGE;
 View_State_e Viewstate = NORMAL_VIEW;
 SlaveMode_e Slave=INIT;

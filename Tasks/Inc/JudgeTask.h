@@ -153,6 +153,6 @@ void judgeUartRxCpltCallback(void);
 void getJudgeState(void);
 //void Send_User_Data(void);
 void Referee_Transmit_UserData(void);
-
+void Referee_Transmit_Image(void);
 
 #endif /*__ JUDGETASK_H */

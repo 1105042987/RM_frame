@@ -119,6 +119,8 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 							AutoClimb_Level--;
 							if(AutoClimb_Level==0)
 							{
+								AutoClimb_AlreadyTop=0;
+								auto_counter=3000;
 								State_Common();
 							}
 						}
@@ -188,7 +190,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 								NMCDL.positionPID.outputMax = 7000;
 						NMCDR.positionPID.outputMax =7000;
 									NMCDL.TargetAngle = UD_BOTTOM;
-								  NMCDR.TargetAngle = UD_BOTTOM;
+								  NMCDR.TargetAngle = UD_BOTTOM-15;
 								signal1=1;
 								if(AlreadyDowned==0)
 									AlreadyDowned=1;
@@ -206,7 +208,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 						NMCDL.positionPID.outputMax = 7000;
 						NMCDR.positionPID.outputMax = 7000;
 							NMCDL.TargetAngle = UD_BOTTOM;
-						  NMCDR.TargetAngle = UD_BOTTOM;
+						  NMCDR.TargetAngle = UD_BOTTOM-15;
 						signal1=1;
 						if(AlreadyClimbed==0)
 						AlreadyClimbed=1;
@@ -226,7 +228,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 
 void ComeToTop()
 {
-	if(AutoClimb_AlreadyTop==0)
+	if(AutoClimb_AlreadyTop==0&&auto_counter==0)
 		AutoClimb_ComeToTop=1;
 	if(AutoClimb_ComeToTop==1)
 	{

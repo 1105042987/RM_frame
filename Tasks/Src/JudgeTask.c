@@ -516,6 +516,63 @@ void Referee_Transmit_UserData()//数据上传可以限制在10hz
 	//tx_free = 0;
 	while(HAL_UART_Transmit_IT(&JUDGE_UART,(uint8_t *)&buffer,28)!=HAL_OK);
 }
+int check=0;
+void Referee_Transmit_Image()//数据上传可以限制在10hz 这个函数用于绘制自定义图形
+{
+	uint8_t buffer[71]={0};
+	
+	buffer[0] = 0xA5;//数据帧起始字节，固定值为 0xA5
+	buffer[1] = 62;//数据帧中 data 的长度,占两个字节
+	
+	buffer[3] = 1;//包序号
+	buffer[4] = myGet_CRC8_Check_Sum(&buffer[0], 5-1, myCRC8_INIT);//帧头 CRC8 校验
+	buffer[5] = 0x01;
+	buffer[6] = 0x03;
+	buffer[7] = 0x00;//数据的内容 ID:0x0100  ,占两个字节
+	buffer[8] = 0x01;
+	buffer[9] = GameRobotState.robot_id;//发送者的 ID, 占两个字节
+	buffer[10] = 0;
+	buffer[11] = GameRobotState.robot_id;//客户端的 ID, 只能为发送者机器人对应的客户端,  占两个字节
+	buffer[12] = 0x01;//注意哨兵没有这个ID
+	  check=1;
+	  buffer[13] = 1;//增加图形
+		buffer[14] = 3;//类型
+	  buffer[15] = 't';//下五个字节是图形名
+		buffer[16] = 'e';
+		buffer[17] = 's';
+		buffer[18] = 't';
+		buffer[19] = 'p';
+    buffer[20] = 1;//图层数
+    buffer[21] = 0;//颜色 0为队伍主颜色
+    buffer[22] = 10;//线宽
+    buffer[23] = 0xc0;//起点x坐标 占两字节
+    buffer[24] = 0x03;	
+    buffer[25] = 0x1c;//起点y坐标 占两字节
+    buffer[26] = 0x02;
+    buffer[28] = 0x01;//字体大小或者圆的半径   	
+		buffer[29] = 0x00;
+		buffer[30] = 0xb0;    //终点x和y	
+		buffer[31] = 0x04;
+		buffer[32] = 0xbc;
+		buffer[33] = 0x02;  
+		buffer[34] = 0;  //圆弧的起始角度和终止角度
+		buffer[35] = 0;
+		buffer[36] = 0;
+		buffer[37] = 0;
+		buffer[38] = 4;  //文本信息的长度
+		buffer[39] = 't';//文本信息
+		buffer[40] = 'e';
+		buffer[41] = 's';
+		buffer[42] = 't';
+		for(int i=43;i<=68;i++)
+		buffer[i] = 0;
+	static uint16_t CRC16=0;
+	CRC16 = myGet_CRC16_Check_Sum(buffer, 69, myCRC16_INIT);
+	buffer[69] = CRC16 & 0x00ff;//0xff 校验位
+	buffer[70] = (CRC16 >> 8) & 0xff;
+		
+	while(HAL_UART_Transmit_IT(&JUDGE_UART,(uint8_t *)&buffer,71)!=HAL_OK);
+}
 
 uint8_t flying = 0;
 void Referee_Transmit_RobotData()

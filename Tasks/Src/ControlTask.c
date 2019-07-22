@@ -134,7 +134,8 @@ void ControlRotate(void)
 //	#endif
 	//if(fabs(imu.target_yaw-imu.now_yaw)<1)
 		//CM_AutoRotate90 = 0;
-	if(imu_pause==0||CM_AutoRotate90==1)
+	if(//imu_pause==0||
+		CM_AutoRotate90==1)
 	{
 		CMRotatePID.ref = imu.target_yaw;
 		CMRotatePID.fdb = imu.now_yaw;
@@ -388,9 +389,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		checkAutoGet();
 		
 		dataSendCnt++;
-		if(dataSendCnt >= 120)
+		if(dataSendCnt >= 80)
 		{
-			Referee_Transmit_UserData();
+			//Referee_Transmit_UserData();
+			Referee_Transmit_Image();
 			dataSendCnt = 0;
 		}
 		
