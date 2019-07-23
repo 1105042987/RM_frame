@@ -224,6 +224,7 @@ void Referee_Update_RobotState(){
 	}
 	
 	maxHP = GameRobotState.max_HP;
+	//=========================================
 	remainHP = GameRobotState.remain_HP;
 	if(lastHP-remainHP>80){
 		StateFlee=8;
@@ -234,12 +235,13 @@ void Referee_Update_RobotState(){
 		else{StateFlee=2;}
 		receiveCnt=0;
 	}
-	
+	if(remainHP<490){SpeedRef=2100;}
 	lastHP=remainHP;
 	receiveCnt++;//10hz
 	if(receiveCnt>10&&StateFlee>1){StateFlee=0;}
 	if(CmdTic<300){CmdTic++;}
 	else{ExtCmd=0;}
+	//========================
 	
 	switch(maxHP){
 		case 200:{maxHeat0 = 240;cooldown0 = 40;}break;
@@ -320,9 +322,9 @@ void Referee_Update_hurt(){//@yyp
 	if(tmp==0x1){StateHurt=1;}
 	if(tmp==0x2){StateHurt=2;}
 }
-//int test;
+
 void Judge_Refresh_Interact(){
-	if(buffer[13]==1){CmdTic=0;ExtCmd=1;}
+	if(buffer[13]==1){CmdTic=0;ExtCmd=1;SpeedRef=2100;}//躲飞机
 	else if(buffer[13]==2){CmdTic=0;ExtCmd=2;}
 	else if(buffer[13]==3){CmdTic=0;ExtCmd=3;}
 }

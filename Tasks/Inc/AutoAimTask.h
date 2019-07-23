@@ -60,10 +60,8 @@ typedef struct Coordinate_t
 	float z;
 }Coordinate_t;
 
-extern uint8_t aimMode;
-extern uint8_t findEnemy;
-extern GMAngle_t adjust;
-extern GMAngle_t aim;
+extern uint8_t aimMode,FindEnemy;
+extern GMAngle_t aim,opt;
 
 void InitAutoAim(void);
 void AutoAimUartRxCpltCallback(void);

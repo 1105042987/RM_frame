@@ -121,7 +121,6 @@ void WorkStateFSM(void){
 				}
 			}
 		}break;
-		#ifndef SLAVE_MODE
 		case STATE_1:{
 			if(normal_time<10000)normal_time++;
 			if(normal_time>=10)startUp = 1;
@@ -146,14 +145,6 @@ void WorkStateFSM(void){
 				FunctionTaskInit();
 			}
 		}break;
-		#else
-		case STATE_1:
-		case STATE_2:
-		case STATE_3:break;
-		case STATE_stop:{
-			sendAllData(1);
-		}break;
-		#endif
 	}
 }
 
@@ -207,8 +198,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			if(WorkState!=STATE_pre){
 				if(WorkState==STATE_stop&&receiveData[0].data[0]>0) WorkState = STATE_pre;
 				else{
-					RCRightMode = (RCMode_e)((receiveData[0].data[0]&0x00ff)>>4);
-					WorkState = (WorkState_e)(receiveData[0].data[0]&0x000f);
+					RCLeftMode = (RCMode_e)((receiveData[0].data[0]&0xf)>>2);
+					RCRightMode = (RCMode_e)(receiveData[0].data[0]&0x3);
 				}
 				if(RCRightMode==Pos1)
 					RCProcess1();

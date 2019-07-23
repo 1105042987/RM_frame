@@ -72,9 +72,7 @@ void SystemClock_Config(void);
 int can13Dog=1000;//@yyp
 /* USER CODE END 0 */
 
-int main(void)
-{
-
+int main(void){
   /* USER CODE BEGIN 1 */
   /* USER CODE END 1 */
 

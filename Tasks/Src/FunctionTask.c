@@ -30,7 +30,7 @@ void FunctionTaskInit(){
 //******************
 #if GUARD == 'U'
 void generalProcess(Remote *rc);
-uint8_t findEnemy;
+uint8_t FindEnemy;
 //********************上平台代码1
 void RCProcess1(Remote *rc){
 	generalProcess(rc);
@@ -40,7 +40,7 @@ void RCProcess1(Remote *rc){
 		brakeOff();
 	}
 	if(WorkState == STATE_2){
-		brakeOn();
+		//brakeOn();
 	}
 	if(WorkState == STATE_3){
 		
@@ -55,13 +55,17 @@ void RCProcess2(Remote *rc){
 		onePushDir(dir,powLmtCnt=500);
 	}
 	if(WorkState == STATE_2){
-		routing0();
+		switch(ExtCmd){
+			case 1:routing1();break;
+			case 2:routing2();break;
+			default:routing1();
+		}
 	}
 	if(WorkState == STATE_3){
 		switch(ExtCmd){
 			case 1:routing1();break;
 			case 2:routing2();break;
-			default:routing0();
+			default:routing1();
 		}
 	}
 	limtSync();
@@ -91,18 +95,14 @@ void generalProcess(Remote *rc){
 	channellcol = (rc->ch3 - (int16_t)Pos1LER_STICK_OFFSET);
 	
 	ChassisSpeed=channelrrow*3;
-	findEnemy=(uint8_t)receiveData[0].data[0];
+	FindEnemy=(uint8_t)receiveData[0].data[0];
 	
-	sendData[0].data[0]=(int16_t)WorkState | (int16_t)RCRightMode<<4;
-	uint8_t upSpd=CMA.RxMsgC6x0.rotateSpeed/8+127;
-	sendData[0].data[0]=sendData[0].data[0] | ((uint16_t)upSpd)<<8;
-	
-	if(GameRobotState.robot_id==7){sendData[0].data[1]=channellrow+5000;}
-	else{sendData[0].data[1]=channellrow;}
-	
-	if(channelrcol>600){sendData[0].data[2]=channellcol+5000;}
-	else{sendData[0].data[2]=channellcol;}
-	sendData[0].data[3]=(int16_t)(RealHeat0*20);
+	sendData[0].data[0]=(uint16_t)RCRightMode | (uint16_t)RCLeftMode<<2 | ((uint16_t)CMA.RxMsgC6x0.rotateSpeed/8+127)<<8;//右拨杆，左拨杆，底盘速度
+	if(GameRobotState.robot_id==7){sendData[0].data[0]=sendData[0].data[0] | 1<<4;}//是否为蓝
+	if(channelrcol>600){sendData[0].data[0]=sendData[0].data[0] | 1<<5;}//
+	sendData[0].data[1]=(uint16_t)(channellrow+660)/6 | ((uint16_t)(channellcol+660)/6)<<8 ;
+	sendData[0].data[2]=(int16_t)CMA.Real;
+	sendData[0].data[3]=(int16_t)(RealHeat0*20);//热量
 	
 	nutDetect();
 }
@@ -113,7 +113,7 @@ void limtSync(){
 }
 #endif  //GUARD == 'U'
 #if GUARD == 'D'
-//下平台代码
+//下平台代
 float vx,dx;//基于imu的伪补偿
 void generalProcess();
 void RCProcess1(){
@@ -130,14 +130,14 @@ void RCProcess1(){
 		FRICL.Target=-0;
 		FRICR.Target= 0;
 		uartSend();
-		if(findEnemy){autoAim();}
+		if(FindEnemy){autoAim();}
 	}
 	if(WorkState == STATE_3){
 		FRICL.Target =-5500;
 		FRICR.Target = 5500;
 		uartSend();
-		if(findEnemy){autoAim();}
-		if(receiveData[0].data[2]>4000){firing2();}
+		if(FindEnemy){autoAim();}
+		if(receiveData[0].data[0] & 0x20){firing3();}
 		else{firing1();}
 	}
 	limtSync();
@@ -155,7 +155,7 @@ void RCProcess2(){
 		FRICL.Target=-0;
 		FRICR.Target= 0;
 		uartSend();
-		if(findEnemy){autoAim();}
+		if(FindEnemy){autoAim();}
 	}
 	if(WorkState == STATE_3){
 		strategyShoot();
@@ -183,26 +183,31 @@ void strategyShoot(){
 	FRICL.Target =-5500;
 	FRICR.Target = 5500;
 	laserOn();
-	if(findEnemy){
+	if(FindEnemy){
 		autoAim();
-		//自瞄数据会有绝对坐标的覆盖，重新补偿
-		GMY.Target-=sgn(GMY.encoderAngle)*(((uint16_t)(receiveData[0].data[0])>>8) -127)/800.0;
-		GMP.Target-=dx*15;
-		if(fabs(aim.yaw)<8 && (aim.dis==0||aim.dis==2000||aim.dis==3000)){firing2();}
-		if(aim.dis==500){noEnemyCnt=1;}
-		else{noEnemyCnt=-300;}
+//		//自瞄数据会有绝对坐标的覆盖，重新补偿
+//		GMY.Target-=sgn(GMY.encoderAngle)*(((uint16_t)(receiveData[0].data[0])>>8) -127)/1000.0;
+//		GMP.Target-=dx*15;
+		if(fabs(GMY.Real-opt.yaw)<2 && fabs(GMP.Real-opt.pit)<2 && (aim.dis==0||aim.dis==2000||aim.dis==3000)){firing2();}
+		if(aim.dis==500){noEnemyCnt=-30;}
+		else{noEnemyCnt=-400;}
 		sendData[0].data[0]=(int16_t)1;
 	}
 	else if(noEnemyCnt>1){
 		scaning1();
 		sendData[0].data[0]=(int16_t)0;
 	}
-	else if(noEnemyCnt<-200){
+	else if(noEnemyCnt<-300){
 		noEnemyCnt++;
-		if(fabs(aim.yaw)<6 && (aim.dis==0||aim.dis==2000||aim.dis==3000)){firing2();}
+		if(fabs(GMY.Real-opt.yaw)<2 && fabs(GMP.Real-opt.pit)<2 && (aim.dis==0||aim.dis==2000||aim.dis==3000)){firing2();}
 		else{STIRv.Target=0;}
 	}
+	else if(noEnemyCnt<-150){
+		noEnemyCnt++;
+		STIRv.Target=0;
+	}
 	else{
+		GMY.Target+=0.2;
 		noEnemyCnt++;
 		STIRv.Target=0;
 	}
@@ -218,25 +223,39 @@ void generalProcess(){
 	//max=660
 	channelrrow = 0;
 	channelrcol = 0;
-	channellrow = -receiveData[0].data[1];//leftRight
-	channellcol = receiveData[0].data[2];//upDown
-	if(channellrow<-4000){channellrow+=5000;}
-	if(channellcol>4000){channellcol-=5000;}
+	channellrow = -(int16_t)((uint16_t)(receiveData[0].data[1] & 0xff)*6)+660;//leftRight
+	channellcol = (int16_t)((uint16_t)(receiveData[0].data[1])>>8)*6-660;//upDown
+	sendData[0].data[1]=(uint16_t)(channellrow+660)/6 | ((uint16_t)(channellcol+660)/6)<<8 ;
 	
+	CMA.Real=receiveData[0].data[2];
 	RealHeat0=receiveData[0].data[3]/(float)(20.0);
-	//基于顶盘速度的yaw运动补偿
-	GMY.Target+=channellrow*0.001f-sgn(GMY.encoderAngle)*(((uint16_t)(receiveData[0].data[0])>>8) -127)/800.0;
+	//
+	GMY.Target+=channellrow*0.001f;
 	GMP.Target+=channellcol*0.001f;
-	//基于imu的pit运动补偿 
-	dx=imu.vx-dx;
-	vx+=dx;
-	vx*=0.99;
-	GMP.Target-=dx*16;
-	dx=imu.vx;
+	//基于顶盘速度的yaw运动补偿,基于imu的pit运动补偿 
+//	GMY.Target-=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127)/(2500.0+GMP.Real*30) * fabs(sin((GMY.encoderAngle)/180*3.14))*sgn(GMY.encoderAngle);
+//	GMP.Target+=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127)/2000 * fabs(cos((GMY.encoderAngle)/180*3.14))*sgn(GMY.encoderAngle);
+
+	
+//	GMY.Target-=sgn(GMY.encoderAngle)*(((uint16_t)(receiveData[0].data[0])>>8) -127)/(2000.0+GMP.Real*30);
+//	dx=imu.vx-dx;
+//	vx+=dx;
+//	vx*=0.99;
+//	GMP.Target-=dx*16;
+//	dx=imu.vx;
+//100,210,315,425,530,610
+	if(CMA.Real>-100){yawZero=-30;}
+	else if(CMA.Real>-210){yawZero=(210+CMA.Real)/-3.67;}
+	else if(CMA.Real>-425){yawZero=0;}
+	else if(CMA.Real>-530){yawZero=(425+CMA.Real)/1.17;}
+	else{yawZero=-90;}
 }
 
 void limtSync(){
-	MINMAX(GMP.Target,-60,0);//limit
+	if(GMY.encoderAngle>-150 && GMY.encoderAngle<-120){MINMAX(GMP.Target,-60,-0.67*(120+GMY.encoderAngle));}
+	else if(GMY.encoderAngle>90 && GMY.encoderAngle<120){MINMAX(GMP.Target,-60,0.67*(GMY.encoderAngle-90));}
+	else if(GMY.encoderAngle<-130 || GMY.encoderAngle>120){MINMAX(GMP.Target,-60,20);}
+	else{MINMAX(GMP.Target,-60,0);}
 //	MINMAX(GMY.Target,-160+GMY.imuEncorderDiff,160+GMY.imuEncorderDiff);//limit
 	//CMR.Target =  -CML.Target;
 }

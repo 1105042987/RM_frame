@@ -15,9 +15,9 @@
 #ifdef	USE_AUTOAIM
 #define USE_AUTOAIM_ANGLE
 //*****************************************声明变量******************************************//
-GMAngle_t aim,abt,opt,adjust;										//校准发射变量
+GMAngle_t aim,abt,opt,jst;										//校准发射变量
 uint8_t Enemy_INFO[8],Tx_INFO[8];						//接收
-uint8_t findEnemy=0,aimMode=0,upper_mode;		//aimMode用于选择瞄准模式，0为手动瞄准，1为正常自瞄，2为打符，3暂无（吊射？）
+uint8_t FindEnemy=0;
 int16_t AimTic=1;
 GMAngle_t aimProcess(float yaw,float pit,int16_t *tic);
 //********************************自瞄初始化********************************//
@@ -26,7 +26,7 @@ void InitAutoAim(){
 	if(HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t *)&Enemy_INFO,8)!= HAL_OK){Error_Handler();}
 	//角度变量初始化（不需要修改）
 	aim.yaw=0;				aim.pit=0;
-	adjust.yaw=0;			adjust.pit=0;
+	jst.yaw=2;			jst.pit=0.5;
 }
 //*******************************UART回调函数********************************/
 //float rate1=2.7,rate2=2.85;
@@ -40,35 +40,43 @@ void AutoAimUartRxCpltCallback(){
 		aim.pit/=2.85;
 		abt.yaw=GMY.Real+aim.yaw;
 		abt.pit=GMP.Real+aim.pit;
-		if(abt.pit<0){
+		//if(abt.pit<0){
 			if(aim.dis==2000){//陀螺正对装甲
-				opt.yaw=opt.yaw*0.7+abt.yaw*0.3;
-				opt.pit=opt.pit*0.7+abt.pit*0.3;
-				opt.yaw-=sgn(GMY.encoderAngle)*(((uint16_t)(receiveData[0].data[0])>>8) -127)/200.0;
+				opt.yaw=opt.yaw*0.6+abt.yaw*0.4;
+				opt.pit=opt.pit*0.6+abt.pit*0.4;
+//				opt.yaw-=sgn(GMY.encoderAngle)*(((uint16_t)(receiveData[0].data[0])>>8) -127)/200.0;
 			}else if(aim.dis==3000){//陀螺侧边装甲
-				opt.yaw=opt.yaw*0.7+(GMY.Real+sgn(aim.yaw)*(fabs(aim.yaw)-3))*0.3;
-				opt.pit=opt.pit*0.7+abt.pit*0.3;
-				opt.yaw-=sgn(GMY.encoderAngle)*(((uint16_t)(receiveData[0].data[0])>>8) -127)/200.0;
-			}else{opt=aimProcess(abt.yaw,abt.pit,&AimTic);}
-			findEnemy=1;
-		}
+				opt.yaw=opt.yaw*0.6+(GMY.Real+sgn(aim.yaw)*(fabs(aim.yaw)-3))*0.4;
+				opt.pit=opt.pit*0.6+abt.pit*0.4;
+//				opt.yaw-=sgn(GMY.encoderAngle)*(((uint16_t)(receiveData[0].data[0])>>8) -127)/200.0;
+			}
+			else{opt=aimProcess(abt.yaw,abt.pit,&AimTic);}
+			FindEnemy=1;
+	//	}
 	}
 	HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t*)&Enemy_INFO,8);
 }
 
 //**************************普通模式自瞄控制函数****************************//
+float test=2;
 void autoAim(){
-	GMY.Target=opt.yaw-0.5;
+	GMY.Target=opt.yaw-jst.yaw;
 //	GMP.Target=GMP.Real+aim.pit*0.65-aimLast.pit*0.2;
-	GMP.Target=opt.pit+1;
-	GMP.Target-=9/GMP.Target+0.5;
-	findEnemy=0;
+	GMP.Target=opt.pit+jst.pit;
+	
+	GMY.Target-=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127)/557.0 * fabs(sin((GMY.encoderAngle-aim.yaw)/180*3.14))*sgn(GMY.encoderAngle);
+	GMP.Target+=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127)/800 * fabs(cos((GMY.encoderAngle-aim.yaw)/180*3.14))*sgn(GMY.encoderAngle);
+
+	if(GMP.Target>-5){GMP.Target+=test;}
+	else{GMP.Target-=15/GMP.Target+0.5;}
+
+	FindEnemy=0;
 }
 
 
 float wySum,dy;
 GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
-/*@尹云鹏，自瞄预测，反陀螺，运动补偿（在functionTask）
+/*@尹云鹏，自瞄预测，反陀螺，运动补偿
 	参数：绝对角度yaw，pit，计时器地址
 	核心思想：
 	1.视觉数据需要与真实角度标定，传入参数为目标绝对角度，差分出速度
@@ -126,15 +134,16 @@ GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 	*tic=1;				//时间中断计时器重新开始
 	
 	if(whipCnt<5){//预测，滤波
-		out.yaw=(in.yaw+wySum*18+out.yaw+out.yaw)/3;
-		out.pit=(in.pit+wpSum*8+out.pit+out.pit)/3;
+		out.yaw=(in.yaw+wySum*25+out.yaw+out.yaw)/3;
+		out.pit=(in.pit+wpSum*15+out.pit+out.pit)/3;
 		out.dis=1;
 	}else{//反陀螺，低权值滤波
 		out.yaw=out.yaw*0.8+in.yaw*0.2;
 		out.pit=out.pit*0.8+in.pit*0.2;
-		out.yaw-=sgn(GMY.encoderAngle)*(((uint16_t)(receiveData[0].data[0])>>8) -127)/100.0;
+//		out.yaw-=sgn(GMY.encoderAngle)*(((uint16_t)(receiveData[0].data[0])>>8) -127)/800.0;
 		out.dis=2;
 	}
+	//3.14x8x0.09x8/60/21= 1/557
 	return out;
 }
 #endif /*USE_AUTOAIM*/
