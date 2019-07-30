@@ -45,13 +45,10 @@ extern int32_t auto_counter;
 
 void FunctionTaskInit(void);
 
-extern int8_t StateFlee,StateSway,StateHurt,ExtCmd;
+extern int8_t StateFlee,StateSway,StateHurt,ExtCmd,ExtCmd2;
 extern int16_t StateCnt,CmdTic;
 extern double ChassisSpeed;
-extern int16_t channelrrow;
-extern int16_t channelrcol;
-extern int16_t channellrow;
-extern int16_t channellcol;
+extern int16_t channelrrow,channelrcol,channellrow,channellcol;
 
 
 void limtSync(void);

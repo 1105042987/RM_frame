@@ -17,9 +17,8 @@
 #define brakeOff()		HAL_GPIO_WritePin(GPIOH,brake_Pin,0)
 
 
-extern int8_t StateSway,StateFlee,NutCnt;
+extern int8_t StateSway,StateFlee,NutCnt,Anchor;
 extern int16_t StateCnt,SpeedRef;
-extern float yawZero;
 
 int sgn(float x);
 
@@ -38,5 +37,5 @@ void scaning3(void);
 void firing1(void);
 void firing2(void);
 void firing3(void);//∑¢π‚≤‚ ‘
-
+void aimAtBox(void);
 void uartSend(void);

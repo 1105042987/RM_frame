@@ -15,7 +15,7 @@ RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
 int32_t auto_counter= 0;		//用于准确延时的完成某事件
 int16_t channelrrow,channelrcol,channellrow,channellcol;
-int8_t StateSway,StateFlee,StateHurt,StateRand=1,ExtCmd;
+int8_t StateSway,StateFlee,StateHurt,StateRand=1,ExtCmd,ExtCmd2;
 int16_t StateCnt=1,CmdTic;
 int16_t noEnemyCnt=1;
 void strategyShoot(void);
@@ -56,16 +56,40 @@ void RCProcess2(Remote *rc){
 	}
 	if(WorkState == STATE_2){
 		switch(ExtCmd){
-			case 1:routing1();break;
-			case 2:routing2();break;
-			default:routing1();
+			case 1:{//躲飞机
+				if(Anchor==0 || Anchor==1){routing1();}
+				else{routing3();}
+				break;
+			}
+			case 2:{
+				if(Anchor==0 || Anchor==2){routing2();}
+				else{routing3();}
+				break;
+			}
+			default:{
+				if(Anchor==0){routing0();}
+				else if(Anchor==1){routing1();}
+				else if(Anchor==2){routing4();}
+			}
 		}
 	}
 	if(WorkState == STATE_3){
 		switch(ExtCmd){
-			case 1:routing1();break;
-			case 2:routing2();break;
-			default:routing1();
+			case 1:{//躲飞机
+				if(Anchor==0 || Anchor==1){routing1();}
+				else{routing3();}
+				break;
+			}
+			case 2:{//躲碉堡
+				if(Anchor==0 || Anchor==2){routing2();}
+				else{routing3();}
+				break;
+			}
+			default:{
+				if(Anchor==0){routing0();}
+				else if(Anchor==1){routing1();}
+				else if(Anchor==2){routing4();}
+			}
 		}
 	}
 	limtSync();
@@ -100,6 +124,7 @@ void generalProcess(Remote *rc){
 	sendData[0].data[0]=(uint16_t)RCRightMode | (uint16_t)RCLeftMode<<2 | ((uint16_t)CMA.RxMsgC6x0.rotateSpeed/8+127)<<8;//右拨杆，左拨杆，底盘速度
 	if(GameRobotState.robot_id==7){sendData[0].data[0]=sendData[0].data[0] | 1<<4;}//是否为蓝
 	if(channelrcol>600){sendData[0].data[0]=sendData[0].data[0] | 1<<5;}//
+	if(ExtCmd2){sendData[0].data[0]=sendData[0].data[0] | 1<<6;ExtCmd2--;}//
 	sendData[0].data[1]=(uint16_t)(channellrow+660)/6 | ((uint16_t)(channellcol+660)/6)<<8 ;
 	sendData[0].data[2]=(int16_t)CMA.Real;
 	sendData[0].data[3]=(int16_t)(RealHeat0*20);//热量
@@ -139,6 +164,11 @@ void RCProcess1(){
 		if(FindEnemy){autoAim();}
 		if(receiveData[0].data[0] & 0x20){firing3();}
 		else{firing1();}
+//		else if(FindEnemy || noEnemyCnt){
+//			if(fabs(GMY.Real-opt.yaw)<2 && fabs(GMP.Real-opt.pit)<2){firing1();}
+//			noEnemyCnt=50;
+//		}
+//		noEnemyCnt--;
 	}
 	limtSync();
 }
@@ -183,26 +213,28 @@ void strategyShoot(){
 	FRICL.Target =-5500;
 	FRICR.Target = 5500;
 	laserOn();
+	if(receiveData[0].data[0] & 0x40){
+		aimAtBox();
+		noEnemyCnt=-100;
+	}
 	if(FindEnemy){
 		autoAim();
-//		//自瞄数据会有绝对坐标的覆盖，重新补偿
-//		GMY.Target-=sgn(GMY.encoderAngle)*(((uint16_t)(receiveData[0].data[0])>>8) -127)/1000.0;
-//		GMP.Target-=dx*15;
-		if(fabs(GMY.Real-opt.yaw)<2 && fabs(GMP.Real-opt.pit)<2 && (aim.dis==0||aim.dis==2000||aim.dis==3000)){firing2();}
-		if(aim.dis==500){noEnemyCnt=-30;}
-		else{noEnemyCnt=-400;}
+		if(fabs(GMY.Real-opt.yaw)<1.5 && fabs(GMP.Real-opt.pit)<1.5 && aim.dis>500){firing2();}
+		if(aim.dis==500){noEnemyCnt=-50;}
+		if(aim.dis==0){noEnemyCnt=2;}
+		else{noEnemyCnt=-350;}
 		sendData[0].data[0]=(int16_t)1;
 	}
 	else if(noEnemyCnt>1){
 		scaning1();
 		sendData[0].data[0]=(int16_t)0;
 	}
-	else if(noEnemyCnt<-300){
+	else if(noEnemyCnt<-250){
 		noEnemyCnt++;
-		if(fabs(GMY.Real-opt.yaw)<2 && fabs(GMP.Real-opt.pit)<2 && (aim.dis==0||aim.dis==2000||aim.dis==3000)){firing2();}
+		if(fabs(GMY.Real-opt.yaw)<1.5 && fabs(GMP.Real-opt.pit)<1.5 && aim.dis>500){firing2();}
 		else{STIRv.Target=0;}
 	}
-	else if(noEnemyCnt<-150){
+	else if(noEnemyCnt<-120){
 		noEnemyCnt++;
 		STIRv.Target=0;
 	}
@@ -229,33 +261,30 @@ void generalProcess(){
 	
 	CMA.Real=receiveData[0].data[2];
 	RealHeat0=receiveData[0].data[3]/(float)(20.0);
-	//
+	
 	GMY.Target+=channellrow*0.001f;
 	GMP.Target+=channellcol*0.001f;
-	//基于顶盘速度的yaw运动补偿,基于imu的pit运动补偿 
-//	GMY.Target-=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127)/(2500.0+GMP.Real*30) * fabs(sin((GMY.encoderAngle)/180*3.14))*sgn(GMY.encoderAngle);
-//	GMP.Target+=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127)/2000 * fabs(cos((GMY.encoderAngle)/180*3.14))*sgn(GMY.encoderAngle);
-
-	
+	//基于顶盘速度的运动补偿
+	float tmpY=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * sin((GMY.encoderAngle)/57.3) * sin(GMP.Real/57.3)/400;//460;
+	float tmpP=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * cos((GMY.encoderAngle)/57.3) * sin(GMP.Real/57.3) * sin(GMP.Real/57.3)/250;
+	GMY.Target+=tmpY;
+	GMP.Target+=tmpP;
+	opt.yaw+=tmpY;
+	opt.pit+=tmpP;
 //	GMY.Target-=sgn(GMY.encoderAngle)*(((uint16_t)(receiveData[0].data[0])>>8) -127)/(2000.0+GMP.Real*30);
 //	dx=imu.vx-dx;
 //	vx+=dx;
 //	vx*=0.99;
 //	GMP.Target-=dx*16;
 //	dx=imu.vx;
-//100,210,315,425,530,610
-	if(CMA.Real>-100){yawZero=-30;}
-	else if(CMA.Real>-210){yawZero=(210+CMA.Real)/-3.67;}
-	else if(CMA.Real>-425){yawZero=0;}
-	else if(CMA.Real>-530){yawZero=(425+CMA.Real)/1.17;}
-	else{yawZero=-90;}
 }
 
 void limtSync(){
-	if(GMY.encoderAngle>-150 && GMY.encoderAngle<-120){MINMAX(GMP.Target,-60,-0.67*(120+GMY.encoderAngle));}
-	else if(GMY.encoderAngle>90 && GMY.encoderAngle<120){MINMAX(GMP.Target,-60,0.67*(GMY.encoderAngle-90));}
-	else if(GMY.encoderAngle<-130 || GMY.encoderAngle>120){MINMAX(GMP.Target,-60,20);}
-	else{MINMAX(GMP.Target,-60,0);}
+//	if(GMY.encoderAngle>-150 && GMY.encoderAngle<-120){MINMAX(GMP.Target,-60,-0.67*(120+GMY.encoderAngle));}
+//	else if(GMY.encoderAngle>90 && GMY.encoderAngle<120){MINMAX(GMP.Target,-60,0.67*(GMY.encoderAngle-90));}
+//	else if(GMY.encoderAngle<-130 || GMY.encoderAngle>120){MINMAX(GMP.Target,-60,20);}
+//	else{MINMAX(GMP.Target,-60,0);}
+	MINMAX(GMP.Target,-60,0);
 //	MINMAX(GMY.Target,-160+GMY.imuEncorderDiff,160+GMY.imuEncorderDiff);//limit
 	//CMR.Target =  -CML.Target;
 }

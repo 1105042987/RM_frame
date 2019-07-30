@@ -15,6 +15,8 @@
 #include <string.h>
 
 uint8_t tmp_judge;
+int8_t hurtSum,hurtOpn;
+int16_t hurtTic;
 void InitJudgeUart(void){
 	tx_free = 1;
 //	Send_User_Data();
@@ -226,20 +228,28 @@ void Referee_Update_RobotState(){
 	maxHP = GameRobotState.max_HP;
 	//=========================================
 	remainHP = GameRobotState.remain_HP;
-	if(lastHP-remainHP>80){
-		StateFlee=8;
-		receiveCnt=0;
+	if(lastHP-remainHP){hurtTic=20;}
+	if(hurtTic){
+		hurtSum+=lastHP-remainHP;
+		hurtTic--;
+	}else{hurtSum=0;}
+	
+	if(hurtSum>30){
+		if(hurtOpn){
+			if(CMA.Real>-460){ExtCmd=2;CmdTic=130;}
+			else{ExtCmd=1;CmdTic=100;}
+			hurtSum=0;
+		}else{
+			hurtOpn=1;
+			hurtSum=0;
+		}
 	}
-	else if(lastHP-remainHP>9){
-		if(StateSway||StateFlee){StateFlee+=2;}
-		else{StateFlee=2;}
-		receiveCnt=0;
-	}
-	if(remainHP<490){SpeedRef=2100;}
 	lastHP=remainHP;
+	
+	
 	receiveCnt++;//10hz
 	if(receiveCnt>10&&StateFlee>1){StateFlee=0;}
-	if(CmdTic<300){CmdTic++;}
+	if(CmdTic<180){CmdTic++;}
 	else{ExtCmd=0;}
 	//========================
 	
@@ -322,11 +332,11 @@ void Referee_Update_hurt(){//@yyp
 	if(tmp==0x1){StateHurt=1;}
 	if(tmp==0x2){StateHurt=2;}
 }
-
+//======================================
 void Judge_Refresh_Interact(){
 	if(buffer[13]==1){CmdTic=0;ExtCmd=1;SpeedRef=2100;}//躲飞机
 	else if(buffer[13]==2){CmdTic=0;ExtCmd=2;}
-	else if(buffer[13]==3){CmdTic=0;ExtCmd=3;}
+	else if(buffer[13]==3){CmdTic=0;ExtCmd2=3;}
 }
 
 

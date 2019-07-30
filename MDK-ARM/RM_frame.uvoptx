@@ -183,87 +183,92 @@
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>AimTic,0x0A</ItemText>
+          <ItemText>AimTic,0x10</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>wySum</ItemText>
+          <ItemText>wy</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>CMR,0x0A</ItemText>
+          <ItemText>GMP</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>1</WinNumber>
-          <ItemText>imu</ItemText>
+          <ItemText>abt</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
           <WinNumber>1</WinNumber>
-          <ItemText>StateFlee</ItemText>
+          <ItemText>GMY.Target</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
           <WinNumber>1</WinNumber>
-          <ItemText>LimitRate</ItemText>
+          <ItemText>((int16_t)((uint16_t)(receiveData[0].data[0])&gt;&gt;8) -127) * sin((GMY.encoderAngle)/57.3) /40,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>10</count>
           <WinNumber>1</WinNumber>
-          <ItemText>ChassisSpeed</ItemText>
+          <ItemText>ExtCmd</ItemText>
         </Ww>
         <Ww>
           <count>11</count>
           <WinNumber>1</WinNumber>
-          <ItemText>NutCnt</ItemText>
+          <ItemText>CmdTic,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>12</count>
           <WinNumber>1</WinNumber>
-          <ItemText>ExtCmd</ItemText>
+          <ItemText>hurtSum,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>13</count>
           <WinNumber>1</WinNumber>
-          <ItemText>CmdCnt</ItemText>
+          <ItemText>lastHP</ItemText>
         </Ww>
         <Ww>
           <count>14</count>
           <WinNumber>1</WinNumber>
-          <ItemText>CmdTic</ItemText>
+          <ItemText>lastHP-remainHP</ItemText>
         </Ww>
         <Ww>
           <count>15</count>
           <WinNumber>1</WinNumber>
-          <ItemText>CMA.RxMsgC6x0.rotateSpeed,0x0A</ItemText>
+          <ItemText>GameRobotState.remain_HP,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>16</count>
           <WinNumber>1</WinNumber>
-          <ItemText>jst</ItemText>
+          <ItemText>PowerHeat,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>17</count>
           <WinNumber>1</WinNumber>
-          <ItemText>GMP</ItemText>
+          <ItemText>buffer[13],0x0A</ItemText>
         </Ww>
         <Ww>
           <count>18</count>
           <WinNumber>1</WinNumber>
-          <ItemText>receiveData[0].data[1]&gt;&gt;8</ItemText>
+          <ItemText>ExtCmd2</ItemText>
         </Ww>
         <Ww>
           <count>19</count>
           <WinNumber>1</WinNumber>
-          <ItemText>imu</ItemText>
+          <ItemText>abt</ItemText>
         </Ww>
         <Ww>
           <count>20</count>
           <WinNumber>1</WinNumber>
-          <ItemText>GMY</ItemText>
+          <ItemText>tmpY</ItemText>
+        </Ww>
+        <Ww>
+          <count>21</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>tmpP</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>
