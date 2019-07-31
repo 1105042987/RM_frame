@@ -45,18 +45,18 @@ void AutoAimUartRxCpltCallback(){
 			if(aim.dis==2000){//陀螺正对装甲
 				abt.yaw=abtLast.yaw*0.6+abt.yaw*0.4;
 				abt.pit=abtLast.pit*0.7+abt.pit*0.3;
-				opt.yaw=abt.yaw-((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * sin((GMY.encoderAngle)/57.3) /16;//19.3
-				opt.pit=abt.pit+((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * cos((GMY.encoderAngle)/57.3) * sin(GMP.Real/57.3) /16;
+				opt.yaw=abt.yaw-ChaSpdSin /16;//19.3
+				opt.pit=abt.pit+ChaSpdCos /16;
 			}else if(aim.dis==3000){//陀螺右侧边装甲,yaw为负
 				abt.yaw=abtLast.yaw*0.6+(abt.yaw+2.5)*0.4;
 				abt.pit=abtLast.pit*0.7+abt.pit*0.3;
-				opt.yaw=abt.yaw-((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * sin((GMY.encoderAngle)/57.3) /16;//19.3
-				opt.pit=abt.pit+((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * cos((GMY.encoderAngle)/57.3) * sin(GMP.Real/57.3) /16;
+				opt.yaw=abt.yaw-ChaSpdSin /16;//19.3
+				opt.pit=abt.pit+ChaSpdCos /16;
 			}else if(aim.dis==4000){//陀螺左侧边装甲
 				abt.yaw=abtLast.yaw*0.7+(abt.yaw-2.5)*0.3;
 				abt.pit=abtLast.pit*0.7+abt.pit*0.3;
-				opt.yaw=abt.yaw-((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * sin((GMY.encoderAngle)/57.3) /16;//19.3
-				opt.pit=abt.pit+((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * cos((GMY.encoderAngle)/57.3) * sin(GMP.Real/57.3) /16;
+				opt.yaw=abt.yaw-ChaSpdSin /16;//19.3
+				opt.pit=abt.pit+ChaSpdCos /16;
 			}
 			else{opt=aimProcess(abt.yaw,abt.pit,&AimTic);}
 			FindEnemy=1;
@@ -110,8 +110,8 @@ GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 	in.pit=(pit+in.pit)/2;
 	if(lock){			//函数首次进入保护，只记录数据不预测
 		lock--;
-		wySum=-((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * sin((GMY.encoderAngle)/57.3) /416;//19.3
-		wpSum=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * cos((GMY.encoderAngle)/57.3) * sin(GMP.Real/57.3) /416;
+		wySum=-ChaSpdSin /416;
+		wpSum= ChaSpdCos /416;
 	}
 	else{
 		//判定陀螺，应该在本次计算wySum之前
@@ -151,8 +151,8 @@ GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 		out.pit=(in.pit+wpSum*15)*0.3+out.pit*0.7;
 		out.dis=1;
 	}else{//反陀螺，低权值滤波
-		out.yaw=0.8*out.yaw+0.2*(in.yaw-((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * sin((GMY.encoderAngle)/57.3) /16);//19.3
-		out.pit=0.8*out.pit+0.2*(in.pit+((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * cos((GMY.encoderAngle)/57.3) * sin(GMP.Real/57.3) /16);
+		out.yaw=0.8*out.yaw+0.2*(in.yaw-ChaSpdSin /16);//19.3
+		out.pit=0.8*out.pit+0.2*(in.pit+ChaSpdCos /16);
 		out.dis=2;
 	}
 //3.14x8x0.09x8/60/21= 1/557

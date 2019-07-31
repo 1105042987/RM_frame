@@ -139,7 +139,7 @@ void limtSync(){
 #endif  //GUARD == 'U'
 #if GUARD == 'D'
 //下平台代
-float vx,dx;//基于imu的伪补偿
+float ChaSpdSin,ChaSpdCos;
 void generalProcess();
 void RCProcess1(){
 	generalProcess();
@@ -161,14 +161,7 @@ void RCProcess1(){
 		FRICL.Target =-5500;
 		FRICR.Target = 5500;
 		uartSend();
-		if(FindEnemy){autoAim();}
-		if(receiveData[0].data[0] & 0x20){firing3();}
-		else{firing1();}
-//		else if(FindEnemy || noEnemyCnt){
-//			if(fabs(GMY.Real-opt.yaw)<2 && fabs(GMP.Real-opt.pit)<2){firing1();}
-//			noEnemyCnt=50;
-//		}
-//		noEnemyCnt--;
+		strategyShoot();
 	}
 	limtSync();
 }
@@ -198,17 +191,28 @@ void RCProcess2(){
 void RCProcess3(){
 	generalProcess();
 	if(WorkState == STATE_1){
-		STIRv.Target=0;
-		FRICL.Target=0;
-		FRICR.Target=0;
+		FRICL.Target =-3300;
+		FRICR.Target = 3300;
+		uartSend();
+		if(FindEnemy){autoAim();}
+		if(receiveData[0].data[0] & 0x20){firing3();}
+		else{firing1();}
 	}
 	if(WorkState == STATE_2){
-		strategyShoot();
+		FRICL.Target =-5500;
+		FRICR.Target = 5500;
 		uartSend();
+		if(FindEnemy){autoAim();}
+		if(receiveData[0].data[0] & 0x20){firing2();}
+		else{firing1();}
+	}
+	if(WorkState == STATE_3){//停止位，根本进不来
+		FRICL.Target=0;
+		FRICR.Target=0;
+		STIRv.Target=0;
 	}
 	limtSync();
 }
-
 void strategyShoot(){
 	FRICL.Target =-5500;
 	FRICR.Target = 5500;
@@ -248,6 +252,7 @@ void strategyShoot(){
 //===================================
 //*******************下平台通用代码
 //===================================
+
 void generalProcess(){
 	offLed(5);
 	laserOn();
@@ -257,7 +262,6 @@ void generalProcess(){
 	channelrcol = 0;
 	channellrow = -(int16_t)((uint16_t)(receiveData[0].data[1] & 0xff)*6)+660;//leftRight
 	channellcol = (int16_t)((uint16_t)(receiveData[0].data[1])>>8)*6-660;//upDown
-	sendData[0].data[1]=(uint16_t)(channellrow+660)/6 | ((uint16_t)(channellcol+660)/6)<<8 ;
 	
 	CMA.Real=receiveData[0].data[2];
 	RealHeat0=receiveData[0].data[3]/(float)(20.0);
@@ -265,28 +269,20 @@ void generalProcess(){
 	GMY.Target+=channellrow*0.001f;
 	GMP.Target+=channellcol*0.001f;
 	//基于顶盘速度的运动补偿
-	float tmpY=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * sin((GMY.encoderAngle)/57.3) * sin(GMP.Real/57.3)/400;//460;
-	float tmpP=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * cos((GMY.encoderAngle)/57.3) * sin(GMP.Real/57.3) * sin(GMP.Real/57.3)/250;
+	ChaSpdSin=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * sin((GMY.encoderAngle)/57.3);
+	ChaSpdCos=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * cos((GMY.encoderAngle)/57.3)*sin(GMP.Real/57.3);
+	float SinPit=sin(GMP.Real/57.3);
+	float tmpY=ChaSpdSin * SinPit/400;//460;
+	float tmpP=ChaSpdCos * SinPit/400;
 	GMY.Target+=tmpY;
 	GMP.Target+=tmpP;
 	opt.yaw+=tmpY;
 	opt.pit+=tmpP;
-//	GMY.Target-=sgn(GMY.encoderAngle)*(((uint16_t)(receiveData[0].data[0])>>8) -127)/(2000.0+GMP.Real*30);
-//	dx=imu.vx-dx;
-//	vx+=dx;
-//	vx*=0.99;
-//	GMP.Target-=dx*16;
-//	dx=imu.vx;
+	
 }
 
 void limtSync(){
-//	if(GMY.encoderAngle>-150 && GMY.encoderAngle<-120){MINMAX(GMP.Target,-60,-0.67*(120+GMY.encoderAngle));}
-//	else if(GMY.encoderAngle>90 && GMY.encoderAngle<120){MINMAX(GMP.Target,-60,0.67*(GMY.encoderAngle-90));}
-//	else if(GMY.encoderAngle<-130 || GMY.encoderAngle>120){MINMAX(GMP.Target,-60,20);}
-//	else{MINMAX(GMP.Target,-60,0);}
 	MINMAX(GMP.Target,-60,0);
-//	MINMAX(GMY.Target,-160+GMY.imuEncorderDiff,160+GMY.imuEncorderDiff);//limit
-	//CMR.Target =  -CML.Target;
 }
 
 #endif // GUARD == 'D'

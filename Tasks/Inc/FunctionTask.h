@@ -49,7 +49,7 @@ extern int8_t StateFlee,StateSway,StateHurt,ExtCmd,ExtCmd2;
 extern int16_t StateCnt,CmdTic;
 extern double ChassisSpeed;
 extern int16_t channelrrow,channelrcol,channellrow,channellcol;
-
+extern float ChaSpdSin,ChaSpdCos;
 
 void limtSync(void);
 #endif /*__FUNCTIONTASK_H*/
