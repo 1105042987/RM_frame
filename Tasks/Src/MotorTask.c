@@ -40,8 +40,8 @@ MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(-1,&ControlGMY,2000,0,20,
 //								fw_PID_INIT_EASY(3000, 500, 200, 20000));
 //								fw_PID_INIT_EASY(0.45, 0.06, 2, 10),
 //								fw_PID_INIT_EASY(2800, 500, 200, 16000));
-								fw_PID_INIT_EASY(0.32, 0, 0, 10),
-								fw_PID_INIT_EASY(18000, 200, 100, 20000));
+								fw_PID_INIT_EASY(0.35, 0.05, 0, 10),
+								fw_PID_INIT_EASY(16000, 200, 100, 20000));
 								
 
 //MotorINFO GMY  =  Gimbal6020_MOTORINFO_Init(1,&ControlGMYEncoder,2000,0,20,

@@ -41,7 +41,6 @@ void routing0(){//全程
 	}
 //	if(NutCnt==0 && dir==-1){LimitRate=0;}
 //	else if(NutCnt==8 && dir==1){LimitRate=0;}
-
 	brakeOff();
 	ChassisSpeed=SpeedRef*dir;
 }
@@ -181,8 +180,8 @@ int8_t preventAnchor(){
 	if(CMA.RxMsgC6x0.rotateSpeed==0 && CMR.RxMsgC6x0.rotateSpeed==0){anchorCnt++;}
 	else{anchorCnt=0;}
 	if(anchorCnt>10){
-		if(CMA.Real<-200){Anchor=1;}//飞机传感器掉线
-		else{Anchor=2;}
+		if(CMA.Real<-200){Anchor=1;NutCnt=8;}//飞机传感器掉线
+		else{Anchor=2;NutCnt=0;}
 		return -1;
 	}
 	else return 1;

@@ -183,6 +183,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			if(imu.FirstEnter == 1) imu.InitCount++;
 			if(imu.InitCount == 1000) {imu.InitFinish = 1;imu.FirstEnter = 0;imu.InitCount = 0;}
 		#endif
+		#ifdef SLAVE_MODE
+			if(RCRightMode==Pos1)
+				RCProcess1();
+			else if(RCRightMode==Pos2)
+				RCProcess2();
+			else
+				RCProcess3();
+		#endif
 		//主循环在时间中断中启动
 		controlLoop();
 		heatCalc();
@@ -201,12 +209,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 					RCLeftMode = (RCMode_e)((receiveData[0].data[0]&0xf)>>2);
 					RCRightMode = (RCMode_e)(receiveData[0].data[0]&0x3);
 				}
-				if(RCRightMode==Pos1)
-					RCProcess1();
-				else if(RCRightMode==Pos2)
-					RCProcess2();
-				else
-					RCProcess3();
 			}
 		}
 		#else

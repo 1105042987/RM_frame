@@ -36,7 +36,8 @@ void AutoAimUartRxCpltCallback(){
 		onLed(5);
 		aim.yaw=(int16_t)((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)*kAngle;
 		aim.pit=-(int16_t)((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)*kAngle;
-		aim.dis=(int16_t)((RX_ENEMY_DIS1<<8)|RX_ENEMY_DIS2);//0弱识别，500正常，2000陀螺正装甲，3000陀螺右装甲，4000陀螺左装甲
+		aim.dis=(int16_t)((RX_ENEMY_DIS1<<8)|RX_ENEMY_DIS2);//0无，500弱识别，1000正常，2000陀螺正装甲，3000陀螺右装甲，4000陀螺左装甲
+		if(aim.dis==0){HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t*)&Enemy_INFO,8);return;}
 		aim.yaw/=2.7;
 		aim.pit/=2.83;
 		abt.yaw=GMY.Real+aim.yaw-jst.yaw;
@@ -46,19 +47,26 @@ void AutoAimUartRxCpltCallback(){
 				abt.yaw=abtLast.yaw*0.6+abt.yaw*0.4;
 				abt.pit=abtLast.pit*0.7+abt.pit*0.3;
 				opt.yaw=abt.yaw-ChaSpdSin /16;//19.3
-				opt.pit=abt.pit+ChaSpdCos /16;
+				opt.pit=abt.pit-ChaSpdCos /15;
 			}else if(aim.dis==3000){//陀螺右侧边装甲,yaw为负
 				abt.yaw=abtLast.yaw*0.6+(abt.yaw+2.5)*0.4;
 				abt.pit=abtLast.pit*0.7+abt.pit*0.3;
 				opt.yaw=abt.yaw-ChaSpdSin /16;//19.3
-				opt.pit=abt.pit+ChaSpdCos /16;
+				opt.pit=abt.pit-ChaSpdCos /15;
 			}else if(aim.dis==4000){//陀螺左侧边装甲
 				abt.yaw=abtLast.yaw*0.7+(abt.yaw-2.5)*0.3;
 				abt.pit=abtLast.pit*0.7+abt.pit*0.3;
 				opt.yaw=abt.yaw-ChaSpdSin /16;//19.3
-				opt.pit=abt.pit+ChaSpdCos /16;
+				opt.pit=abt.pit-ChaSpdCos /15;
 			}
+//======速度补偿版本==================
+//			abt.yaw=abtLast.yaw*0.6+abt.yaw*0.4;
+//			abt.pit=abtLast.pit*0.7+abt.pit*0.3;
+//			opt.yaw=abt.yaw-ChaSpdSin /16;//19.3
+//			opt.pit=abt.pit-ChaSpdCos /15;
+//======预测版本======================
 			else{opt=aimProcess(abt.yaw,abt.pit,&AimTic);}
+//====================================
 			FindEnemy=1;
 		}
 		abtLast=abt;
@@ -68,12 +76,9 @@ void AutoAimUartRxCpltCallback(){
 
 //**************************普通模式自瞄控制函数****************************//
 void autoAim(){
+	opt.pit-=20/opt.pit+0.5;//下坠补偿
 	GMY.Target=opt.yaw;
 	GMP.Target=opt.pit;
-	
-	if(GMP.Target>-5){GMP.Target+=2;}
-	else{GMP.Target-=15/GMP.Target+0.5;}
-
 	FindEnemy=0;
 }
 float wy,wp;
@@ -88,7 +93,7 @@ GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 	5.反陀螺：加权平均
 	6.自身运动补偿：在functionTask
 */
-	#define amt 5	//间隔点个数amount，调节amt使时间间隔大约为50ms，即 amt=50ms/1000ms*fps
+	#define amt 6	//间隔点个数amount，调节amt使时间间隔大约为50ms，即 amt=50ms/1000ms*fps
 	static int8_t i,lock,whipCnt,cnt;	//index计数器，首次进入保护锁，陀螺判定计数，调用计数
 	static float 	y[amt],p[amt],			//yaw,pit历史
 								tSum,t[amt],				//间隔时间,tic历史
@@ -103,15 +108,15 @@ GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 		wy=0;wp=0;dYaw=yaw;
 		wySum=0;wpSum=0;
 		whipCnt=0;
-		in.yaw=yaw;in.pit=pit;
+		in.yaw=yaw;in.pit=pit;in.dis=pit;
 		out=in;
 	}
-	in.yaw=(yaw+in.yaw)/2;//传入值滤波
-	in.pit=(pit+in.pit)/2;
+	in.yaw=in.yaw*0.7+yaw*0.3;//传入值滤波
+	in.pit=in.pit*0.7+pit*0.3;
 	if(lock){			//函数首次进入保护，只记录数据不预测
 		lock--;
-		wySum=-ChaSpdSin /416;
-		wpSum= ChaSpdCos /416;
+		wySum=-ChaSpdSin /500;
+		wpSum=-ChaSpdCos /240;
 	}
 	else{
 		//判定陀螺，应该在本次计算wySum之前
@@ -123,13 +128,12 @@ GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 			cnt=0;
 			whipCnt=0;
 		}
-		
 //==============	
 //		wy=(wy+(in.yaw-y[i])*50/tSum)/2;	//速度滤波,*45本来是预测时间，放到这里提高除法精度
 //		wp=(wp+(in.pit-p[i])*50/tSum)/2;
 //==============	
 		wy=(wy+(in.yaw-y[i])/tSum)/2;	//速度滤波
-		wp=(wp+(in.pit-p[i])/tSum)/2;
+		wp=0.7*wp+0.3*(in.pit-p[i])/tSum;
 		wySum+=wy;	//角速度累加与指数衰减对抗
 		wpSum+=wp;
 		wySum*=0.9;	//指数衰减限制累加,失去物理意义
@@ -147,13 +151,13 @@ GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 //		out.yaw=(in.yaw-wy/sin(in.pit/57.3)+out.yaw)/2;
 //		out.pit=(in.pit+wp+out.pit)/2;
 //==============	
-		out.yaw=(in.yaw+wySum*26+out.yaw+out.yaw)/3;
-		out.pit=(in.pit+wpSum*15)*0.3+out.pit*0.7;
-		out.dis=1;
+		out.yaw=0.3*(in.yaw+wySum*25) +0.7*out.yaw;
+		out.dis=0.3*(in.pit+wpSum*10)+ 0.7*out.pit;
+		out.yaw-=ChaSpdSin /100;
+		out.pit=out.dis-ChaSpdCos /40;
 	}else{//反陀螺，低权值滤波
 		out.yaw=0.8*out.yaw+0.2*(in.yaw-ChaSpdSin /16);//19.3
-		out.pit=0.8*out.pit+0.2*(in.pit+ChaSpdCos /16);
-		out.dis=2;
+		out.pit=0.8*out.pit+0.2*(in.pit-ChaSpdCos /15);
 	}
 //3.14x8x0.09x8/60/21= 1/557
 	return out;

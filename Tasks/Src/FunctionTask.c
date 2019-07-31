@@ -222,10 +222,10 @@ void strategyShoot(){
 		noEnemyCnt=-100;
 	}
 	if(FindEnemy){
-		autoAim();
+		if(aim.dis==0){noEnemyCnt=2;}
+		else{autoAim();}
 		if(fabs(GMY.Real-opt.yaw)<1.5 && fabs(GMP.Real-opt.pit)<1.5 && aim.dis>500){firing2();}
 		if(aim.dis==500){noEnemyCnt=-50;}
-		if(aim.dis==0){noEnemyCnt=2;}
 		else{noEnemyCnt=-350;}
 		sendData[0].data[0]=(int16_t)1;
 	}
@@ -272,13 +272,12 @@ void generalProcess(){
 	ChaSpdSin=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * sin((GMY.encoderAngle)/57.3);
 	ChaSpdCos=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * cos((GMY.encoderAngle)/57.3)*sin(GMP.Real/57.3);
 	float SinPit=sin(GMP.Real/57.3);
-	float tmpY=ChaSpdSin * SinPit/400;//460;
-	float tmpP=ChaSpdCos * SinPit/400;
+	float tmpY=ChaSpdSin * SinPit/375;//460;
+	float tmpP=ChaSpdCos * SinPit/360;
 	GMY.Target+=tmpY;
 	GMP.Target+=tmpP;
 	opt.yaw+=tmpY;
 	opt.pit+=tmpP;
-	
 }
 
 void limtSync(){
