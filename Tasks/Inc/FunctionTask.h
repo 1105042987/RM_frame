@@ -125,5 +125,9 @@ void OptionalFunction(void);
 void Wheel(void);
 void InitialSave(void);
 void Slave_Common(void);
+void SetDoorZero(void);
+void Door_SwitchState(void);
+void Slave_SwitchState(void);
+void Twist(void);
 
 #endif /*__FUNCTIONTASK_H*/

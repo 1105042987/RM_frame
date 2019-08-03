@@ -10,7 +10,7 @@
   ******************************************************************************
   */
 	#include "includes.h"
-	#define FRONT -1550 
+	#define FRONT -1500 
 extern Distance_Couple_t distance_couple;
 extern Engineer_State_e EngineerState;
 extern uint32_t Direction_Indicator;
@@ -190,7 +190,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 								NMCDL.positionPID.outputMax = 7000;
 						NMCDR.positionPID.outputMax =7000;
 									NMCDL.TargetAngle = UD_BOTTOM;
-								  NMCDR.TargetAngle = UD_BOTTOM-15;
+								  NMCDR.TargetAngle = UD_BOTTOM-25;
 								signal1=1;
 								if(AlreadyDowned==0)
 									AlreadyDowned=1;
@@ -208,7 +208,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 						NMCDL.positionPID.outputMax = 7000;
 						NMCDR.positionPID.outputMax = 7000;
 							NMCDL.TargetAngle = UD_BOTTOM;
-						  NMCDR.TargetAngle = UD_BOTTOM-15;
+						  NMCDR.TargetAngle = UD_BOTTOM-25;
 						signal1=1;
 						if(AlreadyClimbed==0)
 						AlreadyClimbed=1;
@@ -259,6 +259,10 @@ void ComeToTop()
 
 void Speed_Locker()
 {
+	if(ChassisSpeedRef.forward_back_ref>0&&AlreadyClimbed==1)
+	{
+		ChassisSpeedRef.forward_back_ref/=1.5;
+	}
 	if(AutoClimb_Level==1&&ChassisSpeedRef.forward_back_ref>0&&AlreadyClimbed==0)  //ÖĞ¼äÌ¨½×
 	{
 		ChassisSpeedRef.forward_back_ref/=2;

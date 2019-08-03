@@ -55,6 +55,12 @@ uint32_t shift_locker=0;
 uint32_t ClawBack_Locker=0;
 uint32_t ctrl_cnt=0;
 uint32_t shift_cnt=0;
+uint32_t twist_cnt=0;
+uint32_t twist_state=0;
+int32_t  twist_angle=45;
+int32_t  chassis_angle=0;
+int32_t  yty_angle=0;
+uint32_t first_twist=0;
 uint32_t saving_count=0;
 uint32_t saving=12;
 uint32_t saveing_flag=0;
@@ -76,6 +82,7 @@ extern uint8_t signal1;
 extern uint8_t signal2;
 extern uint32_t Slave_Commoning;
 extern ManualClimb_State_e ManualClimb_State;
+extern uint32_t clawback;
 
 uint8_t transdata[1];
 void InitialSave()
@@ -257,6 +264,29 @@ void Look_Screen()
 		Yaw_Set_Cnt=150;
 	}
 }
+
+void Twist()
+{
+	if(first_twist==1)
+	{
+		//YTY.TargetAngle-=20;
+		first_twist=2;
+	}
+	if(twist_state==1&&twist_cnt==0&&twist_angle==45)
+	{
+		imu.target_yaw+=60;
+		twist_angle=-45;
+		twist_cnt=500;
+		YTY.TargetAngle=chassis_angle+yty_angle-imu.now_yaw;
+	}
+	if(twist_state==1&&twist_cnt==0&&twist_angle==-45)
+	{
+		imu.target_yaw-=60;
+		twist_angle=45;
+		twist_cnt=500;
+		YTY.TargetAngle=chassis_angle+yty_angle-imu.now_yaw;
+	}
+}
 void Limit_and_Synchronization()
 {
 	//demo
@@ -328,12 +358,15 @@ void RemoteControlProcess(Remote *rc)
    if(DebugState==DEBUG_GET_STATE)
 	 {		 
 		//手动挡
-		if(channellcol>200){       //UP  左纵向是整个机构的上下
-			NMUDL.TargetAngle -= channellcol * 0.05;
-			NMUDR.TargetAngle -= channellcol * 0.05;
-		}	else if(channellcol<-200){		//DOWN 
-			NMUDL.TargetAngle -= channellcol * 0.05;
-			NMUDR.TargetAngle -= channellcol * 0.05;
+		if(channellcol<0)
+		{
+		NMCDL.TargetAngle+=channellcol*0.06;
+		NMCDR.TargetAngle+=channellcol*0.06;
+		}
+		if(channellcol>=0)
+		{
+		NMCDL.TargetAngle+=channellcol*0.06;
+		NMCDR.TargetAngle+=channellcol*0.06;
 		}
 	  if(channelrrow>500)
 		{CLAWTIGHT;}//右横向是抓紧的开关
@@ -650,14 +683,6 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
       else if(key->v & KEY_B)
 			{
-				DebugState=DEBUG_CLIMB_STATE;
-			}
-      else if(key->v & KEY_R)
-			{
-				Box_Clearing=1;
-			}
-      else if(key->v & KEY_C)
-			{
 				if(OnePush_Locker==0)
 				{
 					OnePush_Locker=1;
@@ -690,12 +715,21 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 					}
 				}
 			}
+      else if(key->v & KEY_R)
+			{
+				Box_Clearing=1;
+			}
+      else if(key->v & KEY_W)
+			{
+				AutoClimb_Level=1;
+			}
 			
 			break;
 		}
 		case CTRL:				//slow
 		{
 			ctrl_locker=1;
+			Sensor_LongPush=0;
 			//imu_pause=1;
 			if(key->v & KEY_C)
 			{
@@ -727,8 +761,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_G)
 			{
-				if(Claw_UpToPosition==0)
-		      Claw_UpToPosition=1;
+				if(EngineerState==COMMON_STATE)
+				State_AutoGet_Fake();
 			}
 			else if(key->v & KEY_F)
 			{
@@ -757,6 +791,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		case SHIFT:				//quick
 		{
 			shift_locker=1;
+			Sensor_LongPush=0;
+			Sensor_Lock=0;
 			if(key->v & KEY_Q)
 			{
 				Claw_SelfInspecting=1;
@@ -792,9 +828,22 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 					if(EngineerState==GET_STATE)
 				{
-					AutoGet_FillQueue();
-					//AutoGet_Fillstream();
+					//AutoGet_FillQueue();
+					AutoGet_Fillstream();
 				}
+			}
+			else if(key->v& KEY_B)
+			{
+//				if(EngineerState==COMMON_STATE&&ON_THE_GROUND)
+//				{
+//				 imu_pause=0;
+//				 twist_state=1;
+//					first_twist=1;
+//					chassis_angle=imu.yaw;
+//					yty_angle=YTY.RealAngle;
+//					YTY.positionPID.kp=3.0;
+//					YTY.positionPID.outputMax=360;
+//				}
 				
 			}
 		}break;
@@ -807,9 +856,12 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		{
 			if(key->v & KEY_X)
 			{ 
+				CLAWIN;
 				queue_deinit(&AutoGet_Queue);
 	      queue_init(&AutoGet_Queue);
 				AutoGet_Stop_And_Clear();
+				if(ON_THE_FLOOR)
+					clawback=1;
 			}
 			else if(key->v & KEY_C)
 			{
@@ -817,11 +869,11 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 					State_AutoGet();
 				if(EngineerState==GET_STATE)
 				AutoGet_Enqueue(1);
-				if(AutoClimb_Level==1)
-				{
-					if(EngineerState==COMMON_STATE)
-				  State_AutoClimb();
-				}
+//				if(AutoClimb_Level==1)
+//				{
+//					if(EngineerState==COMMON_STATE)
+//				  State_AutoClimb();
+//				}
 			}
 			else if(key->v & KEY_V)
 			{
@@ -834,6 +886,16 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			{
 				if(EngineerState==GET_STATE)
 				AutoGet_Enqueue(3);
+				if(EngineerState==COMMON_STATE&&ON_THE_GROUND)
+				{
+					imu_pause=1;
+					twist_state=0;
+					twist_angle=45;
+					first_twist=0;
+					YTY.TargetAngle=0;
+					YTY.positionPID.kp=10.0;
+					YTY.positionPID.outputMax=1080;
+				}
 			}
 			else if(key->v & KEY_F)
 			{
@@ -857,6 +919,16 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			}
 			else if(key->v & KEY_Z)
 			{
+				if(twist_state==1)
+				{
+				YTY.TargetAngle=0;
+				imu_pause=1;
+				twist_state=0;
+				twist_angle=45;
+				first_twist=0;
+				YTY.positionPID.kp=10.0;
+				YTY.positionPID.outputMax=1080;
+				}
 				dooropen=0;
 				Z_State=1;
 				CLAWIN;
@@ -881,7 +953,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 					if(Sensor_LongPush>=10)
 						Sensor_Lock=1;
 				}
-				else if(EngineerState==COMMON_STATE&&ON_THE_GROUND)
+				else if(EngineerState==COMMON_STATE//&&ON_THE_GROUND
+					)
 				{
 					if(Slave==AUTOSAVING&&Slave==FORCESAVING)
 						ChassisSpeedRef.rotate_ref = 150 * MOUSE_TO_YAW_ANGLE_INC_FACT;
@@ -901,7 +974,8 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 				if(Sensor_LongPush>=10)
 						Sensor_Lock=1;
 			  }
-				else if(EngineerState==COMMON_STATE&&ON_THE_GROUND)
+				else if(EngineerState==COMMON_STATE//&&ON_THE_GROUND
+					)
 				{
 					if(Slave==AUTOSAVING&&Slave==FORCESAVING)
 						ChassisSpeedRef.rotate_ref = -150 * MOUSE_TO_YAW_ANGLE_INC_FACT;
@@ -932,26 +1006,9 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 		}
 			
 		}
-		SetDoorZero();
-		Door_SwitchState();
-		ComeToTop();
-		Claw_GetSpecifiedBox();
-		Claw_SelfInspect();
-		Claw_AutoIn();
-		AutoGet_SensorControl();
-		Claw_Protect();
-		Claw_AutoBack();
-		Box_Land();
-		AutoGet_SwitchState();
-		AutoGet_AutoDown();
-		AutoClimb_SwitchState();
-		ClawUpDown_SwitchState();
-		ClawUpDown_Protect();
-		Slave_SwitchState();
-		Yaw_Check();
-		Rotate_Check();
-		Chassis_Check();
+		
 	}
+	
 	Limit_and_Synchronization();
 }
 

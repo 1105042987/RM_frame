@@ -12,10 +12,10 @@
 #include "includes.h"
 	
 #define FIRSTBOX -40
-#define SECONDBOX -815
-#define THIRDBOX -1590            //这五个是箱子位置
-#define FOURTHBOX -415
-#define FIFTHBOX -1215
+#define SECONDBOX -830
+#define THIRDBOX -1595            //这五个是箱子位置
+#define FOURTHBOX -445	
+#define FIFTHBOX -1230
 #define SIXTHBOX -820
 
 #define LOWERCRITICIAL 2000      //岛下临界值
@@ -41,6 +41,7 @@ uint32_t AutoGet_Error=0;
 uint32_t AutoGet_Skill=0;
 uint32_t AutoGet_Bullet_S=0;
 uint32_t AutoGet_Bullet_B=0;
+uint32_t AutoGet_ThreeStep=0;
 uint32_t Claw_AlreadyRollOut=0;
 uint32_t Claw_AlreadyWaited=0;
 uint32_t Claw_AlreadyTight=0;
@@ -62,6 +63,7 @@ uint32_t Claw_Zero_Count=0;
 uint32_t Claw_SelfInspect_cnt=0;
 uint32_t Claw_FirstInspect=0;
 uint32_t Claw_Out=0;
+uint32_t Claw_Waiting=0;
 uint32_t Box_Clearing=0;
 uint32_t Box_Tight=0;
 extern uint32_t ClawBack_Locker;
@@ -112,6 +114,7 @@ uint32_t Yaw_Set_Flag=0;
 uint32_t Yaw_Set_Cnt=0;
 int32_t  imu_start_angle=0;
 
+uint32_t debug_check=0;
 void RefreshADC()
 {
 	for(uint16_t i=0;i<160;i++)
@@ -303,6 +306,8 @@ void Claw_Stay()
 		Claw_AlreadyTight=0;
 	}
 }
+
+uint32_t tightcheck=0;
 void Claw_Tight()//爪子抓紧与松开
 {
 	if(Claw_AlreadyRollOut==1&&Claw_AlreadyTight==0)
@@ -310,6 +315,8 @@ void Claw_Tight()//爪子抓紧与松开
 		CLAWTIGHT;
 		auto_counter=300;
 		Claw_AlreadyTight=1;
+		//
+		tightcheck++;
 	}
 }
 
@@ -353,16 +360,16 @@ void Claw_GoTo(int a)//爪子走到第a个箱子的位置
 	{
 	switch(a)
 	{
-		case 1:{UFM.TargetAngle=FIRSTBOX;
-		        if(hasReach(&UFM,20))
-		           AutoGet_TotalStep++;
+		case 1:{UFM.TargetAngle=FIRSTBOX-200;
+		        if(hasReach(&UFM,20)||UFM.RealAngle>-100)
+						{AutoGet_TotalStep++;}
 		        break;}
 		case 2:{UFM.TargetAngle=SECONDBOX;
 		        if(hasReach(&UFM,5))
 		           AutoGet_TotalStep++;
 		        break;}
-		case 3:{UFM.TargetAngle=THIRDBOX;
-		        if(hasReach(&UFM,50))
+		case 3:{UFM.TargetAngle=THIRDBOX+200;
+		        if(hasReach(&UFM,50)||UFM.RealAngle<-1500)
 		           AutoGet_TotalStep++;
 		        break;}
 		case 4:{UFM.TargetAngle=FOURTHBOX;
@@ -401,7 +408,8 @@ void Box_Fire()//弹射一个箱子的完整流程
 void AutoGet_Stop_And_Clear()//状态清零 爪子转回 横移电机停转（用于异常状况处理和一次取弹结束）
 {
 	CLAWLOOSE;
-	CLAWIN;
+	if(queue_empty(&AutoGet_Queue))
+	{CLAWIN;debug_check++;}
 	AutoGet_Start=0;
 	AutoGet_TotalStep=1;
 	AutoGet_Alreadywaited=0;
@@ -560,10 +568,10 @@ void AutoGet_LowerANDThrow()//自动取弹（岛下五个弹）
 void Claw_Wait()
 {
 	CLAWOUT;
-	Claw_GoTo(2);
-	UM1.TargetAngle=-(OUTANGLE/2+2);
+	UFM.TargetAngle=FIRSTBOX-200;
+	UM1.TargetAngle=-(OUTANGLE+2);
 	UM2.TargetAngle=(OUTANGLE+2);
-	
+	Claw_Waiting=1;
 }
 
 void AutoGet_Upper()//自动取弹（岛上三个弹）
@@ -580,7 +588,7 @@ void AutoGet_Upper()//自动取弹（岛上三个弹）
 		case 7:{Claw_GoTo(3);break;}
 		case 8:{Box_ThrowForward();   AutoGet_Bullet_B+=1;  break;}
 		case 9:{Claw_GetaBox();  break;}
-		case 10:{Claw_GoTo(4);break;}
+		case 10:{Claw_GoTo(3);break;}
 		case 11:{Box_ThrowForward();  AutoGet_Bullet_B+=1;  break;}
 		case 12:{UM1.TargetAngle=-INANGLE;UM2.TargetAngle=INANGLE;AutoGet_TotalStep++;break;}
 		case 13:{CLAWIN;auto_counter=500;
@@ -600,7 +608,7 @@ void Claw_Go_and_Get(int position)
 				{
 				  if(ON_THE_GROUND&&position<=3)
 				  {AutoGet_TotalStep++;break;}
-				  if(ON_THE_FLOOR||position>=4)
+				  if((ON_THE_FLOOR||position>=4)&&CLAW_IS_IN)
 				  {CLAWOUT;auto_counter=500;AutoGet_TotalStep++;break;}
 				}
 				case 2:{Claw_GoTo(position);break;}
@@ -743,12 +751,12 @@ void Claw_SelfInspect()//爪子横移自动对位零点
 	}
 	if(Claw_SetZero==1)
 	{
-	if(UFM.RxMsgC6x0.moment<=4000&&Claw_SelfInspecting==1)
+	if(UFM.RxMsgC6x0.moment<=5000&&Claw_SelfInspecting==1)
 	{
 		UFM.TargetAngle+=20;
 		Claw_SelfInspect_cnt=0;
 	}
-	if(UFM.RxMsgC6x0.moment>4000&&Claw_SelfInspecting==1)
+	if(UFM.RxMsgC6x0.moment>5000&&Claw_SelfInspecting==1)
 	{
 		Claw_SelfInspect_cnt++;
 	}
@@ -866,7 +874,7 @@ void Claw_Up()//整个机构的抬升  往上走时角度下降
 			if(Claw_UpToPosition==1&&Claw_UpAngle<UPLEVEL&&auto_counter==0)//-480
 			{
 				UFM.TargetAngle=SECONDBOX;
-				Claw_UpAngle+=10;
+				Claw_UpAngle+=20;
 				NMUDL.TargetAngle=Claw_UpAngle;
 				NMUDR.TargetAngle=Claw_UpAngle;
 				auto_counter=1;
@@ -966,6 +974,13 @@ void Claw_Protect()
 	}
 }
 
+void Claw_Buffer()
+{
+	if(UFM.RealAngle<-1300&&EngineerState==GET_STATE&&AutoGet_TotalStep!=1&&UFM.TargetAngle==(THIRDBOX+200))
+		UFM.TargetAngle=THIRDBOX;
+	if(UFM.RealAngle>-270&&EngineerState==GET_STATE&&(AutoGet_TotalStep!=1||Claw_Waiting==1)&&UFM.TargetAngle==(FIRSTBOX-200))
+	{UFM.TargetAngle=FIRSTBOX;Claw_Waiting=0;}
+}
 
 void Claw_AutoIn()
 {
@@ -1030,14 +1045,33 @@ void State_AutoGet()
 		imu.target_yaw=imu.now_yaw;
 	}
 }
+void State_AutoGet_Fake()
+{
+		InitialSave();
+	EngineerState=GET_STATE;
+	Direction_Indicator=2;
+	//For Debug
+	UM1.TargetAngle=-OUTANGLE/2;
+	UM2.TargetAngle=OUTANGLE/2;
+	///////
+	YTP.TargetAngle = YTP_NORMAL;
+		if(Yaw_Set_Flag==0)
+		{
+			Yaw_Set_Flag=1;
+			Yaw_Set_Cnt=150;
+		}
+		Viewstate=GET_VIEW;
+	if(Claw_UpToPosition==0)
+		Claw_UpToPosition=1;
+}
 void Rotate_Check()
 {
-	if(CM_AutoRotate90==1&&rotate_waiter==0&&imu.target_yaw>=(imu_start_angle-114))
+	if(CM_AutoRotate90==1&&rotate_waiter==0&&imu.target_yaw>=(imu_start_angle-90))
 	{
 		imu.target_yaw -= 3;
 		rotate_waiter=1;
 	}
-	if(imu.target_yaw<(imu_start_angle-114))
+	if(imu.target_yaw<(imu_start_angle-90))
 	{
 		CM_AutoRotate90 = 0;
 	}
@@ -1099,11 +1133,19 @@ void Chassis_Check()
 {
 	if(AutoGet_TotalStep!=1)
 	{
-		if(adgl<LOWERCRITICIAL)
-			ChassisSpeedRef.forward_back_ref = -20 * RC_CHASSIS_SPEED_REF;
-		if(adgr<LOWERCRITICIAL)
-			ChassisSpeedRef.forward_back_ref = 20 * RC_CHASSIS_SPEED_REF;
+		if(adgl<LOWERCRITICIAL){}
+			//ChassisSpeedRef.forward_back_ref = -10 * RC_CHASSIS_SPEED_REF;
+		if(adgr<LOWERCRITICIAL){}
+			//ChassisSpeedRef.forward_back_ref = 10 * RC_CHASSIS_SPEED_REF;
 	}
 //	if(CLAW_IS_OUT)
 //		 // ChassisSpeedRef.left_right_ref = 20 * RC_CHASSIS_SPEED_REF;
 }
+
+/*void AutoGet_Three()
+{
+	if(AutoGet_ThreeStep==1&&AutoGet_TotalStep==1)
+	{
+		queue_push(&AutoGet_Queue,1)
+	}
+}*/

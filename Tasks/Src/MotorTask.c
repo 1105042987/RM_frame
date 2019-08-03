@@ -81,7 +81,7 @@ MotorINFO NMCDR = Normal_MOTORINFO_Init(19.0,&ControlNM,
 								fw_PID_INIT(10.0, 0.0, 0.0, 	1800.0, 1080.0, 1080.0, 1800.0),
 								fw_PID_INIT(30, 0.0, 0.0, 		16384.0, 15000.0, 15000.0, 16384.0),0);		
 MotorINFO UFM = Normal_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT(20.0, 0.10, 5.0, 	3000.0, 3000.0, 3000.0, 3000.0),//30 0.1 0.2
+								fw_PID_INIT(30.0, 0.15, 0.0, 	2000.0, 2000.0, 2000.0, 2000.0),//30 0.1 0.2
 								fw_PID_INIT(30.0, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0),0);	
 MotorINFO CM1 = Normal_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT(8.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
@@ -105,7 +105,7 @@ MotorINFO SR = Normal_MOTORINFO_Init(36.0,&ControlNM,
 								fw_PID_INIT(10.0, 0.0, 0.0, 	1080.0, 1080.0, 1080.0, 1080.0),
 								fw_PID_INIT(30, 0.0, 0.0, 		15000.0, 15000.0, 15000.0, 15000.0),0);								
 							
-//2006是36 3508是19
+//2006是36 3508是19    10 1080
 //MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
 //MotorINFO* can2[8]={&CMFL,&CMFR,&CMBL,&CMBR,&NMUDL,&NMUDR,0,0};
 

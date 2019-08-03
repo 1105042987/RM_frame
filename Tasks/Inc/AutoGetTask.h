@@ -21,7 +21,7 @@ Claw_Out=1
 #define CLAWIN    \
 HAL_GPIO_WritePin(GPIOH,1<<2,GPIO_PIN_RESET);\
 if(CLAW_IS_OUT)Z_count=500;\
-Claw_Out=0;
+Claw_Out=0
 
 
 #define CLAWTIGHT HAL_GPIO_WritePin(GPIOH,1<<5,GPIO_PIN_SET)//в╕всв╔╫Т
@@ -34,11 +34,11 @@ Claw_Out=0;
 #define CLAW_IS_OUT Claw_Out==1
 #define CLAW_IS_IN Claw_Out==0
 
-#define UPLEVEL 730  //700
+#define UPLEVEL 780  //700
 
 #define CLAW_INSPECT_SUCCEED Claw_SelfInspecting==3
 
-#define YTP_NORMAL -65
+#define YTP_NORMAL -50
 extern uint32_t AutoGet_Start;  
 extern uint32_t AutoGet_TotalStep;
 extern uint32_t AutoGet_Alreadywaited;
@@ -135,4 +135,6 @@ void AutoGet_FillQueue(void);
 void ClawUpDown_Protect(void);
 void AutoGet_Fillstream(void);
 void Chassis_Check(void);
+void Claw_Buffer(void);
+void State_AutoGet_Fake(void);
 #endif /*__ AUTOGETTASK_H */

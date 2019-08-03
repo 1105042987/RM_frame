@@ -189,6 +189,8 @@ int main(void)
 	InitialSave();
 	HAL_UART_Receive_IT(&huart8,store,1); 
 	imu.target_yaw =imu.now_yaw;
+	//YTP.RealAngle=-65;
+	
   /* USER CODE END 2 */
 
   /* Infinite loop */

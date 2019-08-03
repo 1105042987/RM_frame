@@ -550,6 +550,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>NMCDR.RxMsgC6x0.moment,0x0A</ItemText>
         </Ww>
+        <Ww>
+          <count>79</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>imu_pause</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>
@@ -751,6 +756,91 @@
           <count>39</count>
           <WinNumber>2</WinNumber>
           <ItemText>Slave</ItemText>
+        </Ww>
+        <Ww>
+          <count>40</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>imu_pause,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>41</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>twist_state,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>42</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>imu.target_yaw</ItemText>
+        </Ww>
+        <Ww>
+          <count>43</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>imu.yaw</ItemText>
+        </Ww>
+        <Ww>
+          <count>44</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>imu.now_yaw</ItemText>
+        </Ww>
+        <Ww>
+          <count>45</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>YTY.TargetAngle</ItemText>
+        </Ww>
+        <Ww>
+          <count>46</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>ttttcheck,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>47</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>UFM.TargetAngle</ItemText>
+        </Ww>
+        <Ww>
+          <count>48</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>UFM.RealAngle</ItemText>
+        </Ww>
+        <Ww>
+          <count>49</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>AutoGet_TotalStep,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>50</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>tightcheck,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>51</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>Claw_TakeThisBox,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>52</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>debug_check,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>53</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>fabs(UFM-&gt;RealAngle - UFM-&gt;TargetAngle)</ItemText>
+        </Ww>
+        <Ww>
+          <count>54</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>fabs(UFM.RealAngle - UFM.TargetAngle)</ItemText>
+        </Ww>
+        <Ww>
+          <count>55</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>UFM.RealAngle - UFM.TargetAngle</ItemText>
+        </Ww>
+        <Ww>
+          <count>56</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>AutoGet_TotalStep,0x0A</ItemText>
         </Ww>
       </WatchWindow2>
       <Tracepoint>

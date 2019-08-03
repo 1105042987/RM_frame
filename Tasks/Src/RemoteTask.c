@@ -59,7 +59,30 @@ void GetRemoteSwitchAction(RemoteSwitch_t *sw, uint8_t val)
 		sw->buf_index = 0;	
 	}			
 }
-
+void Function()
+{
+	SetDoorZero();
+		Door_SwitchState();
+		ComeToTop();
+		Claw_GetSpecifiedBox();
+		Claw_SelfInspect();
+		Claw_AutoIn();
+		AutoGet_SwitchState();
+		AutoGet_SensorControl();
+		Claw_Protect();
+		Claw_AutoBack();
+		Box_Land();
+		AutoGet_AutoDown();
+		AutoClimb_SwitchState();
+		ClawUpDown_SwitchState();
+		ClawUpDown_Protect();
+		Slave_SwitchState();
+		Yaw_Check();
+		Rotate_Check();
+		Chassis_Check();
+	  Twist();
+    Claw_Buffer();
+}
 extern uint32_t protect_cnt;
 //遥控器数据解算
 void RemoteDataProcess(uint8_t *pData)
@@ -121,6 +144,7 @@ void RemoteDataProcess(uint8_t *pData)
 			if(WorkState > 0)
 			{ 
 				MouseKeyControlProcess(&RC_CtrlData.mouse,&RC_CtrlData.key);
+				Function();
 			}
 		}break;
 		case STOP:               

@@ -44,6 +44,7 @@ extern uint32_t clawback_cnt;
 extern uint32_t doorshake_cnt;
 extern uint32_t saving;
 extern uint32_t Z_count;
+extern uint32_t twist_cnt;
 uint32_t AutoGet_LastStep = 1;
 uint32_t AutoGetCnt = 0;
 uint16_t SaveClearCnt = 0;
@@ -134,7 +135,7 @@ void ControlRotate(void)
 //	#endif
 	//if(fabs(imu.target_yaw-imu.now_yaw)<1)
 		//CM_AutoRotate90 = 0;
-	if(//imu_pause==0||
+	if(imu_pause==0||
 		CM_AutoRotate90==1)
 	{
 		CMRotatePID.ref = imu.target_yaw;
@@ -375,6 +376,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(clawback==0) clawback_cnt=1000;
 		if(doorshake_cnt>0) doorshake_cnt--;
 		if(Z_count>0) Z_count--;
+		if(twist_cnt>>0) twist_cnt--;
 		//		if(SaveClearCnt < 1000)SaveClearCnt++;      暂时不知道是干什么用的
 //		else
 //		{
