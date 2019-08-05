@@ -37,5 +37,6 @@ void scaning3(void);
 void firing1(void);
 void firing2(void);
 void firing3(void);//∑¢π‚≤‚ ‘
+void firing5m(void);//5mÕ‚
 void aimAtBox(void);
 void uartSend(void);

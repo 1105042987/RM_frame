@@ -124,17 +124,17 @@ void WorkStateFSM(void){
 		case STATE_1:{
 			if(normal_time<10000)normal_time++;
 			if(normal_time>=10)startUp = 1;
-			if(RCRightMode == Pos3 && RCLeftMode == Pos3) WorkState = STATE_stop;
+			//if(RCRightMode == Pos3 && RCLeftMode == Pos3) WorkState = STATE_stop;
 			if(RCLeftMode == Pos2) WorkState = STATE_2;
 			if(RCLeftMode == Pos3) WorkState = STATE_3;
 		}break;
 		case STATE_2:{
-			if(RCRightMode == Pos3 && RCLeftMode == Pos3) WorkState = STATE_stop;
+			//if(RCRightMode == Pos3 && RCLeftMode == Pos3) WorkState = STATE_stop;
 			if(RCLeftMode == Pos1) WorkState = STATE_1;
 			if(RCLeftMode == Pos3) WorkState = STATE_3;
 		}break;
 		case STATE_3:{
-			if(RCRightMode == Pos3 && RCLeftMode == Pos3) WorkState = STATE_stop;
+			//if(RCRightMode == Pos3 && RCLeftMode == Pos3) WorkState = STATE_stop;
 			if(RCLeftMode == Pos1) WorkState = STATE_1;
 			if(RCLeftMode == Pos2) WorkState = STATE_2;
 		}break;
@@ -184,12 +184,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			if(imu.InitCount == 1000) {imu.InitFinish = 1;imu.FirstEnter = 0;imu.InitCount = 0;}
 		#endif
 		#ifdef SLAVE_MODE
-			if(RCRightMode==Pos1)
-				RCProcess1();
-			else if(RCRightMode==Pos2)
-				RCProcess2();
-			else
-				RCProcess3();
+			if(RCRightMode==Pos1){RCProcess1();}
+			else if(RCRightMode==Pos2){RCProcess2();}
+			else{RCProcess3();}
 		#endif
 		//主循环在时间中断中启动
 		controlLoop();

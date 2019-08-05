@@ -15,7 +15,7 @@
 #include <string.h>
 
 uint8_t tmp_judge;
-int8_t hurtSum,hurtOpn;
+int8_t hurtSum,hurtInit,hurtLck;
 int16_t hurtTic;
 void InitJudgeUart(void){
 	tx_free = 1;
@@ -226,7 +226,7 @@ void Referee_Update_RobotState(){
 	}
 	
 	maxHP = GameRobotState.max_HP;
-	//=========================================
+//=========================================
 	remainHP = GameRobotState.remain_HP;
 	if(lastHP-remainHP){hurtTic=20;}
 	if(hurtTic){
@@ -234,13 +234,23 @@ void Referee_Update_RobotState(){
 		hurtTic--;
 	}else{hurtSum=0;}
 	
+	if(hurtLck){
+		hurtLck--;
+		hurtSum=0;
+	}
 	if(hurtSum>30){
-		if(hurtOpn){
-			if(CMA.Real>-460){ExtCmd=2;CmdTic=130;}
-			else{ExtCmd=1;CmdTic=100;}
+		if(hurtInit){
+			if(CMA.Real>-460){//碉堡被打
+				CmdTic=130;hurtLck=30;
+				if(ExtCmd==1){hurtLck=100;}
+				else{hurtLck=30;}
+				ExtCmd=2;
+				}else{//飞机被打
+				ExtCmd=1;CmdTic=100;hurtLck=30;
+			}
 			hurtSum=0;
 		}else{
-			hurtOpn=1;
+			hurtInit=1;
 			hurtSum=0;
 		}
 	}
@@ -251,7 +261,7 @@ void Referee_Update_RobotState(){
 	if(receiveCnt>10&&StateFlee>1){StateFlee=0;}
 	if(CmdTic<180){CmdTic++;}
 	else{ExtCmd=0;}
-	//========================
+//========================================
 	
 	switch(maxHP){
 		case 200:{maxHeat0 = 240;cooldown0 = 40;}break;

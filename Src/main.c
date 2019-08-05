@@ -72,7 +72,9 @@ void SystemClock_Config(void);
 int can13Dog=1000;//@yyp
 /* USER CODE END 0 */
 
-int main(void){
+int main(void)
+{
+
   /* USER CODE BEGIN 1 */
   /* USER CODE END 1 */
 
@@ -127,7 +129,6 @@ int main(void){
 
   /* USER CODE BEGIN 2 */
 //各模块初始化
-
 	//电机控制
 	Motor_ID_Setting();
 	for(int i=0;i<8;i++) {InitMotor(can1[i]);InitMotor(can2[i]);}
@@ -135,6 +136,7 @@ int main(void){
 	
 	//串口
 	#ifdef USE_AUTOAIM
+		HAL_GPIO_WritePin(encode3508_GPIO_Port, encode3508_Pin, 0);
 		InitAutoAim();
 	#endif
 	InitRemoteControl();

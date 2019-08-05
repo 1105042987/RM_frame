@@ -60,7 +60,7 @@ typedef struct Coordinate_t
 	float z;
 }Coordinate_t;
 
-extern uint8_t aimMode,FindEnemy;
+extern uint8_t AimMode,FindEnemy;
 extern GMAngle_t aim,opt;
 
 void InitAutoAim(void);

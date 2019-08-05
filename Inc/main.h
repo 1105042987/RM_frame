@@ -57,6 +57,8 @@
 #define middleSensor_GPIO_Port GPIOE
 #define brake_Pin GPIO_PIN_2
 #define brake_GPIO_Port GPIOH
+#define encode3508_Pin GPIO_PIN_4
+#define encode3508_GPIO_Port GPIOH
 #define LED8_Pin GPIO_PIN_8
 #define LED8_GPIO_Port GPIOG
 #define LED7_Pin GPIO_PIN_7
