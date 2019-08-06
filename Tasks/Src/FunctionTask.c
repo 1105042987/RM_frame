@@ -19,6 +19,7 @@ int8_t StateSway,StateFlee,StateHurt,StateRand=1,ExtCmd,ExtCmd2;
 int16_t StateCnt=1,CmdTic;
 int16_t noEnemyCnt=1;
 void strategyShoot(void);
+void strategyShoot2(void);
 //≥ı ºªØ
 void FunctionTaskInit(){
 	ChassisSpeed=0;
@@ -165,7 +166,7 @@ void RCProcess1(){
 		FRICL.Target =-5500;
 		FRICR.Target = 5500;
 		uartSend();
-		strategyShoot();
+		strategyShoot2();
 	}
 	limtSync();
 }
@@ -188,7 +189,7 @@ void RCProcess2(){
 	}
 	if(WorkState == STATE_3){
 		laserOff();
-		strategyShoot();
+		strategyShoot2();
 		uartSend();
 	}
 	limtSync();
@@ -338,8 +339,8 @@ void generalProcess(){
 		tmpY=ChaSpdSin * SinPit/400;//375;//460;
 		tmpP=ChaSpdCos * SinPit/380;//360;
 	}else{
-		tmpY=ChaSpdSin * SinPit/240;//375;//460;
-		tmpP=ChaSpdCos * SinPit/200;//360;
+		tmpY=ChaSpdSin * SinPit/325;//375;//460;
+		tmpP=ChaSpdCos * SinPit/310;//360;
 	}
 	GMY.Target+=tmpY;
 	GMP.Target+=tmpP;

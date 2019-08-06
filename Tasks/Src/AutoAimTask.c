@@ -45,33 +45,33 @@ void AutoAimUartRxCpltCallback(){
 		aim.pit/=2.83;
 		abt.yaw=GMY.Real+aim.yaw-jst.yaw;
 		abt.pit=GMP.Real+aim.pit+jst.pit;
-//		if(abt.pit>-16 && GMY.encoderAngle>0){AimMode=5;}//外侧远处
-//		if(abt.pit<-17){AimMode=0;}
-		if(abt.pit<-10){
-			if(aim.dis==2000 || AimMode){//陀螺正对装甲
-				abt.yaw=abtLast.yaw*0.6+abt.yaw*0.4;
-				abt.pit=abtLast.pit*0.7+abt.pit*0.3;
-				opt.yaw=abt.yaw-ChaSpdSin /15;//19.3
-				opt.pit=abt.pit-ChaSpdCos /15;
-			}else if(aim.dis==3000){//陀螺右侧边装甲,yaw为负
-				abt.pit=abtLast.pit*0.7+abt.pit*0.3;
-				abt.yaw=abtLast.yaw*0.6+(abt.yaw-5*sin(abt.pit))*0.4;
-				opt.yaw=abt.yaw-ChaSpdSin /15;//19.3
-				opt.pit=abt.pit-ChaSpdCos /15;
-			}else if(aim.dis==4000){//陀螺左侧边装甲
-				abt.pit=abtLast.pit*0.7+abt.pit*0.3;
-				abt.yaw=abtLast.yaw*0.7+(abt.yaw+5*sin(abt.pit))*0.3;
-				opt.yaw=abt.yaw-ChaSpdSin /15;//19.3
-				opt.pit=abt.pit-ChaSpdCos /15;
+		if(abt.pit>-13 && GMY.encoderAngle>0){AimMode=5;}//外侧远处
+		if(abt.pit<-14){AimMode=0;}
+		if(abt.pit<-5){
+//=========预测===========
+			if(aim.dis==500 || aim.dis==1000){opt=aimProcess(abt.yaw,abt.pit,&AimTic);}
+//========================
+			else{
+				if(aim.dis==2000){//陀螺正对装甲
+					abt.yaw=abtLast.yaw*0.6+abt.yaw*0.4;
+					abt.pit=abtLast.pit*0.7+abt.pit*0.3;
+				}else if(aim.dis==3000){//陀螺右侧边装甲,yaw为负
+					abt.pit=abtLast.pit*0.7+abt.pit*0.3;
+					abt.yaw=abtLast.yaw*0.6+(abt.yaw-5*sin(abt.pit))*0.4;
+				}else if(aim.dis==4000){//陀螺左侧边装甲
+					abt.pit=abtLast.pit*0.7+abt.pit*0.3;
+					abt.yaw=abtLast.yaw*0.7+(abt.yaw+5*sin(abt.pit))*0.3;
+				}
+//========速度补偿========
+				if(AimMode){
+					opt.yaw=abt.yaw-ChaSpdSin /20;//19.3
+					opt.pit=abt.pit-ChaSpdCos /18;
+				}else{
+					opt.yaw=abt.yaw-ChaSpdSin /15;//19.3
+					opt.pit=abt.pit-ChaSpdCos /15;
+				}
+//========================
 			}
-//======速度补偿版本==================
-//			abt.yaw=abtLast.yaw*0.6+abt.yaw*0.4;
-//			abt.pit=abtLast.pit*0.7+abt.pit*0.3;
-//			opt.yaw=abt.yaw-ChaSpdSin /16;//19.3
-//			opt.pit=abt.pit-ChaSpdCos /15;
-//======预测版本======================
-			else{opt=aimProcess(abt.yaw,abt.pit,&AimTic);}
-//====================================
 			FindEnemy=1;
 		}
 		abtLast=abt;
@@ -110,7 +110,7 @@ GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 	static GMAngle_t in,out;					//上一次值，返回值角度
 	tSum+=*tic-t[i];	//与pid的i计算如出一辙，加上本次并减去amt次以前的时间间隔，得到分频后的间隔
 	cnt++;
-	if(*tic>160){			//if两次数据时间间隔大于XXms，清空历史，进入保护锁
+	if(*tic>180){			//if两次数据时间间隔大于XXms，清空历史，进入保护锁
 		lock=amt;
 		wy=0;wp=0;dYaw=yaw;
 		wySum=0;wpSum=0;
@@ -122,8 +122,13 @@ GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 	in.pit=in.pit*0.7+pit*0.3;
 	if(lock){			//函数首次进入保护，只记录数据不预测
 		lock--;
-		wySum=-ChaSpdSin /500;
-		wpSum=-ChaSpdCos /240;
+		if(AimMode){
+			wySum=-ChaSpdSin /650;
+			wpSum=-ChaSpdCos /350;
+		}else{
+			wySum=-ChaSpdSin /500;
+			wpSum=-ChaSpdCos /240;
+		}
 	}
 	else{
 		//判定陀螺，应该在本次计算wySum之前
@@ -158,7 +163,7 @@ GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
 //		out.yaw=(in.yaw-wy/sin(in.pit/57.3)+out.yaw)/2;
 //		out.pit=(in.pit+wp+out.pit)/2;
 //==============	
-		out.yaw=0.3*(in.yaw+wySum*25)+ 0.7*out.yaw;
+		out.yaw=0.3*(in.yaw+wySum*26)+ 0.7*out.yaw;
 		out.dis=0.3*(in.pit+wpSum*10)+ 0.7*out.pit;
 		out.yaw-=ChaSpdSin/100;
 		out.pit=out.dis-ChaSpdCos/40;
