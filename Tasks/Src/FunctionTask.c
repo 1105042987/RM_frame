@@ -51,10 +51,6 @@ void RCProcess1(Remote *rc){
 //********************上平台代码2
 void RCProcess2(Remote *rc){
 	generalProcess(rc);
-	if(WorkState == STATE_1){
-		int8_t dir=sgn(channelrrow);
-		onePushDir(dir,powLmtCnt=500);
-	}
 	if(WorkState == STATE_2){
 		switch(ExtCmd){
 			case 1:{//躲飞机
@@ -75,23 +71,24 @@ void RCProcess2(Remote *rc){
 		}
 	}
 	if(WorkState == STATE_3){
-		switch(ExtCmd){
-			case 1:{//躲飞机
-				if(Anchor==0 || Anchor==1){routing1();}
-				else{routing3();}
-				break;
-			}
-			case 2:{//躲碉堡
-				if(Anchor==0 || Anchor==2){routing2();}
-				else{routing3();}
-				break;
-			}
-			default:{
-				if(Anchor==0){routing0();}
-				else if(Anchor==1){routing1();}
-				else if(Anchor==2){routing4();}
-			}
-		}
+		routing0();
+//		switch(ExtCmd){
+//			case 1:{//躲飞机
+//				if(Anchor==0 || Anchor==1){routing1();}
+//				else{routing3();}
+//				break;
+//			}
+//			case 2:{//躲碉堡
+//				if(Anchor==0 || Anchor==2){routing2();}
+//				else{routing3();}
+//				break;
+//			}
+//			default:{
+//				if(Anchor==0){routing0();}
+//				else if(Anchor==1){routing1();}
+//				else if(Anchor==2){routing4();}
+//			}
+//		}
 	}
 	limtSync();
 }
@@ -127,8 +124,9 @@ void generalProcess(Remote *rc){
 	
 	sendData[0].data[0]=(uint16_t)RCRightMode | (uint16_t)RCLeftMode<<2 | ((uint16_t)CMA.RxMsgC6x0.rotateSpeed/8+127)<<8;//右拨杆，左拨杆，底盘速度
 	if(GameRobotState.robot_id==7){sendData[0].data[0]=sendData[0].data[0] | 1<<4;}//是否为蓝
-	if(channelrcol>600){sendData[0].data[0]=sendData[0].data[0] | 1<<5;}//
-	if(ExtCmd2){sendData[0].data[0]=sendData[0].data[0] | 1<<6;ExtCmd2--;}//
+	if(channelrcol>600){sendData[0].data[0]=sendData[0].data[0] | 1<<5;}//右推到顶
+	if(ExtCmd2){sendData[0].data[0]=sendData[0].data[0] | 1<<6;ExtCmd2--;}//看碉堡
+	if(StateHurt){sendData[0].data[0]=sendData[0].data[0] | 1<<7;StateHurt--;}//看基地
 	sendData[0].data[1]=(uint16_t)(channellrow+660)/6 | ((uint16_t)(channellcol+660)/6)<<8 ;
 	sendData[0].data[2]=(int16_t)CMA.Real;
 	sendData[0].data[3]=(int16_t)(RealHeat0*20);//热量
@@ -144,6 +142,7 @@ void limtSync(){
 #if GUARD == 'D'
 //下平台代
 float ChaSpdSin,ChaSpdCos;
+int8_t tmp;
 void generalProcess();
 void RCProcess1(){
 	generalProcess();
@@ -235,32 +234,32 @@ void strategyShoot(){
 	laserOn();
 	if(receiveData[0].data[0] & 0x40){
 		aimAtBox();
-		noEnemyCnt=-100;
+		noEnemyCnt=80;
 	}
 	if(FindEnemy){
-		if(aim.dis==0){noEnemyCnt=2;}
+		if(aim.dis==0){noEnemyCnt=-2;}
 		else{autoAim();}
 		if(fabs(GMY.Real-opt.yaw)<1.5 && fabs(GMP.Real-opt.pit)<1.5 && aim.dis>500){firing2();}
-		if(aim.dis==500){noEnemyCnt=-50;}
-		else{noEnemyCnt=-350;}
+		if(aim.dis==500){noEnemyCnt=100;}
+		else{noEnemyCnt=240;}
 		sendData[0].data[0]=(int16_t)1;
 	}
-	else if(noEnemyCnt>1){
+	else if(noEnemyCnt<1){
 		scaning1();
 		sendData[0].data[0]=(int16_t)0;
 	}
-	else if(noEnemyCnt<-250){
-		noEnemyCnt++;
+	else if(noEnemyCnt>150){
+		noEnemyCnt--;
 		if(fabs(GMY.Real-opt.yaw)<1.5 && fabs(GMP.Real-opt.pit)<1.5 && aim.dis>500){firing2();}
 		else{STIRv.Target=0;}
 	}
-	else if(noEnemyCnt<-120){
-		noEnemyCnt++;
+	else if(noEnemyCnt>80){
+		noEnemyCnt--;
 		STIRv.Target=0;
 	}
 	else{
 		GMY.Target+=0.2;
-		noEnemyCnt++;
+		noEnemyCnt--;
 		STIRv.Target=0;
 	}
 }
@@ -269,83 +268,136 @@ void strategyShoot2(){
 	if(AimMode){
 		FRICL.Target =-6600;
 		FRICR.Target = 6600;
-	}
-	else{
+	}else{
 		FRICL.Target =-5500;
 		FRICR.Target = 5500;
 	}
-	if(receiveData[0].data[0] & 0x40){
+	if((receiveData[0].data[0] & 0x40) && noEnemyCnt<100){//看碉堡
 		aimAtBox();
-		noEnemyCnt=-100;
+		noEnemyCnt=250;
+		AimMode=0;
+	}
+	if((receiveData[0].data[0] & 0x80) && (noEnemyCnt<100 || aim.dis==6000)&& GMY.encoderAngle>0){//看基地
+		aimAtBase();
+		noEnemyCnt=250;
 		AimMode=0;
 	}
 	if(FindEnemy){
-		if(aim.dis==0){noEnemyCnt=2;}
+		if(aim.dis==0){noEnemyCnt=-2;}
 		else{autoAim();}
 		if(fabs(GMY.Real-opt.yaw)<1.5 && fabs(GMP.Real-opt.pit)<1.5 && aim.dis>500){
 			if(AimMode){firing5m();}
 			else{firing2();}
 		}
-		if(aim.dis==500){noEnemyCnt=-50;}
-		else{noEnemyCnt=-350;}
+		if(aim.dis==500){noEnemyCnt=100;}
+		else{noEnemyCnt=290;}
 		sendData[0].data[0]=(int16_t)1;
 	}
-	else if(noEnemyCnt>1){
+	else if(noEnemyCnt<1){
+		AimMode=0;
 		scaning1();
 		sendData[0].data[0]=(int16_t)0;
 	}
-	else if(noEnemyCnt<-250){
-		noEnemyCnt++;
+	else if(noEnemyCnt>150){
+		noEnemyCnt--;
 		if(fabs(GMY.Real-opt.yaw)<1.5 && fabs(GMP.Real-opt.pit)<1.5 && aim.dis>500){
-			if(AimMode){firing5m();}
+			if(AimMode){
+				if(opt.pit>-7){firing5m();}
+				else{firing5m2();}
+			}
 			else{firing2();}
 		}
 		else{STIRv.Target=0;}
 	}
-	else if(noEnemyCnt<-120){
-		noEnemyCnt++;
+	else if(noEnemyCnt>80){
+		noEnemyCnt--;
 		STIRv.Target=0;
 	}
 	else{
 		GMY.Target+=0.2;
-		noEnemyCnt++;
+		noEnemyCnt--;
 		STIRv.Target=0;
 	}
 }
+////打击策略5m外高速低频=====================
+//void strategyShoot2(){
+//	if(AimMode){
+//		FRICL.Target =-6600;
+//		FRICR.Target = 6600;
+//	}
+//	else{
+//		FRICL.Target =-5500;
+//		FRICR.Target = 5500;
+//	}
+//	if(receiveData[0].data[0] & 0x40){
+//		aimAtBox();
+//		noEnemyCnt=-100;
+//		AimMode=0;
+//	}
+//	if(FindEnemy){
+//		if(aim.dis==0){noEnemyCnt=2;}
+//		else{autoAim();}
+//		if(fabs(GMY.Real-opt.yaw)<1.5 && fabs(GMP.Real-opt.pit)<1.5 && aim.dis>500){
+//			if(AimMode){firing5m();}
+//			else{firing2();}
+//		}
+//		if(aim.dis==500){noEnemyCnt=-50;}
+//		else{noEnemyCnt=-350;}
+//		sendData[0].data[0]=(int16_t)1;
+//	}
+//	else if(noEnemyCnt>1){
+//		scaning1();
+//		sendData[0].data[0]=(int16_t)0;
+//	}
+//	else if(noEnemyCnt<-250){
+//		noEnemyCnt++;
+//		if(fabs(GMY.Real-opt.yaw)<1.5 && fabs(GMP.Real-opt.pit)<1.5 && aim.dis>500){
+//			if(AimMode){firing5m();}
+//			else{firing2();}
+//		}
+//		else{STIRv.Target=0;}
+//	}
+//	else if(noEnemyCnt<-120){
+//		noEnemyCnt++;
+//		STIRv.Target=0;
+//	}
+//	else{
+//		GMY.Target+=0.2;
+//		noEnemyCnt++;
+//		STIRv.Target=0;
+//	}
+//}
 //===================================
 //*******************下平台通用代码
 //===================================
 
 void generalProcess(){
 	offLed(5);
-	laserOn();
 	if(WorkState <= 0) return;
 	//max=660
-	channelrrow = 0;
-	channelrcol = 0;
+	channelrrow = 0;channelrcol = 0;
 	channellrow = -(int16_t)((uint16_t)(receiveData[0].data[1] & 0xff)*3)+330;//leftRight
 	channellcol = (int16_t)((uint16_t)(receiveData[0].data[1])>>8)*3-330;//upDown
-	
-	CMA.Real=receiveData[0].data[2];
-	RealHeat0=receiveData[0].data[3]/(float)(20.0);
-	
 	GMY.Target+=channellrow*0.001f;
 	GMP.Target+=channellcol*0.001f;
+	CMA.Real=receiveData[0].data[2];
+	RealHeat0=receiveData[0].data[3]/(float)(20.0);
 	//基于顶盘速度的运动补偿
 	ChaSpdSin=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * sin((GMY.encoderAngle)/57.3);
 	ChaSpdCos=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * cos((GMY.encoderAngle)/57.3)*sin(GMP.Real/57.3);
 	float SinPit=sin(GMP.Real/57.3),tmpY,tmpP;
 	if(GMY.encoderAngle>0){
-		tmpY=ChaSpdSin * SinPit/400;//375;//460;
-		tmpP=ChaSpdCos * SinPit/380;//360;
+		tmpY=ChaSpdSin * SinPit/380;//375;//460;400
+		tmpP=ChaSpdCos * SinPit/380;//360;380
 	}else{
-		tmpY=ChaSpdSin * SinPit/325;//375;//460;
+		tmpY=ChaSpdSin * SinPit/310;//375;//460;
 		tmpP=ChaSpdCos * SinPit/310;//360;
 	}
 	GMY.Target+=tmpY;
 	GMP.Target+=tmpP;
 	opt.yaw+=tmpY;
 	opt.pit+=tmpP;
+	if(receiveData[0].data[0] & 0x80)tmp=1;
 }
 
 void limtSync(){

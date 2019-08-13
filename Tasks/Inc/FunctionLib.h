@@ -27,6 +27,7 @@ void routing1(void);
 void routing2(void);
 void routing3(void);
 void routing4(void);
+void routingL(void);
 
 void nutDetect(void);
 
@@ -38,5 +39,7 @@ void firing1(void);
 void firing2(void);
 void firing3(void);//发光测试
 void firing5m(void);//5m外
+void firing5m2(void);//5m外
 void aimAtBox(void);
+void aimAtBase(void);
 void uartSend(void);

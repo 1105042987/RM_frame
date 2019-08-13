@@ -10,7 +10,7 @@ void PowerLimitation(){
 	float rate;
 	if(powLmtCnt){
 		powLmtCnt--;
-		limitTgt=70;
+		limitTgt=90;
 	}
 	else if(limitTgt<120){
 		limitTgt+=0.05;

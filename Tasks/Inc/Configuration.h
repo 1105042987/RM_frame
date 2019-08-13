@@ -19,7 +19,6 @@
 	#define USE_POWER_LIMIT 	20
 	#define CAN21
 	#define CAN13 	1
-	
 #else
 	#define SLAVE_MODE
 	#define USE_IMU

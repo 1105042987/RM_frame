@@ -240,13 +240,13 @@ void Referee_Update_RobotState(){
 	}
 	if(hurtSum>30){
 		if(hurtInit){
-			if(CMA.Real>-460){//碉堡被打
-				CmdTic=130;hurtLck=30;
-				if(ExtCmd==1){hurtLck=100;}
+			if(CMA.Real>-443){//碉堡被打
+				CmdTic=70;hurtLck=30;
+				if(ExtCmd==1){hurtLck=80;}
 				else{hurtLck=30;}
 				ExtCmd=2;
-				}else{//飞机被打
-				ExtCmd=1;CmdTic=100;hurtLck=30;
+			}else{//飞机被打
+				ExtCmd=1;CmdTic=40;hurtLck=30;
 			}
 			hurtSum=0;
 		}else{
@@ -259,7 +259,7 @@ void Referee_Update_RobotState(){
 	
 	receiveCnt++;//10hz
 	if(receiveCnt>10&&StateFlee>1){StateFlee=0;}
-	if(CmdTic<180){CmdTic++;}
+	if(CmdTic<120){CmdTic++;}
 	else{ExtCmd=0;}
 //========================================
 	
@@ -339,14 +339,12 @@ void Referee_Update_hurt(){//@yyp
 //	JUDGE_Received = 1;
 	
 	uint8_t tmp=buffer[7]&0x0f;
-	if(tmp==0x1){StateHurt=1;}
-	if(tmp==0x2){StateHurt=2;}
+	if(tmp==0x0){StateHurt=2;hurtLck=30;}
 }
 //======================================
 void Judge_Refresh_Interact(){
 	if(buffer[13]==1){CmdTic=0;ExtCmd=1;SpeedRef=2100;}//躲飞机
 	else if(buffer[13]==2){CmdTic=0;ExtCmd=2;}
-	else if(buffer[13]==3){CmdTic=0;ExtCmd2=3;}
 }
 
 
