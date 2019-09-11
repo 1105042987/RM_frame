@@ -203,11 +203,11 @@ void Chassis_Data_Decoding()
 {
 	ControlRotate();
 	//imu.rol 14.4上坡 15.5碉堡上坡-15.9碉堡下坡 -14.3下坡 -60正向翻 60反向翻
-	if(imu.rol<=-18&&EngineerState==COMMON_STATE&&AutoClimbing==0&&ON_THE_GROUND)
+	if(imu.rol<=-22&&EngineerState==COMMON_STATE&&AutoClimbing==0&&ON_THE_GROUND)
 	{
 		ChassisSpeedRef.forward_back_ref+=fabs(imu.rol+18)*55 * RC_CHASSIS_SPEED_REF;
 	}
-	if(imu.rol>=22&&EngineerState==COMMON_STATE&&AutoClimbing==0&&ON_THE_GROUND)
+	if(imu.rol>=26&&EngineerState==COMMON_STATE&&AutoClimbing==0&&ON_THE_GROUND)
 	{
 		ChassisSpeedRef.forward_back_ref-=(imu.rol-18)*55*RC_CHASSIS_SPEED_REF;
 		fancheck+=1;
@@ -246,6 +246,7 @@ void controlLoop()
 	
 	if(WorkState > 0)
 	{
+		
 		Chassis_Data_Decoding();
 		for(int i=0;i<8;i++) if(can1[i]!=0) (can1[i]->Handle)(can1[i]);
 		for(int i=0;i<8;i++) if(can2[i]!=0) (can2[i]->Handle)(can2[i]);
@@ -393,8 +394,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		dataSendCnt++;
 		if(dataSendCnt >= 80)
 		{
-			//Referee_Transmit_UserData();
-			Referee_Transmit_Image();
+			Referee_Transmit_UserData();
+			//Referee_Transmit_Image();
 			dataSendCnt = 0;
 		}
 		

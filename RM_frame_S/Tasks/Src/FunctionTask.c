@@ -177,6 +177,16 @@ void RescueLoop()
 	checkleft=rightClaw;
 	checkright=leftClaw;
 	SetWheelZero();
+	if(leftClawZero&&rightClawZero)
+	{
+		SL.positionPID.kp=5.0;
+		SR.positionPID.kp=5.0;
+	}
+	else
+	{
+		SL.positionPID.kp=15.0;
+		SR.positionPID.kp=15.0;
+	}
 	if(!leftClawZero)
 	{
 		if(SL.RxMsgC6x0.moment < 3000)

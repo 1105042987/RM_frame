@@ -34,7 +34,8 @@ Claw_Out=0
 #define CLAW_IS_OUT Claw_Out==1
 #define CLAW_IS_IN Claw_Out==0
 
-#define UPLEVEL 780  //700
+#define UPLEVEL 760  //700
+#define UPUPLEVEL 780
 
 #define CLAW_INSPECT_SUCCEED Claw_SelfInspecting==3
 
@@ -137,4 +138,5 @@ void AutoGet_Fillstream(void);
 void Chassis_Check(void);
 void Claw_Buffer(void);
 void State_AutoGet_Fake(void);
+void State_AutoGet_Up(void);
 #endif /*__ AUTOGETTASK_H */

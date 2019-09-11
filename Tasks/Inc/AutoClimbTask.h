@@ -23,7 +23,7 @@
 //1v/5v 	27cm
 
 #define UD_TOP			-10     //0
-#define UD_BOTTOM		-950    //980
+#define UD_BOTTOM		-980    //980
 //-1010
 #define FLAG_SET(target) if(target.val_ref>CHANGE_POINT) target.flag = 0; else target.flag = 1;
 #define FLAG_SETr(target) if(target.val_ref>CHANGE_POINTr) target.flag = 0; else target.flag = 1;
@@ -42,15 +42,15 @@ typedef __packed struct
 
 typedef __packed struct
 {
-	Distance_Sensor_t frontf;
-	Distance_Sensor_t frontr;
-	Distance_Sensor_t frontl;
-	Distance_Sensor_t backb;
-	Distance_Sensor_t backr;
-	Distance_Sensor_t backl;
-	Distance_Sensor_t left;
-	Distance_Sensor_t right;
-	uint16_t move_flags;
+	Distance_Sensor_t frontf;//底盘前
+	Distance_Sensor_t frontr;//现已不用
+	Distance_Sensor_t frontl;//现已不用
+	Distance_Sensor_t backb; //底盘后
+	Distance_Sensor_t backr; //后轮右
+	Distance_Sensor_t backl; //后轮左
+	Distance_Sensor_t left;  //取弹左
+	Distance_Sensor_t right; //取弹右
+	uint16_t move_flags;     //
 }Distance_Couple_t;
 
 //move_flags 16进制：编码准则：lo li ri ro

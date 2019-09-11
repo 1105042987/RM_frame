@@ -83,6 +83,7 @@ extern uint8_t signal2;
 extern uint32_t Slave_Commoning;
 extern ManualClimb_State_e ManualClimb_State;
 extern uint32_t clawback;
+extern uint32_t Claw_UpToPosition_Up;
 
 uint8_t transdata[1];
 void InitialSave()
@@ -494,7 +495,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 	{
 		case SHORT_CLICK:
 		{
-			if(ON_THE_FLOOR&&EngineerState==GET_STATE)
+			if(EngineerState==GET_STATE)
 			{
 				AutoGet_Skill=1;
 			}
@@ -762,7 +763,7 @@ void MouseKeyControlProcess(Mouse *mouse, Key *key)
 			else if(key->v & KEY_G)
 			{
 				if(EngineerState==COMMON_STATE)
-				State_AutoGet_Fake();
+				State_AutoGet_Up();
 			}
 			else if(key->v & KEY_F)
 			{

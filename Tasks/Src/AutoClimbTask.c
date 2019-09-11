@@ -158,9 +158,9 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 	{// chassis
 		signal2=0;
 		if(flag==1)
-		switch(distance_couple.move_flags&0xf)
+		switch(distance_couple.move_flags&0xf)  //保留低四位
 		{
-			case 6:                                                  //下岛时候降架子把车架住往后走
+			case 6:                         //底盘前后都阻断 前轮后轮均开放                //下岛时候降架子把车架住往后走
 				if (ChassisSpeedRef.forward_back_ref < 0) { 
 					//ChassisSpeedRef.forward_back_ref=0;
 					CM1.TargetAngle=0;
@@ -190,7 +190,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 								NMCDL.positionPID.outputMax = 7000;
 						NMCDR.positionPID.outputMax =7000;
 									NMCDL.TargetAngle = UD_BOTTOM;
-								  NMCDR.TargetAngle = UD_BOTTOM-25;
+								  NMCDR.TargetAngle = UD_BOTTOM;
 								signal1=1;
 								if(AlreadyDowned==0)
 									AlreadyDowned=1;
@@ -198,7 +198,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 					}	
 				}
 				break;				
-			case 15:                                             //上岛时候降架子把车抬起来
+			case 15:        //底盘前后都阻断 前轮后轮均阻断                            //上岛时候降架子把车抬起来
 				if(ChassisSpeedRef.forward_back_ref>0 && Direction_Indicator==0){
 					ChassisSpeedRef.forward_back_ref/=2;
 					CM1.TargetAngle=0;
@@ -208,7 +208,7 @@ void Chassis_Choose(uint8_t flag,uint8_t ensure)
 						NMCDL.positionPID.outputMax = 7000;
 						NMCDR.positionPID.outputMax = 7000;
 							NMCDL.TargetAngle = UD_BOTTOM;
-						  NMCDR.TargetAngle = UD_BOTTOM-25;
+						  NMCDR.TargetAngle = UD_BOTTOM;
 						signal1=1;
 						if(AlreadyClimbed==0)
 						AlreadyClimbed=1;
@@ -267,13 +267,17 @@ void Speed_Locker()
 	{
 		ChassisSpeedRef.forward_back_ref/=2;
 	}
+	if(AutoClimb_Level==1&&ChassisSpeedRef.forward_back_ref>0&&AlreadyClimbed==1)  //中间台阶
+	{
+		ChassisSpeedRef.forward_back_ref/=0.8;
+	}
 	if(AutoClimb_Level==1&&ChassisSpeedRef.forward_back_ref>0&&AlreadyClimbed==0&&(!hasReach(&NMCDL,30)||!hasReach(&NMCDR,30)))  //中间台阶
 	{
-		ChassisSpeedRef.forward_back_ref/=2;
+		ChassisSpeedRef.forward_back_ref/=1.7;
 	}
 	if(AutoClimb_Level==2&&EngineerState==COMMON_STATE)
 	{
-		ChassisSpeedRef.forward_back_ref/=2.3;
+		ChassisSpeedRef.forward_back_ref/=2.15;
 	}
 	if(AutoClimb_Level==2&&EngineerState==COMMON_STATE&&(!hasReach(&NMCDL,30)||!hasReach(&NMCDR,30)))
 	{
@@ -281,7 +285,15 @@ void Speed_Locker()
 	}
 	if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==1)
 	{
-		ChassisSpeedRef.forward_back_ref/=1.5;
+		ChassisSpeedRef.forward_back_ref/=1.5;//1.5
+	}
+	if(ON_THE_FLOOR&&ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==1&&(hasReach(&NMCDL,30)||hasReach(&NMCDR,30)))
+	{
+		ChassisSpeedRef.forward_back_ref/=0.9;
+	}
+	if(ChassisSpeedRef.forward_back_ref<0&&AlreadyDowned==1&&(!hasReach(&NMCDL,30)||!hasReach(&NMCDR,30)))
+	{
+		ChassisSpeedRef.forward_back_ref/=0.7;
 	}
 //	if(((!hasReach(&NMCDL,45)||!hasReach(&NMCDR,45))&&(distance_couple.move_flags&0x000e)!=14&&ChassisSpeedRef.forward_back_ref<=0))
 //	{

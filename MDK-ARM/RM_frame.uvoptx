@@ -448,12 +448,12 @@
         <Ww>
           <count>58</count>
           <WinNumber>1</WinNumber>
-          <ItemText>NMUDL</ItemText>
+          <ItemText>NMUDL,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>59</count>
           <WinNumber>1</WinNumber>
-          <ItemText>NMUDR</ItemText>
+          <ItemText>NMUDR,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>60</count>
@@ -554,6 +554,11 @@
           <count>79</count>
           <WinNumber>1</WinNumber>
           <ItemText>imu_pause</ItemText>
+        </Ww>
+        <Ww>
+          <count>80</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>CM1</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -841,6 +846,16 @@
           <count>56</count>
           <WinNumber>2</WinNumber>
           <ItemText>AutoGet_TotalStep,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>57</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>CM2,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>58</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>CM1</ItemText>
         </Ww>
       </WatchWindow2>
       <Tracepoint>
