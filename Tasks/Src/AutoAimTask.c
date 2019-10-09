@@ -10,199 +10,181 @@
   *
   ******************************************************************************
 */
-
 #include "includes.h"
-
 #ifndef DEBUG_MODE
 #ifdef	USE_AUTOAIM
-
-
+#define USE_AUTOAIM_ANGLE
 //*****************************************声明变量******************************************//
-
-GMINFO_t aim,aim_rcd;																												//目标角度
-Coordinate_t enemy_gun,enemy_scope,scope_gun;																//坐标
-uint8_t Enemy_INFO[8];																											//接收
-uint8_t find_enemy=0,aim_mode=0;																						//aim_mode用于选择瞄准模式，0为不瞄准，1为正常自瞄，2为打符，3暂无（吊射？）
-uint16_t aim_cnt=0;																													//自瞄分频延时变量
-int16_t current_yaw=0,current_pitch=0;																			//当前云台角度
-int16_t receive_cnt=0,receive_rcd=0;																				//检测上位机信号帧数
-double bullet_speed=10.0,bullet_speed_adjust=0,yaw_adjust=0,pitch_adjust=0;	//校准发射变量
-extern MotorINFO* GimbalMotorGroup[2];
-#define GMP (*GimbalMotorGroup[0])
-#define GMY (*GimbalMotorGroup[1])
-#define GMP_ANGLE		(double)((GimbalMotorGroup[0]->RxMsg6623.angle-GimbalMotorGroup[0]->Zero)/8192.0*2*const_pi)
-
-//********************************************************************************************//
-
-
+GMAngle_t aim,abt,abtLast,opt,jst;
+uint8_t Enemy_INFO[8],Tx_INFO[8];						//接收
+uint8_t FindEnemy,AimMode;
+int16_t AimTic=1;
+GMAngle_t aimProcess(float yaw,float pit,int16_t *tic);
 //********************************自瞄初始化********************************//
-
-void InitAutoAim()
-{
+void InitAutoAim(){
 	//开启AUTO_AIM_UART的DMA接收
-	if(HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t *)&Enemy_INFO,8)!= HAL_OK)
-	{
-		Error_Handler();
+	if(HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t *)&Enemy_INFO,8)!= HAL_OK){Error_Handler();}
+	//角度变量初始化（不需要修改）
+	aim.yaw=0;				aim.pit=0;
+	jst.yaw=1;			jst.pit=0;
+}
+//*******************************UART回调函数********************************/
+//float rate1=2.7,rate2=2.85;
+float tmpY,tmpP;
+void AutoAimUartRxCpltCallback(){
+	if(RX_ENEMY_START=='s'&&RX_ENEMY_END=='e'){
+		onLed(5);
+		aim.yaw=(int16_t)((RX_ENEMY_YAW1<<8)|RX_ENEMY_YAW2)*kAngle;
+		aim.pit=-(int16_t)((RX_ENEMY_PITCH1<<8)|RX_ENEMY_PITCH2)*kAngle;
+		aim.dis=(int16_t)((RX_ENEMY_DIS1<<8)|RX_ENEMY_DIS2);//0无，500弱识别，1000正常，2000陀螺正装甲，3000陀螺右装甲，4000陀螺左装甲，5000五米外，6000工程
+		if(aim.dis==0){
+			HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t*)&Enemy_INFO,8);
+			return;
+		}
+		aim.yaw/=2.7;
+		aim.pit/=2.83;
+		abt.yaw=GMY.Real+aim.yaw-jst.yaw;
+		abt.pit=GMP.Real+aim.pit+jst.pit;
+		if(abt.pit>-12 && GMY.encoderAngle>0){AimMode=5;}//外侧远处
+		if(abt.pit<-13){AimMode=0;}
+		if(abt.pit<-2){
+//=========预测===========
+			if(aim.dis==500 || aim.dis==1000 || aim.dis==6000){opt=aimProcess(abt.yaw,abt.pit,&AimTic);}
+//========================
+			else{
+				if(aim.dis==2000){//陀螺正对装甲
+					abt.yaw=abtLast.yaw*0.6+abt.yaw*0.4;
+					abt.pit=abtLast.pit*0.7+abt.pit*0.3;
+				}else if(aim.dis==3000){//陀螺右侧边装甲,yaw为负
+					abt.pit=abtLast.pit*0.7+abt.pit*0.3;
+					abt.yaw=abtLast.yaw*0.6+(abt.yaw-5*sin(abt.pit))*0.4;
+				}else if(aim.dis==4000){//陀螺左侧边装甲
+					abt.pit=abtLast.pit*0.7+abt.pit*0.3;
+					abt.yaw=abtLast.yaw*0.7+(abt.yaw+5*sin(abt.pit))*0.3;
+				}
+//========速度补偿========
+				if(AimMode){
+					opt.yaw=abt.yaw-ChaSpdSin /19;//19.3,20
+					opt.pit=abt.pit-ChaSpdCos /18;//18
+				}else{
+					opt.yaw=abt.yaw-ChaSpdSin /14.3;//19.3
+					opt.pit=abt.pit-ChaSpdCos /14.3;
+				}
+//========================
+			}
+			FindEnemy=1;
+		}
+		abtLast=abt;
 	}
-	
-	//坐标变量初始化（不需要修改）
-	enemy_scope.x=0;	enemy_scope.y=0;	enemy_scope.z=200;
-	enemy_gun.x=0;		enemy_gun.y=0;		enemy_gun.z=200;
-	
-	//设置坐标初始值（根据不同安装情况调整这3个参数）
-	scope_gun.x=0;		scope_gun.y=0;		scope_gun.z=0;
+	HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t*)&Enemy_INFO,8);
 }
-
-//**************************************************************************//
-
-
-//*******************************UART回调函数********************************//
-
-void AutoAimUartRxCpltCallback()
-{
-	//串口数据解码
-	if(RX_ENEMY_START=='s'&&RX_ENEMY_END=='e')
-	{
-		enemy_scope.x=(float)((RX_ENEMY_X1<<8)|RX_ENEMY_X2)*k_coordinate;
-		enemy_scope.y=(float)((RX_ENEMY_Y1<<8)|RX_ENEMY_Y2)*k_coordinate;
-		enemy_scope.z=(float)((RX_ENEMY_Z1<<8)|RX_ENEMY_Z2)*k_distance;
-		enemy_scope.x=(enemy_scope.x>coordinate_max)?(enemy_scope.x-2*coordinate_max):enemy_scope.x;
-		enemy_scope.y=(enemy_scope.y>coordinate_max)?(enemy_scope.y-2*coordinate_max):enemy_scope.y;
-		find_enemy=1;
-		receive_cnt++;
-	}
-	
-	HAL_UART_Receive_DMA(&AUTOAIM_UART,(uint8_t *)&Enemy_INFO,8);
-}
-//***************************************************************************//
-
-
-//****************************************坐标角度转换函数*************************************//
-
-//在时间中断中分频后调用该函数
-void EnemyINFOProcess()
-{
-	//坐标转换
-	enemy_gun.x=enemy_scope.x+scope_gun.x;
-	enemy_gun.y=enemy_scope.y+scope_gun.y;
-	enemy_gun.z=enemy_scope.z+scope_gun.z;
-	
-	//角度计算（计算消耗内存较多，不能放在2ms以下的时间中断内执行）
-	aim.y=atan(enemy_gun.x/(enemy_gun.z*cos(GMP_ANGLE)-enemy_gun.y*sin(GMP_ANGLE)))/const_pi*180.0-yaw_adjust;
-	aim.p=atan(enemy_gun.y/enemy_gun.z)/const_pi*180.0+pitch_adjust;
-}
-
-//*********************************************************************************************//
-
 
 //**************************普通模式自瞄控制函数****************************//
-
-void AutoAimNormal()
-{
-	MINMAX(aim.y,-4.0f,4.0f);
-	MINMAX(aim.p,-2.0f,2.0f);
-	if(find_enemy)
-	{
-		if(aim_cnt<1)
-		{
-			GMY.Target+=(aim.y+aim_rcd.y)/2;
-			GMP.Target+=(aim.p+aim_rcd.p)/2;
-			aim_cnt++;
-		}
-		else
-		{
-			find_enemy=0;
-			aim_cnt=0;
-			aim_rcd.y=aim.y;
-			aim_rcd.p=aim.p;
-		}
-	}
+void autoAim(){
+	if(AimMode){opt.pit-=12/opt.pit+0.5;}//5m
+	else if(GMY.encoderAngle<0){opt.pit-=10/opt.pit-0.5;}
+	else{opt.pit-=30/opt.pit+0.5;}//下坠补偿
+	GMY.Target=opt.yaw;
+	GMP.Target=opt.pit;
+	FindEnemy=0;
 }
-
-//**************************************************************************//
-
-
-//**************************打符模式自瞄控制函数****************************//
-
-void AutoAimBuff()
-{
-	if(find_enemy)
-	{
-		//云台转向目标方向
-		if(aim_cnt==0)
-		{
-			aim_rcd.y=aim.y;
-			aim_rcd.p=aim.p;
-			GMY.Target+=aim_rcd.y/20;
-			GMP.Target+=aim_rcd.p/20;
-			aim_cnt++;
-		}
-		else if(aim_cnt>=1 && aim_cnt<20)
-		{
-			GMY.Target+=aim_rcd.y/20;
-			GMP.Target+=aim_rcd.p/20;
-			aim_cnt++;
-		}
-		//等待云台稳定
-		else if(aim_cnt>=20 && aim_cnt<30)
-		{
-			aim_cnt++;
-		}
-		//发射
-		else if(aim_cnt==30)
-		{
-			//ShootOneBullet();
-			aim_cnt++;
-		}
-		//等待云台稳定
-		else if(aim_cnt>30 && aim_cnt<50)
-		{
-			aim_cnt++;
-		}
-		//重新指向中心
-		else if(aim_cnt>=50 && aim_cnt<70)
-		{
-			GMY.Target-=aim_rcd.y/20;
-			GMP.Target-=aim_rcd.p/20;
-			aim_cnt++;
-		}
-		else
-		{
-			aim_cnt=0;
-			find_enemy=0;
+//float wy,wp;
+GMAngle_t aimProcess(float yaw,float pit,int16_t *tic){
+/*@尹云鹏，自瞄预测，反陀螺，运动补偿
+	参数：绝对角度yaw，pit，计时器地址
+	核心思想：
+	1.视觉数据需要与真实角度标定，传入参数为目标绝对角度，差分出速度
+	2.视觉数据存在误差，以一定时间间隔采样
+	3.速度累加与指数衰减对抗
+	4.判定陀螺：速度与aim积小于一个负数，计次超过3
+	5.反陀螺：加权平均
+	6.自身运动补偿：在functionTask
+*/
+	#define amt 6	//间隔点个数amount，调节amt使时间间隔大约为50ms，即 amt=50ms/1000ms*fps
+	static int8_t i,lock,whipCnt,cnt;	//index计数器，首次进入保护锁，陀螺判定计数，调用计数
+	static float 	y[amt],p[amt],			//yaw,pit历史
+								tSum,t[amt],				//间隔时间,tic历史
+								wy,wp,							//yaw,pit角速度
+								wySum,wpSum,				//角速度累加对抗
+								dYaw;								//两次yaw差值，判定陀螺用
+	static GMAngle_t in,out;					//上一次值，返回值角度
+	tSum+=*tic-t[i];	//与pid的i计算如出一辙，加上本次并减去amt次以前的时间间隔，得到分频后的间隔
+	cnt++;
+	if(*tic>180){			//if两次数据时间间隔大于XXms，清空历史，进入保护锁
+		lock=amt;
+		wy=0;wp=0;dYaw=yaw;
+		wySum=0;wpSum=0;
+		whipCnt=0;
+		in.yaw=yaw;in.pit=pit;in.dis=pit;
+		out=in;
+	}
+	in.yaw=in.yaw*0.7+yaw*0.3;//传入值滤波
+	in.pit=in.pit*0.7+pit*0.3;
+	if(lock){			//函数首次进入保护，只记录数据不预测
+		lock--;
+		if(AimMode){
+			wySum=-ChaSpdSin /610;
+			wpSum=-ChaSpdCos /327;
+		}else{
+			wySum=-ChaSpdSin /434;
+			wpSum=-ChaSpdCos /222;
 		}
 	}
-}
-
-//**************************************************************************//
-
-
-//***********************************自瞄控制*******************************//
-
-void AutoAimGMCTRL()
-{
-	switch(aim_mode)
-	{
-		case 1: AutoAimNormal(); break;		//自瞄
-		case 2: AutoAimBuff(); break;			//打符
-		case 3: break;							//吊射？
-		default: break;
+	else{
+		//判定陀螺，应该在本次计算wySum之前
+		dYaw=in.yaw-dYaw;
+		if(dYaw*wySum<-0.35){
+			if(whipCnt<20){whipCnt++;}
+			cnt=0;
+		}else if(cnt>120){
+			cnt=0;
+			whipCnt=0;
+		}
+//==============
+//		wy=(wy+(in.yaw-y[i])*50/tSum)/2;	//速度滤波,*45本来是预测时间，放到这里提高除法精度
+//		wp=(wp+(in.pit-p[i])*50/tSum)/2;
+//==============	
+		wy=(wy+(in.yaw-y[i])/tSum)/2;	//速度滤波
+		wp=0.7*wp+0.3*(in.pit-p[i])/tSum;
+		wySum+=wy;	//角速度累加与指数衰减对抗
+		wpSum+=wp;
+		wySum*=0.9;	//指数衰减限制累加,失去物理意义
+		wpSum*=0.9;
 	}
+	dYaw=in.yaw;	//暂存上次yaw，用于下次计算yaw差值
+	y[i]=in.yaw;	//yaw历史
+	p[i]=in.pit;	//pit历史
+	t[i]=*tic;		//tic历史
+	i=(i+1)%amt;	//amt次之内循环
+	*tic=1;				//时间中断计时器重新开始
 	
-	//************检测帧数*************
-	if(receive_cnt==0)
-		auto_counter=1000;
-	if(auto_counter==0)
-	{
-		receive_rcd=receive_cnt;
-		receive_cnt=0;
-		auto_counter=1000;
+	if(whipCnt<5){//预测，滤波
+//==============
+//		out.yaw=(in.yaw-wy/sin(in.pit/57.3)+out.yaw)/2;
+//		out.pit=(in.pit+wp+out.pit)/2;
+//==============	
+		out.yaw=0.4*(in.yaw+wySum*26)+ 0.6*out.yaw;
+		out.dis=0.3*(in.pit+wpSum*10)+ 0.7*out.pit;
+		out.yaw-=ChaSpdSin/100;
+		out.pit=out.dis-ChaSpdCos/40;
+	}else{//反陀螺，低权值滤波
+		out.yaw=0.8*out.yaw+0.2*(in.yaw-ChaSpdSin /19);//19.3
+		out.pit=0.8*out.pit+0.2*(in.pit-ChaSpdCos /18);
 	}
-	//*********************************
+//3.14x8x0.09x8/60/21= 1/557
+	return out;
 }
-
-//**************************************************************************//
-
+//记录云台角度历史
+GMAngle_t GMAngleRcd(){
+	#define rcdAmt 30
+	static GMAngle_t GMAngleRcd[rcdAmt];
+	static uint8_t i = 0;
+	GMAngleRcd[i].yaw = GMY.Real;
+	GMAngleRcd[i].pit = GMP.Real;
+	i=(i+1)%rcdAmt;
+	return GMAngleRcd[i];
+}
 
 #endif /*USE_AUTOAIM*/
 #endif /*DEBUG_MODE*/
+

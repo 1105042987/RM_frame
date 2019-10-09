@@ -10,207 +10,400 @@
   ******************************************************************************
   */
 #include "includes.h"
-KeyboardMode_e KeyboardMode = NO_CHANGE;
+double ChassisSpeed;
 RampGen_t LRSpeedRamp = RAMP_GEN_DAFAULT;   	//斜坡函数
 RampGen_t FBSpeedRamp = RAMP_GEN_DAFAULT;
-ChassisSpeed_Ref_t ChassisSpeedRef; 
-void KeyboardModeFSM(Key *key);
-void MouseModeFSM(Mouse *mouse);
-void Standardized_Chassis_Move(float Rate);
-#include "RobotMotor.h"
-#ifdef CONFIGURATION
-extern MotorINFO CMFL,CMFR,CMBL,CMBR,GMY,GMP,FRICL,FRICR,STIR,CML,CMR;
-#endif
-int32_t auto_counter=0;		//用于准确延时的完成某事件
-
-int16_t channelrrow = 0;
-int16_t channelrcol = 0;
-int16_t channellrow = 0;
-int16_t channellcol = 0;
-
+int32_t auto_counter= 0;		//用于准确延时的完成某事件
+int16_t channelrrow,channelrcol,channellrow,channellcol;
+int8_t StateSway,StateFlee,StateHurt,StateRand=1,ExtCmd,ExtCmd2;
+int16_t StateCnt=1,CmdTic;
+int16_t noEnemyCnt=1;
+void strategyShoot(void);
+void strategyShoot2(void);
 //初始化
-void FunctionTaskInit()
-{
-	LRSpeedRamp.SetScale(&LRSpeedRamp, MOUSE_LR_RAMP_TICK_COUNT);
-	FBSpeedRamp.SetScale(&FBSpeedRamp, MOUSR_FB_RAMP_TICK_COUNT);
-	LRSpeedRamp.ResetCounter(&LRSpeedRamp);
-	FBSpeedRamp.ResetCounter(&FBSpeedRamp);
-	
-	ChassisSpeedRef.forward_back_ref = 0.0f;
-	ChassisSpeedRef.left_right_ref = 0.0f;
-	ChassisSpeedRef.rotate_ref = 0.0f;
-	
-	KeyboardMode=NO_CHANGE;
+void FunctionTaskInit(){
+	ChassisSpeed=0;
 }
 //限位与同步
-void Limit_and_Synchronization()
-{
-	//MINMAX(UD1.Target,-900,270);//limit
-	//FRICR.Target = -FRICL.Target;
-}
+
 //******************
 //遥控器模式功能编写
 //******************
-void RemoteControlProcess(Remote *rc)
-{
-	if(WorkState <= 0) return;
-	//max=660
-	channelrrow = (rc->ch0 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
-	channelrcol = (rc->ch1 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
-	channellrow = (rc->ch2 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
-	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
-	if(WorkState == NORMAL_STATE)
-	{	
-		Standardized_Chassis_Move(1);
+#if GUARD == 'U'
+void generalProcess(Remote *rc);
+uint8_t FindEnemy;
+//********************上平台代码1
+void RCProcess1(Remote *rc){
+	generalProcess(rc);
+	if(getLeftSr()){onLed(7);}
+	else{offLed(7);}
+	if(WorkState == STATE_1){
+		brakeOff();
 	}
-	if(WorkState == ADDITIONAL_STATE_ONE)
-	{
+	if(WorkState == STATE_2){
+		//brakeOn();
 	}
-	if(WorkState == ADDITIONAL_STATE_TWO)
-	{
+	if(WorkState == STATE_3){
+		
 	}
-	Limit_and_Synchronization();
+	limtSync();
 }
-//**************************
-//遥控器**测试**模式功能编写
-//**************************
-void RemoteTestProcess(Remote *rc)
-{
-	if(WorkState <= 0) return;
-	//max=660
-	channelrrow = (rc->ch0 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
-	channelrcol = (rc->ch1 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
-	channellrow = (rc->ch2 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
-	channellcol = (rc->ch3 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET); 
-	if(WorkState == NORMAL_STATE)
-	{	
-		Standardized_Chassis_Move(1);
+//********************上平台代码2
+void RCProcess2(Remote *rc){
+	generalProcess(rc);
+	if(WorkState == STATE_2){
+		switch(ExtCmd){
+			case 1:{//躲飞机
+				if(Anchor==0 || Anchor==1){routing1();}
+				else{routing3();}
+				break;
+			}
+			case 2:{
+				if(Anchor==0 || Anchor==2){routing2();}
+				else{routing3();}
+				break;
+			}
+			default:{
+				if(Anchor==0){routing0();}
+				else if(Anchor==1){routing1();}
+				else if(Anchor==2){routing4();}
+			}
+		}
 	}
-	if(WorkState == ADDITIONAL_STATE_ONE)
-	{
+	if(WorkState == STATE_3){
+		routing0();
+//		switch(ExtCmd){
+//			case 1:{//躲飞机
+//				if(Anchor==0 || Anchor==1){routing1();}
+//				else{routing3();}
+//				break;
+//			}
+//			case 2:{//躲碉堡
+//				if(Anchor==0 || Anchor==2){routing2();}
+//				else{routing3();}
+//				break;
+//			}
+//			default:{
+//				if(Anchor==0){routing0();}
+//				else if(Anchor==1){routing1();}
+//				else if(Anchor==2){routing4();}
+//			}
+//		}
 	}
-	if(WorkState == ADDITIONAL_STATE_TWO)
-	{	
-	}
-	Limit_and_Synchronization();
+	limtSync();
 }
-//****************
-//键鼠模式功能编写
-//****************
-uint16_t KM_FORWORD_BACK_SPEED 	= NORMAL_FORWARD_BACK_SPEED;
-uint16_t KM_LEFT_RIGHT_SPEED  	= NORMAL_LEFT_RIGHT_SPEED;
-void MouseKeyControlProcess(Mouse *mouse, Key *key)
-{	
-	if(WorkState <= 0) return;
-	mouse->last_press_l=mouse->last_press_l*mouse->press_l+mouse->press_l;
-	mouse->last_press_r=mouse->last_press_r*mouse->press_r+mouse->press_r;
-	MINMAX(mouse->x, -150, 150); 
-	MINMAX(mouse->y, -150, 150); 
-	
-	#ifdef USE_CHASSIS_FOLLOW
-		GMY.Target += mouse->x * MOUSE_TO_YAW_ANGLE_INC_FACT;
-		GMP.Target -= mouse->y * MOUSE_TO_PITCH_ANGLE_INC_FACT;
-	#else
-		ChassisSpeedRef.rotate_ref = -mouse->x * RC_ROTATE_SPEED_REF;
-	#endif
-	
-	if(mouse->last_press_l==1)//左短按
-	{
+//********************上平台代码3
+void RCProcess3(Remote *rc){
+	generalProcess(rc);
+	if(WorkState == STATE_1){
 		
 	}
-	if(mouse->last_press_l>50)//左长按
-	{
+	if(WorkState == STATE_2){
 		
 	}
-	if(mouse->last_press_r==1)//右短按
-	{
+	if(WorkState == STATE_3){
 		
 	}
-	if(mouse->last_press_r>50)//右长按
-	{
-		
-	}
-	
-	KeyboardModeFSM(key);
-	//*****Don't Use WASD******
-	switch (KeyboardMode)	
-	{
-		case SHIFT_CTRL:		//State Change
-		{
-			
-		}break;
-		case CTRL:
-		{
-			
-		}break;
-		case SHIFT:
-		{
-			
-		}break;
-		case NO_CHANGE:
-		{
-			
-		}break;
-	}
-	//CM Movement Process 
-	//shift: High Speed , ctrl: Low Speed  , shift+ctrl: Don't Move
-	if(key->v & KEY_W)  		//key: w
-		ChassisSpeedRef.forward_back_ref =  KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
-	else if(key->v & KEY_S) 	//key: s
-		ChassisSpeedRef.forward_back_ref = -KM_FORWORD_BACK_SPEED* FBSpeedRamp.Calc(&FBSpeedRamp);
-	else
-	{
-		ChassisSpeedRef.forward_back_ref = 0;
-		FBSpeedRamp.ResetCounter(&FBSpeedRamp);
-	}
-	if(key->v & KEY_D)  		//key: d
-		ChassisSpeedRef.left_right_ref =  KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
-	else if(key->v & KEY_A) 	//key: a
-		ChassisSpeedRef.left_right_ref = -KM_LEFT_RIGHT_SPEED * LRSpeedRamp.Calc(&LRSpeedRamp);
-	else
-	{
-		ChassisSpeedRef.left_right_ref = 0;
-		LRSpeedRamp.ResetCounter(&LRSpeedRamp);
-	}
-	Limit_and_Synchronization();
+	limtSync();
 }
 
-void KeyboardModeFSM(Key *key)
-{
-	if((key->v & 0x30) == 0x30)//Shift_Ctrl
-	{
-		KM_FORWORD_BACK_SPEED=  0;
-		KM_LEFT_RIGHT_SPEED = 0;
-		KeyboardMode=SHIFT_CTRL;
+
+//===================================
+//********************上平台通用代码
+//===================================
+void generalProcess(Remote *rc){	
+	if(WorkState <= 0) return;
+	//max=660
+	channelrrow = (rc->ch0 - (int16_t)Pos1LER_STICK_OFFSET);//leftRight
+	channelrcol = (rc->ch1 - (int16_t)Pos1LER_STICK_OFFSET);
+	channellrow = (rc->ch2 - (int16_t)Pos1LER_STICK_OFFSET);
+	channellcol = (rc->ch3 - (int16_t)Pos1LER_STICK_OFFSET);
+	
+	ChassisSpeed=channelrrow*3;
+	FindEnemy=(uint8_t)receiveData[0].data[0];
+	
+	sendData[0].data[0]=(uint16_t)RCRightMode | (uint16_t)RCLeftMode<<2 | ((uint16_t)CMA.RxMsgC6x0.rotateSpeed/8+127)<<8;//右拨杆，左拨杆，底盘速度
+	if(GameRobotState.robot_id==7){sendData[0].data[0]=sendData[0].data[0] | 1<<4;}//是否为蓝
+	if(channelrcol>600){sendData[0].data[0]=sendData[0].data[0] | 1<<5;}//右推到顶
+	if(ExtCmd2){sendData[0].data[0]=sendData[0].data[0] | 1<<6;ExtCmd2--;}//看碉堡
+	if(StateHurt){sendData[0].data[0]=sendData[0].data[0] | 1<<7;StateHurt--;}//看基地
+	sendData[0].data[1]=(uint16_t)(channellrow+660)/6 | ((uint16_t)(channellcol+660)/6)<<8 ;
+	sendData[0].data[2]=(int16_t)CMA.Real;
+	sendData[0].data[3]=(int16_t)(RealHeat0*20);//热量
+	
+	nutDetect();
+}
+void limtSync(){
+	MINMAX(GMP.Target,-60,0);//limit
+//	MINMAX(GMY.Target,-160+GMY.imuEncorderDiff,160+GMY.imuEncorderDiff);//limit
+	//CMR.Target =  -CML.Target;
+}
+#endif  //GUARD == 'U'
+#if GUARD == 'D'
+//下平台代
+float ChaSpdSin,ChaSpdCos;
+int8_t tmp;
+void generalProcess();
+void RCProcess1(){
+	generalProcess();
+	laserOn();
+	if(WorkState == STATE_1){
+		STIRv.Target=0;
+		FRICL.Target=0;
+		FRICR.Target=0;
+//		vy+=imu.vy;
+//		GMY.Target-=vy/rate;
 	}
-	else if(key->v & KEY_SHIFT)//Shift
-	{
-		KM_FORWORD_BACK_SPEED=  HIGH_FORWARD_BACK_SPEED;
-		KM_LEFT_RIGHT_SPEED = HIGH_LEFT_RIGHT_SPEED;
-		KeyboardMode=SHIFT;
+	if(WorkState == STATE_2){
+		STIRv.Target=0;
+		FRICL.Target=-0;
+		FRICR.Target= 0;
+		uartSend();
+		if(FindEnemy){autoAim();}
 	}
-	else if(key->v & KEY_CTRL)//Ctrl
-	{
-		KM_FORWORD_BACK_SPEED=  LOW_FORWARD_BACK_SPEED;
-		KM_LEFT_RIGHT_SPEED = LOW_LEFT_RIGHT_SPEED;
-		KeyboardMode=CTRL;
+	if(WorkState == STATE_3){
+		FRICL.Target =-5500;
+		FRICR.Target = 5500;
+		uartSend();
+		strategyShoot2();
 	}
-	else
-	{
-		KM_FORWORD_BACK_SPEED=  NORMAL_FORWARD_BACK_SPEED;
-		KM_LEFT_RIGHT_SPEED = NORMAL_LEFT_RIGHT_SPEED;
-		KeyboardMode=NO_CHANGE;
-	}	
+	limtSync();
+}
+//*******************下平台代码2
+void RCProcess2(){
+	generalProcess();
+	if(WorkState == STATE_1){
+		laserOn();
+		STIRv.Target=0;
+		FRICL.Target=0;
+		FRICR.Target=0;
+	}
+	if(WorkState == STATE_2){
+		laserOn();
+		STIRv.Target=0;
+		FRICL.Target=-0;
+		FRICR.Target= 0;
+		uartSend();
+		if(FindEnemy){autoAim();}
+	}
+	if(WorkState == STATE_3){
+		laserOff();
+		strategyShoot2();
+		uartSend();
+	}
+	limtSync();
 }
 
-void Standardized_Chassis_Move(float Rate)
-{
-	ChassisSpeedRef.forward_back_ref = channelrcol * RC_CHASSIS_SPEED_REF*Rate;
-	ChassisSpeedRef.left_right_ref   = channelrrow * RC_CHASSIS_SPEED_REF/2*Rate;
-	#ifdef USE_CHASSIS_FOLLOW
-		GMY.Target += channellrow * RC_GIMBAL_SPEED_REF;
-		GMP.Target += channellcol * RC_GIMBAL_SPEED_REF;
-	#else
-		ChassisSpeedRef.rotate_ref = -channellrow * RC_ROTATE_SPEED_REF;
-	#endif
+//*******************下平台代码3
+void RCProcess3(){
+	laserOn();
+	generalProcess();
+	if(WorkState == STATE_1){
+		FRICL.Target =-4200;
+		FRICR.Target = 4200;
+		uartSend();
+		if(FindEnemy){autoAim();}
+		if(receiveData[0].data[0] & 0x20){firing3();}
+		else{firing1();}
+	}
+	if(WorkState == STATE_2){
+		FRICL.Target =-5500;
+		FRICR.Target = 5500;
+		uartSend();
+		AimMode=0;
+		if(FindEnemy){autoAim();}
+		if(receiveData[0].data[0] & 0x20){firing2();}
+		else{firing1();}
+	}
+	if(WorkState == STATE_3){
+		FRICL.Target =-6600;
+		FRICR.Target = 6600;
+		uartSend();
+		AimMode=5;
+		if(FindEnemy){autoAim();}
+		if(receiveData[0].data[0] & 0x20){firing5m();}
+		else{firing1();}
+	}
+	limtSync();
 }
+
+//打击策略1==================
+void strategyShoot(){
+	FRICL.Target =-5500;
+	FRICR.Target = 5500;
+	laserOn();
+	if(receiveData[0].data[0] & 0x40){
+		aimAtBox();
+		noEnemyCnt=80;
+	}
+	if(FindEnemy){
+		if(aim.dis==0){noEnemyCnt=-2;}
+		else{autoAim();}
+		if(fabs(GMY.Real-opt.yaw)<1.5 && fabs(GMP.Real-opt.pit)<1.5 && aim.dis>500){firing2();}
+		if(aim.dis==500){noEnemyCnt=100;}
+		else{noEnemyCnt=240;}
+		sendData[0].data[0]=(int16_t)1;
+	}
+	else if(noEnemyCnt<1){
+		scaning1();
+		sendData[0].data[0]=(int16_t)0;
+	}
+	else if(noEnemyCnt>150){
+		noEnemyCnt--;
+		if(fabs(GMY.Real-opt.yaw)<1.5 && fabs(GMP.Real-opt.pit)<1.5 && aim.dis>500){firing2();}
+		else{STIRv.Target=0;}
+	}
+	else if(noEnemyCnt>80){
+		noEnemyCnt--;
+		STIRv.Target=0;
+	}
+	else{
+		GMY.Target+=0.2;
+		noEnemyCnt--;
+		STIRv.Target=0;
+	}
+}
+//打击策略5m外高速低频=====================
+void strategyShoot2(){
+	if(AimMode){
+		FRICL.Target =-6600;
+		FRICR.Target = 6600;
+	}else{
+		FRICL.Target =-5500;
+		FRICR.Target = 5500;
+	}
+	if((receiveData[0].data[0] & 0x40) && noEnemyCnt<100){//看碉堡
+		aimAtBox();
+		noEnemyCnt=250;
+		AimMode=0;
+	}
+	if((receiveData[0].data[0] & 0x80) && (noEnemyCnt<100 || aim.dis==6000)&& GMY.encoderAngle>0){//看基地
+		aimAtBase();
+		noEnemyCnt=250;
+		AimMode=0;
+	}
+	if(FindEnemy){
+		if(aim.dis==0){noEnemyCnt=-2;}
+		else{autoAim();}
+		if(fabs(GMY.Real-opt.yaw)<1.5 && fabs(GMP.Real-opt.pit)<1.5 && aim.dis>500){
+			if(AimMode){firing5m();}
+			else{firing2();}
+		}
+		if(aim.dis==500){noEnemyCnt=100;}
+		else{noEnemyCnt=290;}
+		sendData[0].data[0]=(int16_t)1;
+	}
+	else if(noEnemyCnt<1){
+		AimMode=0;
+		scaning1();
+		sendData[0].data[0]=(int16_t)0;
+	}
+	else if(noEnemyCnt>150){
+		noEnemyCnt--;
+		if(fabs(GMY.Real-opt.yaw)<1.5 && fabs(GMP.Real-opt.pit)<1.5 && aim.dis>500){
+			if(AimMode){
+				if(opt.pit>-7){firing5m();}
+				else{firing5m2();}
+			}
+			else{firing2();}
+		}
+		else{STIRv.Target=0;}
+	}
+	else if(noEnemyCnt>80){
+		noEnemyCnt--;
+		STIRv.Target=0;
+	}
+	else{
+		GMY.Target+=0.2;
+		noEnemyCnt--;
+		STIRv.Target=0;
+	}
+}
+////打击策略5m外高速低频=====================
+//void strategyShoot2(){
+//	if(AimMode){
+//		FRICL.Target =-6600;
+//		FRICR.Target = 6600;
+//	}
+//	else{
+//		FRICL.Target =-5500;
+//		FRICR.Target = 5500;
+//	}
+//	if(receiveData[0].data[0] & 0x40){
+//		aimAtBox();
+//		noEnemyCnt=-100;
+//		AimMode=0;
+//	}
+//	if(FindEnemy){
+//		if(aim.dis==0){noEnemyCnt=2;}
+//		else{autoAim();}
+//		if(fabs(GMY.Real-opt.yaw)<1.5 && fabs(GMP.Real-opt.pit)<1.5 && aim.dis>500){
+//			if(AimMode){firing5m();}
+//			else{firing2();}
+//		}
+//		if(aim.dis==500){noEnemyCnt=-50;}
+//		else{noEnemyCnt=-350;}
+//		sendData[0].data[0]=(int16_t)1;
+//	}
+//	else if(noEnemyCnt>1){
+//		scaning1();
+//		sendData[0].data[0]=(int16_t)0;
+//	}
+//	else if(noEnemyCnt<-250){
+//		noEnemyCnt++;
+//		if(fabs(GMY.Real-opt.yaw)<1.5 && fabs(GMP.Real-opt.pit)<1.5 && aim.dis>500){
+//			if(AimMode){firing5m();}
+//			else{firing2();}
+//		}
+//		else{STIRv.Target=0;}
+//	}
+//	else if(noEnemyCnt<-120){
+//		noEnemyCnt++;
+//		STIRv.Target=0;
+//	}
+//	else{
+//		GMY.Target+=0.2;
+//		noEnemyCnt++;
+//		STIRv.Target=0;
+//	}
+//}
+//===================================
+//*******************下平台通用代码
+//===================================
+
+void generalProcess(){
+	offLed(5);
+	if(WorkState <= 0) return;
+	//max=660
+	channelrrow = 0;channelrcol = 0;
+	channellrow = -(int16_t)((uint16_t)(receiveData[0].data[1] & 0xff)*3)+330;//leftRight
+	channellcol = (int16_t)((uint16_t)(receiveData[0].data[1])>>8)*3-330;//upDown
+	GMY.Target+=channellrow*0.001f;
+	GMP.Target+=channellcol*0.001f;
+	CMA.Real=receiveData[0].data[2];
+	RealHeat0=receiveData[0].data[3]/(float)(20.0);
+	//基于顶盘速度的运动补偿
+	ChaSpdSin=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * sin((GMY.encoderAngle)/57.3);
+	ChaSpdCos=((int16_t)((uint16_t)(receiveData[0].data[0])>>8) -127) * cos((GMY.encoderAngle)/57.3)*sin(GMP.Real/57.3);
+	float SinPit=sin(GMP.Real/57.3),tmpY,tmpP;
+	if(GMY.encoderAngle>0){
+		tmpY=ChaSpdSin * SinPit/380;//375;//460;400
+		tmpP=ChaSpdCos * SinPit/380;//360;380
+	}else{
+		tmpY=ChaSpdSin * SinPit/310;//375;//460;
+		tmpP=ChaSpdCos * SinPit/310;//360;
+	}
+	GMY.Target+=tmpY;
+	GMP.Target+=tmpP;
+	opt.yaw+=tmpY;
+	opt.pit+=tmpP;
+	if(receiveData[0].data[0] & 0x80)tmp=1;
+}
+
+void limtSync(){
+	MINMAX(GMP.Target,-60,0);
+}
+
+#endif // GUARD == 'D'
+
+

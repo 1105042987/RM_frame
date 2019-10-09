@@ -10,111 +10,108 @@
   ******************************************************************************
   */
 #include "includes.h"
-
-#ifdef CONFIGURATION
 void ControlNM(MotorINFO *id);
+void ControlNA(MotorINFO *id);
 void ControlCM(MotorINFO *id);
 void ControlANTI_CM(MotorINFO *id);
 void ControlGMY(MotorINFO *id);
 void ControlGMP(MotorINFO *id);
+void ControlGMYEncoder(MotorINFO* id);
 
-//**********************************************************************
-//					pid(kp,ki,kd,kprM,kirM,kdrM,rM)
-//						kprM:kp result Max
-//**********************************************************************
-
-//**********************************************************************
-//				SpeedBased_MOTORINFO_Init(func,spid)
-//**********************************************************************
-MotorINFO CMFL = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
-MotorINFO CMFR = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
-MotorINFO CMBL = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
-MotorINFO CMBR = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
+////**********************************************************************
+////					pid(kp,ki,kd,kprM,kirM,kdrM,rM)
+////						kprM:kp result Max
+////**********************************************************************
 MotorINFO FRICL = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
 MotorINFO FRICR = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
-//***********************************************************************************
-//		     Gimbal_MOTORINFO_Init(rdc,func,zero,compensation,maxrange,ppid,spid)
-//***********************************************************************************
-//使用云台电机时，请务必确定校准过零点
-MotorINFO GMP  = Gimbal_MOTORINFO_Init(2.0,&ControlGMP, 3740 , 0 , 20 ,
-									   fw_PID_INIT_EASY(0.5,0,0.9, 	100.0),
-									   fw_PID_INIT_EASY(920,30,0, 	5000.0));
-									   
-MotorINFO GMY  = Gimbal_MOTORINFO_Init(1.0,&ControlGMY, 1310 , 0 , 40 ,
-									   fw_PID_INIT_EASY(0.6,0,0.5, 	100.0),
-									   fw_PID_INIT_EASY(2500,100,0, 5000.0));
-
-//*************************************************************************
-//			AngleBased_MOTORINFO_Init(rdc,func,ppid,spid)
-//*************************************************************************
-MotorINFO STIR = AngleBased_MOTORINFO_Init(36.0,&ControlNM,
-								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1200.0),
-								fw_PID_INIT_EASY(30, 0.0, 0.0,	 15000.0));
-MotorINFO CML = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1200.0),
-								fw_PID_INIT_EASY(30, 0.0, 0.0,	 15000.0));
-MotorINFO CMR = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
-								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 1200.0),
-								fw_PID_INIT_EASY(30, 0.0, 0.0,	 15000.0));
-
-MotorINFO* can1[8]={&FRICL,&FRICR,0,0,&GMY,&GMP,&STIR,0};
-MotorINFO* can2[8]={&CML,&CMR,&CMBL,&CMBR,0,0,0,0};
 
 
+MotorINFO GMP  =  Gimbal6020_MOTORINFO_Init(1,&ControlGMP,0,0,20,
+								fw_PID_INIT_EASY(95, 0, 5, 5000),
+								fw_PID_INIT_EASY(40, 2, 1,  20000));
+//								fw_PID_INIT_EASY(100, 2, 22, 5000),
+//								fw_PID_INIT_EASY(24, 1, 5,  16000));
+//								fw_PID_INIT_EASY(120, 2, 15, 5000),
+//								fw_PID_INIT_EASY(20, 2, 2,  16000));
 
-MotorINFO* ChassisMotorGroup[4]={&CML,&CMR,0,0};			// 非四电机例子
+MotorINFO GMY  = Gimbal6020_MOTORINFO_Init(-1,&ControlGMY,2000,0,20,
+//								fw_PID_INIT_EASY(0.6, 0.02, 0.2, 10),
+//								fw_PID_INIT_EASY(0.4, 0.02, 2, 10),
+//								fw_PID_INIT_EASY(3000, 500, 200, 20000));
+//								fw_PID_INIT_EASY(0.45, 0.06, 2, 10),
+//								fw_PID_INIT_EASY(2800, 500, 200, 16000));
+								fw_PID_INIT_EASY(0.35, 0.05, 0, 10),
+								fw_PID_INIT_EASY(16000, 200, 100, 20000));
+								
 
-//MotorINFO* ChassisMotorGroup[4]={&CMFL,&CMFR,&CMBL,&CMBR};
+//MotorINFO GMY  =  Gimbal6020_MOTORINFO_Init(1,&ControlGMYEncoder,2000,0,20,
+//								fw_PID_INIT_EASY(23, 5, 12, 5000),
+//								fw_PID_INIT_EASY(55, 2, 10,	20000));
+								
+//MotorINFO STIRp = AngleBased_MOTORINFO_Init(36.0,&ControlNM,
+//								fw_PID_INIT_EASY(10.0, 0.0, 0.0, 2000.0),
+//								fw_PID_INIT_EASY(40, 1, 0.0,	 15000.0));
+								
+MotorINFO STIRv = SpeedBased_MOTORINFO_Init(&ControlCM,STIRv_PID_DEFAULT);
+MotorINFO CMR = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
+MotorINFO CML = SpeedBased_MOTORINFO_Init(&ControlCM,CHASSIS_MOTOR_SPEED_PID_DEFAULT);
+//MotorINFO CML = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
+//								fw_PID_INIT_EASY(10, 0, 0, 3500),
+//								fw_PID_INIT_EASY(40, 0, 5, 15000));
+//MotorINFO CMR = AngleBased_MOTORINFO_Init(19.0,&ControlNM,
+//								fw_PID_INIT_EASY(10, 0, 0, 3500),
+//								fw_PID_INIT_EASY(40, 0, 5, 15000));
+MotorINFO CMA = AngleBased_MOTORINFO_Init(19.0,&ControlNA,
+								fw_PID_INIT_EASY(10, 0, 0, 0),
+								fw_PID_INIT_EASY(40, 0, 5, 0));
+								
+MotorINFO* can1[8]={&FRICL,&FRICR,&STIRv,0,&GMP,&GMY,0,0};
+MotorINFO* can2[8]={&CML,&CMR,&CMA,0,0,0,0,0};
 
 
-#ifdef USE_CHASSIS_FOLLOW
-MotorINFO* GimbalMotorGroup[2]={&GMP,&GMY};
-#else
-#ifdef USE_AUTOAIM
-MotorINFO* GimbalMotorGroup[2]={&GMP,&GMY};
-#endif
-#endif
-
-#endif
-
-
-void ControlNM(MotorINFO* id)
-{
+void ControlNM(MotorINFO* id){
 	if(id==0) return;
-	if(id->s_count == 1)
-	{		
-		uint16_t 	ThisAngle;	
-		double 		ThisSpeed;	
-		ThisAngle = id->RxMsgC6x0.angle;				//未处理角度
-		if(id->FirstEnter==1) {id->lastRead = ThisAngle;id->FirstEnter = 0;return;}
-		if(ThisAngle<=id->lastRead)
-		{
-			if((id->lastRead-ThisAngle)>4000)//编码器上溢
-				id->Real = id->Real + (ThisAngle+8192-id->lastRead) * 360 / 8192.0 / id->ReductionRate;
-			else//正常
-				id->Real = id->Real - (id->lastRead - ThisAngle) * 360 / 8192.0 / id->ReductionRate;
+	if(id->s_count == 0){
+		double 		ThisSpeed;
+		id->encoderAngle = (id->RxMsgC6x0.angle - id->Zero) *360/8192.0f;
+		NORMALIZE_ANGLE180(id->encoderAngle);
+		if(id->FirstEnter==1){
+			id->lastRead = id->encoderAngle;
+			id->Real=id->encoderAngle;
+			id->Target=id->Real;
+			id->FirstEnter = 0;
+			return;
 		}
-		else
-		{
-			if((ThisAngle-id->lastRead)>4000)//编码器下溢
-				id->Real = id->Real - (id->lastRead+8192-ThisAngle) *360 / 8192.0 / id->ReductionRate;
-			else//正常
-				id->Real = id->Real + (ThisAngle - id->lastRead) * 360 / 8192.0 / id->ReductionRate;
-		}
+		float tmp=id->encoderAngle - id->lastRead;
+		id->Real+= (tmp<180?(tmp>-180?tmp:tmp+360):tmp-360)/ id->ReductionRate;//处理编码器溢出
 		ThisSpeed = id->RxMsgC6x0.rotateSpeed * 6 / id->ReductionRate;		//单位：度每秒
-		
 		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
 		
 		id->s_count = 0;
-		id->lastRead = ThisAngle;
+		id->lastRead = id->encoderAngle;
 	}
-	else
-	{
-		id->s_count++;
-	}		
+	else{id->s_count++;}		
 }
-void ControlCM(MotorINFO* id)
-{
+void ControlNA(MotorINFO* id){
+	if(id==0) return;
+	if(id->s_count == 1){
+		id->encoderAngle = (id->RxMsgC6x0.angle) *360/8192.0f;
+		NORMALIZE_ANGLE180(id->encoderAngle);
+		if(id->FirstEnter==1){
+			id->lastRead = id->encoderAngle;
+			id->Real=0;
+			id->FirstEnter = 0;
+			return;
+		}
+		float tmp=id->encoderAngle - id->lastRead;
+		id->Real+= (tmp<180?(tmp>-180?tmp:tmp+360):tmp-360)/ id->ReductionRate;//处理编码器溢出
+		
+		id->s_count = 0;
+		id->lastRead = id->encoderAngle;
+	}
+	else{id->s_count++;}		
+}
+void ControlCM(MotorINFO* id){
 	//Target 代作为目标速度
 	if(id==0) return;
 	id->offical_speedPID.ref = (float)(id->Target);
@@ -122,136 +119,81 @@ void ControlCM(MotorINFO* id)
 	id->offical_speedPID.Calc(&(id->offical_speedPID));
 	id->Intensity=(1.30f)*id->offical_speedPID.output;
 }
-void ControlANTI_CM(MotorINFO* id)
-{
-	//Target 代作为目标速度
+void ControlGMP(MotorINFO* id){
 	if(id==0) return;
-	id->offical_speedPID.ref = (float)(id->Target);
-	id->offical_speedPID.fdb = id->RxMsgC6x0.rotateSpeed;
-	id->offical_speedPID.Calc(&(id->offical_speedPID));
-	id->Intensity=(-1.30f)*id->offical_speedPID.output;
-}
-
-float readAngle;
-float tempAngle;
-void ControlGM(MotorINFO* id,float ThisAngle,float ThisSpeed, uint8_t type)
-{
-	if(id==0) return;
-	if(id->s_count == 0)
-	{
-		static uint8_t Reseted = 0;
-		double encoder_real = (id->Zero - id->RxMsg6623.angle) * 360.0 / 8192.0 / fabs(id->ReductionRate);
-		int8_t dir;
-		float  encoderThisAngle = id->RxMsg6623.angle;
-		
-		if(id->ReductionRate>=0) dir=1;else dir=-1;
-		if(id->FirstEnter==1) {
-			//id->lastRead = ThisAngle;
-			//id->Real = encoder_real;
-			//NORMALIZE_ANGLE180(id->Real);
-			id->encoderLastAngle = encoderThisAngle;
-			id->encoderAngle = (id->Zero - id->RxMsg6623.angle) * 360.0 / 8192.0 / fabs(id->ReductionRate);
+	if(id->s_count == 1){
+		double 		ThisSpeed;
+		id->encoderAngle = (id->RxMsgC6x0.angle - id->Zero) *360/8192.0f;
+		NORMALIZE_ANGLE180(id->encoderAngle);
+		if(id->FirstEnter==1){
+			id->lastRead = id->encoderAngle;
+			id->Real=id->encoderAngle;
+			id->Target=id->Real;
 			id->FirstEnter = 0;
 			return;
 		}
-		if(encoderThisAngle<=id->encoderLastAngle)
-		{
-			if((id->encoderLastAngle-encoderThisAngle)>4000)//编码器上溢
-				id->encoderAngle = id->encoderAngle - (encoderThisAngle+8192-id->encoderLastAngle) * 360 / (float)(8192.0) / id->ReductionRate;
-			else//正常
-				id->encoderAngle = id->encoderAngle + (id->encoderLastAngle - encoderThisAngle) * 360 / (float)(8192.0) / id->ReductionRate;
-		}
-		else
-		{
-			if((encoderThisAngle-id->encoderLastAngle)>4000)//编码器下溢
-				id->encoderAngle = id->encoderAngle + (id->encoderLastAngle+8192-encoderThisAngle) *360 / (float)(8192.0) / id->ReductionRate;
-			else//正常
-				id->encoderAngle = id->encoderAngle - (encoderThisAngle - id->encoderLastAngle) * 360 / (float)(8192.0) / id->ReductionRate;
-		}
-		id->encoderLastAngle = encoderThisAngle;
-		NORMALIZE_ANGLE180(id->encoderAngle);
-		
-		if(!startUp)
-		{
-			id->Real = id->encoderAngle;
-			id->gyroFirstEnter = 0;
-		}
-		else if(startUp)
-		{
-			if(!id->gyroFirstEnter)
-			{
-				id->gyroFirstEnter = 1;
-				id->Real = id->Real - id->encoderAngle + ThisAngle;
-				id->Target = id->Target - id->encoderAngle + ThisAngle;
-				id->lastRead = ThisAngle;
-			}
-			else
-			{
-				if(ThisAngle <= id->lastRead)
-				{
-					if((id->lastRead-ThisAngle) > 180)
-						 id->Real += (ThisAngle + 360 - id->lastRead)*dir;
-					else
-						 id->Real -= (id->lastRead - ThisAngle)*dir;
-				}
-				else
-				{
-					if((ThisAngle-id->lastRead) > 180)
-						 id->Real -= (id->lastRead + 360 - ThisAngle)*dir;
-					else
-						 id->Real += (ThisAngle - id->lastRead)*dir;
-				}
-				if(fabs(id->Real-id->Target)<5) Reseted = 1;
-				id->lastRead = ThisAngle;
-			}
-		}
-		
-		if(type == 2)MINMAX(id->Target, id->Real - encoder_real - id->Maxrange, id->Real - encoder_real + id->Maxrange);
-		else if(type == 1)MINMAX(id->Target,-id->Maxrange,id->Maxrange);
-
-		if(Reseted==0) id->positionPID.outputMax = 1.0;
-		else id->positionPID.outputMax = 10.0;
-		
-		if(!startUp && type == 1)id->Intensity = id->Compensation - PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
-		else 
-			id->Intensity = id->Compensation - PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,-ThisSpeed);
-		if(!startUp && type == 1)id->Intensity *= -1;
-		MINMAX(id->Intensity,-id->speedPID.outputMax,id->speedPID.outputMax);
-		
+		float tmp=id->encoderAngle - id->lastRead;
+		id->Real+= (tmp<180?(tmp>-180?tmp:tmp+360):tmp-360)/ id->ReductionRate;//处理编码器溢出
+		ThisSpeed = id->RxMsgC6x0.rotateSpeed * 6 / id->ReductionRate;		//单位：度每秒
+		id->Intensity = id->Compensation +PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);
 		id->s_count = 0;
+		id->lastRead = id->encoderAngle;
 	}
-	else
-	{
+	else{id->s_count++;}		
+}
+
+void ControlGMYEncoder(MotorINFO* id){
+	if(id==0) return;
+	if(id->s_count == 1){
+		double 		ThisSpeed;	
+		id->encoderAngle = (id->RxMsgC6x0.angle - id->Zero) *360/8192.0f;
+		NORMALIZE_ANGLE180(id->encoderAngle);
+		if(id->FirstEnter==1){
+			id->lastRead = id->encoderAngle;
+			id->Real=id->encoderAngle;
+			id->Target=id->Real;
+			id->FirstEnter = 0;
+			return;
+		}
+		float tmp=id->encoderAngle - id->lastRead;
+		id->Real+= (tmp<180?(tmp>-180?tmp:tmp+360):tmp-360)/ id->ReductionRate;//处理编码器溢出
+		ThisSpeed = id->RxMsgC6x0.rotateSpeed * 6 ;// id->ReductionRate;//单位：度每秒
+		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID),id->Target,id->Real,ThisSpeed);//+ id->Compensation
+		//id->s_count = 0;
+		id->lastRead = id->encoderAngle;
+	}
+	else{id->s_count++;}		
+}
+
+void ControlGMY(MotorINFO* id){
+	if(id==0) return;
+	if(id->s_count == 1){
+		float ThisAngle=imu.yaw;
+		float ThisSpeed=-imu.wz;
+		id->encoderAngle = (id->RxMsgC6x0.angle - id->Zero) *360/8192.0f;//在autoAimTask 的 autoAimPredict()要用，所以放在下一个if的外面
+		NORMALIZE_ANGLE180(id->encoderAngle);
+		if(id->FirstEnter==1){
+			id->lastRead=ThisAngle;
+			id->Real=ThisAngle;//EncoderAngle;
+			id->Target= id->Real;
+			id->imuEncorderDiff= id->Real-id->encoderAngle;//借此参数表示imu与encoder的差值
+			id->FirstEnter = 0;
+			return;
+		}
+		float tmp=ThisAngle - id->lastRead;
+		id->Real+= (tmp<180?(tmp>-180?tmp:tmp+360):tmp-360)/ id->ReductionRate;//处理编码器溢出
+		id->lastRead = ThisAngle ;
+		id->Intensity = PID_PROCESS_Double(&(id->positionPID),&(id->speedPID), id->Target,id->Real,ThisSpeed);//+id->Compensation;
+		//id->s_count = 0;
+	}
+	else{
 		id->s_count++;
 	}		
 }
-#ifdef NEW_INFANTRY
-double pitchAngle;
-void ControlGMP(MotorINFO* id)
-{
-	pitchAngle = gyro_data.rol+180;
-	NORMALIZE_ANGLE180(pitchAngle);
-	//ControlGM(id,-gyro_data.rol,gyro_data.wx);
-	ControlGM(id,-pitchAngle,gyro_data.wx,1);
-}
-void ControlGMY(MotorINFO* id)
-{
-	ControlGM(id,gyro_data.yaw,-gyro_data.wz,2);
-}
-#else
-void ControlGMP(MotorINFO* id)
-{
-	ControlGM(id,gyro_data.pit+180,gyro_data.wy,1);
-}
-void ControlGMY(MotorINFO* id)
-{
-	ControlGM(id,gyro_data.yaw+180,gyro_data.wz,2);
-}
-#endif
+//#endif
 
 //CAN
-void setCAN11()
-{
+void setCAN11(){
 	CanTxMsgTypeDef pData;
 	hcan1.pTxMsg = &pData;
 	
@@ -262,18 +204,17 @@ void setCAN11()
 	hcan1.pTxMsg->DLC = 0x08;
 	
 	for(int i=0;i<4;i++){
-		if(can1[i]==0) {
+		if(can1[i]==0){
 			hcan1.pTxMsg->Data[i*2]   = 0;
 			hcan1.pTxMsg->Data[i*2+1] = 0;
 		}
-		else {
+		else{
 			hcan1.pTxMsg->Data[i*2]   = (uint8_t)(can1[i]->Intensity >> 8);
 			hcan1.pTxMsg->Data[i*2+1] = (uint8_t)can1[i]->Intensity;
 		}
 	}
 
-	if(can1_update == 1 && can1_type == 1)
-	{
+	if(can1_update == 1 && can1_type == 1){
 		HAL_NVIC_DisableIRQ(CAN1_RX0_IRQn);
 		HAL_NVIC_DisableIRQ(CAN2_RX0_IRQn);
 		HAL_NVIC_DisableIRQ(USART1_IRQn);
@@ -283,8 +224,7 @@ void setCAN11()
 		#ifdef DEBUG_MODE
 			HAL_NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
 		#endif
-		if(HAL_CAN_Transmit_IT(&hcan1) != HAL_OK)
-		{
+		if(HAL_CAN_Transmit_IT(&hcan1) != HAL_OK){
 			Error_Handler();
 		}
 		can1_update = 0;
@@ -306,8 +246,7 @@ void setCAN11()
 		#endif
 	}
 }
-void setCAN12()
-{
+void setCAN12(){
 	CanTxMsgTypeDef pData;
 	hcan1.pTxMsg = &pData;
 	
@@ -328,8 +267,7 @@ void setCAN12()
 		}
 	}
 
-	if(can1_update == 1 && can1_type == 2)
-	{
+	if(can1_update == 1 && can1_type == 2){
 		HAL_NVIC_DisableIRQ(CAN1_RX0_IRQn);
 		HAL_NVIC_DisableIRQ(CAN2_RX0_IRQn);
 		HAL_NVIC_DisableIRQ(USART1_IRQn);
@@ -339,8 +277,7 @@ void setCAN12()
 		#ifdef DEBUG_MODE
 			HAL_NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
 		#endif
-		if(HAL_CAN_Transmit_IT(&hcan1) != HAL_OK)
-		{
+		if(HAL_CAN_Transmit_IT(&hcan1) != HAL_OK){
 			Error_Handler();
 		}
 		can1_update = 0;
@@ -363,8 +300,7 @@ void setCAN12()
 		#endif
   }
 }
-void setCAN21()
-{
+void setCAN21(){
 	CanTxMsgTypeDef pData;
 	hcan2.pTxMsg = &pData;
 	
@@ -385,8 +321,7 @@ void setCAN21()
 		}
 	}
 
-	if(can2_update == 1 && can2_type == 1)
-	{
+	if(can2_update == 1 && can2_type == 1){
 		HAL_NVIC_DisableIRQ(CAN1_RX0_IRQn);
 		HAL_NVIC_DisableIRQ(CAN2_RX0_IRQn);
 		HAL_NVIC_DisableIRQ(USART1_IRQn);
@@ -396,8 +331,7 @@ void setCAN21()
 		#ifdef DEBUG_MODE
 			HAL_NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
 		#endif
-		if(HAL_CAN_Transmit_IT(&hcan2) != HAL_OK)
-		{
+		if(HAL_CAN_Transmit_IT(&hcan2) != HAL_OK){
 			Error_Handler();
 		}
 		can2_update = 0;
@@ -419,8 +353,7 @@ void setCAN21()
 		#endif
   }
 }
-void setCAN22()
-{
+void setCAN22(){
 	CanTxMsgTypeDef pData;
 	hcan2.pTxMsg = &pData;
 	
@@ -431,18 +364,17 @@ void setCAN22()
 	hcan2.pTxMsg->DLC = 0x08;
 	
 	for(int i=0;i<4;i++){
-		if(can2[i+4]==0) {
+		if(can2[i+4]==0){
 			hcan2.pTxMsg->Data[i*2]   = 0;
 			hcan2.pTxMsg->Data[i*2+1] = 0;
 		}
-		else {
+		else{
 			hcan2.pTxMsg->Data[i*2]   = (uint8_t)(can2[i+4]->Intensity >> 8);
 			hcan2.pTxMsg->Data[i*2+1] = (uint8_t)can2[i+4]->Intensity;
 		}
 	}
 
-	if(can2_update == 1 && can2_type == 2)
-	{
+	if(can2_update == 1 && can2_type == 2){
 		HAL_NVIC_DisableIRQ(CAN1_RX0_IRQn);
 		HAL_NVIC_DisableIRQ(CAN2_RX0_IRQn);
 		HAL_NVIC_DisableIRQ(USART1_IRQn);
@@ -452,8 +384,7 @@ void setCAN22()
 		#ifdef DEBUG_MODE
 			HAL_NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
 		#endif
-		if(HAL_CAN_Transmit_IT(&hcan2) != HAL_OK)
-		{
+		if(HAL_CAN_Transmit_IT(&hcan2) != HAL_OK){
 			Error_Handler();
 		}
 		can2_update = 0;
@@ -476,8 +407,7 @@ void setCAN22()
   }
 }
 
-void InitMotor(MotorINFO *id)
-{
+void InitMotor(MotorINFO *id){
 	if(id==0) return;
 	id->FirstEnter=1;
 	id->lastRead=0;
@@ -488,36 +418,30 @@ void InitMotor(MotorINFO *id)
 	id->Intensity=0;
 }
 
-void Motor_ID_Setting()
-{
-	for(int i=0;i<4;i++)
-	{
-		if(can1[i]!=0) 
-		{
+void Motor_ID_Setting(){
+	for(int i=0;i<4;i++){
+		if(can1[i]!=0){
 			can1[i]->CAN_TYPE=&hcan1;
 			can1[i]->RXID = 0x201+i;
 			can1[i]->TXID = 0x200;
 		}
-		if(can2[i]!=0) 
-		{
+		if(can2[i]!=0){
 			can2[i]->CAN_TYPE=&hcan2;
 			can2[i]->RXID = 0x201+i;
 			can2[i]->TXID = 0x200;
 		}
 	}
-	for(int i=4;i<8;i++)
-	{
-		if(can1[i]!=0) 
-		{
+	for(int i=4;i<8;i++){
+		if(can1[i]!=0){
 			can1[i]->CAN_TYPE=&hcan1;
 			can1[i]->RXID = 0x201+i;
 			can1[i]->TXID = 0x1ff;
 		}
-		if(can2[i]!=0) 
-		{
+		if(can2[i]!=0){
 			can2[i]->CAN_TYPE=&hcan2;
 			can2[i]->RXID = 0x201+i;
 			can2[i]->TXID = 0x1ff;
 		}
 	}
 }
+
